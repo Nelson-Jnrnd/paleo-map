@@ -19,7 +19,10 @@ FONC-300, CONS-450, PERF-010, PERF-020, PERF-080…PERF-120, PERF-220, PERF-230.
   clearly labeled as a paleogeographic reconstruction (FONC-210, FONC-220,
   FONC-300).
 - **Time control** — visible control to change the selected age across 252–66 Ma,
-  split into Triassic / Jurassic / Cretaceous (FONC-120, FONC-100).
+  split into Triassic / Jurassic / Cretaceous (FONC-120, FONC-100). The control
+  **steps by geological stage** (standard ICS Mesozoic stages) and displays the
+  selected age in Ma; period-level quick jumps (FONC-190, V1) sit on top as
+  shortcuts. (Per OQ-030.)
 - **Selected age** — permanently displayed in Ma (FONC-040, FONC-110).
 - **Selected group** — permanently displayed; dinosaurs active by default
   (FONC-050, FONC-020).
@@ -55,4 +58,5 @@ FONC-300, CONS-450, PERF-010, PERF-020, PERF-080…PERF-120, PERF-220, PERF-230.
 
 - [ ] Add `../assets/mockups/exploration-view.png` and state variants.
 - [ ] Annotate each region with its requirement ID(s).
-- [ ] Resolve time-control granularity (OQ-030) before finalizing the control.
+- [x] Time-control granularity resolved (OQ-030): stepped by geological stage,
+      age displayed in Ma.

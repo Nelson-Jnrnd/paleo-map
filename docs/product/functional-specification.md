@@ -65,6 +65,16 @@ Requirements are marked with a priority:
 - **must**: mandatory requirement.
 - **should**: optional or recommended requirement.
 
+> **Clarification (priority vs. verb).** Priority (§0.1) and verb are two
+> independent axes: the **priority** says *which release* a requirement belongs to
+> (MVP / V1 / V2), and the **verb** says *how binding* it is *within that
+> release*. Consequently a "[V1] must" requirement is not required for the MVP but
+> becomes mandatory once V1 is undertaken. For example, showing a taxon image is
+> optional (FONC-1190, "[V1] should"), but *if* an image is shown, labeling its
+> type, credit, and artistic nature is mandatory (FONC-1200–FONC-1230, "[V1]
+> must"). This note documents interpretation only; it changes no requirement
+> wording or ID. (Resolves [open question OQ-020](open-questions.md#oq-020--must-verb-combined-with-v1--v2-priority).)
+
 ### 0.3 Glossary
 
 **Mesozoic**: geological interval between approximately 252 Ma and 66 Ma.

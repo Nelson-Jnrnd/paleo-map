@@ -36,11 +36,13 @@ chooses a branch (change age / filter / select occurrence / search / reset).
 **Related requirements:** FONC-120, FONC-130, FONC-140, FONC-150, FONC-160,
 FONC-170, PERF-030, PERF-360.
 
-**Outline:** user moves the time control → update selected age (Ma) → redraw map
-for age → recompute visible occurrences by time-range overlap → update count → if
-update >500 ms show indicator (PERF-050). No full reload (PERF-360).
+**Outline:** user moves the time control (stepping by geological stage, per
+OQ-030) → update selected age (Ma) → redraw map for age → recompute visible
+occurrences by time-range overlap → update count → if update >500 ms show
+indicator (PERF-050). No full reload (PERF-360).
 
-**TODO:** [ ] author `.puml`; [ ] resolve continuous-vs-stepped age (OQ-030).
+**TODO:** [ ] author `.puml`; [x] age granularity resolved (OQ-030): stepped by
+geological stage.
 
 ---
 
@@ -92,7 +94,9 @@ FONC-1080, CONS-460, CONS-470, PERF-040, PERF-350.
 if needed, FONC-1270) → render profile content (≤2 actions from occurrence) → user
 returns to map (≤1 action) → selected age and filters preserved.
 
-**TODO:** [ ] author `.puml`; [ ] annotate the ≤2 / ≤1 action limits (OQ-040).
+**TODO:** [ ] author `.puml`; annotate the ≤2 / ≤1 action limits, counting an
+_action_ per OQ-040 (a click/tap or keyboard equivalent that causes a transition;
+hover/scroll/zoom/pan excluded).
 
 ---
 

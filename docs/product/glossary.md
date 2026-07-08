@@ -31,6 +31,7 @@ and are defined here for convenience. They do not extend the product scope.
 
 | Term | Definition |
 | --- | --- |
+| Action | One primary user interaction that causes a navigation or state transition — a click/tap or its keyboard equivalent. Hover, scroll, zoom, and pan do not count. Used to measure the navigation limits FONC-1070/CONS-460 (≤2 actions) and FONC-1080/CONS-470 (≤1 action). (Resolves OQ-040.) |
 | Content level | Classification of how much information a taxon has: Occurrence only, Short profile, Detailed profile, or Featured species (see FONC-430…FONC-470). |
 | Occurrence only | Content level for taxa that only have basic fossil occurrence data (FONC-440). |
 | Short profile | Content level for taxa with a name, classification, time range and at least one occurrence (FONC-450). |

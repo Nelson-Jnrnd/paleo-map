@@ -24,7 +24,7 @@ the specification.
 | Item | Where it returns |
 | ---- | ---------------- |
 | Continuous animation of continental drift | FONC-330 [V2] |
-| A 3D globe view | Not currently a requirement — see [open questions](open-questions.md) (OQ-010) |
+| A 3D globe view | **Explicit non-goal** — see §2 below and OQ-010 (resolved). Not a deferred feature. |
 | Side-by-side comparison between two periods | FONC-200 [V2], FONC-1350 [V2] |
 | A complete phylogeny | Partial navigation only: FONC-730/FONC-740 [V1] |
 | Guided paths | FONC-1400…FONC-1430 [V2] |
@@ -93,6 +93,10 @@ These are deliberate product boundaries, not deferrals.
   CONS-090).
 - Wording must not imply that secondary content has the same editorial status as
   dinosaurs (CONS-100).
+- **A 3D globe view is an explicit non-goal.** The map is a flat world map
+  (FONC-210…FONC-330); no requirement is reserved for a globe. The domain model
+  stays projection-agnostic so a globe could be added later, but only via a new
+  (V2) requirement — never as an implied one. (Resolves OQ-010.)
 
 ---
 

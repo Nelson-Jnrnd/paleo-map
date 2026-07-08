@@ -57,6 +57,9 @@ Grouped by area, with the governing requirement IDs. All are **[MVP]**.
   exists; no claim of covering all Mesozoic life; main vs secondary content
   clearly indicated. → FONC-340, FONC-350, FONC-360, FONC-370, FONC-400,
   FONC-410.
+  - **MVP data is dinosaurs-only (OQ-050, resolved).** Secondary reptile groups
+    are V1 (FONC-380/FONC-390); the main/secondary labeling machinery is present
+    in the MVP but satisfied vacuously — every taxon is tagged "main content."
 
 ### Content levels
 

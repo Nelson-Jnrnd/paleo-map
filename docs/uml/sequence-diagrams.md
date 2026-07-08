@@ -8,8 +8,11 @@ model the Explorer interacting with the interface and its views. The repository
 has no backend, database, or API defined, so **do not introduce a server, data
 store, or service tier** in these diagrams unless and until such architecture is
 specified. Where an external data source is implied, represent it abstractly
-(e.g. a "Data" participant) and flag the dependency
-([OQ-060](../product/open-questions.md)).
+(e.g. a "Data" participant). Per [OQ-060](../product/open-questions.md#oq-060--source-datasets-that-supply-occurrences-and-time-ranges)
+(resolved), the concrete source — the Paleobiology Database (PBDB) for
+occurrences/time ranges and a plate-rotation model for paleogeographic positions —
+is a **technical-design decision for a future design spec**, so these diagrams
+keep the data source abstract and source-neutral.
 
 Each section below is one planned diagram.
 
@@ -28,7 +31,8 @@ FONC-1020, FONC-1070, FONC-1080.
 **Participants (product-facing):** Explorer, Exploration View, Occurrence Panel,
 Taxon Profile.
 
-**TODO:** [ ] author `.puml`; [ ] annotate the ≤2 / ≤1 action limits (OQ-040).
+**TODO:** [ ] author `.puml`; annotate the ≤2 / ≤1 action limits, counting an
+_action_ per OQ-040 (a click/tap or keyboard equivalent that causes a transition).
 
 ---
 
@@ -60,8 +64,9 @@ PERF-360.
 
 **Participants:** Explorer, Time Control, Exploration View (Map), Data (abstract).
 
-**TODO:** [ ] author `.puml`; [ ] keep the Data participant abstract until a
-source is decided (OQ-060).
+**TODO:** [ ] author `.puml`; keep the Data participant abstract and
+source-neutral — the concrete source (PBDB + plate-rotation model) is deferred to
+a design spec (OQ-060, resolved).
 
 ---
 

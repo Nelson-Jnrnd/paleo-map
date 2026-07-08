@@ -10,9 +10,11 @@
 requirement IDs it verifies. Coverage focuses on **MVP** requirements; a small
 number of V1/V2 placeholders (`AC-9xx`) are stubbed for future use.
 
-**Open dependencies:** some criteria depend on unresolved
-[open questions](../product/open-questions.md) — noted inline where relevant
-(e.g. the meaning of an "action" in OQ-040).
+**Resolved dependencies:** criteria that once depended on
+[open questions](../product/open-questions.md) now reflect their resolutions —
+e.g. an "action" is defined per OQ-040, the time control steps by geological stage
+per OQ-030, and MVP content is dinosaurs-only per OQ-050. Notes below point to the
+governing decision.
 
 ---
 
@@ -59,7 +61,8 @@ Related requirements: FONC-090, FONC-100, FONC-110, FONC-170, CONS-190.
   interval is divided into Triassic, Jurassic, and Cretaceous; and a selected
   precise age is visually distinct from a displayed time range.
 
-> Note: exact time-control behavior depends on OQ-030 (continuous vs stepped age).
+> Note: per OQ-030 (resolved), the time control steps by geological stage and
+> displays the selected age in Ma.
 
 ## AC-050 — Map is clearly a paleogeographic reconstruction
 
@@ -109,7 +112,10 @@ Related requirements: FONC-990, FONC-1070, CONS-460, PERF-340.
 - **Then** the taxon profile opens in no more than 2 actions from the visible
   occurrence.
 
-> Note: pass/fail counting of "actions" depends on OQ-040.
+> Note: per OQ-040 (resolved), an "action" is one primary interaction that causes
+> a navigation/state transition (click/tap or keyboard equivalent);
+> hover/scroll/zoom/pan are not counted. So occurrence → info panel (1) → open
+> profile (2) satisfies the ≤2-action limit.
 
 ## AC-100 — Taxon profile shows required content
 
@@ -131,6 +137,8 @@ Related requirements: FONC-1000, FONC-1010, FONC-1020, FONC-1080, CONS-470.
 - **When** the user returns to the map,
 - **Then** the return takes no more than 1 action, and the previously selected age
   and active filters are still applied.
+
+> Note: "action" is defined per OQ-040 (resolved) — see AC-090.
 
 ## AC-120 — Filtering by period, group, and dinosaurs-only with a live count
 
@@ -252,8 +260,10 @@ Related requirements: FONC-360, FONC-400, FONC-410.
   each taxon is marked as main or secondary content, and the application does not
   present itself as a complete atlas of all Mesozoic life.
 
-> Note: whether any secondary content is present in the MVP data set depends on
-> OQ-050; the labeling requirement may be satisfied vacuously.
+> Note: per OQ-050 (resolved), the MVP data set is dinosaurs-only, so this
+> criterion verifies the labeling **mechanism** (every taxon tagged "main
+> content") rather than the presence of secondary taxa. The mechanism must be
+> ready for secondary groups in V1 (FONC-380/FONC-390).
 
 ## AC-240 — Minimal-data profile message
 
