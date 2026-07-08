@@ -1,28 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" font-family="'IBM Plex Sans','system-ui','Segoe UI',sans-serif" role="img" aria-label="High-fidelity exploration view — paleogeographic map, geological time control and filters">
   <defs>
     <radialGradient id="ocean" cx="52%" cy="40%" r="78%">
-      <stop offset="0" stop-color="#132231"/>
-      <stop offset="1" stop-color="#0c141c"/>
+      <stop offset="0" stop-color="#d7e4ec"/>
+      <stop offset="1" stop-color="#eef4f7"/>
     </radialGradient>
     <clipPath id="map"><rect x="300" y="96" width="900" height="594"/></clipPath>
   </defs>
   <style>
     .serif{font-family:'Spectral','Source Serif 4','Charter','Georgia',serif}
     .mono{font-family:'IBM Plex Mono','SFMono-Regular','Menlo',monospace}
-    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10.5px;letter-spacing:1.5px;fill:#5f6b78}
-    .lbl{font-size:12px;fill:#8a97a6}
-    .val{font-size:13px;fill:#cdd6df}
-    .hi{font-size:13px;fill:#e8eef4}
+    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10.5px;letter-spacing:1.5px;fill:#6e8091}
+    .lbl{font-size:12px;fill:#5f7180}
+    .val{font-size:13px;fill:#33424f}
+    .hi{font-size:13px;fill:#1f2b38}
   </style>
 
   <!-- base -->
-  <rect width="1200" height="780" fill="#0f1720"/>
+  <rect width="1200" height="780" fill="#e9eef2"/>
 
   <!-- MAP viewport -->
   <g clip-path="url(#map)">
     <rect x="300" y="96" width="900" height="594" fill="url(#ocean)"/>
     <!-- graticule -->
-    <g stroke="#1a2836" stroke-width="1">
+    <g stroke="#cdd9e0" stroke-width="1">
       <line x1="400" y1="96" x2="400" y2="690"/><line x1="500" y1="96" x2="500" y2="690"/>
       <line x1="600" y1="96" x2="600" y2="690"/><line x1="700" y1="96" x2="700" y2="690"/>
       <line x1="800" y1="96" x2="800" y2="690"/><line x1="900" y1="96" x2="900" y2="690"/>
@@ -32,99 +32,99 @@
       <line x1="300" y1="540" x2="1200" y2="540"/><line x1="300" y1="614" x2="1200" y2="614"/>
     </g>
     <!-- equator emphasized -->
-    <line x1="300" y1="392" x2="1200" y2="392" stroke="#243748" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <line x1="300" y1="392" x2="1200" y2="392" stroke="#b9c8d1" stroke-width="1.5" stroke-dasharray="2 4"/>
     <!-- Laurasia (north) -->
     <path d="M470 150 q120 -34 300 -14 q150 18 250 6 q80 -8 120 20 q30 60 -60 96 q-160 40 -360 24 q-150 -12 -300 6 q-70 8 -80 -40 q-8 -70 110 -104 z"
-          fill="#26313f" stroke="#3c4e62" stroke-width="1.5"/>
+          fill="#edf1f1" stroke="#a9b9c3" stroke-width="1.5"/>
     <!-- Gondwana (south) -->
     <path d="M520 470 q90 -40 220 -30 q140 8 230 40 q70 26 40 92 q-40 80 -200 92 q-190 14 -320 -30 q-80 -28 -66 -96 q10 -46 96 -60 z"
-          fill="#26313f" stroke="#3c4e62" stroke-width="1.5"/>
+          fill="#edf1f1" stroke="#a9b9c3" stroke-width="1.5"/>
     <!-- small block -->
     <path d="M1030 470 q60 -20 110 -6 q40 14 26 60 q-18 50 -96 52 q-70 2 -84 -44 q-8 -40 44 -62 z"
-          fill="#232e3a" stroke="#374858" stroke-width="1.25"/>
+          fill="#e6ebeb" stroke="#b3c3cd" stroke-width="1.25"/>
 
     <!-- occurrences (teal data layer) -->
     <g>
-      <circle cx="560" cy="205" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="700" cy="192" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="640" cy="250" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="820" cy="220" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="940" cy="205" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="600" cy="520" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="720" cy="548" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-      <circle cx="880" cy="520" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
+      <circle cx="560" cy="205" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="700" cy="192" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="640" cy="250" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="820" cy="220" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="940" cy="205" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="600" cy="520" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="720" cy="548" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+      <circle cx="880" cy="520" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
     </g>
     <!-- cluster -->
-    <circle cx="770" cy="255" r="19" fill="#35c2a3" fill-opacity="0.18"/>
-    <circle cx="770" cy="255" r="13" fill="#1f8f78" stroke="#35c2a3" stroke-width="1.5"/>
-    <text x="770" y="259" class="mono" font-size="12" font-weight="600" fill="#eafff8" text-anchor="middle">12</text>
+    <circle cx="770" cy="255" r="19" fill="#0f9d83" fill-opacity="0.18"/>
+    <circle cx="770" cy="255" r="13" fill="#17a98c" stroke="#0f9d83" stroke-width="1.5"/>
+    <text x="770" y="259" class="mono" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">12</text>
     <!-- selected occurrence -->
-    <circle cx="880" cy="205" r="14" fill="#35c2a3" fill-opacity="0.20"/>
-    <circle cx="880" cy="205" r="7" fill="#7fe9d0" stroke="#0c141c" stroke-width="1.5"/>
+    <circle cx="880" cy="205" r="14" fill="#0f9d83" fill-opacity="0.20"/>
+    <circle cx="880" cy="205" r="7" fill="#0c8f76" stroke="#eef4f7" stroke-width="1.5"/>
   </g>
 
   <!-- map inner border -->
-  <rect x="300" y="96" width="900" height="594" fill="none" stroke="#27343f"/>
+  <rect x="300" y="96" width="900" height="594" fill="none" stroke="#cfd8de"/>
 
   <!-- reconstruction badge -->
-  <rect x="320" y="112" width="284" height="30" rx="6" fill="#16202b" stroke="#2d3b49"/>
-  <circle cx="338" cy="127" r="6" fill="none" stroke="#8a97a6" stroke-width="1.4"/>
-  <line x1="338" y1="123" x2="338" y2="127" stroke="#8a97a6" stroke-width="1.4"/>
-  <line x1="338" y1="127" x2="341" y2="129" stroke="#8a97a6" stroke-width="1.4"/>
+  <rect x="320" y="112" width="284" height="30" rx="6" fill="#ffffff" stroke="#cbd6dd"/>
+  <circle cx="338" cy="127" r="6" fill="none" stroke="#5f7180" stroke-width="1.4"/>
+  <line x1="338" y1="123" x2="338" y2="127" stroke="#5f7180" stroke-width="1.4"/>
+  <line x1="338" y1="127" x2="341" y2="129" stroke="#5f7180" stroke-width="1.4"/>
   <text x="352" y="131" class="val" font-size="12">Paleogeographic reconstruction · 150 Ma</text>
 
   <!-- scale + north -->
-  <text x="320" y="628" class="mono" font-size="10" fill="#6f7c8a">N</text>
-  <path d="M326 632 l4 -12 l4 12 z" fill="#8a97a6"/>
-  <line x1="320" y1="662" x2="420" y2="662" stroke="#6f7c8a" stroke-width="1.5"/>
-  <line x1="320" y1="658" x2="320" y2="666" stroke="#6f7c8a" stroke-width="1.5"/>
-  <line x1="420" y1="658" x2="420" y2="666" stroke="#6f7c8a" stroke-width="1.5"/>
-  <text x="320" y="680" class="mono" font-size="10" fill="#6f7c8a">0</text>
-  <text x="420" y="680" class="mono" font-size="10" fill="#6f7c8a" text-anchor="end">2,000 km</text>
+  <text x="320" y="628" class="mono" font-size="10" fill="#6e8091">N</text>
+  <path d="M326 632 l4 -12 l4 12 z" fill="#5f7180"/>
+  <line x1="320" y1="662" x2="420" y2="662" stroke="#6e8091" stroke-width="1.5"/>
+  <line x1="320" y1="658" x2="320" y2="666" stroke="#6e8091" stroke-width="1.5"/>
+  <line x1="420" y1="658" x2="420" y2="666" stroke="#6e8091" stroke-width="1.5"/>
+  <text x="320" y="680" class="mono" font-size="10" fill="#6e8091">0</text>
+  <text x="420" y="680" class="mono" font-size="10" fill="#6e8091" text-anchor="end">2,000 km</text>
 
   <!-- zoom controls: 3 levels -->
   <g>
-    <rect x="1156" y="120" width="32" height="96" rx="7" fill="#16202b" stroke="#2d3b49"/>
+    <rect x="1156" y="120" width="32" height="96" rx="7" fill="#ffffff" stroke="#cbd6dd"/>
     <text x="1172" y="146" class="hi" font-size="17" text-anchor="middle">+</text>
-    <line x1="1162" y1="152" x2="1182" y2="152" stroke="#2d3b49"/>
+    <line x1="1162" y1="152" x2="1182" y2="152" stroke="#cbd6dd"/>
     <text x="1172" y="176" class="hi" font-size="17" text-anchor="middle">−</text>
-    <line x1="1162" y1="184" x2="1182" y2="184" stroke="#2d3b49"/>
-    <circle cx="1172" cy="202" r="6" fill="none" stroke="#8a97a6" stroke-width="1.4"/>
+    <line x1="1162" y1="184" x2="1182" y2="184" stroke="#cbd6dd"/>
+    <circle cx="1172" cy="202" r="6" fill="none" stroke="#5f7180" stroke-width="1.4"/>
   </g>
-  <text x="1188" y="234" class="mono" font-size="9.5" fill="#5f6b78" text-anchor="end">global · regional · local</text>
+  <text x="1188" y="234" class="mono" font-size="9.5" fill="#6e8091" text-anchor="end">global · regional · local</text>
 
   <!-- legend -->
-  <rect x="946" y="616" width="234" height="58" rx="8" fill="#131b24" stroke="#27343f"/>
-  <circle cx="966" cy="636" r="5" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
+  <rect x="946" y="616" width="234" height="58" rx="8" fill="#ffffff" stroke="#cfd8de"/>
+  <circle cx="966" cy="636" r="5" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
   <text x="978" y="640" class="val" font-size="12">Occurrence</text>
-  <circle cx="1066" cy="636" r="8" fill="#1f8f78" stroke="#35c2a3"/>
+  <circle cx="1066" cy="636" r="8" fill="#17a98c" stroke="#0f9d83"/>
   <text x="1080" y="640" class="val" font-size="12">Cluster</text>
   <text x="966" y="662" class="lbl" font-size="10">Points are discovery evidence, not ranges.</text>
 
   <!-- TOP BAR -->
-  <rect x="0" y="0" width="1200" height="58" fill="#131b24"/>
-  <line x1="0" y1="58" x2="1200" y2="58" stroke="#27343f"/>
-  <text x="24" y="27" class="serif" font-size="17" font-weight="600" fill="#e8eef4" letter-spacing="0.3">Mesozoic Atlas</text>
-  <text x="24" y="45" class="mono" font-size="10" fill="#5f6b78">deep-time occurrence explorer</text>
+  <rect x="0" y="0" width="1200" height="58" fill="#ffffff"/>
+  <line x1="0" y1="58" x2="1200" y2="58" stroke="#cfd8de"/>
+  <text x="24" y="27" class="serif" font-size="17" font-weight="600" fill="#1f2b38" letter-spacing="0.3">Mesozoic Atlas</text>
+  <text x="24" y="45" class="mono" font-size="10" fill="#6e8091">deep-time occurrence explorer</text>
   <!-- search -->
-  <rect x="452" y="13" width="384" height="32" rx="16" fill="#0f1720" stroke="#2d3b49"/>
-  <circle cx="474" cy="29" r="6" fill="none" stroke="#8a97a6" stroke-width="1.5"/>
-  <line x1="478" y1="33" x2="484" y2="39" stroke="#8a97a6" stroke-width="1.5"/>
+  <rect x="452" y="13" width="384" height="32" rx="16" fill="#e9eef2" stroke="#cbd6dd"/>
+  <circle cx="474" cy="29" r="6" fill="none" stroke="#5f7180" stroke-width="1.5"/>
+  <line x1="478" y1="33" x2="484" y2="39" stroke="#5f7180" stroke-width="1.5"/>
   <text x="494" y="33" class="lbl">Search taxa — scientific name</text>
-  <text x="1176" y="35" class="val" font-size="12" text-anchor="end" fill="#8a97a6">About the data</text>
+  <text x="1176" y="35" class="val" font-size="12" text-anchor="end" fill="#5f7180">About the data</text>
 
   <!-- LEFT SIDEBAR -->
-  <rect x="0" y="58" width="300" height="722" fill="#16202b"/>
-  <line x1="300" y1="58" x2="300" y2="780" stroke="#27343f"/>
+  <rect x="0" y="58" width="300" height="722" fill="#ffffff"/>
+  <line x1="300" y1="58" x2="300" y2="780" stroke="#cfd8de"/>
 
   <text x="24" y="92" class="eyebrow">FILTERS</text>
 
   <!-- period -->
   <text x="24" y="120" class="lbl">Period</text>
-  <rect x="24" y="128" width="252" height="46" rx="8" fill="#0f1720" stroke="#2d3b49"/>
-  <rect x="108" y="128" width="84" height="46" rx="0" fill="#35c2a3" fill-opacity="0.14"/>
-  <line x1="108" y1="128" x2="108" y2="174" stroke="#2d3b49"/>
-  <line x1="192" y1="128" x2="192" y2="174" stroke="#2d3b49"/>
+  <rect x="24" y="128" width="252" height="46" rx="8" fill="#e9eef2" stroke="#cbd6dd"/>
+  <rect x="108" y="128" width="84" height="46" rx="0" fill="#0f9d83" fill-opacity="0.14"/>
+  <line x1="108" y1="128" x2="108" y2="174" stroke="#cbd6dd"/>
+  <line x1="192" y1="128" x2="192" y2="174" stroke="#cbd6dd"/>
   <text x="66" y="150" class="val" font-size="12" text-anchor="middle">Triassic</text>
   <text x="150" y="150" class="hi" font-size="12" font-weight="600" text-anchor="middle">Jurassic</text>
   <text x="234" y="150" class="val" font-size="12" text-anchor="middle">Cretac.</text>
@@ -134,60 +134,60 @@
 
   <!-- group -->
   <text x="24" y="204" class="lbl">Taxonomic group</text>
-  <rect x="24" y="212" width="252" height="40" rx="8" fill="#0f1720" stroke="#2d3b49"/>
+  <rect x="24" y="212" width="252" height="40" rx="8" fill="#e9eef2" stroke="#cbd6dd"/>
   <text x="40" y="237" class="hi" font-size="13">Theropoda</text>
-  <path d="M254 230 l6 7 l6 -7" fill="none" stroke="#8a97a6" stroke-width="1.5"/>
+  <path d="M254 230 l6 7 l6 -7" fill="none" stroke="#5f7180" stroke-width="1.5"/>
 
   <!-- dinosaurs only -->
   <text x="24" y="290" class="val">Dinosaurs only</text>
-  <rect x="232" y="280" width="44" height="22" rx="11" fill="#35c2a3"/>
-  <circle cx="265" cy="291" r="8" fill="#06231d"/>
+  <rect x="232" y="280" width="44" height="22" rx="11" fill="#0f9d83"/>
+  <circle cx="265" cy="291" r="8" fill="#ffffff"/>
   <text x="24" y="310" class="lbl" font-size="11">Non-avian dinosaurs — the atlas focus</text>
 
-  <line x1="24" y1="332" x2="276" y2="332" stroke="#233240"/>
+  <line x1="24" y1="332" x2="276" y2="332" stroke="#dde5ea"/>
 
   <!-- active filters -->
   <text x="24" y="358" class="eyebrow">ACTIVE FILTERS</text>
-  <rect x="24" y="368" width="96" height="26" rx="13" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="24" y="368" width="96" height="26" rx="13" fill="#eef2f5" stroke="#cbd6dd"/>
   <circle cx="40" cy="381" r="4" fill="#3E93C6"/>
   <text x="52" y="385" class="val" font-size="12">Jurassic</text>
   <text x="108" y="385" class="lbl" font-size="12">✕</text>
-  <rect x="128" y="368" width="108" height="26" rx="13" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="128" y="368" width="108" height="26" rx="13" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="144" y="385" class="val" font-size="12">Theropoda</text>
   <text x="224" y="385" class="lbl" font-size="12">✕</text>
 
-  <text x="24" y="426" class="val" font-size="12.5" fill="#8a97a6" text-decoration="underline">Reset all filters</text>
+  <text x="24" y="426" class="val" font-size="12.5" fill="#5f7180" text-decoration="underline">Reset all filters</text>
 
-  <line x1="24" y1="446" x2="276" y2="446" stroke="#233240"/>
+  <line x1="24" y1="446" x2="276" y2="446" stroke="#dde5ea"/>
 
   <!-- result summary -->
-  <text x="24" y="494" class="serif" font-size="36" font-weight="600" fill="#e8eef4">47</text>
+  <text x="24" y="494" class="serif" font-size="36" font-weight="600" fill="#1f2b38">47</text>
   <text x="92" y="484" class="val">occurrences in view</text>
   <text x="92" y="502" class="lbl" font-size="11.5">2 filters · Jurassic · 150 Ma</text>
 
   <text x="24" y="546" class="lbl" font-size="11.5">Every occurrence shown carries an</text>
   <text x="24" y="562" class="lbl" font-size="11.5">identifiable source.</text>
 
-  <text x="24" y="756" class="mono" font-size="9" fill="#4b5764">FONC-010·020·040·050·060·080·120·210·230·300</text>
+  <text x="24" y="756" class="mono" font-size="9" fill="#93a2ad">FONC-010·020·040·050·060·080·120·210·230·300</text>
 
   <!-- STATUS RIBBON -->
-  <rect x="300" y="58" width="900" height="38" fill="#131b24"/>
-  <line x1="300" y1="96" x2="1200" y2="96" stroke="#27343f"/>
+  <rect x="300" y="58" width="900" height="38" fill="#ffffff"/>
+  <line x1="300" y1="96" x2="1200" y2="96" stroke="#cfd8de"/>
   <text x="320" y="76" class="eyebrow" font-size="9.5">AGE</text>
-  <text x="320" y="90" class="serif" font-size="14" fill="#e8eef4">150 Ma<tspan class="lbl serif" font-size="12"> · Late Jurassic</tspan></text>
-  <line x1="470" y1="66" x2="470" y2="88" stroke="#27343f"/>
+  <text x="320" y="90" class="serif" font-size="14" fill="#1f2b38">150 Ma<tspan class="lbl serif" font-size="12"> · Late Jurassic</tspan></text>
+  <line x1="470" y1="66" x2="470" y2="88" stroke="#cfd8de"/>
   <text x="490" y="76" class="eyebrow" font-size="9.5">GROUP</text>
-  <text x="490" y="90" class="val" font-size="13" fill="#cdd6df">Theropoda <tspan class="lbl">(dinosaurs)</tspan></text>
-  <line x1="690" y1="66" x2="690" y2="88" stroke="#27343f"/>
+  <text x="490" y="90" class="val" font-size="13" fill="#33424f">Theropoda <tspan class="lbl">(dinosaurs)</tspan></text>
+  <line x1="690" y1="66" x2="690" y2="88" stroke="#cfd8de"/>
   <text x="710" y="76" class="eyebrow" font-size="9.5">IN VIEW</text>
-  <text x="710" y="90" class="val" font-size="13" fill="#cdd6df">47 occurrences</text>
-  <text x="1180" y="82" class="val" font-size="12" text-anchor="end" fill="#8a97a6">▣ Layers</text>
+  <text x="710" y="90" class="val" font-size="13" fill="#33424f">47 occurrences</text>
+  <text x="1180" y="82" class="val" font-size="12" text-anchor="end" fill="#5f7180">▣ Layers</text>
 
   <!-- TIME CONTROL -->
-  <rect x="300" y="690" width="900" height="90" fill="#131b24"/>
-  <line x1="300" y1="690" x2="1200" y2="690" stroke="#27343f"/>
+  <rect x="300" y="690" width="900" height="90" fill="#ffffff"/>
+  <line x1="300" y1="690" x2="1200" y2="690" stroke="#cfd8de"/>
   <text x="320" y="716" class="eyebrow">GEOLOGICAL TIME · 252 → 66 Ma · stepped by stage</text>
-  <text x="1180" y="716" class="mono" font-size="9.5" fill="#5f6b78" text-anchor="end">FONC-090·100·110·120·170</text>
+  <text x="1180" y="716" class="mono" font-size="9.5" fill="#6e8091" text-anchor="end">FONC-090·100·110·120·170</text>
   <!-- track -->
   <rect x="340" y="742" width="225" height="10" fill="#8E5AA5" fill-opacity="0.55"/>
   <rect x="565" y="742" width="247" height="10" fill="#3E93C6" fill-opacity="0.65"/>
@@ -195,13 +195,13 @@
   <text x="452" y="770" class="lbl" font-size="11" text-anchor="middle">Triassic</text>
   <text x="688" y="770" class="hi" font-size="11" text-anchor="middle">Jurassic</text>
   <text x="986" y="770" class="lbl" font-size="11" text-anchor="middle">Cretaceous</text>
-  <text x="340" y="736" class="mono" font-size="9.5" fill="#5f6b78">252</text>
-  <text x="565" y="736" class="mono" font-size="9.5" fill="#5f6b78" text-anchor="middle">201</text>
-  <text x="812" y="736" class="mono" font-size="9.5" fill="#5f6b78" text-anchor="middle">145</text>
-  <text x="1160" y="736" class="mono" font-size="9.5" fill="#5f6b78" text-anchor="end">66</text>
+  <text x="340" y="736" class="mono" font-size="9.5" fill="#6e8091">252</text>
+  <text x="565" y="736" class="mono" font-size="9.5" fill="#6e8091" text-anchor="middle">201</text>
+  <text x="812" y="736" class="mono" font-size="9.5" fill="#6e8091" text-anchor="middle">145</text>
+  <text x="1160" y="736" class="mono" font-size="9.5" fill="#6e8091" text-anchor="end">66</text>
   <!-- handle -->
-  <line x1="790" y1="730" x2="790" y2="762" stroke="#7fe9d0" stroke-width="2"/>
-  <circle cx="790" cy="747" r="6" fill="#35c2a3" stroke="#0c141c" stroke-width="1.5"/>
-  <rect x="744" y="700" width="92" height="24" rx="12" fill="#35c2a3"/>
-  <text x="790" y="716" class="mono" font-size="11" font-weight="600" fill="#06231d" text-anchor="middle">150 Ma</text>
+  <line x1="790" y1="730" x2="790" y2="762" stroke="#0c8f76" stroke-width="2"/>
+  <circle cx="790" cy="747" r="6" fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5"/>
+  <rect x="744" y="700" width="92" height="24" rx="12" fill="#0f9d83"/>
+  <text x="790" y="716" class="mono" font-size="11" font-weight="600" fill="#ffffff" text-anchor="middle">150 Ma</text>
 </svg>

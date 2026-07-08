@@ -1,91 +1,91 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 680" font-family="'IBM Plex Sans','system-ui','Segoe UI',sans-serif" role="img" aria-label="High-fidelity fossil occurrence panel, docked over the map">
   <defs>
     <radialGradient id="ocean2" cx="45%" cy="40%" r="80%">
-      <stop offset="0" stop-color="#132231"/><stop offset="1" stop-color="#0c141c"/>
+      <stop offset="0" stop-color="#d7e4ec"/><stop offset="1" stop-color="#eef4f7"/>
     </radialGradient>
     <clipPath id="mapc"><rect x="0" y="0" width="600" height="680"/></clipPath>
   </defs>
   <style>
     .serif{font-family:'Spectral','Source Serif 4','Charter','Georgia',serif}
     .mono{font-family:'IBM Plex Mono','SFMono-Regular','Menlo',monospace}
-    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10px;letter-spacing:1.4px;fill:#5f6b78}
-    .lbl{font-size:12px;fill:#8a97a6}
-    .val{font-size:13px;fill:#cdd6df}
-    .hi{font-size:13px;fill:#e8eef4}
-    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#4b5764}
+    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10px;letter-spacing:1.4px;fill:#6e8091}
+    .lbl{font-size:12px;fill:#5f7180}
+    .val{font-size:13px;fill:#33424f}
+    .hi{font-size:13px;fill:#1f2b38}
+    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#93a2ad}
   </style>
 
-  <rect width="1040" height="680" fill="#0f1720"/>
+  <rect width="1040" height="680" fill="#e9eef2"/>
 
   <!-- MAP CONTEXT -->
   <g clip-path="url(#mapc)">
     <rect width="600" height="680" fill="url(#ocean2)"/>
-    <g stroke="#1a2836" stroke-width="1">
+    <g stroke="#cdd9e0" stroke-width="1">
       <line x1="120" y1="0" x2="120" y2="680"/><line x1="240" y1="0" x2="240" y2="680"/>
       <line x1="360" y1="0" x2="360" y2="680"/><line x1="480" y1="0" x2="480" y2="680"/>
       <line x1="0" y1="130" x2="600" y2="130"/><line x1="0" y1="260" x2="600" y2="260"/>
       <line x1="0" y1="390" x2="600" y2="390"/><line x1="0" y1="520" x2="600" y2="520"/>
     </g>
     <path d="M60 190 q120 -40 280 -22 q150 16 260 4 q60 40 -30 84 q-150 44 -340 26 q-140 -12 -240 8 q-40 -50 110 -108 z"
-          fill="#26313f" stroke="#3c4e62" stroke-width="1.5"/>
-    <g fill="#35c2a3" stroke="#0c141c" stroke-width="1.5">
+          fill="#edf1f1" stroke="#a9b9c3" stroke-width="1.5"/>
+    <g fill="#0f9d83" stroke="#eef4f7" stroke-width="1.5">
       <circle cx="180" cy="230" r="5"/><circle cx="300" cy="210" r="5"/>
       <circle cx="360" cy="255" r="5"/><circle cx="120" cy="250" r="5"/>
     </g>
     <!-- selected -->
-    <circle cx="410" cy="235" r="16" fill="#35c2a3" fill-opacity="0.22"/>
-    <circle cx="410" cy="235" r="7" fill="#7fe9d0" stroke="#0c141c" stroke-width="1.5"/>
-    <line x1="426" y1="232" x2="600" y2="120" stroke="#35c2a3" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7"/>
-    <text x="20" y="660" class="mono" font-size="10" fill="#5f6b78">Selected occurrence · FONC-270 / FONC-280</text>
+    <circle cx="410" cy="235" r="16" fill="#0f9d83" fill-opacity="0.22"/>
+    <circle cx="410" cy="235" r="7" fill="#0c8f76" stroke="#eef4f7" stroke-width="1.5"/>
+    <line x1="426" y1="232" x2="600" y2="120" stroke="#0f9d83" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7"/>
+    <text x="20" y="660" class="mono" font-size="10" fill="#6e8091">Selected occurrence · FONC-270 / FONC-280</text>
   </g>
 
   <!-- PANEL -->
-  <rect x="600" y="0" width="440" height="680" fill="#131b24"/>
-  <line x1="600" y1="0" x2="600" y2="680" stroke="#27343f"/>
+  <rect x="600" y="0" width="440" height="680" fill="#ffffff"/>
+  <line x1="600" y1="0" x2="600" y2="680" stroke="#cfd8de"/>
 
   <text x="624" y="42" class="eyebrow">SELECTED FOSSIL OCCURRENCE</text>
   <text x="1016" y="44" class="lbl" font-size="14" text-anchor="end">✕</text>
-  <line x1="624" y1="56" x2="1016" y2="56" stroke="#233240"/>
+  <line x1="624" y1="56" x2="1016" y2="56" stroke="#dde5ea"/>
 
   <text x="624" y="86" class="eyebrow">ASSOCIATED TAXON</text>
   <text x="1016" y="86" class="id" text-anchor="end">FONC-290</text>
-  <text x="624" y="114" class="serif" font-style="italic" font-size="21" fill="#e8eef4">Allosaurus fragilis</text>
+  <text x="624" y="114" class="serif" font-style="italic" font-size="21" fill="#1f2b38">Allosaurus fragilis</text>
   <text x="624" y="134" class="lbl">Theropoda · non-avian dinosaur</text>
-  <rect x="624" y="148" width="228" height="40" rx="8" fill="#35c2a3"/>
-  <text x="738" y="173" font-size="13" font-weight="600" fill="#06231d" text-anchor="middle">Open taxon profile  →</text>
+  <rect x="624" y="148" width="228" height="40" rx="8" fill="#0f9d83"/>
+  <text x="738" y="173" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Open taxon profile  →</text>
   <text x="1016" y="173" class="lbl" font-size="11" text-anchor="end">≤ 2 actions</text>
 
-  <line x1="624" y1="210" x2="1016" y2="210" stroke="#233240"/>
+  <line x1="624" y1="210" x2="1016" y2="210" stroke="#dde5ea"/>
 
   <text x="624" y="238" class="eyebrow">TIME RANGE</text>
   <text x="1016" y="238" class="id" text-anchor="end">FONC-920 · 1140</text>
   <text x="624" y="262" class="val">153–150 Ma · Late Jurassic</text>
-  <rect x="880" y="248" width="118" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
-  <text x="939" y="262" class="lbl" font-size="10.5" text-anchor="middle" fill="#9fb0c0">≈ approximate</text>
+  <rect x="880" y="248" width="118" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="939" y="262" class="lbl" font-size="10.5" text-anchor="middle" fill="#566573">≈ approximate</text>
 
   <text x="624" y="298" class="eyebrow">MODERN LOCATION</text>
   <text x="1016" y="298" class="id" text-anchor="end">FONC-900 · CONS-110</text>
   <text x="624" y="322" class="val">Morrison Fm (Brushy Basin Mbr) — Utah, USA</text>
 
   <text x="624" y="358" class="eyebrow">COORDINATES</text>
-  <text x="624" y="382" class="mono" font-size="12" fill="#cdd6df">38.9° N, 109.5° W <tspan class="lbl" font-family="'IBM Plex Sans'">(modern)</tspan></text>
+  <text x="624" y="382" class="mono" font-size="12" fill="#33424f">38.9° N, 109.5° W <tspan class="lbl" font-family="'IBM Plex Sans'">(modern)</tspan></text>
 
   <text x="624" y="418" class="eyebrow">PALEOGEOGRAPHIC POSITION</text>
   <text x="1016" y="418" class="id" text-anchor="end">FONC-910 · 1130</text>
   <text x="624" y="442" class="val">Western Laurasia · ~30° N palaeolat</text>
-  <rect x="624" y="452" width="118" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
-  <text x="683" y="466" class="lbl" font-size="10.5" text-anchor="middle" fill="#9fb0c0">▲ reconstructed</text>
+  <rect x="624" y="452" width="118" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="683" y="466" class="lbl" font-size="10.5" text-anchor="middle" fill="#566573">▲ reconstructed</text>
 
   <text x="624" y="502" class="eyebrow">SOURCE</text>
   <text x="1016" y="502" class="id" text-anchor="end">FONC-930 · 1100</text>
   <text x="624" y="526" class="val">Paleobiology Database</text>
-  <rect x="908" y="512" width="90" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="908" y="512" width="90" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="953" y="526" class="lbl" font-size="10" text-anchor="middle">Database</text>
 
   <!-- disclaimer -->
-  <rect x="624" y="552" width="392" height="72" rx="8" fill="#0f1720" stroke="#2d3b49"/>
-  <rect x="624" y="552" width="4" height="72" rx="2" fill="#c9a24a"/>
-  <text x="644" y="578" class="val" font-size="12.5" fill="#e8eef4">▲ Discovery evidence</text>
+  <rect x="624" y="552" width="392" height="72" rx="8" fill="#e9eef2" stroke="#cbd6dd"/>
+  <rect x="624" y="552" width="4" height="72" rx="2" fill="#b7791f"/>
+  <text x="644" y="578" class="val" font-size="12.5" fill="#1f2b38">▲ Discovery evidence</text>
   <text x="644" y="598" class="lbl" font-size="11.5">Marks where a fossil was found — not a range,</text>
   <text x="644" y="614" class="lbl" font-size="11.5">nor an exact position where the animal lived.</text>
   <text x="1016" y="648" class="id" text-anchor="end">FONC-1150 · CONS-130 · CONS-140</text>

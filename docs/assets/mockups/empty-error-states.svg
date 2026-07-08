@@ -2,68 +2,68 @@
   <style>
     .serif{font-family:'Spectral','Source Serif 4','Charter','Georgia',serif}
     .mono{font-family:'IBM Plex Mono','SFMono-Regular','Menlo',monospace}
-    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10px;letter-spacing:1.3px;fill:#5f6b78}
-    .title{font-family:'Spectral','Charter','Georgia',serif;font-size:17px;fill:#e8eef4}
-    .msg{font-size:12.5px;fill:#8a97a6}
-    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#4b5764}
+    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10px;letter-spacing:1.3px;fill:#6e8091}
+    .title{font-family:'Spectral','Charter','Georgia',serif;font-size:17px;fill:#1f2b38}
+    .msg{font-size:12.5px;fill:#5f7180}
+    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#93a2ad}
   </style>
 
-  <rect width="1120" height="640" fill="#0f1720"/>
-  <text x="24" y="42" class="serif" font-size="20" fill="#e8eef4">Empty &amp; error states</text>
+  <rect width="1120" height="640" fill="#e9eef2"/>
+  <text x="24" y="42" class="serif" font-size="20" fill="#1f2b38">Empty &amp; error states</text>
   <text x="24" y="64" class="msg">Never a blank canvas — explain what happened, offer the next step, keep filters.</text>
 
   <!-- A: empty filtered -->
-  <rect x="24" y="92" width="528" height="228" rx="12" fill="#16202b" stroke="#27343f"/>
+  <rect x="24" y="92" width="528" height="228" rx="12" fill="#ffffff" stroke="#cfd8de"/>
   <text x="48" y="122" class="eyebrow">EMPTY · FILTERED RESULTS</text>
-  <rect x="48" y="136" width="44" height="44" rx="10" fill="#131b24" stroke="#2d3b49"/>
-  <circle cx="70" cy="158" r="10" fill="none" stroke="#8a97a6" stroke-width="1.6"/>
-  <line x1="63" y1="165" x2="77" y2="151" stroke="#8a97a6" stroke-width="1.6"/>
+  <rect x="48" y="136" width="44" height="44" rx="10" fill="#ffffff" stroke="#cbd6dd"/>
+  <circle cx="70" cy="158" r="10" fill="none" stroke="#5f7180" stroke-width="1.6"/>
+  <line x1="63" y1="165" x2="77" y2="151" stroke="#5f7180" stroke-width="1.6"/>
   <text x="108" y="152" class="title">No occurrences match</text>
   <text x="108" y="176" class="msg">No Theropoda are recorded at 150 Ma with</text>
   <text x="108" y="193" class="msg">the current filters.</text>
-  <rect x="108" y="208" width="150" height="34" rx="8" fill="none" stroke="#35c2a3" stroke-width="1.3"/>
-  <text x="183" y="230" font-size="12.5" fill="#7fe9d0" text-anchor="middle">↺  Reset all filters</text>
-  <text x="48" y="272" class="msg" font-size="11.5" fill="#6f7c8a">Filters stay applied, so you keep your place.</text>
+  <rect x="108" y="208" width="150" height="34" rx="8" fill="none" stroke="#0f9d83" stroke-width="1.3"/>
+  <text x="183" y="230" font-size="12.5" fill="#0c8f76" text-anchor="middle">↺  Reset all filters</text>
+  <text x="48" y="272" class="msg" font-size="11.5" fill="#6e8091">Filters stay applied, so you keep your place.</text>
   <text x="528" y="304" class="id" text-anchor="end">FONC-1280 · FONC-860 · PERF-320</text>
 
   <!-- B: empty search -->
-  <rect x="592" y="92" width="528" height="228" rx="12" fill="#16202b" stroke="#27343f"/>
+  <rect x="592" y="92" width="528" height="228" rx="12" fill="#ffffff" stroke="#cfd8de"/>
   <text x="616" y="122" class="eyebrow">EMPTY · SEARCH</text>
-  <rect x="616" y="136" width="44" height="44" rx="10" fill="#131b24" stroke="#2d3b49"/>
-  <circle cx="635" cy="155" r="8" fill="none" stroke="#8a97a6" stroke-width="1.6"/>
-  <line x1="641" y1="161" x2="649" y2="169" stroke="#8a97a6" stroke-width="1.6"/>
+  <rect x="616" y="136" width="44" height="44" rx="10" fill="#ffffff" stroke="#cbd6dd"/>
+  <circle cx="635" cy="155" r="8" fill="none" stroke="#5f7180" stroke-width="1.6"/>
+  <line x1="641" y1="161" x2="649" y2="169" stroke="#5f7180" stroke-width="1.6"/>
   <text x="676" y="152" class="title">No taxon matches “velocirapto”</text>
   <text x="676" y="176" class="msg">Search uses scientific names. Check the</text>
   <text x="676" y="193" class="msg">spelling, or try a genus (e.g. Velociraptor).</text>
-  <text x="676" y="228" font-size="12.5" fill="#7fe9d0">✕  Clear search</text>
-  <text x="616" y="272" class="msg" font-size="11.5" fill="#6f7c8a">The map keeps its current age and filters.</text>
+  <text x="676" y="228" font-size="12.5" fill="#0c8f76">✕  Clear search</text>
+  <text x="616" y="272" class="msg" font-size="11.5" fill="#6e8091">The map keeps its current age and filters.</text>
   <text x="1096" y="304" class="id" text-anchor="end">FONC-1290 · PERF-330</text>
 
   <!-- C: map error -->
-  <rect x="24" y="344" width="528" height="228" rx="12" fill="#16202b" stroke="#27343f"/>
-  <rect x="24" y="344" width="528" height="5" rx="2.5" fill="#e5675c"/>
-  <text x="48" y="378" class="eyebrow" fill="#e5675c">ERROR · BASEMAP</text>
-  <rect x="48" y="392" width="44" height="44" rx="10" fill="#241618" stroke="#5c2f2c"/>
-  <text x="70" y="423" font-size="22" font-weight="700" fill="#e5675c" text-anchor="middle">!</text>
+  <rect x="24" y="344" width="528" height="228" rx="12" fill="#ffffff" stroke="#cfd8de"/>
+  <rect x="24" y="344" width="528" height="5" rx="2.5" fill="#cf4436"/>
+  <text x="48" y="378" class="eyebrow" fill="#cf4436">ERROR · BASEMAP</text>
+  <rect x="48" y="392" width="44" height="44" rx="10" fill="#fbe6e3" stroke="#e6b3ac"/>
+  <text x="70" y="423" font-size="22" font-weight="700" fill="#cf4436" text-anchor="middle">!</text>
   <text x="108" y="408" class="title">Couldn’t load the 150 Ma reconstruction</text>
   <text x="108" y="432" class="msg">The paleogeographic basemap failed to load.</text>
-  <rect x="108" y="448" width="96" height="34" rx="8" fill="#35c2a3"/>
-  <text x="156" y="470" font-size="12.5" font-weight="600" fill="#06231d" text-anchor="middle">Retry</text>
+  <rect x="108" y="448" width="96" height="34" rx="8" fill="#0f9d83"/>
+  <text x="156" y="470" font-size="12.5" font-weight="600" fill="#ffffff" text-anchor="middle">Retry</text>
   <text x="216" y="470" class="msg" font-size="11.5">Filters preserved.</text>
-  <text x="48" y="512" class="msg" font-size="11.5" fill="#6f7c8a">Retries only the basemap — no full reload.</text>
+  <text x="48" y="512" class="msg" font-size="11.5" fill="#6e8091">Retries only the basemap — no full reload.</text>
   <text x="528" y="556" class="id" text-anchor="end">FONC-1310 · PERF-280 · FONC-1340</text>
 
   <!-- D: profile error -->
-  <rect x="592" y="344" width="528" height="228" rx="12" fill="#16202b" stroke="#27343f"/>
-  <rect x="592" y="344" width="528" height="5" rx="2.5" fill="#e5675c"/>
-  <text x="616" y="378" class="eyebrow" fill="#e5675c">ERROR · TAXON PROFILE</text>
-  <rect x="616" y="392" width="44" height="44" rx="10" fill="#241618" stroke="#5c2f2c"/>
-  <text x="638" y="423" font-size="22" font-weight="700" fill="#e5675c" text-anchor="middle">!</text>
+  <rect x="592" y="344" width="528" height="228" rx="12" fill="#ffffff" stroke="#cfd8de"/>
+  <rect x="592" y="344" width="528" height="5" rx="2.5" fill="#cf4436"/>
+  <text x="616" y="378" class="eyebrow" fill="#cf4436">ERROR · TAXON PROFILE</text>
+  <rect x="616" y="392" width="44" height="44" rx="10" fill="#fbe6e3" stroke="#e6b3ac"/>
+  <text x="638" y="423" font-size="22" font-weight="700" fill="#cf4436" text-anchor="middle">!</text>
   <text x="676" y="408" class="title">Couldn’t load <tspan font-style="italic">Allosaurus fragilis</tspan></text>
   <text x="676" y="432" class="msg">The rest of the atlas is still available.</text>
-  <rect x="676" y="448" width="96" height="34" rx="8" fill="#35c2a3"/>
-  <text x="724" y="470" font-size="12.5" font-weight="600" fill="#06231d" text-anchor="middle">Retry</text>
+  <rect x="676" y="448" width="96" height="34" rx="8" fill="#0f9d83"/>
+  <text x="724" y="470" font-size="12.5" font-weight="600" fill="#ffffff" text-anchor="middle">Retry</text>
   <text x="784" y="470" class="msg" font-size="11.5">Filters preserved.</text>
-  <text x="616" y="512" class="msg" font-size="11.5" fill="#6f7c8a">Retry without reloading the application.</text>
+  <text x="616" y="512" class="msg" font-size="11.5" fill="#6e8091">Retry without reloading the application.</text>
   <text x="1096" y="556" class="id" text-anchor="end">FONC-1320 · PERF-290 · PERF-300</text>
 </svg>

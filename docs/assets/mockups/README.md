@@ -15,12 +15,13 @@ link these images live under [`../../mockups/`](../../mockups/).
 
 - Naming: lowercase, hyphen-separated; append a state suffix for variants (see
   [`../../mockups/README.md`](../../mockups/README.md)).
-- Palette (shared across sheets — dark deep-time cartographic, see
+- Palette (shared across sheets — light deep-time cartographic / bathymetric
+  chart, see
   [`../../mockups/design-guidelines.md`](../../mockups/design-guidelines.md) §4):
-  ocean ground `#0f1720`, panels `#16202b`, land `#26313f`, text `#e8eef4`, one
-  teal accent `#35c2a3` (occurrence/data + interaction), ICS period colours on
-  the timeline (Triassic `#8E5AA5`, Jurassic `#3E93C6`, Cretaceous `#5FA96A`),
-  red `#e5675c` for error states only.
+  page `#e9eef2`, pale ocean `#d7e4ec`→`#eef4f7`, panels `#ffffff`, land
+  `#edf1f1`, text `#1f2b38`, one teal accent `#0f9d83` (occurrence/data +
+  interaction), ICS period colours on the timeline (Triassic `#8E5AA5`, Jurassic
+  `#3E93C6`, Cretaceous `#5FA96A`), red `#cf4436` for error states only.
 
 ## Files
 

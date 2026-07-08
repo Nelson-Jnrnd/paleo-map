@@ -65,20 +65,23 @@ Use the vocabulary of paleontology and stratigraphy, and the terms defined in th
 Restrained, and derived from the subject — a **deep-time cartographic console**
 (what real paleogeographic / deep-time GIS tools look like: GPlates, Macrostrat),
 not a warm-paper document and not an AI startup. Deliberately *not* the
-over-used warm-cream-and-graphite look; the ground is a dark bathymetric ocean so
-the map and its data read as the primary object.
+over-used warm-cream-and-graphite look: the neutrals are **cool blue-greys** and
+the map is a pale **bathymetric chart** so the map and its data read as the
+primary object.
 
-**Palette (one accent + a meaning-only status system).** Dark is the default
-theme; a light theme must be provided with equal care via tokens.
+**Palette (one accent + a meaning-only status system).** The product is
+**single-theme, light** — a deliberate light cartographic world. Style through
+tokens; do not hand-code a second theme.
 
-| Token | Value (dark) | Use |
+| Token | Value (light) | Use |
 | --- | --- | --- |
-| Ocean / ground | `#0f1720` (radial `#132231`→`#0c141c`) | Page and map background |
-| Panel / surface | `#16202b` / `#131b24` | Sidebars, panels, control bars |
-| Land | `#26313f`, coast `#3c4e62` | Reconstructed continental masses |
-| Graticule / line | `#1a2836` / `#27343f` | Map grid, borders, dividers |
-| Text | `#e8eef4` hi · `#cdd6df` · `#8a97a6` muted · `#5f6b78` faint | Type ramp |
-| **Accent — teal** | `#35c2a3` (bright `#7fe9d0`, ink `#06231d`) | The single accent: the occurrence/data layer, selection, primary action, current-age handle |
+| Ground / page | `#e9eef2` (cool blue-grey) | Page background behind panels |
+| Ocean | radial `#d7e4ec`→`#eef4f7` | Map sea (pale bathymetric tint) |
+| Panel / surface | `#ffffff` | Sidebars, panels, cards, control bars |
+| Land | `#edf1f1`, coast `#a9b9c3` | Reconstructed continental masses |
+| Graticule / line | `#cdd9e0` grid · `#cfd8de` / `#dde5ea` borders & dividers | Map grid, borders |
+| Text | `#1f2b38` hi · `#33424f` · `#5f7180` muted · `#6e8091` faint · `#93a2ad` id | Type ramp |
+| **Accent — teal** | `#0f9d83` (deep `#0c8f76`, cluster `#17a98c`, on-accent `#ffffff`) | The single accent: the occurrence/data layer, selection, primary action, current-age handle |
 
 Teal is the *only* accent, and it belongs to the data + interaction layer
 (occurrence markers, the selected point, primary buttons, the time handle).
@@ -96,9 +99,9 @@ Everything else is cool neutral. Two additional colour systems exist, both
 | Reconstructed | ▲ + neutral chip | Paleogeographic position is modeled, not observed |
 | Approximate | ≈ + neutral chip | Time range is uncertain / broad |
 | Interpretative | muted, separated block | Inferred, not fossil-derived |
-| Incomplete / attention | muted amber `#c9a24a`, sparing | Profile is partial (a "note", not an error) |
+| Incomplete / attention | muted amber `#b7791f`, sparing | Profile is partial (a "note", not an error) |
 | Missing | explicit "Not available" label | Field has no sourced value |
-| Error | red `#e5675c`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
+| Error | red `#cf4436`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
 
 **Typography.** Three roles, chosen to avoid the generic system-sans default:
 
@@ -218,7 +221,7 @@ complexity.
 ### Relationship to the mockups
 
 The high-fidelity [screen mockups](README.md) are the reference implementation of
-this charter — they realize §2 (uncertainty first-class), §4 (dark cartographic
+this charter — they realize §2 (uncertainty first-class), §4 (light cartographic
 system, one teal accent, ICS period colours, neutral status cues), and §7 (all
 real states, including the disabled-group state on the filters panel). Any built
 UI must match them and this charter; where a screen has no mockup yet, design it

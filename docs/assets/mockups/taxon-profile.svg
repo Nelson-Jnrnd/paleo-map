@@ -2,40 +2,40 @@
   <style>
     .serif{font-family:'Spectral','Source Serif 4','Charter','Georgia',serif}
     .mono{font-family:'IBM Plex Mono','SFMono-Regular','Menlo',monospace}
-    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10.5px;letter-spacing:1.4px;fill:#5f6b78}
-    .h{font-family:'Spectral','Charter','Georgia',serif;font-size:15px;fill:#e8eef4}
-    .lbl{font-size:12px;fill:#8a97a6}
-    .val{font-size:13px;fill:#cdd6df}
-    .hi{font-size:13px;fill:#e8eef4}
-    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#4b5764}
+    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10.5px;letter-spacing:1.4px;fill:#6e8091}
+    .h{font-family:'Spectral','Charter','Georgia',serif;font-size:15px;fill:#1f2b38}
+    .lbl{font-size:12px;fill:#5f7180}
+    .val{font-size:13px;fill:#33424f}
+    .hi{font-size:13px;fill:#1f2b38}
+    .id{font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#93a2ad}
   </style>
 
-  <rect width="1200" height="820" fill="#0f1720"/>
+  <rect width="1200" height="820" fill="#e9eef2"/>
 
   <!-- TOP BAR -->
-  <rect x="0" y="0" width="1200" height="58" fill="#131b24"/>
-  <line x1="0" y1="58" x2="1200" y2="58" stroke="#27343f"/>
-  <rect x="24" y="13" width="150" height="32" rx="16" fill="none" stroke="#35c2a3" stroke-width="1.4"/>
-  <text x="46" y="33" class="val" font-size="12.5" fill="#7fe9d0">←  Back to map</text>
-  <text x="192" y="37" class="mono" font-size="11" fill="#6f7c8a">Map / Theropoda / <tspan fill="#8a97a6">Allosaurus fragilis</tspan></text>
-  <text x="1176" y="37" class="val" font-size="12" text-anchor="end" fill="#8a97a6">Age &amp; filters preserved · 150 Ma</text>
+  <rect x="0" y="0" width="1200" height="58" fill="#ffffff"/>
+  <line x1="0" y1="58" x2="1200" y2="58" stroke="#cfd8de"/>
+  <rect x="24" y="13" width="150" height="32" rx="16" fill="none" stroke="#0f9d83" stroke-width="1.4"/>
+  <text x="46" y="33" class="val" font-size="12.5" fill="#0c8f76">←  Back to map</text>
+  <text x="192" y="37" class="mono" font-size="11" fill="#6e8091">Map / Theropoda / <tspan fill="#5f7180">Allosaurus fragilis</tspan></text>
+  <text x="1176" y="37" class="val" font-size="12" text-anchor="end" fill="#5f7180">Age &amp; filters preserved · 150 Ma</text>
 
   <!-- HEADER -->
-  <text x="24" y="110" class="serif" font-style="italic" font-size="30" fill="#e8eef4">Allosaurus fragilis</text>
-  <rect x="24" y="128" width="66" height="24" rx="12" fill="#1e2a36" stroke="#2d3b49"/>
+  <text x="24" y="110" class="serif" font-style="italic" font-size="30" fill="#1f2b38">Allosaurus fragilis</text>
+  <rect x="24" y="128" width="66" height="24" rx="12" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="57" y="144" class="val" font-size="11.5" text-anchor="middle">Species</text>
-  <rect x="98" y="128" width="98" height="24" rx="12" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="98" y="128" width="98" height="24" rx="12" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="147" y="144" class="val" font-size="11.5" text-anchor="middle">Short profile</text>
-  <rect x="204" y="128" width="132" height="24" rx="12" fill="#241f16" stroke="#5c4a26"/>
-  <text x="270" y="144" font-size="11.5" text-anchor="middle" fill="#c9a24a">◐ Incomplete</text>
+  <rect x="204" y="128" width="132" height="24" rx="12" fill="#f6ecd6" stroke="#dcc58f"/>
+  <text x="270" y="144" font-size="11.5" text-anchor="middle" fill="#b7791f">◐ Incomplete</text>
   <text x="24" y="174" class="lbl">Non-avian dinosaur · <tspan class="val" font-weight="600">Main content</tspan></text>
 
   <!-- primary action -->
-  <rect x="928" y="98" width="248" height="42" rx="8" fill="#35c2a3"/>
-  <text x="1052" y="124" font-size="13.5" font-weight="600" fill="#06231d" text-anchor="middle">▸  Show 3 occurrences on map</text>
+  <rect x="928" y="98" width="248" height="42" rx="8" fill="#0f9d83"/>
+  <text x="1052" y="124" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">▸  Show 3 occurrences on map</text>
   <text x="1176" y="162" class="id" text-anchor="end">FONC-560 · FONC-1000 · FONC-1080</text>
 
-  <line x1="24" y1="192" x2="1176" y2="192" stroke="#233240"/>
+  <line x1="24" y1="192" x2="1176" y2="192" stroke="#dde5ea"/>
 
   <!-- LEFT COLUMN -->
   <text x="24" y="224" class="h">Classification</text>
@@ -46,93 +46,93 @@
     <text x="64" y="300" class="val">Theropoda <tspan class="lbl">clade</tspan></text>
     <text x="84" y="324" class="val">Allosauridae <tspan class="lbl">family</tspan></text>
     <text x="104" y="348" class="val">Allosaurus <tspan class="lbl">genus</tspan></text>
-    <text x="124" y="372" class="val" fill="#7fe9d0">Allosaurus fragilis <tspan class="lbl" fill="#5aa38f">species</tspan></text>
+    <text x="124" y="372" class="val" fill="#0c8f76">Allosaurus fragilis <tspan class="lbl" fill="#3f8a76">species</tspan></text>
   </g>
-  <rect x="24" y="388" width="150" height="24" rx="12" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="24" y="388" width="150" height="24" rx="12" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="38" y="404" class="val" font-size="11.5">Nomenclatural status: valid</text>
 
-  <line x1="24" y1="432" x2="576" y2="432" stroke="#233240"/>
+  <line x1="24" y1="432" x2="576" y2="432" stroke="#dde5ea"/>
   <text x="24" y="462" class="h">Known time range</text>
   <text x="576" y="462" class="id" text-anchor="end">FONC-550 · CONS-200</text>
-  <rect x="24" y="476" width="552" height="12" rx="6" fill="#0f1720" stroke="#233240"/>
+  <rect x="24" y="476" width="552" height="12" rx="6" fill="#e9eef2" stroke="#dde5ea"/>
   <rect x="360" y="476" width="150" height="12" rx="6" fill="#3E93C6" fill-opacity="0.75"/>
   <text x="24" y="512" class="val">155–145 Ma · Late Jurassic <tspan class="lbl">(Kimmeridgian–Tithonian)</tspan></text>
-  <rect x="452" y="500" width="124" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
-  <text x="514" y="514" class="lbl" font-size="10.5" text-anchor="middle" fill="#9fb0c0">≈ approximate</text>
+  <rect x="452" y="500" width="124" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="514" y="514" class="lbl" font-size="10.5" text-anchor="middle" fill="#566573">≈ approximate</text>
 
-  <line x1="24" y1="536" x2="576" y2="536" stroke="#233240"/>
+  <line x1="24" y1="536" x2="576" y2="536" stroke="#dde5ea"/>
   <text x="24" y="566" class="h">Illustration</text>
   <text x="576" y="566" class="id" text-anchor="end">FONC-1240</text>
-  <rect x="24" y="578" width="552" height="104" rx="8" fill="#131b24" stroke="#2d3b49" stroke-dasharray="6 5"/>
-  <circle cx="300" cy="616" r="14" fill="none" stroke="#3a4a5c" stroke-width="1.5"/>
-  <line x1="291" y1="625" x2="309" y2="607" stroke="#3a4a5c" stroke-width="1.5"/>
-  <text x="300" y="652" class="val" text-anchor="middle" fill="#8a97a6">No image available</text>
+  <rect x="24" y="578" width="552" height="104" rx="8" fill="#ffffff" stroke="#cbd6dd" stroke-dasharray="6 5"/>
+  <circle cx="300" cy="616" r="14" fill="none" stroke="#b3c1cb" stroke-width="1.5"/>
+  <line x1="291" y1="625" x2="309" y2="607" stroke="#b3c1cb" stroke-width="1.5"/>
+  <text x="300" y="652" class="val" text-anchor="middle" fill="#5f7180">No image available</text>
   <text x="300" y="670" class="lbl" font-size="11" text-anchor="middle">Reconstructions arrive credited at Detailed level (V1)</text>
 
-  <line x1="24" y1="700" x2="576" y2="700" stroke="#233240"/>
+  <line x1="24" y1="700" x2="576" y2="700" stroke="#dde5ea"/>
   <text x="24" y="730" class="h">Interpretative data</text>
   <text x="576" y="730" class="id" text-anchor="end">FONC-600–630 (V1) · 670</text>
-  <text x="24" y="756" class="lbl">Diet <tspan fill="#5f6b78">— not available (interpretative · V1)</tspan></text>
-  <text x="24" y="778" class="lbl">Locomotion <tspan fill="#5f6b78">— not available (interpretative · V1)</tspan></text>
-  <text x="24" y="800" class="lbl">Length / mass <tspan fill="#5f6b78">— not available (interpretative · V1)</tspan></text>
+  <text x="24" y="756" class="lbl">Diet <tspan fill="#6e8091">— not available (interpretative · V1)</tspan></text>
+  <text x="24" y="778" class="lbl">Locomotion <tspan fill="#6e8091">— not available (interpretative · V1)</tspan></text>
+  <text x="24" y="800" class="lbl">Length / mass <tspan fill="#6e8091">— not available (interpretative · V1)</tspan></text>
 
   <!-- column divider -->
-  <line x1="600" y1="208" x2="600" y2="808" stroke="#1c2836"/>
+  <line x1="600" y1="208" x2="600" y2="808" stroke="#dde5ea"/>
 
   <!-- RIGHT COLUMN -->
   <text x="624" y="224" class="h">Fossil occurrences <tspan class="lbl" font-family="'IBM Plex Sans'">· 3 known</tspan></text>
   <text x="1176" y="224" class="id" text-anchor="end">FONC-560 · FONC-1150</text>
   <!-- occurrence rows -->
   <g>
-    <rect x="624" y="236" width="552" height="48" rx="8" fill="#16202b" stroke="#27343f"/>
+    <rect x="624" y="236" width="552" height="48" rx="8" fill="#ffffff" stroke="#cfd8de"/>
     <text x="640" y="256" class="hi" font-size="12.5">Morrison Formation (Brushy Basin Mbr)</text>
-    <text x="640" y="274" class="mono" font-size="10.5" fill="#8a97a6">Utah, USA · 153–150 Ma</text>
-    <rect x="1000" y="250" width="88" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+    <text x="640" y="274" class="mono" font-size="10.5" fill="#5f7180">Utah, USA · 153–150 Ma</text>
+    <rect x="1000" y="250" width="88" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
     <text x="1044" y="264" class="lbl" font-size="10" text-anchor="middle">PBDB</text>
-    <text x="1160" y="264" class="val" font-size="11.5" fill="#7fe9d0" text-anchor="end">▸ map</text>
+    <text x="1160" y="264" class="val" font-size="11.5" fill="#0c8f76" text-anchor="end">▸ map</text>
 
-    <rect x="624" y="290" width="552" height="48" rx="8" fill="#16202b" stroke="#27343f"/>
+    <rect x="624" y="290" width="552" height="48" rx="8" fill="#ffffff" stroke="#cfd8de"/>
     <text x="640" y="310" class="hi" font-size="12.5">Lourinhã Formation</text>
-    <text x="640" y="328" class="mono" font-size="10.5" fill="#8a97a6">Estremadura, Portugal · 151–145 Ma</text>
-    <rect x="1000" y="304" width="88" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+    <text x="640" y="328" class="mono" font-size="10.5" fill="#5f7180">Estremadura, Portugal · 151–145 Ma</text>
+    <rect x="1000" y="304" width="88" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
     <text x="1044" y="318" class="lbl" font-size="10" text-anchor="middle">PBDB</text>
-    <text x="1160" y="318" class="val" font-size="11.5" fill="#7fe9d0" text-anchor="end">▸ map</text>
+    <text x="1160" y="318" class="val" font-size="11.5" fill="#0c8f76" text-anchor="end">▸ map</text>
 
-    <rect x="624" y="344" width="552" height="48" rx="8" fill="#16202b" stroke="#27343f"/>
+    <rect x="624" y="344" width="552" height="48" rx="8" fill="#ffffff" stroke="#cfd8de"/>
     <text x="640" y="364" class="hi" font-size="12.5">Morrison Formation</text>
-    <text x="640" y="382" class="mono" font-size="10.5" fill="#8a97a6">Colorado, USA · 155–152 Ma</text>
-    <rect x="1000" y="358" width="88" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+    <text x="640" y="382" class="mono" font-size="10.5" fill="#5f7180">Colorado, USA · 155–152 Ma</text>
+    <rect x="1000" y="358" width="88" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
     <text x="1044" y="372" class="lbl" font-size="10" text-anchor="middle">Primary</text>
-    <text x="1160" y="372" class="val" font-size="11.5" fill="#7fe9d0" text-anchor="end">▸ map</text>
+    <text x="1160" y="372" class="val" font-size="11.5" fill="#0c8f76" text-anchor="end">▸ map</text>
   </g>
 
-  <line x1="624" y1="410" x2="1176" y2="410" stroke="#233240"/>
+  <line x1="624" y1="410" x2="1176" y2="410" stroke="#dde5ea"/>
   <text x="624" y="440" class="h">Modern discovery locations</text>
   <text x="1176" y="440" class="id" text-anchor="end">FONC-570</text>
   <text x="624" y="464" class="val">Utah · Colorado · Wyoming (USA) · Portugal</text>
 
-  <line x1="624" y1="484" x2="1176" y2="484" stroke="#233240"/>
+  <line x1="624" y1="484" x2="1176" y2="484" stroke="#dde5ea"/>
   <text x="624" y="514" class="h">Paleogeographic positions</text>
-  <rect x="880" y="500" width="118" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
-  <text x="939" y="514" class="lbl" font-size="10.5" text-anchor="middle" fill="#9fb0c0">▲ reconstructed</text>
+  <rect x="880" y="500" width="118" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="939" y="514" class="lbl" font-size="10.5" text-anchor="middle" fill="#566573">▲ reconstructed</text>
   <text x="1176" y="514" class="id" text-anchor="end">FONC-580 · 1130</text>
   <text x="624" y="538" class="val">Western Laurasia (Late Jurassic reconstruction)</text>
 
-  <line x1="624" y1="558" x2="1176" y2="558" stroke="#233240"/>
+  <line x1="624" y1="558" x2="1176" y2="558" stroke="#dde5ea"/>
   <text x="624" y="588" class="h">Sources</text>
   <text x="1176" y="588" class="id" text-anchor="end">FONC-590 · 1090 · CONS-420</text>
   <text x="624" y="612" class="val">Paleobiology Database</text>
-  <rect x="1030" y="600" width="90" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="1030" y="600" width="90" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="1075" y="614" class="lbl" font-size="10" text-anchor="middle">Database</text>
   <text x="624" y="636" class="val">Madsen, J. H. (1976)</text>
-  <rect x="1030" y="624" width="90" height="20" rx="10" fill="#1e2a36" stroke="#2d3b49"/>
+  <rect x="1030" y="624" width="90" height="20" rx="10" fill="#eef2f5" stroke="#cbd6dd"/>
   <text x="1075" y="638" class="lbl" font-size="10" text-anchor="middle">Primary</text>
   <text x="624" y="658" class="lbl" font-size="11">Imported 2026-06 · external links where available (V1)</text>
 
   <!-- missing field -->
-  <rect x="624" y="674" width="552" height="52" rx="8" fill="#131b24" stroke="#2d3b49" stroke-dasharray="6 5"/>
+  <rect x="624" y="674" width="552" height="52" rx="8" fill="#ffffff" stroke="#cbd6dd" stroke-dasharray="6 5"/>
   <text x="640" y="696" class="hi" font-size="12.5">Estimated body mass</text>
-  <text x="640" y="714" class="val" font-size="11.5" fill="#9fb0c0">Not available — no sourced estimate (shown, never blank)</text>
+  <text x="640" y="714" class="val" font-size="11.5" fill="#566573">Not available — no sourced estimate (shown, never blank)</text>
   <text x="1160" y="696" class="id" text-anchor="end">FONC-490</text>
   <text x="1160" y="714" class="id" text-anchor="end">FONC-1120</text>
 
