@@ -1,8 +1,9 @@
 # Screens: Empty & Error States
 
-> Mockup page. Status: **planned**. Images (planned):
-> `../assets/mockups/empty-state.png`, `../assets/mockups/error-state.png`.
-> Convention: see [README](README.md).
+> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
+> [README](README.md).
+
+![Wireframe of the empty and error states](../assets/mockups/empty-error-states.svg)
 
 A shared catalog of the empty and error states required across screens. Each state
 records its **trigger**, what the **user sees**, and the **recovery** action. The
@@ -22,14 +23,14 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 - **User sees:** an explicit empty state on the map/results area, with the active
   filters still shown.
 - **Recovery:** remove a filter or reset all filters (FONC-870, FONC-880).
-- **Mockup:** `empty-state.png`.
+- **Mockup:** top-left card in `empty-error-states.svg`.
 
 ### No search result
 
 - **Trigger:** a search matches no taxon (FONC-1290, PERF-330).
 - **User sees:** an explicit empty state for the search.
 - **Recovery:** adjust or clear the search term.
-- **Mockup:** `search-empty.png`.
+- **Mockup:** top-right card in `empty-error-states.svg`.
 
 ### Minimal-data profile
 
@@ -38,7 +39,7 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 - **User sees:** the profile with an explicit "minimal/incomplete" message and
   labeled missing fields (FONC-490).
 - **Recovery:** none required; informational. Return to map remains available.
-- **Mockup:** `taxon-profile-minimal.png`.
+- **Mockup:** shown in `taxon-profile.svg` (dedicated sheet TODO).
 
 ## Error states
 
@@ -48,7 +49,7 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 - **User sees:** a clear error message in place of the map.
 - **Recovery:** retry without reloading the whole app (FONC-1330, PERF-300);
   active filters preserved (FONC-1340, PERF-310).
-- **Mockup:** `error-state.png`.
+- **Mockup:** bottom-left card in `empty-error-states.svg`.
 
 ### Taxon profile load failure
 
@@ -56,7 +57,7 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 - **User sees:** a clear error message in place of the profile content.
 - **Recovery:** retry (FONC-1330, PERF-300); active filters preserved (FONC-1340,
   PERF-310).
-- **Mockup:** `taxon-profile-error.png`.
+- **Mockup:** bottom-right card in `empty-error-states.svg`.
 
 ## Retry behavior (shared)
 
@@ -76,6 +77,7 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 
 ## TODO
 
-- [ ] Add `empty-state.png` and `error-state.png` (plus per-screen variants).
+- [x] Low-fi wireframe added: `../assets/mockups/empty-error-states.svg`
+      (four states: filtered-empty, search-empty, map error, profile error).
 - [ ] Confirm retry affordance placement per screen.
-- [ ] Annotate each state with its requirement ID(s).
+- [x] Annotate each state with its requirement ID(s) (in the wireframe).

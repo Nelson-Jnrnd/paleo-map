@@ -1,7 +1,9 @@
 # Screen: Filters Panel
 
-> Mockup page. Status: **planned**. Image (planned):
-> `../assets/mockups/filters-panel.png`. Convention: see [README](README.md).
+> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
+> [README](README.md).
+
+![Wireframe of the filters panel](../assets/mockups/filters-panel.svg)
 
 The panel for narrowing visible occurrences. MVP filters are period, taxonomic
 group, and dinosaurs-only, with a live result count and clear ways to remove
@@ -43,6 +45,6 @@ FONC-060, PERF-230, PERF-320.
 
 ## TODO
 
-- [ ] Add `../assets/mockups/filters-panel.png`.
-- [ ] Show removable filter chips and the reset control.
-- [ ] Annotate each region with its requirement ID(s).
+- [x] Low-fi wireframe added: `../assets/mockups/filters-panel.svg`.
+- [x] Show removable filter chips and the reset control (in the wireframe).
+- [x] Annotate regions with requirement IDs (in the wireframe).

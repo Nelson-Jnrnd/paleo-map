@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 648" font-family="'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Wireframe of the filters panel">
+  <style>
+    .h{font-size:15px;font-weight:700;fill:#2b2b28}
+    .eyebrow{font-size:10px;letter-spacing:1.4px;font-weight:700;fill:#8a857a}
+    .lbl{font-size:12px;fill:#6f6b62}
+    .val{font-size:12.5px;fill:#2b2b28}
+    .valb{font-size:12.5px;font-weight:700;fill:#2b2b28}
+    .mono{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:9.5px;fill:#5f7891}
+    .card{fill:#ffffff;stroke:#d8d5cd;stroke-width:1}
+    .chip{fill:#f0efe9;stroke:#d8d5cd;stroke-width:1}
+    .badge{fill:#f0e4d2;stroke:#cdaa72;stroke-width:1}
+    .box{fill:#ffffff;stroke:#b8b4aa;stroke-width:1.4}
+    .accfill{fill:#b07a35}
+    .acctxt{fill:#b07a35;font-weight:700}
+  </style>
+
+  <rect width="460" height="648" fill="#f6f5f2"/>
+  <rect x="16" y="16" width="428" height="616" rx="10" class="card"/>
+
+  <text x="36" y="48" class="h">Filters</text>
+  <text x="424" y="48" class="mono" text-anchor="end">FONC-030</text>
+  <line x1="36" y1="60" x2="424" y2="60" stroke="#e4e1d8"/>
+
+  <!-- Period -->
+  <text x="36" y="84" class="eyebrow">PERIOD</text>
+  <text x="424" y="84" class="mono" text-anchor="end">FONC-780</text>
+  <g>
+    <rect x="36" y="96" width="16" height="16" rx="3" class="box"/>
+    <text x="62" y="109" class="val">Triassic <tspan class="lbl">· 252–201 Ma</tspan></text>
+    <rect x="36" y="122" width="16" height="16" rx="3" class="accfill"/>
+    <path d="M39 130 l3 4 l7 -8" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <text x="62" y="135" class="valb">Jurassic <tspan class="lbl">· 201–145 Ma</tspan></text>
+    <rect x="36" y="148" width="16" height="16" rx="3" class="box"/>
+    <text x="62" y="161" class="val">Cretaceous <tspan class="lbl">· 145–66 Ma</tspan></text>
+  </g>
+  <line x1="36" y1="184" x2="424" y2="184" stroke="#e4e1d8"/>
+
+  <!-- Group -->
+  <text x="36" y="208" class="eyebrow">TAXONOMIC GROUP</text>
+  <text x="424" y="208" class="mono" text-anchor="end">FONC-790</text>
+  <g>
+    <rect x="36" y="220" width="16" height="16" rx="3" class="accfill"/>
+    <path d="M39 228 l3 4 l7 -8" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <text x="62" y="233" class="valb">Theropoda</text>
+    <rect x="36" y="244" width="16" height="16" rx="3" class="box"/>
+    <text x="62" y="257" class="val">Sauropodomorpha</text>
+    <rect x="36" y="268" width="16" height="16" rx="3" class="box"/>
+    <text x="62" y="281" class="val">Ornithopoda</text>
+    <rect x="36" y="292" width="16" height="16" rx="3" class="box"/>
+    <text x="62" y="305" class="val">Thyreophora</text>
+    <text x="62" y="329" class="lbl">Ceratopsia · Pachycephalosauria …</text>
+  </g>
+  <line x1="36" y1="348" x2="424" y2="348" stroke="#e4e1d8"/>
+
+  <!-- Dinosaurs only -->
+  <text x="36" y="376" class="valb">Dinosaurs only</text>
+  <rect x="384" y="366" width="40" height="20" rx="10" class="accfill"/>
+  <circle cx="414" cy="376" r="8" fill="#ffffff"/>
+  <text x="36" y="394" class="lbl" font-size="11">Active by default (FONC-020)</text>
+  <text x="424" y="394" class="mono" text-anchor="end">FONC-800</text>
+  <line x1="36" y1="410" x2="424" y2="410" stroke="#e4e1d8"/>
+
+  <!-- Active filters -->
+  <text x="36" y="434" class="eyebrow">ACTIVE FILTERS</text>
+  <text x="424" y="434" class="mono" text-anchor="end">FONC-870 (remove one)</text>
+  <rect x="36" y="444" width="86" height="24" rx="12" class="badge"/>
+  <text x="50" y="460" class="acctxt" font-size="11">Jurassic  ✕</text>
+  <rect x="130" y="444" width="98" height="24" rx="12" class="badge"/>
+  <text x="144" y="460" class="acctxt" font-size="11">Theropoda  ✕</text>
+
+  <!-- Result count -->
+  <rect x="36" y="484" width="388" height="56" rx="8" fill="#eceae4"/>
+  <text x="52" y="524" font-size="24" font-weight="700" fill="#2b2b28">47</text>
+  <text x="96" y="510" class="lbl">occurrences match</text>
+  <text x="96" y="528" class="lbl">the active filters</text>
+  <text x="408" y="524" class="mono" text-anchor="end">FONC-060 · FONC-850</text>
+
+  <!-- Reset -->
+  <rect x="36" y="556" width="388" height="34" rx="8" fill="#ffffff" stroke="#b07a35" stroke-width="1.4"/>
+  <text x="230" y="578" class="acctxt" text-anchor="middle">↺  Reset all filters</text>
+  <text x="424" y="612" class="mono" text-anchor="end">FONC-880</text>
+
+  <text x="36" y="612" class="lbl" font-size="10.5" fill="#a29d92">V1 (out of MVP): diet · region · content level · reliability</text>
+  <text x="16" y="644" class="mono" fill="#a29d92">Low-fidelity wireframe — FONC-810–840 deferred.</text>
+</svg>

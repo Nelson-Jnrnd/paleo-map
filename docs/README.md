@@ -42,7 +42,7 @@ convention.
 ## Where to add mockups
 
 Mockup **pages** (screen contents, states, requirement links) live in
-[`mockups/`](mockups/). Mockup **image files** (`.png`) live in
+[`mockups/`](mockups/). Mockup **image files** (`.svg`) live in
 [`assets/mockups/`](assets/mockups/). See [`mockups/README.md`](mockups/README.md)
 for the naming convention.
 

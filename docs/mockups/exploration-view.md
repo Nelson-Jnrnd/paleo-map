@@ -1,7 +1,9 @@
 # Screen: Exploration View
 
-> Mockup page. Status: **planned**. Image (planned):
-> `../assets/mockups/exploration-view.png`. Convention: see [README](README.md).
+> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
+> [README](README.md).
+
+![Wireframe of the exploration view — map, time control and filters](../assets/mockups/exploration-view.svg)
 
 The main screen: a paleogeographic map with a time control and filters, plus
 persistent context (selected age, selected group, result count). This is the hub
@@ -41,10 +43,10 @@ FONC-300, CONS-450, PERF-010, PERF-020, PERF-080…PERF-120, PERF-220, PERF-230.
 ## States to document
 
 - **Loading state** — while the map initially loads (FONC-1260); indicator when an
-  update exceeds 500 ms (PERF-050). Variant: `exploration-view-loading.png`.
+  update exceeds 500 ms (PERF-050). Variant: `exploration-view-loading.svg` (TODO).
 - **Empty state** — filters return no occurrence (FONC-1280, FONC-860); offer
-  reset. Variant: `exploration-view-empty.png`. See
-  [empty & error states](empty-error-states.md).
+  reset. Illustrated in [empty & error states](empty-error-states.md); dedicated
+  variant `exploration-view-empty.svg` (TODO).
 - **Error state** — map fails to load (FONC-1310) with retry, filters preserved
   (FONC-1330, FONC-1340). See [empty & error states](empty-error-states.md).
 
@@ -56,7 +58,8 @@ FONC-300, CONS-450, PERF-010, PERF-020, PERF-080…PERF-120, PERF-220, PERF-230.
 
 ## TODO
 
-- [ ] Add `../assets/mockups/exploration-view.png` and state variants.
-- [ ] Annotate each region with its requirement ID(s).
+- [x] Low-fi wireframe added: `../assets/mockups/exploration-view.svg`.
+- [ ] Add dedicated state-variant sheets (loading, empty, error).
+- [x] Annotate regions with requirement IDs (in the wireframe).
 - [x] Time-control granularity resolved (OQ-030): stepped by geological stage,
       age displayed in Ma.
