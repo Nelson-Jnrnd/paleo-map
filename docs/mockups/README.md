@@ -9,6 +9,11 @@ decisions beyond what the
 [functional specification](../product/functional-specification.md) states. They
 describe *what must be present*, not a final visual design.
 
+> **All UI work is binding on [`design-guidelines.md`](design-guidelines.md)** —
+> the product's design charter (uncertainty first, domain language, one accent +
+> a meaning-only status system, all real states designed). Read it before
+> designing or building any screen.
+
 ## Where mockups go
 
 - Documentation page per screen: `docs/mockups/<screen>.md` (this folder).

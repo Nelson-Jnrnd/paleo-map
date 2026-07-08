@@ -30,6 +30,7 @@ fossil evidence. Other Mesozoic reptiles are secondary content. See
 | Acceptance criteria | [`requirements/acceptance-criteria.md`](requirements/acceptance-criteria.md) |
 | UML diagrams (pages + conventions) | [`uml/README.md`](uml/README.md) |
 | UI mockups (pages + conventions) | [`mockups/README.md`](mockups/README.md) |
+| **UI design charter (binding on all UI work)** | [`mockups/design-guidelines.md`](mockups/design-guidelines.md) |
 | Diagram / mockup binary assets | [`assets/`](assets/) |
 
 ## Where to add UML diagrams
