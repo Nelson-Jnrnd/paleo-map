@@ -1,9 +1,9 @@
 # Screen: Exploration View
 
-> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
-> [README](README.md).
+> Mockup page. Status: **High-fidelity mockup**. Convention: see
+> [README](README.md); visual system in [design-guidelines.md](design-guidelines.md).
 
-![Wireframe of the exploration view — map, time control and filters](../assets/mockups/exploration-view.svg)
+![Mockup of the exploration view — map, time control and filters](../assets/mockups/exploration-view.svg)
 
 The main screen: a paleogeographic map with a time control and filters, plus
 persistent context (selected age, selected group, result count). This is the hub
@@ -58,8 +58,8 @@ FONC-300, CONS-450, PERF-010, PERF-020, PERF-080…PERF-120, PERF-220, PERF-230.
 
 ## TODO
 
-- [x] Low-fi wireframe added: `../assets/mockups/exploration-view.svg`.
+- [x] High-fidelity mockup added: `../assets/mockups/exploration-view.svg`.
 - [ ] Add dedicated state-variant sheets (loading, empty, error).
-- [x] Annotate regions with requirement IDs (in the wireframe).
+- [x] Annotate regions with requirement IDs (in the mockup).
 - [x] Time-control granularity resolved (OQ-030): stepped by geological stage,
       age displayed in Ma.

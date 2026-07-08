@@ -1,9 +1,9 @@
 # Screen: Occurrence Panel
 
-> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
-> [README](README.md).
+> Mockup page. Status: **High-fidelity mockup**. Convention: see
+> [README](README.md); visual system in [design-guidelines.md](design-guidelines.md).
 
-![Wireframe of the fossil occurrence panel](../assets/mockups/occurrence-panel.svg)
+![Mockup of the fossil occurrence panel, docked over the map](../assets/mockups/occurrence-panel.svg)
 
 The information panel shown when a fossil occurrence is selected on the map. It
 summarizes the occurrence and links to the full taxon profile — while making
@@ -46,6 +46,6 @@ CONS-130, CONS-140.
 
 ## TODO
 
-- [x] Low-fi wireframe added: `../assets/mockups/occurrence-panel.svg`.
+- [x] High-fidelity mockup added: `../assets/mockups/occurrence-panel.svg`.
 - [ ] Show the panel both as a map overlay and (if applicable) docked layout.
-- [x] Annotate regions with requirement IDs (in the wireframe).
+- [x] Annotate regions with requirement IDs (in the mockup).

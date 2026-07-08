@@ -15,9 +15,12 @@ link these images live under [`../../mockups/`](../../mockups/).
 
 - Naming: lowercase, hyphen-separated; append a state suffix for variants (see
   [`../../mockups/README.md`](../../mockups/README.md)).
-- Palette (shared across sheets): paper `#f6f5f2`, ink `#2b2b28`, stone lines
-  `#b8b4aa`/`#d8d5cd`, ochre accent `#b07a35` (active/selected), brick `#a3453b`
-  (semantic — error states), survey-slate `#5f7891` (requirement-ID annotations).
+- Palette (shared across sheets — dark deep-time cartographic, see
+  [`../../mockups/design-guidelines.md`](../../mockups/design-guidelines.md) §4):
+  ocean ground `#0f1720`, panels `#16202b`, land `#26313f`, text `#e8eef4`, one
+  teal accent `#35c2a3` (occurrence/data + interaction), ICS period colours on
+  the timeline (Triassic `#8E5AA5`, Jurassic `#3E93C6`, Cretaceous `#5FA96A`),
+  red `#e5675c` for error states only.
 
 ## Files
 
@@ -36,7 +39,7 @@ link these images live under [`../../mockups/`](../../mockups/).
 | `taxon-profile-error.svg` | [Taxon profile](../../mockups/taxon-profile.md) | ⬜ TODO |
 | `search-empty.svg` | [Empty & error states](../../mockups/empty-error-states.md) | ⬜ TODO |
 
-> The five MVP screens are drafted as low-fidelity wireframes. When adding an
+> The five MVP screens are high-fidelity mockups. When adding an
 > image, embed it on its screen page and annotate which requirement each region
 > satisfies. State-variant sheets remain to be produced; several states are
 > already illustrated within the drafted screens (e.g. empty/error states are

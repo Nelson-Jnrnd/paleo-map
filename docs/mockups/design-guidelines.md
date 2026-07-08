@@ -62,43 +62,63 @@ Use the vocabulary of paleontology and stratigraphy, and the terms defined in th
 
 ## 4. Visual system
 
-Restrained, and derived from the subject — a geological survey sheet, not an AI
-startup.
+Restrained, and derived from the subject — a **deep-time cartographic console**
+(what real paleogeographic / deep-time GIS tools look like: GPlates, Macrostrat),
+not a warm-paper document and not an AI startup. Deliberately *not* the
+over-used warm-cream-and-graphite look; the ground is a dark bathymetric ocean so
+the map and its data read as the primary object.
 
-**Palette (one accent + a semantic status system).**
+**Palette (one accent + a meaning-only status system).** Dark is the default
+theme; a light theme must be provided with equal care via tokens.
 
-| Token | Value (light) | Use |
+| Token | Value (dark) | Use |
 | --- | --- | --- |
-| Paper / ground | `#f6f5f2` | Page and sheet background |
-| Ink | `#2b2b28` | Primary text |
-| Muted / faint | `#6f6b62` / `#a29d92` | Secondary text, captions |
-| Line | `#d8d5cd` / `#b8b4aa` | Borders, dividers, controls |
-| **Accent — ochre** | `#b07a35` | The single accent: active/selected state, primary action, current age |
+| Ocean / ground | `#0f1720` (radial `#132231`→`#0c141c`) | Page and map background |
+| Panel / surface | `#16202b` / `#131b24` | Sidebars, panels, control bars |
+| Land | `#26313f`, coast `#3c4e62` | Reconstructed continental masses |
+| Graticule / line | `#1a2836` / `#27343f` | Map grid, borders, dividers |
+| Text | `#e8eef4` hi · `#cdd6df` · `#8a97a6` muted · `#5f6b78` faint | Type ramp |
+| **Accent — teal** | `#35c2a3` (bright `#7fe9d0`, ink `#06231d`) | The single accent: the occurrence/data layer, selection, primary action, current-age handle |
 
-The accent is ochre (sediment / amber), and it is the *only* decorative color.
-Everything else is neutral. Because provenance is core to this product, a small
-**semantic status system** is allowed *in addition* to the accent — but it
-encodes meaning, never decoration:
+Teal is the *only* accent, and it belongs to the data + interaction layer
+(occurrence markers, the selected point, primary buttons, the time handle).
+Everything else is cool neutral. Two additional colour systems exist, both
+**meaning-only, never decorative**:
+
+- **ICS period colours** on the geological timeline — the real International
+  Chronostratigraphic Chart hues: **Triassic** violet `#8E5AA5`, **Jurassic**
+  blue `#3E93C6`, **Cretaceous** green `#5FA96A`. A period filter dot uses the
+  same hue so the mapping is learnable. These are domain codes, not styling.
+- **Provenance / status cues** — kept neutral so the accent stays singular:
 
 | Status | Cue | Meaning |
 | --- | --- | --- |
-| Reconstructed | ▲ + ochre-tint chip | Paleogeographic position is modeled, not observed |
-| Approximate | ≈ + ochre-tint chip | Time range is uncertain / broad |
+| Reconstructed | ▲ + neutral chip | Paleogeographic position is modeled, not observed |
+| Approximate | ≈ + neutral chip | Time range is uncertain / broad |
 | Interpretative | muted, separated block | Inferred, not fossil-derived |
+| Incomplete / attention | muted amber `#c9a24a`, sparing | Profile is partial (a "note", not an error) |
 | Missing | explicit "Not available" label | Field has no sourced value |
-| Error | brick `#a3453b`, sparing | Load failure only — never used decoratively |
+| Error | red `#e5675c`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
 
-Design **both light and dark themes** with equal care; drive everything through
-tokens.
+**Typography.** Three roles, chosen to avoid the generic system-sans default:
 
-**Typography.** A clean sans for UI text; a monospace for IDs, coordinates, and
-Ma values (a drafting convention, and it gives `tabular-nums` alignment for
-numbers and ages). Set a type scale and hold to it; give running text room.
+- **Serif** — `'Spectral','Source Serif 4','Charter','Georgia',serif` for
+  headings and *scientific names* (italic). Gives the atlas a natural-history,
+  field-guide voice.
+- **Sans (UI)** — `'IBM Plex Sans','system-ui','Segoe UI',sans-serif` for labels,
+  values, and body. Engineered, not Helvetica/Arial/Inter.
+- **Mono** — `'IBM Plex Mono','SFMono-Regular','Menlo',monospace` for Ma values,
+  coordinates, period ticks, and requirement IDs; use `tabular-nums`.
+
+(In committed SVGs the exact face depends on the viewer's installed fonts, but
+the stacks never fall back to Helvetica/Arial.)
 
 **Restraint.** No glassmorphism, glowing cards, pastel gradients, decorative
-blobs, or fake analytics. Shadows, gradients, rounded corners, and animation are
-used sparingly and only when they aid comprehension (e.g. a marker's selected
-state, a cluster expanding). Respect `prefers-reduced-motion`.
+blobs, or fake analytics. A single subtle radial on the ocean and a faint
+graticule are the only "texture", and they are cartographic, not decorative.
+Shadows, gradients, rounded corners, and animation are used sparingly and only
+when they aid comprehension (a marker's selected halo, a cluster expanding).
+Respect `prefers-reduced-motion`.
 
 ## 5. Hierarchy and actions
 
@@ -195,9 +215,11 @@ complexity.
 
 ---
 
-### Relationship to the wireframes
+### Relationship to the mockups
 
-The low-fidelity [wireframes](README.md) lock **layout and required content**.
-Any higher-fidelity design or built UI must additionally satisfy this charter —
-especially §2 (uncertainty is first-class) and §4 (one accent + a meaning-only
-status system).
+The high-fidelity [screen mockups](README.md) are the reference implementation of
+this charter — they realize §2 (uncertainty first-class), §4 (dark cartographic
+system, one teal accent, ICS period colours, neutral status cues), and §7 (all
+real states, including the disabled-group state on the filters panel). Any built
+UI must match them and this charter; where a screen has no mockup yet, design it
+to the same rules.

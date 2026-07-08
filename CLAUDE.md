@@ -85,8 +85,9 @@ Any UI work — mockups, screens, or built interface — is **binding on**
 `docs/mockups/design-guidelines.md`. It defines the product's design charter:
 uncertainty and provenance are first-class and always legible (never hidden
 behind a hover or secondary click); domain language only (taxa, occurrences, Ma,
-formations — never "Insights/Engagement"); one ochre accent plus a
-meaning-only status system; restraint over decoration; and all real states
+formations — never "Insights/Engagement"); a dark deep-time cartographic system
+with one teal accent plus a meaning-only status system (incl. ICS period
+colours); restraint over decoration; and all real states
 (loading, empty, minimal, error, disabled) designed, not just the happy path.
 Read it before designing or implementing any UI. These are design conventions,
 not product requirements — requirements still live only in the functional

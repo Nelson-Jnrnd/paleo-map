@@ -1,9 +1,9 @@
 # Screen: Taxon Profile
 
-> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
-> [README](README.md).
+> Mockup page. Status: **High-fidelity mockup**. Convention: see
+> [README](README.md); visual system in [design-guidelines.md](design-guidelines.md).
 
-![Wireframe of a taxon profile](../assets/mockups/taxon-profile.svg)
+![Mockup of a taxon profile](../assets/mockups/taxon-profile.svg)
 
 The profile of a single taxon, reached from an occurrence or a search result.
 Must present classification, time range, occurrences, and sources — and clearly
@@ -43,10 +43,10 @@ FONC-1240, PERF-160, PERF-170, PERF-180, PERF-190.
   Variant: `taxon-profile-loading.svg` (TODO).
 - **Minimal-data state** — profile exists but is incomplete/minimal; explicit
   message (FONC-1300, FONC-480). Illustrated by the "Incomplete profile" flag and
-  labeled missing field in the drafted wireframe; dedicated variant
+  labeled missing field in the mockup; dedicated variant
   `taxon-profile-minimal.svg` (TODO).
 - **Image fallback state** — no image available; show an alternative state
-  (FONC-1240). Shown in the drafted wireframe (Illustration block); dedicated
+  (FONC-1240). Shown in the mockup (Illustration block); dedicated
   variant `taxon-profile-no-image.svg` (TODO).
 - **Error state** — profile fails to load; clear error + retry, filters preserved
   (FONC-1320, FONC-1330, FONC-1340). See
@@ -60,7 +60,7 @@ FONC-1240, PERF-160, PERF-170, PERF-180, PERF-190.
 
 ## TODO
 
-- [x] Low-fi wireframe added: `../assets/mockups/taxon-profile.svg`.
+- [x] High-fidelity mockup added: `../assets/mockups/taxon-profile.svg`.
 - [ ] Add dedicated state-variant sheets (loading, minimal, no-image, error).
 - [x] Show where V1 enrichment (diet, size, image, related taxa) will slot in.
-- [x] Annotate regions with requirement IDs (in the wireframe).
+- [x] Annotate regions with requirement IDs (in the mockup).

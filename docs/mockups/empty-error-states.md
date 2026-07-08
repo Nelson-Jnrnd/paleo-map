@@ -1,9 +1,9 @@
 # Screens: Empty & Error States
 
-> Mockup page. Status: **Drafted (low-fi wireframe)**. Convention: see
-> [README](README.md).
+> Mockup page. Status: **High-fidelity mockup**. Convention: see
+> [README](README.md); visual system in [design-guidelines.md](design-guidelines.md).
 
-![Wireframe of the empty and error states](../assets/mockups/empty-error-states.svg)
+![Mockup of the empty and error states](../assets/mockups/empty-error-states.svg)
 
 A shared catalog of the empty and error states required across screens. Each state
 records its **trigger**, what the **user sees**, and the **recovery** action. The
@@ -77,7 +77,7 @@ FONC-1340, PERF-280, PERF-290, PERF-300, PERF-310, PERF-320, PERF-330.
 
 ## TODO
 
-- [x] Low-fi wireframe added: `../assets/mockups/empty-error-states.svg`
+- [x] High-fidelity mockup added: `../assets/mockups/empty-error-states.svg`
       (four states: filtered-empty, search-empty, map error, profile error).
 - [ ] Confirm retry affordance placement per screen.
-- [x] Annotate each state with its requirement ID(s) (in the wireframe).
+- [x] Annotate each state with its requirement ID(s) (in the mockup).

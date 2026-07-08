@@ -22,14 +22,15 @@ describe *what must be present*, not a final visual design.
 
 ## Format: SVG
 
-Mockups are authored as **SVG** wireframes. SVG renders inline in GitHub Markdown
-(so it shows directly on the screen pages and in the spec), stays diff-friendly in
-version control, and needs no build step. Each SVG carries its own paper
-background so it reads as an intentional "sheet" in both GitHub light and dark
-themes.
+Mockups are authored as **high-fidelity SVG** in the
+[design charter](design-guidelines.md)'s dark deep-time cartographic system. SVG
+renders inline in GitHub Markdown (so it shows directly on the screen pages and in
+the spec), stays diff-friendly in version control, and needs no build step. Each
+SVG carries its own dark ocean background so it reads as an intentional app
+surface regardless of the viewer's GitHub theme.
 
 A headless-Chromium PNG render can be produced for previews/exports, but the SVG
-is the source of truth. (The first MVP set was drafted with Claude Code and also
+is the source of truth. (The MVP set was designed with Claude Code and also
 published as a combined [Artifact](https://claude.ai/) for visual review.)
 
 ## Naming convention
@@ -67,9 +68,9 @@ record: the trigger, what the user sees, and the recovery action. See
 
 ## Status
 
-The five MVP screens are **drafted** as low-fidelity SVG wireframes and embedded
-on their screen pages: exploration view, taxon profile, occurrence panel, filters
-panel, and empty/error states. Per-state variant sheets (loading, minimal-data,
-no-image, etc.) listed in the [screens index](screens-index.md) are still TODO,
-as are the non-MVP screens (formation profile, timeline, comparison, guided
-paths).
+The five MVP screens are **high-fidelity mockups** in the dark deep-time
+cartographic system, embedded on their screen pages: exploration view, taxon
+profile, occurrence panel, filters panel, and empty/error states. Per-state
+variant sheets (loading, minimal-data, no-image, etc.) listed in the
+[screens index](screens-index.md) are still TODO, as are the non-MVP screens
+(formation profile, timeline, comparison, guided paths).
