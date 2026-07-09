@@ -1,8 +1,10 @@
 # Data architecture & model (design)
 
-**Status:** Technical design document. This is **not** a source of product
-requirements — those live only in the
-[functional specification](../product/functional-specification.md). This document
+**Status:** Technical design document — the elaboration behind the **approved**
+[`SPEC-001: Data architecture & model`](../specs/approved/SPEC-001-data-architecture.md).
+This is **not** a source of product requirements — those live only in the
+[functional specification](../product/functional-specification.md); the governed
+data requirements (DATA-001…, NFR-001) live in SPEC-001. This document
 records *how* the data behind the atlas is sourced, structured, and served so that
 the requirements (especially the provenance and uncertainty rules of §1.11 and
 §2.x) are satisfied **structurally** rather than by convention.

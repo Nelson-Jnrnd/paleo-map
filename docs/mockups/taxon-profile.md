@@ -29,25 +29,38 @@ FONC-1240, PERF-160, PERF-170, PERF-180, PERF-190.
 - **Modern discovery locations** — present-day discovery sites (FONC-570).
 - **Paleogeographic positions** — reconstructed positions, marked as reconstructed
   (FONC-580, FONC-1130).
-- **Sources** — sources for the main information (FONC-590, FONC-1090).
+- **Editorial summary** — narrative for Detailed/Featured taxa (FONC-640), sourced
+  and attributed; in the mockup it is a Wikipedia (tertiary) summary carrying
+  CC BY-SA attribution.
+- **Illustration** — a typed, credited, licensed image (FONC-1190, FONC-1200,
+  FONC-1210) marked artistic (FONC-1220); the mockup shows an artistic
+  reconstruction credited to Wikimedia Commons.
+- **Sources** — sources for the main information (FONC-590, FONC-1090), with source
+  **kind** distinguished (Database / Primary / Encyclopedic — CONS-420).
 - **Content level & interpretative markers** — content-level indicator (FONC-430);
-  interpretative data marked distinct from fossil-derived data (FONC-670).
+  interpretative data (diet, size…) shown **with its source** and marked distinct
+  from fossil-derived data (FONC-670). Validity is shown as a **sourced opinion**
+  ("valid / nomen dubium, per …" — FONC-720), demonstrating the
+  [data model](../design/data-model.md).
 - **Missing-data labels** — unavailable fields shown with explicit labels, never
   blank (FONC-490, FONC-1120, PERF-180).
 - **Return to map** — a single-action way back to the map, preserving state
   (FONC-1000, FONC-1080).
+
+> The mockup depicts a **Detailed profile** so it can exercise the data model:
+> Wikipedia-sourced summary, a credited/licensed image, opinion-based validity
+> (incl. a `nomen dubium` synonym), and sourced biology with one explicit-missing
+> field. The Occurrence-only / Short / minimal variants are simpler subsets.
 
 ## States to document
 
 - **Loading state** — when profile data is not already available (FONC-1270).
   Variant: `taxon-profile-loading.svg` (TODO).
 - **Minimal-data state** — profile exists but is incomplete/minimal; explicit
-  message (FONC-1300, FONC-480). Illustrated by the "Incomplete profile" flag and
-  labeled missing field in the mockup; dedicated variant
-  `taxon-profile-minimal.svg` (TODO).
+  message (FONC-1300, FONC-480). Dedicated variant `taxon-profile-minimal.svg`
+  (TODO).
 - **Image fallback state** — no image available; show an alternative state
-  (FONC-1240). Shown in the mockup (Illustration block); dedicated
-  variant `taxon-profile-no-image.svg` (TODO).
+  (FONC-1240). Dedicated variant `taxon-profile-no-image.svg` (TODO).
 - **Error state** — profile fails to load; clear error + retry, filters preserved
   (FONC-1320, FONC-1330, FONC-1340). See
   [empty & error states](empty-error-states.md).
