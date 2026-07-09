@@ -6,10 +6,15 @@
 > requirements.
 
 **Purpose.** Give every requirement a forward path to a screen, a UML diagram,
-and an acceptance criterion. Diagram names are **placeholders** until the source
-files exist (see [`../uml/README.md`](../uml/README.md)). Acceptance criteria
-IDs point to [`acceptance-criteria.md`](acceptance-criteria.md); `TBD` marks
-criteria not yet written (V1/V2).
+and an acceptance criterion. Acceptance criteria IDs point to
+[`acceptance-criteria.md`](acceptance-criteria.md); `TBD` marks criteria not yet
+written (V1/V2).
+
+**Diagram names** below refer to the now-live diagrams: behavioural diagrams (use
+case / activity / state / sequence) are in [`../uml/`](../uml/); "Domain model"
+and other class models are the typed class models in the
+[data architecture design](../design/data-model.md). All are also rendered
+in-place in the [specification PDF](../Interactive-Mesozoic-Dinosaur-Atlas-Specification.pdf).
 
 **Status legend:** `Draft` — mapped, not yet verified. Update to
 `Specified` / `Designed` / `Verified` as artifacts are produced.

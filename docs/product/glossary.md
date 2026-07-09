@@ -46,3 +46,7 @@ and are defined here for convenience. They do not extend the product scope.
 | Source | An identifiable origin for data; may be a primary source, a database, or an editorial synthesis (CONS-390, CONS-420). |
 | Fossil fact / estimate / hypothesis | The three evidence categories the system must distinguish (CONS-290). |
 | CSS px | A CSS reference pixel, the unit used for readability and interactive-area thresholds (PERF-080, PERF-120). |
+| Assertion | A claim about something (e.g. validity, diet, mass) made *by a source at a date*, rather than an intrinsic attribute. The data model reifies these so each carries its provenance (see [data-model](../design/data-model.md)). |
+| Taxonomic opinion | An assertion about a taxon name's nomenclatural status by a reference; the accepted validity is *derived* from the set of opinions, not stored as a fixed value. |
+| Provenance | The source (and source chain) behind a displayed value. Kinds: primary literature, database, encyclopedic (tertiary), editorial (CONS-420). |
+| Derived flag | A display marker (*reconstructed*, *approximate*, *interpretative*, *missing*) computed from data structure rather than stored — see [data-model](../design/data-model.md). |

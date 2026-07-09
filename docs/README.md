@@ -32,6 +32,8 @@ fossil evidence. Other Mesozoic reptiles are secondary content. See
 | UI mockups (pages + conventions) | [`mockups/README.md`](mockups/README.md) |
 | **UI design charter (binding on all UI work)** | [`mockups/design-guidelines.md`](mockups/design-guidelines.md) |
 | Data architecture & model (technical design) | [`design/data-model.md`](design/data-model.md) |
+| **Full specification as one PDF** (spec + UML + UI + design) | [`Interactive-Mesozoic-Dinosaur-Atlas-Specification.pdf`](Interactive-Mesozoic-Dinosaur-Atlas-Specification.pdf) |
+| PDF build (regenerates the above from these docs) | [`../tools/spec-pdf/`](../tools/spec-pdf/) |
 | Diagram / mockup binary assets | [`assets/`](assets/) |
 
 ## Where to add UML diagrams

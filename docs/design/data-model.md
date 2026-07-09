@@ -435,6 +435,85 @@ classDiagram
 
 ---
 
+## 8b. Application & view model
+
+The runtime/view layer that the interface composes. These enums (`ViewState`,
+`FilterKind`, `SelectionKind`) *are* intrinsic — a view genuinely is one of
+loading/loaded/empty/error — unlike the data-layer classifications above.
+
+```mermaid
+classDiagram
+  direction LR
+  class ExplorationView{
+    +Boolean controlsVisible
+  }
+  class MapView{
+    +ZoomLevel zoom
+    +GeoBounds viewport
+  }
+  class TimeControl{
+    +Age selectedAge
+  }
+  class FilterPanel{
+    +Boolean open
+  }
+  class FilterSet{
+    +Integer activeCount
+  }
+  class Filter{
+    +FilterKind kind
+    +String value
+    +Boolean removable
+  }
+  class SearchBox{
+    +String query
+  }
+  class ResultSet{
+    +Integer visibleCount
+  }
+  class Selection{
+    +SelectionKind kind
+  }
+  class NavigationContext{
+    +Age preservedAge
+    +Boolean filtersPreserved
+  }
+  class ViewState{
+    <<enumeration>>
+    Loading
+    Loaded
+    Empty
+    Error
+  }
+  class FilterKind{
+    <<enumeration>>
+    Period
+    TaxonomicGroup
+    DinosaursOnly
+  }
+  class SelectionKind{
+    <<enumeration>>
+    Occurrence
+    Cluster
+    Taxon
+  }
+  ExplorationView "1" *-- "1" MapView : composes
+  ExplorationView "1" *-- "1" TimeControl : composes
+  ExplorationView "1" *-- "1" FilterPanel : composes
+  ExplorationView "1" *-- "1" SearchBox : composes
+  ExplorationView "1" *-- "1" ResultSet : composes
+  ExplorationView "1" *-- "1" NavigationContext : composes
+  ExplorationView --> "1" ViewState : has
+  ExplorationView --> "0..1" Selection : current
+  FilterPanel "1" *-- "1" FilterSet : owns
+  FilterSet "1" *-- "*" Filter : composes
+  Filter --> "1" FilterKind : typed by
+  Selection --> "1" SelectionKind : typed by
+```
+
+`NavigationContext` is what preserves the selected age and active filters across
+navigation and load failures (FONC-1010/1020/1340).
+
 ## 9. Ingestion pipeline
 
 ```mermaid

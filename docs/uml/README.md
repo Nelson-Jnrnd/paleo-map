@@ -1,66 +1,46 @@
 # UML Diagrams
 
-This folder holds **diagram pages**: context, actors, expected content,
-requirement links, and TODO lists for each UML diagram. The **diagram source
-files** live separately under [`../assets/uml/`](../assets/uml/), and rendered
-images (if committed) under the same folder.
+This folder holds the project's UML diagrams as **Mermaid** embedded directly in
+Markdown, so they render inline on GitHub and stay diff-friendly. No separate
+source/export step is required.
 
-These pages introduce no requirements. Every diagram must trace back to
-requirement IDs from the
+These pages introduce no requirements. Every diagram traces back to requirement
+IDs from the
 [functional specification](../product/functional-specification.md).
 
-## Diagram convention: PlantUML
+## Where the diagrams live
 
-This project uses **PlantUML** for UML diagrams. (Mermaid is used elsewhere for
-lightweight inline sketches, but authored UML diagrams are PlantUML `.puml`
-files so they can be versioned and rendered consistently.) Choose one convention
-per diagram and do not mix.
+| Diagram kind | Page / source |
+| --- | --- |
+| Use case | [`use-case-diagram.md`](use-case-diagram.md) |
+| Activity (exploration, filters, occurrence→profile) | [`activity-diagrams.md`](activity-diagrams.md) |
+| State (map, taxon profile, filters) | [`state-diagrams.md`](state-diagrams.md) |
+| Sequence (occurrence→profile, search→map) | [`sequence-diagrams.md`](sequence-diagrams.md) |
+| Domain / data class models (typed, composition/aggregation) | [`domain-model.md`](domain-model.md) → [`../design/data-model.md`](../design/data-model.md) |
 
-- Source files: `docs/assets/uml/<name>.puml`
-- Optional rendered output committed alongside: `docs/assets/uml/<name>.svg` (or
-  `.png`).
-- Each diagram page embeds or links its source once it exists.
+The **behavioural** diagrams (use case / activity / state / sequence) are
+canonical here. The **data-layer class models** are canonical in the
+[data architecture design](../design/data-model.md); `domain-model.md` is a thin
+index into them so there is a single source of truth per diagram.
 
-## Expected diagrams
+## Convention: Mermaid
 
-| Diagram | Page | Source file (planned) |
-| --- | --- | --- |
-| Use case overview | [`use-case-diagram.md`](use-case-diagram.md) | `docs/assets/uml/use-case-overview.puml` |
-| Domain model | [`domain-model.md`](domain-model.md) | `docs/assets/uml/domain-model.puml` |
-| Activity diagrams | [`activity-diagrams.md`](activity-diagrams.md) | `docs/assets/uml/exploration-flow.puml`, `docs/assets/uml/taxon-profile-flow.puml`, and others below |
-| State diagrams | [`state-diagrams.md`](state-diagrams.md) | `docs/assets/uml/*-state.puml` |
-| Sequence diagrams | [`sequence-diagrams.md`](sequence-diagrams.md) | `docs/assets/uml/*-sequence.puml` |
-
-## Naming convention
-
-- Lowercase, hyphen-separated, descriptive: `use-case-overview.puml`,
-  `domain-model.puml`, `exploration-flow.puml`, `taxon-profile-flow.puml`,
-  `age-change-flow.puml`, `filter-application-flow.puml`,
-  `occurrence-selection-flow.puml`, `empty-state-flow.puml`.
-- State diagrams end with `-state`: `map-loading-state.puml`,
-  `taxon-profile-loading-state.puml`, `search-state.puml`, `filter-state.puml`.
-- Sequence diagrams end with `-sequence`:
-  `occurrence-to-profile-sequence.puml`, `search-to-map-sequence.puml`.
+- Diagrams are authored as ```` ```mermaid ```` fenced blocks inside these pages.
+- GitHub renders them inline; the specification PDF renders the **same** blocks
+  (the build reads them straight from these files — see `tools/spec-pdf/`).
+- A block that the PDF places in a specific spec section is preceded by an HTML
+  comment marker the build reads, e.g.
+  `<!-- pdf-fig: usecase | Use case diagram — Explorer and the top-level use cases -->`.
+  GitHub ignores the comment.
 
 ## How diagrams reference requirement IDs
 
-Every diagram must be traceable to the specification:
-
-1. The diagram **page** lists the related requirement IDs (`FONC-*`, `CONS-*`,
-   `PERF-*`) in a "Related requirements" section.
-2. Inside the `.puml` source, add requirement IDs as notes or comments, e.g.
-   `note right: FONC-270, FONC-280`.
-3. Keep the [traceability matrix](../requirements/requirements-traceability.md)
-   in sync — its "Related UML diagram" column names these diagrams.
+1. Each page lists the related requirement IDs (`FONC-*`, `CONS-*`, `PERF-*`).
+2. The [traceability matrix](../requirements/requirements-traceability.md) names
+   these diagrams in its "Related UML diagram" column.
 
 ## Product-facing scope
 
-Diagrams stay **product-facing**. Do not assume a backend, database, or API
-architecture that the specification has not defined — the repository currently
-contains no application code. Model user-visible behavior and domain concepts,
-not implementation internals.
-
-## Status
-
-All diagrams are **planned**. These pages define structure; the `.puml` sources
-are TODO. See each page's TODO list.
+Diagrams stay product-facing (Explorer + the interface). Data-layer models
+additionally reflect the sourcing/provenance design in
+[`../design/data-model.md`](../design/data-model.md).
