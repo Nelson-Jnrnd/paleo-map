@@ -276,7 +276,8 @@ taxon profile is two actions).
 > **Clarification (which sources).** These requirements demand an *identifiable*
 > source for every visible occurrence and time range but deliberately do **not**
 > mandate a particular provider. The concrete dataset(s) are a technical-design
-> decision made outside this specification; any provider that supplies sourced
+> decision recorded in the [data architecture design](../design/data-model.md)
+> (Paleobiology Database + Wikipedia/Wikidata); any provider that supplies sourced
 > occurrences, time ranges and reconstructions satisfies the requirements below.
 
 - **FONC-1090** [MVP] — The system must display the sources of the scientific data used.
