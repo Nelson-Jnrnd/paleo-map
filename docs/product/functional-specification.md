@@ -73,7 +73,7 @@ Requirements are marked with a priority:
 > optional (FONC-1190, "[V1] should"), but *if* an image is shown, labeling its
 > type, credit, and artistic nature is mandatory (FONC-1200–FONC-1230, "[V1]
 > must"). This note documents interpretation only; it changes no requirement
-> wording or ID. (Resolves [open question OQ-020](open-questions.md#oq-020--must-verb-combined-with-v1--v2-priority).)
+> wording or ID.
 
 ### 0.3 Glossary
 
@@ -106,6 +106,16 @@ estimated mass or assumed behavior.
 
 **Sourced data**: information linked to an identifiable source.
 
+**Geological stage**: a subdivision of a geological period in the International
+Chronostratigraphic Chart. The time control's selectable resolution is the
+geological stage (see §1.2).
+
+**Action**: one primary user interaction that causes a navigation or state
+transition — a click/tap or its keyboard equivalent. Hover, scroll, zoom and pan
+are not counted. This is the unit used by the navigation limits in FONC-1070 /
+FONC-1080 and CONS-460 / CONS-470 (for example, occurrence → occurrence panel →
+taxon profile is two actions).
+
 ---
 
 ## 1. Features
@@ -122,6 +132,13 @@ estimated mass or assumed behavior.
 - **FONC-080** [MVP] — The system must allow the active filters to be reset from the main exploration view.
 
 ### 1.2 Time exploration
+
+> **Clarification (time control resolution).** The selected age is chosen in
+> discrete steps at **geological-stage** boundaries and is displayed in Ma;
+> quick selection of a whole period (FONC-190) is a shortcut over the same
+> control. This fixes how FONC-120 and FONC-170 behave and how the overlap
+> between the selected age and a known time range (FONC-150 / FONC-160) is
+> evaluated. A continuous, sub-stage age selector is out of scope.
 
 - **FONC-090** [MVP] — The system must allow exploration of the interval between 252 Ma and 66 Ma.
 - **FONC-100** [MVP] — The system must divide the main time interval into three periods: Triassic, Jurassic and Cretaceous.
@@ -153,6 +170,12 @@ estimated mass or assumed behavior.
 - **FONC-330** [V2] — The system should allow the map transition between two geological ages to be animated.
 
 ### 1.4 Scope of represented groups
+
+> **Clarification (MVP data scope).** The MVP data set contains **non-avian
+> dinosaurs only**; secondary Mesozoic reptile groups (FONC-380 / FONC-390) are
+> introduced in V1. The main-vs-secondary distinction (FONC-360 / FONC-410) is
+> therefore present in the MVP as labelling machinery applied to dinosaur content;
+> it is not satisfied by shipping any secondary taxa in the MVP.
 
 - **FONC-340** [MVP] — The system must treat non-avian dinosaurs as the main content.
 - **FONC-350** [MVP] — The system must allow only non-avian dinosaurs to be displayed.
@@ -249,6 +272,12 @@ estimated mass or assumed behavior.
 - **FONC-1080** [MVP] — The system must allow the user to return to the map in a maximum of 1 action from a taxon profile.
 
 ### 1.11 Sources, provenance and uncertainty
+
+> **Clarification (which sources).** These requirements demand an *identifiable*
+> source for every visible occurrence and time range but deliberately do **not**
+> mandate a particular provider. The concrete dataset(s) are a technical-design
+> decision made outside this specification; any provider that supplies sourced
+> occurrences, time ranges and reconstructions satisfies the requirements below.
 
 - **FONC-1090** [MVP] — The system must display the sources of the scientific data used.
 - **FONC-1100** [MVP] — The system must display an identifiable source for each visible fossil occurrence.
@@ -461,3 +490,8 @@ The MVP does not need to include:
 8. Artistic reconstructions for all taxa.
 9. Systematic predator-prey relationships.
 10. Extrapolated distribution range maps.
+
+The map is a 2-D paleogeographic view. The **3D globe view (item 2) is an explicit
+product non-goal**, not merely a deferred feature: adding it would require a new
+(V2) requirement. The remaining items are deferred to V1 or V2 as indicated by the
+priorities in §§1–3.
