@@ -29,7 +29,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 
 | Spec ID | Title | Status | Owner | Related issue | Related PRs | Location |
 | ------- | ----- | ------ | ----- | ------------- | ----------- | -------- |
-| _(none yet)_ | | | | | | |
+| SPEC-001 | Data architecture & model | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-001-data-architecture.md`](specs/approved/SPEC-001-data-architecture.md) |
 
 > Keep this table in sync with the frontmatter of each spec. `/spec-report` and
 > `scripts/validate_drift.py` help detect drift between this index and the

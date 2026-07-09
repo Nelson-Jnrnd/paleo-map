@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 780" font-family="'IBM Plex Sans','system-ui','Segoe UI',sans-serif" role="img" aria-label="High-fidelity filters panel with a disabled-option state">
+  <style>
+    .serif{font-family:'Spectral','Source Serif 4','Charter','Georgia',serif}
+    .mono{font-family:'IBM Plex Mono','SFMono-Regular','Menlo',monospace}
+    .eyebrow{font-family:'IBM Plex Mono','SFMono-Regular',monospace;font-size:10px;letter-spacing:1.4px;fill:#6e8091}
+    .lbl{font-size:12px;fill:#5f7180}
+    .val{font-size:13px;fill:#33424f}
+    .hi{font-size:13px;fill:#1f2b38}
+    .dis{font-size:13px;fill:#93a2ad}
+    .id{font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#93a2ad}
+  </style>
+
+  <rect width="480" height="780" fill="#e9eef2"/>
+  <rect x="16" y="16" width="448" height="748" rx="12" fill="#ffffff" stroke="#cfd8de"/>
+
+  <text x="40" y="52" class="serif" font-size="18" fill="#1f2b38">Filters</text>
+  <text x="440" y="52" class="lbl" text-anchor="end">3 active</text>
+  <line x1="40" y1="66" x2="440" y2="66" stroke="#dde5ea"/>
+
+  <!-- PERIOD -->
+  <text x="40" y="92" class="eyebrow">PERIOD</text>
+  <text x="440" y="92" class="id" text-anchor="end">FONC-780</text>
+  <rect x="40" y="100" width="16" height="16" rx="4" fill="#e9eef2" stroke="#b3c1cb"/>
+  <circle cx="70" cy="108" r="4" fill="#8E5AA5"/>
+  <text x="82" y="113" class="val">Triassic <tspan class="lbl">252–201 Ma</tspan></text>
+  <rect x="40" y="126" width="16" height="16" rx="4" fill="#0f9d83"/>
+  <path d="M43 134 l3 4 l7 -8" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="70" cy="134" r="4" fill="#3E93C6"/>
+  <text x="82" y="139" class="hi" font-weight="600">Jurassic <tspan class="lbl" font-weight="400">201–145 Ma</tspan></text>
+  <rect x="40" y="152" width="16" height="16" rx="4" fill="#e9eef2" stroke="#b3c1cb"/>
+  <circle cx="70" cy="160" r="4" fill="#5FA96A"/>
+  <text x="82" y="165" class="val">Cretaceous <tspan class="lbl">145–66 Ma</tspan></text>
+
+  <line x1="40" y1="188" x2="440" y2="188" stroke="#dde5ea"/>
+
+  <!-- GROUP -->
+  <text x="40" y="214" class="eyebrow">TAXONOMIC GROUP</text>
+  <text x="440" y="214" class="id" text-anchor="end">FONC-790</text>
+  <rect x="40" y="224" width="16" height="16" rx="4" fill="#0f9d83"/>
+  <path d="M43 232 l3 4 l7 -8" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <text x="66" y="237" class="hi" font-weight="600">Theropoda</text>
+  <text x="440" y="237" class="lbl" font-size="11" text-anchor="end">47</text>
+  <rect x="40" y="250" width="16" height="16" rx="4" fill="#e9eef2" stroke="#b3c1cb"/>
+  <text x="66" y="263" class="val">Sauropodomorpha</text>
+  <text x="440" y="263" class="lbl" font-size="11" text-anchor="end">31</text>
+  <rect x="40" y="276" width="16" height="16" rx="4" fill="#e9eef2" stroke="#b3c1cb"/>
+  <text x="66" y="289" class="val">Ornithopoda</text>
+  <text x="440" y="289" class="lbl" font-size="11" text-anchor="end">12</text>
+  <rect x="40" y="302" width="16" height="16" rx="4" fill="#e9eef2" stroke="#b3c1cb"/>
+  <text x="66" y="315" class="val">Thyreophora <tspan class="lbl">(Stegosauria)</tspan></text>
+  <text x="440" y="315" class="lbl" font-size="11" text-anchor="end">9</text>
+  <!-- disabled rows: no occurrences at the selected Jurassic age -->
+  <rect x="40" y="328" width="16" height="16" rx="4" fill="#ffffff" stroke="#d3dbe0"/>
+  <text x="66" y="341" class="dis">Ceratopsia</text>
+  <text x="440" y="341" class="id" font-size="10" text-anchor="end" fill="#93a2ad">Cretaceous only</text>
+  <rect x="40" y="354" width="16" height="16" rx="4" fill="#ffffff" stroke="#d3dbe0"/>
+  <text x="66" y="367" class="dis">Pachycephalosauria</text>
+  <text x="440" y="367" class="id" font-size="10" text-anchor="end" fill="#93a2ad">Cretaceous only</text>
+  <text x="40" y="388" class="lbl" font-size="11" fill="#6e8091">2 groups have no occurrences at 150 Ma.</text>
+
+  <line x1="40" y1="406" x2="440" y2="406" stroke="#dde5ea"/>
+
+  <!-- dinosaurs only -->
+  <text x="40" y="434" class="val">Dinosaurs only</text>
+  <rect x="396" y="424" width="44" height="22" rx="11" fill="#0f9d83"/>
+  <circle cx="429" cy="435" r="8" fill="#ffffff"/>
+  <text x="40" y="454" class="lbl" font-size="11">Hides secondary Mesozoic reptiles (V1).</text>
+
+  <line x1="40" y1="474" x2="440" y2="474" stroke="#dde5ea"/>
+
+  <!-- active filters -->
+  <text x="40" y="500" class="eyebrow">ACTIVE FILTERS</text>
+  <text x="440" y="500" class="id" text-anchor="end">FONC-870</text>
+  <rect x="40" y="510" width="92" height="26" rx="13" fill="#eef2f5" stroke="#cbd6dd"/>
+  <circle cx="56" cy="523" r="4" fill="#3E93C6"/>
+  <text x="68" y="527" class="val" font-size="12">Jurassic</text>
+  <text x="120" y="527" class="lbl" font-size="12">✕</text>
+  <rect x="140" y="510" width="104" height="26" rx="13" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="156" y="527" class="val" font-size="12">Theropoda</text>
+  <text x="232" y="527" class="lbl" font-size="12">✕</text>
+  <rect x="252" y="510" width="134" height="26" rx="13" fill="#eef2f5" stroke="#cbd6dd"/>
+  <text x="268" y="527" class="val" font-size="12">Dinosaurs only</text>
+  <text x="372" y="527" class="lbl" font-size="12">✕</text>
+
+  <!-- result -->
+  <rect x="40" y="556" width="400" height="70" rx="10" fill="#ffffff" stroke="#cfd8de"/>
+  <text x="58" y="602" class="serif" font-size="32" fill="#1f2b38">47</text>
+  <text x="112" y="588" class="val">occurrences match</text>
+  <text x="112" y="606" class="lbl" font-size="11.5">of 99 Theropoda across the Jurassic</text>
+  <text x="422" y="602" class="id" text-anchor="end">FONC-060 · 850</text>
+
+  <!-- reset (secondary) -->
+  <rect x="40" y="644" width="400" height="40" rx="8" fill="none" stroke="#cbd6dd"/>
+  <text x="240" y="669" class="val" font-size="13" fill="#5f7180" text-anchor="middle">↺  Reset all filters</text>
+  <text x="440" y="710" class="id" text-anchor="end">FONC-880</text>
+
+  <text x="40" y="710" class="lbl" font-size="11" fill="#6e8091">Diet · region · completeness filters — V1</text>
+  <text x="40" y="742" class="id">FONC-800 · FONC-020 · states: active / disabled</text>
+</svg>
