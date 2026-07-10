@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-002
 title: Technology stack
-status: In Review
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: [SPEC-001]
 conflicts_with: []
-last_verified_at: 2026-07-09
+last_verified_at: 2026-07-10
 ---
 
 # SPEC-002: Technology stack
@@ -390,13 +390,16 @@ static-artifact contract (SPEC-001) is unchanged by any such swap.
 
 ## Human decisions required
 
-- [ ] Confirm **static client, no runtime backend** (REQ-001) — recommended.
-- [ ] Confirm **React + Vite** over the SvelteKit runner-up (REQ-003) — recommended.
-- [ ] Confirm **MapLibre GL JS** over the Leaflet fallback (REQ-004) — recommended.
-- [ ] Confirm **TypeScript/Node pipeline** over Python (REQ-007) — recommended.
-- [ ] Confirm **Cloudflare Pages** as the initial hosting target (REQ-011) —
-  recommended; any static CDN is acceptable.
-- [ ] Approve overall to move SPEC-002 from `In Review` to `Approved`.
+Approved by the owner (nelsonjeanrenaud@gmail.com) on **2026-07-10** — all
+recommended choices confirmed.
+
+- [x] Confirm **static client, no runtime backend** (REQ-001) — approved.
+- [x] Confirm **React + Vite** over the SvelteKit runner-up (REQ-003) — approved.
+- [x] Confirm **MapLibre GL JS** over the Leaflet fallback (REQ-004) — approved.
+- [x] Confirm **TypeScript/Node pipeline** over Python (REQ-007) — approved.
+- [x] Confirm **Cloudflare Pages** as the initial hosting target (REQ-011) —
+  approved; any static CDN is acceptable.
+- [x] Approve overall — SPEC-002 moved from `In Review` to `Approved`.
 
 ## Conflict check
 
@@ -411,25 +414,25 @@ frontmatter.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Architecture (design §2) | _TBD_ | _TBD_ | In Review |
-| REQ-002 | Language (design §8) | _TBD_ | _TBD_ | In Review |
-| REQ-003 | Framework (design §4) | _TBD_ | _TBD_ | In Review |
-| REQ-004 | Map engine (design §3) | _TBD_ | _TBD_ | In Review |
-| REQ-005 | Styling (design §7) | _TBD_ | _TBD_ | In Review |
-| REQ-006 | Data delivery (design §5) | _TBD_ | _TBD_ | In Review |
-| REQ-007 | Pipeline (design §6) | _TBD_ | _TBD_ | In Review |
-| REQ-008 | Testing (design §8) | _TBD_ | _TBD_ | In Review |
-| REQ-009 | Tooling (design §8) | _TBD_ | _TBD_ | In Review |
-| REQ-010 | CI/CD (design §8) | _TBD_ | _TBD_ | In Review |
-| REQ-011 | Hosting (design §8) | _TBD_ | _TBD_ | In Review |
-| NFR-001 | Perf budget (design §1, §10) | _TBD_ | _TBD_ | In Review |
-| NFR-002 | A11y gate (design §8) | _TBD_ | _TBD_ | In Review |
-| SEC-001 | Supply chain (design §8, §10) | _TBD_ | _TBD_ | In Review |
+| REQ-001 | Architecture (design §2) | _TBD_ | _TBD_ | Approved |
+| REQ-002 | Language (design §8) | _TBD_ | _TBD_ | Approved |
+| REQ-003 | Framework (design §4) | _TBD_ | _TBD_ | Approved |
+| REQ-004 | Map engine (design §3) | _TBD_ | _TBD_ | Approved |
+| REQ-005 | Styling (design §7) | _TBD_ | _TBD_ | Approved |
+| REQ-006 | Data delivery (design §5) | _TBD_ | _TBD_ | Approved |
+| REQ-007 | Pipeline (design §6) | _TBD_ | _TBD_ | Approved |
+| REQ-008 | Testing (design §8) | _TBD_ | _TBD_ | Approved |
+| REQ-009 | Tooling (design §8) | _TBD_ | _TBD_ | Approved |
+| REQ-010 | CI/CD (design §8) | _TBD_ | _TBD_ | Approved |
+| REQ-011 | Hosting (design §8) | _TBD_ | _TBD_ | Approved |
+| NFR-001 | Perf budget (design §1, §10) | _TBD_ | _TBD_ | Approved |
+| NFR-002 | A11y gate (design §8) | _TBD_ | _TBD_ | Approved |
+| SEC-001 | Supply chain (design §8, §10) | _TBD_ | _TBD_ | Approved |
 
 ## Implementation notes
 
-_None yet — no application code exists. Implementation may not start until this
-spec is Approved (Definition of Ready)._
+_None yet — no application code exists. The spec is now Approved and meets the
+Definition of Ready; implementation may begin against the approved scope._
 
 ## Spec amendments
 
@@ -444,7 +447,7 @@ _None._
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions resolved or explicitly deferred (deferred; listed).
+- [x] Open questions resolved or explicitly deferred (deferred; listed).
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed (`depends_on: SPEC-001`).
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner, 2026-07-10).

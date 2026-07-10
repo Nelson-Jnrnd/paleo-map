@@ -1,8 +1,8 @@
 # Technology stack — decision analysis (design)
 
 **Status:** Technical design document — the elaboration behind
-[`SPEC-002: Technology stack`](../specs/active/SPEC-002-technology-stack.md)
-(currently **In Review**). This is **not** a source of product requirements —
+[`SPEC-002: Technology stack`](../specs/approved/SPEC-002-technology-stack.md)
+(Approved). This is **not** a source of product requirements —
 those live only in the
 [functional specification](../product/functional-specification.md). It records
 *how* the atlas will be built and *why* each technical choice was made, so the
@@ -388,4 +388,4 @@ flowchart LR
 > This document names the concrete build stack; the
 > [functional specification](../product/functional-specification.md) stays
 > technology-neutral by design. The normative, verifiable form of these decisions
-> is in [SPEC-002](../specs/active/SPEC-002-technology-stack.md).
+> is in [SPEC-002](../specs/approved/SPEC-002-technology-stack.md).
