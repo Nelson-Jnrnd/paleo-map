@@ -230,7 +230,8 @@ required for the read model.
 ## Open questions
 
 - [ ] Import cadence and diffing (full re-snapshot vs incremental).
-- [ ] Which plate-rotation model to pin for paleocoordinates.
+- [x] Which plate-rotation model to pin for paleocoordinates — resolved:
+  **Scotese/PALEOMAP**, accessed model-agnostically (see AMEND-001).
 - [ ] Editorial featured-species authoring/review workflow.
 - [ ] Search index scope (scientific-name MVP; common-name via encyclopedic later).
 
@@ -238,7 +239,9 @@ required for the read model.
 
 - [x] Data sources: **PBDB + Wikipedia/Wikidata** — approved.
 - [x] Profile fields: **structured, sourced, explicit-missing** — approved.
-- [ ] Snapshot vs live: recommended **snapshot**; confirm.
+- [x] Snapshot vs live: **snapshot** — confirmed.
+- [x] Plate-rotation model: **Scotese/PALEOMAP** (`pgm=scotese`) for the MVP,
+  accessed model-agnostically — confirmed. See amendment AMEND-001.
 
 ## Conflict check
 
@@ -267,7 +270,32 @@ _None yet — no application code exists._
 
 > Required for any behavioral change after approval.
 
-_None._
+### AMEND-001: Pin the plate-rotation model for paleocoordinates
+
+- **Date:** 2026-07-10
+- **Decision by:** nelsonjeanrenaud@gmail.com
+- **Change:** Resolves the open question and human decision on paleocoordinate
+  provenance for DATA-004/DATA-005/NFR-001.
+  - The **Scotese/PALEOMAP** rotation model is pinned for the MVP, requested from
+    PBDB via `pgm=scotese`, so occurrence paleocoordinates and the reconstructed
+    basemap share one model. This scope is Mesozoic-focused (dinosaur taxa), which
+    the model covers in full; deep-Paleozoic coverage is out of scope.
+  - Paleocoordinates are **not** computed by the atlas; PBDB computes them and the
+    snapshot records them. The **model identifier and version** are stored in the
+    L1 snapshot metadata alongside `retrievedOn`, so the paleocoordinates remain
+    attributable and reproducible (satisfies NFR-001; the evolving bare `gplates`
+    default is not used).
+  - The rotation model is accessed **model-agnostically**: the model is a
+    single configured parameter of the ingestion run and a recorded field in
+    snapshot metadata, never hard-coded into derivation logic or the read model.
+    Re-ingesting under a different model changes configuration and data, not the
+    schema or application code.
+- **Rationale:** Effort, chance of success, usability, and (within the Mesozoic)
+  quality of results all favour Scotese/PALEOMAP; its pre-rendered PaleoDEM basemap
+  also matches the design charter's bathymetric-chart aesthetic.
+- **Impact:** No new requirement ID; refines the acceptance evidence for DATA-004
+  (paleocoordinate source), DATA-005 (snapshot metadata), and NFR-001
+  (reproducible, model-pinned paleocoordinates).
 
 ## Review checklist
 
