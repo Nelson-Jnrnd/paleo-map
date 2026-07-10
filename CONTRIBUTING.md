@@ -38,6 +38,16 @@ These are standard-library Python (3.x), no dependencies.
 
 ## Build and test commands
 
-Not yet defined — there is no application code. When code is added, record the
-build/test commands here, in `CLAUDE.md`, and in a CI workflow
-(`.github/workflows/ci.yml`). Do not invent build commands.
+The data layer (SPEC-001) is TypeScript on Node ≥20, managed with pnpm and
+tested with Vitest. CI runs these in `.github/workflows/ci.yml` (separate from
+the governance workflow):
+
+```
+pnpm install         # install dev dependencies (committed lockfile)
+pnpm run typecheck   # tsc --noEmit (strict)
+pnpm test            # vitest run — the SPEC-001 verification suite
+pnpm run snapshot    # build the dated snapshot artifact from the fixture subset
+```
+
+The UI stack (React + Vite + MapLibre, SPEC-002) is not built yet; its commands
+will be added here when that increment lands.

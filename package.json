@@ -1,0 +1,26 @@
+{
+  "name": "paleo-map",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive Mesozoic Dinosaur Atlas — data layer (SPEC-001).",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "snapshot": "tsx src/pipeline/cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}
