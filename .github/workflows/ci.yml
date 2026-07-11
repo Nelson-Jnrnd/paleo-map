@@ -1,6 +1,10 @@
 name: ci
 
-# Build/typecheck/test for the data layer (SPEC-001, SPEC-002 REQ-007/008/010).
+# Build/typecheck/test for the data layer (SPEC-001) and the UI vertical slice
+# (SPEC-002 REQ-007/008/010, SPEC-003). Type-check, unit + UI component/scenario
+# tests, and a static production build (SPEC-003 NFR-001). The Playwright browser
+# E2E/a11y gate is a recorded follow-up (SPEC-003 assumption A-3) and runs via
+# `pnpm run e2e` outside required CI.
 # The governance workflow remains separate (docs/spec checks).
 
 on:
@@ -31,5 +35,8 @@ jobs:
       - name: Type-check
         run: pnpm run typecheck
 
-      - name: Unit / integration tests
+      - name: Unit / integration / UI tests
         run: pnpm test
+
+      - name: Static production build
+        run: pnpm run build
