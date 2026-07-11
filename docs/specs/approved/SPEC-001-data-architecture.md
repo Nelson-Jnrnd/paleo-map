@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-001
 title: Data architecture & model
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: []
 conflicts_with: []
-last_verified_at: 2026-07-09
+last_verified_at: 2026-07-11
 ---
 
 # SPEC-001: Data architecture & model
@@ -81,7 +81,8 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** No occurrence, time range, or profile field can be
   serialized to the app store without a resolvable source reference.
 - **Verification method:** automated schema/constraint check on the app store.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/pipeline/validate.ts` (`validateReadModel`),
+  `test/data-001-provenance-constraint.test.ts`.
 
 ### DATA-002: Validity and biology are sourced assertions
 
@@ -94,7 +95,9 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** A taxon's validity renders as `status + "per <source>"`;
   changing the winning opinion changes the displayed status.
 - **Verification method:** unit test over opinion sets; UI inspection.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/domain/taxonomy.ts` (`acceptedOpinion`),
+  `src/pipeline/derive.ts`, `test/data-002-validity-assertions.test.ts`. UI
+  inspection pending the profile UI increment.
 
 ### DATA-003: Uncertainty flags are derived, not stored
 
@@ -106,7 +109,10 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** Toggling nothing, the flags follow the underlying data;
   there is no writable column for them.
 - **Verification method:** unit tests on the derivation functions.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/domain/provenance.ts` (`deriveProvenanceView`),
+  `src/domain/timescale.ts` (`spansMultipleStages`),
+  `test/data-003-derived-flags.test.ts`. The flags exist only under a
+  computed `provenance` view — there is no writable column.
 
 ### DATA-004: Sources are PBDB + Wikipedia/Wikidata with a typed chain
 
@@ -120,7 +126,11 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** Encyclopedic (Wikipedia) values render marked tertiary;
   PBDB values resolve to their citing reference where present.
 - **Verification method:** integration test of the join; UI inspection.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/pipeline/ingest.ts` (Wikidata QID join, typed
+  source chain), `test/data-004-source-join.test.ts`; live adapter over PBDB +
+  Wikidata + Wikipedia/Commons in `src/pipeline/http-client.ts`,
+  `test/data-008-live-source-client.test.ts`. UI inspection pending the profile
+  UI increment.
 
 ### DATA-005: Three tiers, served from a dated snapshot
 
@@ -133,7 +143,9 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** No runtime egress to PBDB/Wikipedia; every snapshot
   carries a `retrievedOn` date surfaced in the UI where required.
 - **Verification method:** network inspection in tests; snapshot metadata check.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/read/api.ts` (reads the snapshot only),
+  `test/data-005-no-runtime-egress.test.ts` (fetch spy asserts no egress;
+  `retrievedOn` + rotation model asserted).
 
 ### DATA-006: Taxon-profile biology is typed, nullable, sourced
 
@@ -146,7 +158,10 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
   uncertainty range; an unpopulated field renders as an explicit "not available".
 - **Verification method:** unit tests; UI inspection against the taxon-profile
   mockup.
-- **Evidence location:** `docs/assets/mockups/taxon-profile.svg` (design reference).
+- **Evidence location:** `src/domain/profile.ts` (typed measurements/bounds,
+  `deriveContentLevel`), `test/data-006-profile-biology.test.ts`;
+  `docs/assets/mockups/taxon-profile.svg` (design reference; UI inspection
+  pending the profile UI increment).
 
 ### DATA-007: Media licence compliance
 
@@ -158,7 +173,11 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
   images are labelled artistic.
 - **Verification method:** automated check that every shown image has licence +
   credit; UI inspection.
-- **Evidence location:** `docs/assets/mockups/taxon-profile.svg` (design reference).
+- **Evidence location:** `src/domain/profile.ts` (`isShowable`),
+  `src/pipeline/derive.ts` (drops unlicensable images),
+  `test/data-007-media-licence.test.ts`;
+  `docs/assets/mockups/taxon-profile.svg` (design reference; UI inspection
+  pending the profile UI increment).
 
 ### NFR-001: Import date and reproducibility
 
@@ -168,7 +187,9 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Acceptance criteria:** Two builds of L2 from one L1 snapshot are byte-stable for
   derived fields.
 - **Verification method:** deterministic-rebuild test.
-- **Evidence location:** _to be filled at implementation._
+- **Evidence location:** `src/pipeline/build.ts` (canonical serialization;
+  `retrievedOn` from the snapshot, not the clock),
+  `test/nfr-001-deterministic-rebuild.test.ts`.
 
 ## Data model impact
 
@@ -203,14 +224,14 @@ carry licence + credit (DATA-007).
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| DATA-001 | No sourceless displayable value | automated | store constraint test | _TBD_ | _TBD_ |
-| DATA-002 | Validity shows "per <source>" | unit + manual | opinion-set test | _TBD_ | _TBD_ |
-| DATA-003 | Flags follow data, no stored column | unit | derivation tests | _TBD_ | _TBD_ |
-| DATA-004 | Tertiary marked; PBDB→ref | integration | join test | _TBD_ | _TBD_ |
-| DATA-005 | No runtime upstream egress | automated | network assertion | _TBD_ | _TBD_ |
-| DATA-006 | No numeric without source/range | unit + manual | profile tests vs mockup | taxon-profile.svg | _TBD_ |
-| DATA-007 | Every image has licence + credit | automated | image check | taxon-profile.svg | _TBD_ |
-| NFR-001 | Deterministic L2 rebuild | automated | rebuild test | _TBD_ | _TBD_ |
+| DATA-001 | No sourceless displayable value | automated | `pnpm test` → data-001 (4 tests, pass) | `test/data-001-provenance-constraint.test.ts`, `src/pipeline/validate.ts` | _pending_ |
+| DATA-002 | Validity shows "per <source>" | unit + manual | `pnpm test` → data-002 (3 tests, pass) | `test/data-002-validity-assertions.test.ts`, `src/domain/taxonomy.ts` | _pending_ |
+| DATA-003 | Flags follow data, no stored column | unit | `pnpm test` → data-003 (6 tests, pass) | `test/data-003-derived-flags.test.ts`, `src/domain/provenance.ts` | _pending_ |
+| DATA-004 | Tertiary marked; PBDB→ref | integration | `pnpm test` → data-004 (4 tests, pass) | `test/data-004-source-join.test.ts`, `src/pipeline/ingest.ts` | _pending_ |
+| DATA-005 | No runtime upstream egress | automated | `pnpm test` → data-005 (3 tests, fetch spy, pass) | `test/data-005-no-runtime-egress.test.ts`, `src/read/api.ts` | _pending_ |
+| DATA-006 | No numeric without source/range | unit + manual | `pnpm test` → data-006 (4 tests, pass); UI pending | `test/data-006-profile-biology.test.ts`, `src/domain/profile.ts`, taxon-profile.svg | _pending_ |
+| DATA-007 | Every image has licence + credit | automated | `pnpm test` → data-007 (3 tests, pass); UI pending | `test/data-007-media-licence.test.ts`, taxon-profile.svg | _pending_ |
+| NFR-001 | Deterministic L2 rebuild | automated | `pnpm test` → nfr-001 (3 tests, byte-equal, pass) | `test/nfr-001-deterministic-rebuild.test.ts`, `src/pipeline/build.ts` | _pending_ |
 
 ## Test plan
 
@@ -253,18 +274,67 @@ those product rules. No other spec exists to overlap with.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| DATA-001 | Provenance model (design §4) | _TBD_ | _TBD_ | Approved |
-| DATA-002 | Taxonomy model (design §5) | _TBD_ | _TBD_ | Approved |
-| DATA-003 | ProvenanceView (design §4) | _TBD_ | _TBD_ | Approved |
-| DATA-004 | Sources (design §2) | _TBD_ | _TBD_ | Approved |
-| DATA-005 | Tiers + pipeline (design §3, §9) | _TBD_ | _TBD_ | Approved |
-| DATA-006 | Profile model (design §8) | _TBD_ | _TBD_ | Approved |
-| DATA-007 | Media (design §2, §8) | _TBD_ | _TBD_ | Approved |
-| NFR-001 | Snapshot (design §9) | _TBD_ | _TBD_ | Approved |
+| DATA-001 | Provenance model (design §4) | `src/domain/provenance.ts` (`Provenanced`), `src/pipeline/validate.ts` (`validateReadModel`) | `test/data-001-provenance-constraint.test.ts` | Verified (data layer) |
+| DATA-002 | Taxonomy model (design §5) | `src/domain/taxonomy.ts` (`acceptedOpinion`), `src/pipeline/derive.ts` | `test/data-002-validity-assertions.test.ts` | Verified (data layer); UI pending |
+| DATA-003 | ProvenanceView (design §4) | `src/domain/provenance.ts` (`deriveProvenanceView`), `src/domain/timescale.ts` | `test/data-003-derived-flags.test.ts` | Verified (data layer) |
+| DATA-004 | Sources (design §2) | `src/pipeline/ingest.ts` (Wikidata join, typed chain) | `test/data-004-source-join.test.ts` | Verified (data layer); UI pending |
+| DATA-005 | Tiers + pipeline (design §3, §9) | `src/read/api.ts`, `src/pipeline/build.ts` | `test/data-005-no-runtime-egress.test.ts` | Verified (data layer) |
+| DATA-006 | Profile model (design §8) | `src/domain/profile.ts` (`deriveContentLevel`), `src/pipeline/derive.ts` | `test/data-006-profile-biology.test.ts` | Verified (data layer); UI pending |
+| DATA-007 | Media (design §2, §8) | `src/domain/profile.ts` (`isShowable`), `src/pipeline/derive.ts` | `test/data-007-media-licence.test.ts` | Verified (data layer); UI pending |
+| NFR-001 | Snapshot (design §9) | `src/pipeline/build.ts` (canonical serialize, dated snapshot) | `test/nfr-001-deterministic-rebuild.test.ts` | Verified (data layer) |
 
 ## Implementation notes
 
-_None yet — no application code exists._
+First increment (the data-layer vertical) is implemented and verified by
+automated tests:
+
+- **Scope done:** the shared TypeScript domain model (`src/domain/`), the
+  ingestion pipeline (`src/pipeline/`: ingest → Wikidata join → L1 → L2/L3
+  derive → validate → dated snapshot), and the read API (`src/read/`). A small
+  Dinosauria / Campanian–Maastrichtian subset
+  (`src/fixtures/dinosauria-maastrichtian.ts`) drives the join and derivation
+  tests. `pnpm run snapshot` builds a dated snapshot artifact under
+  `data/snapshots/` (git-ignored, reproducible). All eight requirements
+  (DATA-001…007, NFR-001) have passing verification suites (30 tests).
+- **Live ingestion increment (implemented):** the drop-in live
+  `HttpSourceClient` (`src/pipeline/http-client.ts`) now implements the same
+  `SourceClient` interface over the real upstreams — PBDB REST (`taxa`, `occs`,
+  `refs`), Wikidata SPARQL, and the MediaWiki/Wikimedia-Commons APIs — and runs
+  at **build time only** (`pnpm run snapshot -- --live`). The app read path is
+  unchanged and still never egresses (DATA-005 holds; verified by loading a live
+  snapshot through `ReadApi` with a `fetch` spy that records zero calls).
+  Paleocoordinates are requested with `pgm=scotese` (AMEND-001) and carried
+  through to the snapshot. A live run of the default scope (Dinosauria genera in
+  the Maastrichtian) captured **478 taxa, 4,187 occurrences (3,957 with Scotese
+  paleocoordinates), 1,632 typed sources, 380 Wikidata joins, 370 Wikipedia
+  summaries, and 291 licensed Commons images** — every displayed value
+  source-resolvable (DATA-001) and every shown image licence + credit bearing
+  (DATA-007). The stubbed-fetch adapter test is
+  `test/data-008-live-source-client.test.ts`.
+- **Assumption (recorded):** the fixture subset
+  (`src/fixtures/dinosauria-maastrichtian.ts`) remains the offline,
+  deterministic default path for tests; the live client is opt-in via `--live`.
+- **Assumption (recorded) — Wikidata join key:** DATA-004 keys encyclopedic
+  content on the Wikidata QID. The QID is *discovered by taxon name* (`P225`
+  restricted to taxa with an enwiki sitelink) rather than by PBDB's own `P846`
+  property, because current `P846` values on Wikidata are legacy identifiers
+  that no longer resolve in the PBDB `data1.2` API. The join still resolves to a
+  QID that keys the article, common name, and image, so the DATA-004 chain is
+  unchanged.
+- **Assumption (recorded) — live coverage:** ecospace fields (`jdt`/`jmo`/`jev`)
+  map to typed Diet/Locomotion/Habitat attributes attributed to the taxon's PBDB
+  reference; specimen-level measurements are *not* pulled in this run (they are
+  sparse upstream), so measurements remain empty by design (DATA-006 permits
+  explicit "not available"). Live Commons images default to `FossilPhoto` when
+  the type cannot be inferred.
+- **Winning-opinion rule (recorded):** accepted validity is the most recently
+  published opinion, ties broken deterministically by source id (for NFR-001
+  byte-stability). A more nuanced authority-weighted rule can supersede this via
+  a future amendment.
+- **Pending (not this increment):** UI-inspection evidence for DATA-002/004/006/
+  007 (no UI yet); spatial clustering and the full media-asset pipeline (image
+  type inference, multiple images per taxon); live specimen measurements. These
+  are separate increments and do not change the requirements verified here.
 
 ## Spec amendments
 

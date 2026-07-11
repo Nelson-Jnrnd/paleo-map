@@ -74,10 +74,21 @@ Implementation cannot start until the spec meets
 
 ## Project stack
 
-At bootstrap time this repository contains no application code, so build and
-test commands are not yet defined. When code is added, record the build/test
-commands here and in `CONTRIBUTING.md`, and wire them into
-`.github/workflows/ci.yml`. Do not invent build commands.
+TypeScript (strict) on Node ≥20, package-managed with **pnpm**; tests run on
+**Vitest** (SPEC-002 REQ-002/007/008/009). The data layer (SPEC-001) lives under
+`src/` — `domain/` is the shared model, `pipeline/` ingests a source subset into
+the dated L1/L2 snapshot, and `read/` serves L2+L3 with no upstream calls. The
+UI stack (React + Vite + MapLibre, SPEC-002 REQ-003…006) is not built yet.
+
+Build/test commands (also in `CONTRIBUTING.md`, wired into
+`.github/workflows/ci.yml`):
+
+```
+pnpm install         # install dev dependencies (committed lockfile)
+pnpm run typecheck   # tsc --noEmit (strict)
+pnpm test            # vitest run
+pnpm run snapshot    # build the dated snapshot from the fixture subset
+```
 
 ## UI design
 
