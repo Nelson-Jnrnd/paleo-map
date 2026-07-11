@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: []
 conflicts_with: []
-last_verified_at: 2026-07-10
+last_verified_at: 2026-07-11
 ---
 
 # SPEC-001: Data architecture & model
@@ -127,8 +127,10 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
   PBDB values resolve to their citing reference where present.
 - **Verification method:** integration test of the join; UI inspection.
 - **Evidence location:** `src/pipeline/ingest.ts` (Wikidata QID join, typed
-  source chain), `test/data-004-source-join.test.ts`. UI inspection pending the
-  profile UI increment.
+  source chain), `test/data-004-source-join.test.ts`; live adapter over PBDB +
+  Wikidata + Wikipedia/Commons in `src/pipeline/http-client.ts`,
+  `test/data-008-live-source-client.test.ts`. UI inspection pending the profile
+  UI increment.
 
 ### DATA-005: Three tiers, served from a dated snapshot
 
@@ -294,20 +296,45 @@ automated tests:
   tests. `pnpm run snapshot` builds a dated snapshot artifact under
   `data/snapshots/` (git-ignored, reproducible). All eight requirements
   (DATA-001…007, NFR-001) have passing verification suites (30 tests).
-- **Assumption (recorded):** upstream ingestion runs against a bundled,
-  source-shaped subset rather than a live PBDB/Wikidata call. This matches the
-  snapshot / no-live-calls model (DATA-005) and the spec's fixture-based test
-  plan; the environment's network policy also denies those hosts. A live
-  `HttpSourceClient` implementing the same `SourceClient` interface is a
-  drop-in for a future increment.
+- **Live ingestion increment (implemented):** the drop-in live
+  `HttpSourceClient` (`src/pipeline/http-client.ts`) now implements the same
+  `SourceClient` interface over the real upstreams — PBDB REST (`taxa`, `occs`,
+  `refs`), Wikidata SPARQL, and the MediaWiki/Wikimedia-Commons APIs — and runs
+  at **build time only** (`pnpm run snapshot -- --live`). The app read path is
+  unchanged and still never egresses (DATA-005 holds; verified by loading a live
+  snapshot through `ReadApi` with a `fetch` spy that records zero calls).
+  Paleocoordinates are requested with `pgm=scotese` (AMEND-001) and carried
+  through to the snapshot. A live run of the default scope (Dinosauria genera in
+  the Maastrichtian) captured **478 taxa, 4,187 occurrences (3,957 with Scotese
+  paleocoordinates), 1,632 typed sources, 380 Wikidata joins, 370 Wikipedia
+  summaries, and 291 licensed Commons images** — every displayed value
+  source-resolvable (DATA-001) and every shown image licence + credit bearing
+  (DATA-007). The stubbed-fetch adapter test is
+  `test/data-008-live-source-client.test.ts`.
+- **Assumption (recorded):** the fixture subset
+  (`src/fixtures/dinosauria-maastrichtian.ts`) remains the offline,
+  deterministic default path for tests; the live client is opt-in via `--live`.
+- **Assumption (recorded) — Wikidata join key:** DATA-004 keys encyclopedic
+  content on the Wikidata QID. The QID is *discovered by taxon name* (`P225`
+  restricted to taxa with an enwiki sitelink) rather than by PBDB's own `P846`
+  property, because current `P846` values on Wikidata are legacy identifiers
+  that no longer resolve in the PBDB `data1.2` API. The join still resolves to a
+  QID that keys the article, common name, and image, so the DATA-004 chain is
+  unchanged.
+- **Assumption (recorded) — live coverage:** ecospace fields (`jdt`/`jmo`/`jev`)
+  map to typed Diet/Locomotion/Habitat attributes attributed to the taxon's PBDB
+  reference; specimen-level measurements are *not* pulled in this run (they are
+  sparse upstream), so measurements remain empty by design (DATA-006 permits
+  explicit "not available"). Live Commons images default to `FossilPhoto` when
+  the type cannot be inferred.
 - **Winning-opinion rule (recorded):** accepted validity is the most recently
   published opinion, ties broken deterministically by source id (for NFR-001
   byte-stability). A more nuanced authority-weighted rule can supersede this via
   a future amendment.
 - **Pending (not this increment):** UI-inspection evidence for DATA-002/004/006/
-  007 (no UI yet); spatial clustering and the full media-asset pipeline; the
-  live source client. These are separate increments and do not change the
-  requirements verified here.
+  007 (no UI yet); spatial clustering and the full media-asset pipeline (image
+  type inference, multiple images per taxon); live specimen measurements. These
+  are separate increments and do not change the requirements verified here.
 
 ## Spec amendments
 
