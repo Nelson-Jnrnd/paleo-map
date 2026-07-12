@@ -16,10 +16,10 @@ test('boots from the static bundle and renders the paleogeographic map', async (
   await expect(page.getByText(/Paleogeographic reconstruction/i)).toBeVisible();
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible();
 
-  // The basemap attribution discloses the schematic coastlines + frame mismatch
-  // (SPEC-004 REQ-002/003).
-  await expect(page.getByText(/Late Cretaceous \(schematic\)/i)).toBeVisible();
-  await expect(page.getByText(/indicative only/i)).toBeVisible();
+  // The basemap attributes its source and confirms the shared reconstruction
+  // frame with the occurrences (SPEC-004 REQ-002/003).
+  await expect(page.getByText(/GPlates/i)).toBeVisible();
+  await expect(page.getByText(/same reconstruction/i)).toBeVisible();
 });
 
 test('PERF-340: occurrence → taxon profile → back to map, in a real browser', async ({ page }) => {

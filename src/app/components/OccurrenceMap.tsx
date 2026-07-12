@@ -260,7 +260,7 @@ export function OccurrenceMap({
         <div className={styles.basemapAttribution} role="note">
           <strong>{basemap.meta.name}</strong> · {basemap.meta.source} · {basemap.meta.licence}
           <br />
-          {frame.note}
+          {frame.note} {basemap.meta.note}
         </div>
       )}
     </>

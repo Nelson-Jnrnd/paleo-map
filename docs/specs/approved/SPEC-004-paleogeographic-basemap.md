@@ -250,19 +250,15 @@ graticule/ocean placeholder; occurrences and the loop are unaffected.
 
 ## Human decisions required
 
-- [x] **Coastline data source — chosen: Schematic (Option 1).** Three options
-  were prepared (schematic outline; real Scotese/PALEOMAP frame-matched data; open
-  GPlates model). The two real-data options require fetching/reconstructing
-  paleocoastlines, which the locked-down build environment cannot do, so only the
-  schematic option was deliverable. The interactive picker to confirm this failed
-  to reach the owner (tool error); implementation proceeded under the owner's
-  direction ("do the next planned step" / "continue"). The schematic geometry is
-  **clearly labeled schematic** and its frame mismatch with the Scotese occurrence
-  points is **disclosed in the UI** (REQ-002). **Recorded upgrade path (A-1'):**
-  replacing `public/basemap/late-cretaceous.*` with real, frame-matched
-  Scotese/PALEOMAP geometry (owner-supplied or built in an env with data access)
-  satisfies REQ-002 without touching app code. **Owner: please ratify or override
-  this source choice.**
+- [x] **Coastline data source — final: real GPlates PALEOMAP (Scotese) coastlines
+  (see AMEND-001).** Three options were prepared (schematic; real Scotese/PALEOMAP;
+  open GPlates model). It was *first* implemented as schematic on the mistaken
+  belief the environment couldn't fetch data; when that was challenged and
+  disproved, it was replaced with **real** reconstructed coastlines from the
+  GPlates Web Service in the **same `scotese` frame as the occurrences**, so land
+  and points align (REQ-002 matching branch). Geometry is fetched + simplified by
+  `scripts/fetch_basemap.ts` and **committed** so build/CI stay offline. **Owner:
+  ratification still invited.**
 - [x] **One reconstruction for the MVP window** — confirmed; per-stage coastlines
   deferred.
 - [x] Approved — proceeded to implementation under owner direction; status set to
@@ -288,33 +284,63 @@ new data model. No contradiction with existing specs.
 
 ## Implementation notes
 
-Implemented on branch `claude/exploration-view-ui-slice-pf0cso`.
+Implemented on branch `claude/exploration-view-ui-slice-pf0cso`. Final state per
+AMEND-001 (real data):
 
-- **Geometry:** `scripts/gen_basemap.ts` emits a schematic Late-Cretaceous
-  landmass set → `public/basemap/late-cretaceous.geojson` + `.meta.json` (written
-  by `predev`/`prebuild`). Deliberately low-detail rectangles — obviously
-  schematic, not a plate-model output.
-- **Rendering:** `src/app/components/OccurrenceMap.tsx` loads the geometry
-  (`src/app/data/basemap.ts`) and draws `land-fill` + `land-line` layers beneath
-  the occurrence markers; markers stay on top and selectable (REQ-001).
-- **Frame disclosure (REQ-002):** `describeFrame` compares the basemap model
-  (`schematic`) to the snapshot's (`scotese`) and renders an always-present
-  attribution/disclosure overlay stating positions are indicative only.
+- **Geometry:** `scripts/fetch_basemap.ts` fetches reconstructed coastlines from
+  the GPlates Web Service (PALEOMAP/Scotese model, 70 Ma), Douglas–Peucker-
+  simplifies (tol 0.3°) + rounds to 2 dp, and writes **committed**
+  `public/basemap/late-cretaceous.geojson` (315 polygons, ~29 KB gzipped) +
+  `.meta.json`. Committed so build/CI are offline and reproducible.
+- **Rendering (REQ-001):** `src/app/components/OccurrenceMap.tsx` loads the
+  geometry (`src/app/data/basemap.ts`) and draws `land-fill` + `land-line` layers
+  beneath the occurrence markers; markers stay on top and selectable.
+- **Frame match (REQ-002):** the geometry's model is `scotese`, matching the
+  snapshot; `describeFrame` confirms the shared reconstruction in the attribution
+  overlay, which also states the single-70 Ma representative age for the window.
+- **Attribution/licence (REQ-003):** overlay cites the GPlates source + model +
+  CC BY 4.0; provenance recorded in `late-cretaceous.meta.json`.
 - **Fallback (REQ-004):** `loadBasemap` resolves to null on any failure; the map
-  keeps the ocean/graticule, markers, and the loop.
-- **Verification:** unit tests `test/ui/basemap.test.ts` (5, frame + load paths);
-  E2E `test/e2e/exploration.e2e.ts` asserts the schematic attribution; a browser
-  screenshot confirms the land renders with the occurrence cluster sitting on it.
-  47 unit/component tests + 2 E2E green; `pnpm run build` within budget.
+  keeps ocean/graticule, markers, and the loop.
+- **Verification:** `test/ui/basemap.test.ts` (5, frame + load paths); E2E
+  asserts the GPlates attribution + "same reconstruction" note; a browser
+  screenshot shows real continents (Western Interior Seaway) with the occurrence
+  cluster in its Laramidian position. 47 unit/component tests + 2 E2E green;
+  `pnpm run build` within budget.
 
-**Deviation from a full basemap:** the fidelity is schematic (recorded source
-decision above). REQ-002's *matching-frame* acceptance is met by the disclosed
-mismatch path, not by frame-matched geometry; supplying real Scotese/PALEOMAP
-data (upgrade path A-1') meets the matching branch with no code change.
+The map is a **single 70 Ma reconstruction** for the whole window (per non-goals);
+per-stage coastlines remain deferred. Geometry holes (inland seas) are dropped by
+the simplifier — acceptable for a basemap.
 
 ## Spec amendments
 
-_None._
+### AMEND-001: Real GPlates PALEOMAP coastlines instead of the schematic outline
+
+- **Date:** 2026-07-12
+- **Reason:** The original source decision picked the schematic outline on the
+  belief that the build environment could not reach external data. That was
+  **wrong** — outbound HTTPS works (verified against `gws.gplates.org`,
+  `paleobiodb.org`). Real, frame-matched data (the originally-preferred Option 2)
+  is obtainable, so it replaces the schematic placeholder.
+- **Changed requirements:** REQ-001, REQ-002, REQ-003, NFR-001 — now satisfied by
+  **real** geometry: reconstructed Late-Cretaceous coastlines from the **GPlates
+  Web Service** using the **PALEOMAP (Scotese) model**, i.e. the same plate frame
+  PBDB uses for `pgm=scotese` (SPEC-001). REQ-002 is now met by the **matching-
+  frame** branch (land and points share the `scotese` reconstruction), not the
+  disclosure branch.
+- **Behavioral impact:** The map draws real continents (North America split by the
+  Western Interior Seaway, etc.); the occurrence cluster sits in its true Laramidian
+  position; the attribution states the shared reconstruction and notes the single
+  70 Ma representative age for the window. The schematic generator
+  (`scripts/gen_basemap.ts`) is removed; a fetch+simplify tool
+  (`scripts/fetch_basemap.ts`) produces committed, offline-reproducible geometry
+  simplified to ~29 KB gzipped (Douglas–Peucker, tol 0.3° — well under the NFR-001
+  budget).
+- **Test impact:** `test/e2e/exploration.e2e.ts` now asserts the GPlates source +
+  "same reconstruction" note; `test/ui/basemap.test.ts` unchanged (frame logic
+  covers both branches).
+- **Human approval reference:** Made under owner direction after the owner
+  challenged the "environment is limited" claim; owner ratification still invited.
 
 ## Review checklist
 

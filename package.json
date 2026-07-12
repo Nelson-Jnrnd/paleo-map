@@ -14,14 +14,13 @@
     "test:watch": "vitest",
     "snapshot": "tsx src/pipeline/cli.ts",
     "gen:web-data": "tsx scripts/gen_web_data.ts",
-    "gen:basemap": "tsx scripts/gen_basemap.ts",
-    "gen:web": "pnpm run gen:web-data && pnpm run gen:basemap",
-    "predev": "pnpm run gen:web",
+    "predev": "pnpm run gen:web-data",
     "dev": "vite",
-    "prebuild": "pnpm run gen:web",
+    "prebuild": "pnpm run gen:web-data",
     "build": "vite build",
     "preview": "vite preview",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "fetch:basemap": "tsx scripts/fetch_basemap.ts"
   },
   "dependencies": {
     "maplibre-gl": "^4.7.1",

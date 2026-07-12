@@ -9,7 +9,9 @@
 export interface BasemapMeta {
   name: string;
   source: string;
+  sourceUrl?: string;
   rotationModel: string;
+  model?: string;
   targetAgeMa: number;
   licence: string;
   note: string;
