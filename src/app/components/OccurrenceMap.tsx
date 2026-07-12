@@ -1,30 +1,39 @@
 /**
- * Paleogeographic occurrence map (SPEC-003 REQ-002; SPEC-002 REQ-004). MapLibre
- * GL renders a self-contained bathymetric basemap (no tiles, no token — SEC-001)
- * and the occurrences at their reconstructed paleocoordinates as a clustered
- * GeoJSON source: clusters carry a count (group) and single points a marker
- * (individual), distinguished by shape + label, not colour alone (FONC-230/240,
- * PERF-250). Zoom/pan come from the built-in controls (FONC-250/260).
+ * Paleogeographic occurrence map (SPEC-003 REQ-002; SPEC-004; SPEC-002 REQ-004).
+ * MapLibre GL renders a self-contained bathymetric basemap (no tiles, no token —
+ * SEC-001): reconstructed continental land (SPEC-004) beneath the occurrences,
+ * which are a clustered GeoJSON source at their reconstructed paleocoordinates.
+ * Clusters carry size (group) and single points a marker (individual),
+ * distinguished by shape + label, not colour alone (FONC-230/240, PERF-250).
+ * Zoom/pan come from the built-in controls (FONC-250/260).
  *
- * The map is an enhancement over the always-present accessible occurrence list
- * (charter / SPEC-002 canvas-a11y edge case): where WebGL is unavailable (e.g.
- * the jsdom test environment) it degrades to a short note and the list remains
- * the equivalent path.
+ * The basemap is schematic and does not use the occurrences' rotation frame, so
+ * the map discloses that mismatch in an always-present DOM overlay (SPEC-004
+ * REQ-002/003) — visible even where WebGL is unavailable, which is also the
+ * accessible, canvas-independent path (charter / SPEC-002 canvas-a11y edge case):
+ * where WebGL is missing the map degrades to a note and the occurrence list
+ * remains the equivalent route.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Map as MapLibreMap, GeoJSONSource, MapMouseEvent } from 'maplibre-gl';
 import type { ReadOccurrence } from '../../domain/index.js';
+import { describeFrame, loadBasemap } from '../data/basemap.js';
+import type { Basemap } from '../data/basemap.js';
 import styles from './exploration.module.css';
 
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
   selectedId: string | null;
   onSelect: (occurrenceId: string) => void;
+  /** The occurrences' pinned rotation model, for basemap frame reconciliation. */
+  occurrenceRotationModel: string;
 }
 
 const OCEAN_OUTER = '#d7e4ec';
+const LAND = '#edf1f1';
+const COAST = '#a9b9c3';
 const ACCENT = '#0f9d83';
 const ACCENT_CLUSTER = '#17a98c';
 
@@ -53,6 +62,7 @@ export function OccurrenceMap({
   occurrences,
   selectedId,
   onSelect,
+  occurrenceRotationModel,
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -60,8 +70,22 @@ export function OccurrenceMap({
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
   const [available, setAvailable] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [basemap, setBasemap] = useState<Basemap | null>(null);
 
-  // Initialise once.
+  // Load the basemap once (independent of WebGL) so its attribution/disclosure
+  // shows even when the canvas cannot render (SPEC-004 REQ-004).
+  useEffect(() => {
+    let cancelled = false;
+    void loadBasemap().then((b) => {
+      if (!cancelled) setBasemap(b);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Initialise the map once.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -96,6 +120,7 @@ export function OccurrenceMap({
         cleanup = (): void => {
           loadedRef.current = false;
           mapRef.current = null;
+          setMapLoaded(false);
           map.remove();
         };
         map.on('load', () => {
@@ -105,7 +130,7 @@ export function OccurrenceMap({
             cluster: true,
             clusterRadius: 40,
           });
-          // Group (cluster) — larger disc + count label.
+          // Group (cluster) — larger disc.
           map.addLayer({
             id: 'clusters',
             type: 'circle',
@@ -132,6 +157,7 @@ export function OccurrenceMap({
             },
           });
           loadedRef.current = true;
+          setMapLoaded(true);
 
           map.on('click', 'points', (e: MapMouseEvent & { features?: GeoJSON.Feature[] }) => {
             const id = e.features?.[0]?.properties?.['id'];
@@ -158,9 +184,32 @@ export function OccurrenceMap({
       cancelled = true;
       cleanup();
     };
-    // Initialise once; data/selection are synced by the effects below.
+    // Initialise once; data/selection/basemap are synced by the effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Add the reconstructed continental land beneath the markers once both the map
+  // and the basemap are ready (SPEC-004 REQ-001). Drawn before 'clusters' so
+  // markers stay on top and selectable.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !basemap) return;
+    if (map.getSource('basemap')) return;
+    map.addSource('basemap', { type: 'geojson', data: basemap.geojson });
+    map.addLayer(
+      { id: 'land-fill', type: 'fill', source: 'basemap', paint: { 'fill-color': LAND } },
+      'clusters',
+    );
+    map.addLayer(
+      {
+        id: 'land-line',
+        type: 'line',
+        source: 'basemap',
+        paint: { 'line-color': COAST, 'line-width': 1 },
+      },
+      'clusters',
+    );
+  }, [mapLoaded, basemap]);
 
   // Sync source data when the visible occurrences change (PERF-360).
   useEffect(() => {
@@ -188,23 +237,32 @@ export function OccurrenceMap({
     ]);
   }, [selectedId]);
 
-  if (!available) {
-    return (
-      <div className={styles.stateWrap} role="note">
-        <p>
-          The interactive map needs WebGL, which isn’t available here. Use the occurrence
-          list to explore — it carries the same occurrences, sources and uncertainty.
-        </p>
-      </div>
-    );
-  }
+  const frame = basemap ? describeFrame(basemap.meta, occurrenceRotationModel) : null;
 
   return (
-    <div
-      ref={containerRef}
-      role="application"
-      aria-label="Paleogeographic map of fossil occurrences (reconstruction)"
-      style={{ position: 'absolute', inset: 0 }}
-    />
+    <>
+      {available ? (
+        <div
+          ref={containerRef}
+          role="application"
+          aria-label="Paleogeographic map of fossil occurrences (reconstruction)"
+          style={{ position: 'absolute', inset: 0 }}
+        />
+      ) : (
+        <div className={styles.stateWrap} role="note">
+          <p>
+            The interactive map needs WebGL, which isn’t available here. Use the occurrence
+            list to explore — it carries the same occurrences, sources and uncertainty.
+          </p>
+        </div>
+      )}
+      {basemap && frame && (
+        <div className={styles.basemapAttribution} role="note">
+          <strong>{basemap.meta.name}</strong> · {basemap.meta.source} · {basemap.meta.licence}
+          <br />
+          {frame.note}
+        </div>
+      )}
+    </>
   );
 }

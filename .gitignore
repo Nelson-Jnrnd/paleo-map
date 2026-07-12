@@ -2,6 +2,7 @@ node_modules/
 dist/
 data/snapshots/
 public/data/
+public/basemap/
 test-results/
 playwright-report/
 coverage/

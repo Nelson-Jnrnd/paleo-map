@@ -15,6 +15,11 @@ test('boots from the static bundle and renders the paleogeographic map', async (
   // The map is labeled a reconstruction (FONC-300) and MapLibre renders a canvas.
   await expect(page.getByText(/Paleogeographic reconstruction/i)).toBeVisible();
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible();
+
+  // The basemap attribution discloses the schematic coastlines + frame mismatch
+  // (SPEC-004 REQ-002/003).
+  await expect(page.getByText(/Late Cretaceous \(schematic\)/i)).toBeVisible();
+  await expect(page.getByText(/indicative only/i)).toBeVisible();
 });
 
 test('PERF-340: occurrence → taxon profile → back to map, in a real browser', async ({ page }) => {

@@ -14,9 +14,11 @@
     "test:watch": "vitest",
     "snapshot": "tsx src/pipeline/cli.ts",
     "gen:web-data": "tsx scripts/gen_web_data.ts",
-    "predev": "pnpm run gen:web-data",
+    "gen:basemap": "tsx scripts/gen_basemap.ts",
+    "gen:web": "pnpm run gen:web-data && pnpm run gen:basemap",
+    "predev": "pnpm run gen:web",
     "dev": "vite",
-    "prebuild": "pnpm run gen:web-data",
+    "prebuild": "pnpm run gen:web",
     "build": "vite build",
     "preview": "vite preview",
     "e2e": "playwright test"

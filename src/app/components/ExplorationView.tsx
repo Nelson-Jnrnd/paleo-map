@@ -73,6 +73,7 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
             occurrences={occurrences}
             selectedId={state.selectedOccurrenceId}
             onSelect={(occurrenceId) => dispatch({ type: 'selectOccurrence', occurrenceId })}
+            occurrenceRotationModel={api.metadata().rotationModel}
           />
         </div>
         <aside className={styles.sidebar} aria-label="Occurrences and details">
