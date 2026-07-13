@@ -137,8 +137,18 @@ export function OccurrenceMap({
             source: 'occurrences',
             filter: ['has', 'point_count'],
             paint: {
-              'circle-color': ACCENT_CLUSTER,
-              'circle-radius': 16,
+              // Deepen + enlarge with magnitude so a big cluster reads as big
+              // (not colour alone — radius carries it too; PERF-250).
+              'circle-color': [
+                'step',
+                ['get', 'point_count'],
+                ACCENT_CLUSTER,
+                25,
+                '#0f9d83',
+                100,
+                '#0c8f76',
+              ],
+              'circle-radius': ['step', ['get', 'point_count'], 12, 10, 16, 50, 22, 200, 30],
               'circle-stroke-color': '#ffffff',
               'circle-stroke-width': 2,
             },

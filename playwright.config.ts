@@ -10,7 +10,10 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './test/e2e',
   testMatch: /.*\.e2e\.ts/,
-  fullyParallel: true,
+  // Serial: the tests share one preview server and a software-WebGL context;
+  // running them in parallel just starves first map paint.
+  fullyParallel: false,
+  workers: 1,
   timeout: 30_000,
   reporter: 'list',
   use: {

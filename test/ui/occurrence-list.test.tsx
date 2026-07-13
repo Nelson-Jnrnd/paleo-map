@@ -9,6 +9,8 @@
 import { afterEach, expect, test } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { ExplorationView } from '../../src/app/components/ExplorationView.js';
+import { LIST_RENDER_CAP, OccurrenceList } from '../../src/app/components/OccurrenceList.js';
+import type { ReadOccurrence } from '../../src/domain/index.js';
 import { fixtureApi } from './app-harness.js';
 
 afterEach(cleanup);
@@ -38,4 +40,40 @@ test('lists visible occurrences with source and uncertainty cues', async () => {
   const first = rows[0]!;
   first.focus();
   expect(first).toHaveFocus();
+});
+
+test('caps the rendered list at real scale but keeps the count and a refine hint (AMEND-001)', async () => {
+  const api = await fixtureApi();
+  const base = api.listOccurrences({ stage: 'Maastrichtian' });
+  // Synthesize a large filtered set by cloning the fixture occurrences.
+  const many: ReadOccurrence[] = Array.from({ length: 250 }, (_, i) => {
+    const src = base[i % base.length]!;
+    return { ...src, id: `occ:scale:${i}` };
+  });
+
+  render(<OccurrenceList api={api} occurrences={many} selectedId={null} onSelect={() => {}} />);
+  const list = screen.getByRole('region', { name: /Visible occurrences/i });
+
+  // Only the cap is rendered as DOM rows, not all 250 (PERF-020/030).
+  expect(within(list).getAllByRole('button')).toHaveLength(LIST_RENDER_CAP);
+  // The full total and a way to reach the rest are shown, not hidden.
+  expect(within(list).getByText(new RegExp(`Showing ${LIST_RENDER_CAP} of 250`))).toBeInTheDocument();
+});
+
+test('a selected occurrence beyond the cap is still surfaced in the list', async () => {
+  const api = await fixtureApi();
+  const base = api.listOccurrences({ stage: 'Maastrichtian' });
+  const many: ReadOccurrence[] = Array.from({ length: 250 }, (_, i) => {
+    const src = base[i % base.length]!;
+    return { ...src, id: `occ:scale:${i}` };
+  });
+
+  render(
+    <OccurrenceList api={api} occurrences={many} selectedId="occ:scale:240" onSelect={() => {}} />,
+  );
+  const list = screen.getByRole('region', { name: /Visible occurrences/i });
+  const current = within(list)
+    .getAllByRole('button')
+    .find((b) => b.getAttribute('aria-current') === 'true');
+  expect(current).toBeDefined();
 });

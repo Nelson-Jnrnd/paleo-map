@@ -481,7 +481,39 @@ lifecycle/drift rules.
 
 > Required for any behavioral change after approval.
 
-_None._
+### AMEND-001: Ship the real PBDB dataset; bound the occurrence-list render
+
+- **Date:** 2026-07-13
+- **Reason:** The slice was verified against the 5-occurrence fixture; the build
+  environment can in fact reach PBDB (see SPEC-004 AMEND-001), so the app now
+  ships a **real** dinosaur dataset — a live PBDB pull of Dinosauria/Maastrichtian
+  (**478 taxa, 4,187 occurrences, 1,632 sources**), committed as the served
+  artifact. At that scale two things broke and are fixed here.
+- **Changed requirements:**
+  - **REQ-003 (occurrence list):** the acceptance "every visible occurrence
+    appears as a focusable control" is **amended** — at real scale a stage can
+    hold thousands of occurrences, so the list renders a **bounded window**
+    (`LIST_RENDER_CAP = 200`) with an explicit "Showing N of M — narrow by age, or
+    select a point/cluster on the map to reach the rest" affordance, and always
+    includes the currently-selected occurrence. The **map** remains the complete
+    view (all occurrences, clustered); the list is the keyboard path into it,
+    narrowed by age/selection. Full list virtualization (render-all-reachable
+    while windowed) is a recorded follow-up.
+  - **REQ-002 (map):** cluster markers are now **sized/deepened by point count**
+    so magnitude reads visually (radius + colour step, not colour alone), now that
+    real density (PERF-090/100/120) is actually exercised.
+- **Behavioral impact:** the app opens on ~4,187 Maastrichtian occurrences
+  clustered across the reconstructed globe; the list shows the first 200 with the
+  refine hint; first content ~1.2 s and first map paint ~1.6 s in-browser (within
+  PERF-020/010). Data delivery is a single ~7 MB (≈457 KB gzipped) artifact;
+  partitioning by stage/period (SPEC-002 REQ-006 scaling path) remains a follow-up.
+- **Test impact:** `test/ui/occurrence-list.test.tsx` gains cap + selected-beyond-
+  cap tests; `test/e2e/exploration.e2e.ts` is made data-agnostic (first list row)
+  and runs serially. Unit tests still build from the fixture client, so they stay
+  deterministic regardless of the shipped artifact.
+- **Human approval reference:** Made under owner direction ("do the next planned
+  step") after the owner corrected the "environment is limited" assumption; owner
+  ratification invited.
 
 ## Review checklist
 

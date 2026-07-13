@@ -24,12 +24,28 @@ interface OccurrenceListProps {
   onSelect: (occurrenceId: string) => void;
 }
 
+/** Max occurrence rows rendered at once (the map holds the complete set). */
+export const LIST_RENDER_CAP = 200;
+
 export function OccurrenceList({
   api,
   occurrences,
   selectedId,
   onSelect,
 }: OccurrenceListProps): ReactElement {
+  // At real scale a stage can hold thousands of occurrences; render a bounded
+  // window so the DOM stays fast (PERF-020/030). The map shows the complete,
+  // clustered set; the list is the keyboard path into it, narrowed by age/
+  // selection (SPEC-003 REQ-003, AMEND-001). Any selected occurrence is always
+  // included so selecting a cluster point on the map surfaces its row.
+  const total = occurrences.length;
+  const shown = occurrences.slice(0, LIST_RENDER_CAP);
+  if (selectedId && !shown.some((o) => o.id === selectedId)) {
+    const sel = occurrences.find((o) => o.id === selectedId);
+    if (sel) shown.unshift(sel);
+  }
+  const truncated = total > shown.length;
+
   return (
     <section aria-label="Visible occurrences">
       <div className={styles.listHeader}>
@@ -37,9 +53,15 @@ export function OccurrenceList({
         <p className={styles.source}>
           Documented discovery locations — not distribution ranges.
         </p>
+        {truncated && (
+          <p className={styles.source} role="status">
+            Showing {shown.length} of {total} — narrow by age, or select a point/cluster on
+            the map to reach the rest.
+          </p>
+        )}
       </div>
       <ul className={styles.list}>
-        {occurrences.map((o) => {
+        {shown.map((o) => {
           const isSelected = o.id === selectedId;
           const approximate = o.timeRange.provenance.approximate;
           const paleoMissing = o.paleoPosition.provenance.missing;
