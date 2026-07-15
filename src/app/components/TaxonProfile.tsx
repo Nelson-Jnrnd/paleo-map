@@ -54,13 +54,29 @@ export function TaxonProfile({ api, taxonId, onBack }: TaxonProfileProps): React
   const { range, approximate } = taxonTimeRange(occurrences);
 
   if (!taxon) {
+    // Real data holds occurrences identified only to an indeterminate or higher
+    // rank (e.g. "Theropoda indet.") with no genus-level taxon record. Show an
+    // honest, navigable profile rather than a dead end (charter §2/§7).
+    const fallbackName = occurrences[0]?.taxonName ?? 'Unavailable';
     return (
-      <section className={styles.profile}>
-        <button type="button" className={styles.reset} onClick={onBack}>
+      <section className={styles.profile} aria-label={`Taxon profile: ${fallbackName}`}>
+        <button type="button" className={styles.back} onClick={onBack}>
           ← Back to map
         </button>
-        <div className={styles.stateWrap}>
-          <p>Unknown taxon.</p>
+        <header className={styles.profileHeader}>
+          <h1 className="sciName">{fallbackName}</h1>
+          <div className={styles.profileMeta}>
+            <AttentionNote>
+              Indeterminate identification — no genus-level taxon record
+            </AttentionNote>
+          </div>
+        </header>
+        <div className={styles.section}>
+          <span className={styles.statLabel}>Occurrences</span>
+          <p className={styles.fieldValue}>
+            <span className="mono">{occurrences.length}</span> occurrence(s) recorded under this
+            identification.
+          </p>
         </div>
       </section>
     );

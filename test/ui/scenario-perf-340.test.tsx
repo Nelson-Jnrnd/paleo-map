@@ -31,8 +31,11 @@ test('PERF-340: period → filter dinosaurs → occurrence → profile → back 
   const campanian = within(timeline).getByRole('button', { name: /Campanian/ });
   expect(campanian).toHaveAttribute('aria-pressed', 'true');
 
-  // Action 1: select the occurrence.
-  await user.click(screen.getByRole('button', { name: /Tyrannosaurus/ }));
+  // Expand the taxon group, then select the occurrence (the list is aggregated
+  // by taxon — SPEC-005). Its row is identified by its formation.
+  const list = screen.getByRole('region', { name: /Visible occurrences/i });
+  await user.click(within(list).getByRole('button', { name: /Tyrannosaurus/ }));
+  await user.click(within(list).getByRole('button', { name: /Judith River/ }));
 
   // The occurrence panel opens with its single primary action.
   const openProfile = screen.getByRole('button', { name: /Open taxon profile/i });

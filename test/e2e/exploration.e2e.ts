@@ -30,14 +30,41 @@ test('PERF-340: occurrence → taxon profile → back to map, in a real browser'
   // Default age (Maastrichtian) is selected and the dinosaurs group is active.
   await expect(page.getByText('Dinosaurs', { exact: true })).toBeVisible();
 
-  // Select the first occurrence from the accessible list (data-agnostic: works
-  // against the shipped real PBDB dataset), open its profile, return.
+  // Expand the first (most abundant) taxon group, select its first occurrence,
+  // open the profile, return (data-agnostic against the real PBDB dataset).
   const list = page.locator('section[aria-label="Visible occurrences"]');
-  await list.getByRole('button').first().click();
+  await list.locator('button[aria-expanded="false"]').first().click();
+  await list.locator('ul[id^="group-"] button').first().click();
   await page.getByRole('button', { name: /Open taxon profile/i }).click();
 
   await expect(page.getByRole('region', { name: /Taxon profile:/i })).toBeVisible();
 
   await page.getByRole('button', { name: /Back to map/i }).click();
   await expect(page.getByRole('navigation', { name: /timeline/i })).toBeVisible();
+});
+
+test('SPEC-005: the list is viewport-linked — zooming in narrows what it shows', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const list = page.locator('section[aria-label="Visible occurrences"]');
+  const header = list.locator('p').first();
+  await expect(header).toContainText(/in view/i);
+
+  const countIn = async (): Promise<number> => {
+    const t = (await header.textContent()) ?? '';
+    return Number(/·\s*(\d+)\s*occurrences/.exec(t)?.[1] ?? '0');
+  };
+  const before = await countIn();
+
+  // Zoom into North America (the map is centred there); other continents drop out.
+  for (let i = 0; i < 4; i++) {
+    await page.locator('.maplibregl-ctrl-zoom-in').click();
+    await page.waitForTimeout(250);
+  }
+  await page.waitForTimeout(500);
+  const after = await countIn();
+
+  expect(before).toBeGreaterThan(0);
+  expect(after).toBeLessThan(before);
 });

@@ -21,6 +21,7 @@ import type { Map as MapLibreMap, GeoJSONSource, MapMouseEvent } from 'maplibre-
 import type { ReadOccurrence } from '../../domain/index.js';
 import { describeFrame, loadBasemap } from '../data/basemap.js';
 import type { Basemap } from '../data/basemap.js';
+import type { Bounds } from '../state/aggregate.js';
 import styles from './exploration.module.css';
 
 interface OccurrenceMapProps {
@@ -29,6 +30,8 @@ interface OccurrenceMapProps {
   onSelect: (occurrenceId: string) => void;
   /** The occurrences' pinned rotation model, for basemap frame reconciliation. */
   occurrenceRotationModel: string;
+  /** Reports the map's current bounds on load and on pan/zoom (SPEC-005 REQ-002). */
+  onViewportChange?: (bounds: Bounds) => void;
 }
 
 const OCEAN_OUTER = '#d7e4ec';
@@ -63,12 +66,15 @@ export function OccurrenceMap({
   selectedId,
   onSelect,
   occurrenceRotationModel,
+  onViewportChange,
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const loadedRef = useRef(false);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onViewportChangeRef = useRef(onViewportChange);
+  onViewportChangeRef.current = onViewportChange;
   const [available, setAvailable] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [basemap, setBasemap] = useState<Basemap | null>(null);
@@ -168,6 +174,18 @@ export function OccurrenceMap({
           });
           loadedRef.current = true;
           setMapLoaded(true);
+
+          const reportBounds = (): void => {
+            const b = map.getBounds();
+            onViewportChangeRef.current?.({
+              west: b.getWest(),
+              south: b.getSouth(),
+              east: b.getEast(),
+              north: b.getNorth(),
+            });
+          };
+          reportBounds(); // initial extent
+          map.on('moveend', reportBounds); // pan/zoom (SPEC-005 REQ-002)
 
           map.on('click', 'points', (e: MapMouseEvent & { features?: GeoJSON.Feature[] }) => {
             const id = e.features?.[0]?.properties?.['id'];

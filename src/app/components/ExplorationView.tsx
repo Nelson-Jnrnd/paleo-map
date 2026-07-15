@@ -6,7 +6,7 @@
  * navigates to a taxon (REQ-007).
  */
 
-import { useMemo, useReducer } from 'react';
+import { useMemo, useReducer, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ReadApi } from '../../read/api.js';
 import {
@@ -16,6 +16,8 @@ import {
   stageByName,
   visibleOccurrences,
 } from '../state/exploration.js';
+import { inViewport } from '../state/aggregate.js';
+import type { Bounds, GroupBy } from '../state/aggregate.js';
 import { ContextBar } from './ContextBar.js';
 import { TimelineControl } from './TimelineControl.js';
 import { OccurrenceMap } from './OccurrenceMap.js';
@@ -31,8 +33,11 @@ interface ExplorationViewProps {
 
 export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
   const [state, dispatch] = useReducer(explorationReducer, initialExplorationState);
+  const [viewport, setViewport] = useState<Bounds | null>(null);
+  const [groupBy, setGroupBy] = useState<GroupBy>('taxon');
 
   const occurrences = useMemo(() => visibleOccurrences(api, state), [api, state]);
+  const inView = useMemo(() => inViewport(occurrences, viewport), [occurrences, viewport]);
   const selectedOccurrence = state.selectedOccurrenceId
     ? occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null
     : null;
@@ -74,6 +79,7 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
             selectedId={state.selectedOccurrenceId}
             onSelect={(occurrenceId) => dispatch({ type: 'selectOccurrence', occurrenceId })}
             occurrenceRotationModel={api.metadata().rotationModel}
+            onViewportChange={setViewport}
           />
         </div>
         <aside className={styles.sidebar} aria-label="Occurrences and details">
@@ -90,9 +96,14 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
           ) : (
             <OccurrenceList
               api={api}
-              occurrences={occurrences}
+              occurrences={inView}
+              totalInFilter={occurrences.length}
+              viewportActive={viewport !== null}
+              groupBy={groupBy}
+              onGroupByChange={setGroupBy}
               selectedId={state.selectedOccurrenceId}
               onSelect={(occurrenceId) => dispatch({ type: 'selectOccurrence', occurrenceId })}
+              onOpenProfile={(taxonId) => dispatch({ type: 'openProfile', taxonId })}
             />
           )}
         </aside>

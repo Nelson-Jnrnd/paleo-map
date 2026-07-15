@@ -47,3 +47,11 @@ test('labels a minimal (occurrence-only) profile (FONC-1300)', async () => {
   expect(screen.getByText(/Occurrence only — minimal profile/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Back to map/i })).toBeInTheDocument();
 });
+
+test('taxon profile for an indeterminate/unknown taxon is an honest, navigable screen', async () => {
+  const api = await fixtureApi();
+  render(<TaxonProfile api={api} taxonId="txn:not-a-real-taxon" onBack={() => {}} />);
+  expect(screen.getByRole('region', { name: /Taxon profile:/i })).toBeInTheDocument();
+  expect(screen.getByText(/Indeterminate identification/i)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Back to map/i })).toBeInTheDocument();
+});

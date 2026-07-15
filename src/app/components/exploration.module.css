@@ -210,6 +210,108 @@
   padding: 0;
 }
 
+/* --- Grouped / aggregated list (SPEC-005) --- */
+.listHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.groupByToggle {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.groupByToggle button {
+  padding: 2px var(--space-2);
+  min-height: var(--target-min);
+  font-size: 11px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: none;
+  border-left: 1px solid var(--color-border);
+}
+
+.groupByToggle button:first-child {
+  border-left: none;
+}
+
+.groupByToggle button[aria-pressed='true'] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.groupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.groupHead {
+  display: flex;
+  align-items: stretch;
+}
+
+.groupToggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: var(--color-text-hi);
+  font-size: 14px;
+}
+
+.groupToggle:hover {
+  background: var(--color-ground);
+}
+
+.disclosure {
+  color: var(--color-text-faint);
+  font-size: 11px;
+  width: 10px;
+}
+
+.groupCount {
+  margin-left: auto;
+  color: var(--color-accent-deep);
+  font-size: 13px;
+}
+
+.groupProfile {
+  padding: 0 var(--space-3);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-divider);
+  color: var(--color-accent-deep);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.groupProfile:hover {
+  background: var(--color-ground);
+}
+
+.group .list {
+  background: color-mix(in srgb, var(--color-ground) 40%, var(--color-surface));
+}
+
+.group .occurrenceRow {
+  padding-left: calc(var(--space-4) + var(--space-3));
+}
+
 .occurrenceRow {
   width: 100%;
   text-align: left;

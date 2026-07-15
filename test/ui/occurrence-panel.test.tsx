@@ -19,8 +19,10 @@ test('occurrence panel shows provenance fields and the primary action', async ()
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
 
-  // The Lance occurrence has no paleocoordinate (missing paleoposition).
-  await user.click(screen.getByRole('button', { name: /Lance/ }));
+  // Expand the taxon group, then select the Lance occurrence (no paleocoordinate).
+  const list = screen.getByRole('region', { name: /Visible occurrences/i });
+  await user.click(within(list).getByRole('button', { name: /Triceratops/ }));
+  await user.click(within(list).getByRole('button', { name: /Lance/ }));
 
   const panel = screen.getByRole('region', { name: /Occurrence:/i });
   expect(within(panel).getByText('Time range')).toBeInTheDocument();
@@ -41,7 +43,9 @@ test('a reconstructed paleoposition is labeled in the panel', async () => {
   render(<ExplorationView api={api} />);
 
   // A Hell Creek occurrence has a reconstructed paleocoordinate.
-  await user.click(screen.getAllByRole('button', { name: /Hell Creek/ })[0]!);
+  const list = screen.getByRole('region', { name: /Visible occurrences/i });
+  await user.click(within(list).getByRole('button', { name: /Tyrannosaurus/ }));
+  await user.click(within(list).getAllByRole('button', { name: /Hell Creek/ })[0]!);
   const panel = screen.getByRole('region', { name: /Occurrence:/i });
   expect(within(panel).getByText('Reconstructed')).toBeInTheDocument();
 });
