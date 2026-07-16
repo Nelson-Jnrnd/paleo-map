@@ -6,50 +6,59 @@
  * navigates to a taxon (REQ-007).
  */
 
-import { useMemo, useReducer, useState } from 'react';
-import type { ReactElement } from 'react';
-import type { ReadApi } from '../../read/api.js';
+import { useMemo, useReducer, useState } from "react";
+import type { ReactElement } from "react";
+import type { ReadApi } from "../../read/api.js";
 import {
   EXPLORATION_STAGES,
   explorationReducer,
   initialExplorationState,
   stageByName,
   visibleOccurrences,
-} from '../state/exploration.js';
-import { inViewport } from '../state/aggregate.js';
-import type { Bounds, GroupBy } from '../state/aggregate.js';
-import { ContextBar } from './ContextBar.js';
-import { TimelineControl } from './TimelineControl.js';
-import { OccurrenceMap } from './OccurrenceMap.js';
-import { OccurrenceList } from './OccurrenceList.js';
-import { OccurrencePanel } from './OccurrencePanel.js';
-import { TaxonProfile } from './TaxonProfile.js';
-import { EmptyState } from './states.js';
-import styles from './exploration.module.css';
+} from "../state/exploration.js";
+import { inViewport } from "../state/aggregate.js";
+import type { Bounds, GroupBy } from "../state/aggregate.js";
+import { ContextBar } from "./ContextBar.js";
+import { TimelineControl } from "./TimelineControl.js";
+import { OccurrenceMap } from "./OccurrenceMap.js";
+import { OccurrenceList } from "./OccurrenceList.js";
+import { OccurrencePanel } from "./OccurrencePanel.js";
+import { TaxonProfile } from "./TaxonProfile.js";
+import { EmptyState } from "./states.js";
+import styles from "./exploration.module.css";
 
 interface ExplorationViewProps {
   api: ReadApi;
 }
 
 export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
-  const [state, dispatch] = useReducer(explorationReducer, initialExplorationState);
+  const [state, dispatch] = useReducer(
+    explorationReducer,
+    initialExplorationState,
+  );
   const [viewport, setViewport] = useState<Bounds | null>(null);
-  const [groupBy, setGroupBy] = useState<GroupBy>('taxon');
+  const [groupBy, setGroupBy] = useState<GroupBy>("taxon");
 
-  const occurrences = useMemo(() => visibleOccurrences(api, state), [api, state]);
-  const inView = useMemo(() => inViewport(occurrences, viewport), [occurrences, viewport]);
+  const occurrences = useMemo(
+    () => visibleOccurrences(api, state),
+    [api, state],
+  );
+  const inView = useMemo(
+    () => inViewport(occurrences, viewport),
+    [occurrences, viewport],
+  );
   const selectedOccurrence = state.selectedOccurrenceId
-    ? occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null
+    ? (occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null)
     : null;
   const stage = stageByName(state.stageName);
 
-  if (state.screen === 'profile' && state.profileTaxonId) {
+  if (state.screen === "profile" && state.profileTaxonId) {
     return (
       <div className={styles.app}>
         <TaxonProfile
           api={api}
           taxonId={state.profileTaxonId}
-          onBack={() => dispatch({ type: 'backToMap' })}
+          onBack={() => dispatch({ type: "backToMap" })}
         />
       </div>
     );
@@ -62,12 +71,12 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
         stageName={state.stageName}
         group={state.group}
         count={occurrences.length}
-        onReset={() => dispatch({ type: 'reset' })}
+        onReset={() => dispatch({ type: "reset" })}
       />
       <TimelineControl
         stages={EXPLORATION_STAGES}
         selected={state.stageName}
-        onSelect={(stageName) => dispatch({ type: 'selectStage', stageName })}
+        onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
       />
       <div className={styles.body}>
         <div className={styles.mapPane}>
@@ -77,7 +86,9 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
           <OccurrenceMap
             occurrences={occurrences}
             selectedId={state.selectedOccurrenceId}
-            onSelect={(occurrenceId) => dispatch({ type: 'selectOccurrence', occurrenceId })}
+            onSelect={(occurrenceId) =>
+              dispatch({ type: "selectOccurrence", occurrenceId })
+            }
             occurrenceRotationModel={api.metadata().rotationModel}
             onViewportChange={setViewport}
           />
@@ -87,12 +98,14 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
             <OccurrencePanel
               api={api}
               occurrence={selectedOccurrence}
-              onOpenProfile={(taxonId) => dispatch({ type: 'openProfile', taxonId })}
-              onClose={() => dispatch({ type: 'clearSelection' })}
+              onOpenProfile={(taxonId) =>
+                dispatch({ type: "openProfile", taxonId })
+              }
+              onClose={() => dispatch({ type: "clearSelection" })}
             />
           )}
           {occurrences.length === 0 ? (
-            <EmptyState onReset={() => dispatch({ type: 'reset' })} />
+            <EmptyState onReset={() => dispatch({ type: "reset" })} />
           ) : (
             <OccurrenceList
               api={api}
@@ -102,8 +115,12 @@ export function ExplorationView({ api }: ExplorationViewProps): ReactElement {
               groupBy={groupBy}
               onGroupByChange={setGroupBy}
               selectedId={state.selectedOccurrenceId}
-              onSelect={(occurrenceId) => dispatch({ type: 'selectOccurrence', occurrenceId })}
-              onOpenProfile={(taxonId) => dispatch({ type: 'openProfile', taxonId })}
+              onSelect={(occurrenceId) =>
+                dispatch({ type: "selectOccurrence", occurrenceId })
+              }
+              onOpenProfile={(taxonId) =>
+                dispatch({ type: "openProfile", taxonId })
+              }
             />
           )}
         </aside>

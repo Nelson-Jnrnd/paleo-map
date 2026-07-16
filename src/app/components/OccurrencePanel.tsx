@@ -7,13 +7,13 @@
  * PERF-180).
  */
 
-import type { ReactElement } from 'react';
-import type { ReadOccurrence } from '../../domain/index.js';
-import type { ReadApi } from '../../read/api.js';
-import { formatMaRange } from '../format.js';
-import { sourceReference } from '../sources.js';
-import { ApproximateCue, MissingValue, ReconstructedCue } from './Cues.js';
-import styles from './exploration.module.css';
+import type { ReactElement } from "react";
+import type { ReadOccurrence } from "../../domain/index.js";
+import type { ReadApi } from "../../read/api.js";
+import { formatMaRange } from "../format.js";
+import { sourceReference } from "../sources.js";
+import { ApproximateCue, MissingValue, ReconstructedCue } from "./Cues.js";
+import styles from "./exploration.module.css";
 
 interface OccurrencePanelProps {
   api: ReadApi;
@@ -33,7 +33,10 @@ export function OccurrencePanel({
   const approximate = occurrence.timeRange.provenance.approximate;
 
   return (
-    <section className={styles.panel} aria-label={`Occurrence: ${occurrence.taxonName}`}>
+    <section
+      className={styles.panel}
+      aria-label={`Occurrence: ${occurrence.taxonName}`}
+    >
       <div className={styles.panelHead}>
         <h2 className="sciName">{occurrence.taxonName}</h2>
         <button
@@ -49,7 +52,9 @@ export function OccurrencePanel({
       <dl className={styles.fieldGrid}>
         <dt className={styles.fieldLabel}>Time range</dt>
         <dd className={styles.fieldValue}>
-          <span className="mono">{formatMaRange(occurrence.timeRange.value)}</span>{' '}
+          <span className="mono">
+            {formatMaRange(occurrence.timeRange.value)}
+          </span>{" "}
           {approximate && <ApproximateCue />}
         </dd>
 
@@ -57,7 +62,7 @@ export function OccurrencePanel({
         <dd className={styles.fieldValue}>
           {modern ? (
             <>
-              {modern.region}{' '}
+              {modern.region}{" "}
               <span className="mono">
                 ({modern.lat.toFixed(1)}°, {modern.lng.toFixed(1)}°)
               </span>
@@ -73,7 +78,7 @@ export function OccurrencePanel({
             <>
               <span className="mono">
                 {paleo.palaeoLat.toFixed(1)}°, {paleo.palaeoLng.toFixed(1)}°
-              </span>{' '}
+              </span>{" "}
               <ReconstructedCue />
             </>
           ) : (

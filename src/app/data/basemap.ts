@@ -22,8 +22,8 @@ export interface Basemap {
   geojson: GeoJSON.FeatureCollection;
 }
 
-export const BASEMAP_GEOJSON_URL = 'basemap/late-cretaceous.geojson';
-export const BASEMAP_META_URL = 'basemap/late-cretaceous.meta.json';
+export const BASEMAP_GEOJSON_URL = "basemap/late-cretaceous.geojson";
+export const BASEMAP_META_URL = "basemap/late-cretaceous.meta.json";
 
 /**
  * Frame reconciliation: does the basemap share the occurrences' rotation model?
@@ -34,7 +34,9 @@ export function describeFrame(
   basemap: BasemapMeta,
   occurrenceRotationModel: string,
 ): { matches: boolean; note: string } {
-  const matches = basemap.rotationModel.toLowerCase() === occurrenceRotationModel.toLowerCase();
+  const matches =
+    basemap.rotationModel.toLowerCase() ===
+    occurrenceRotationModel.toLowerCase();
   if (matches) {
     return {
       matches,
@@ -62,7 +64,11 @@ export async function loadBasemap(
     if (!gRes.ok || !mRes.ok) return null;
     const geojson = (await gRes.json()) as GeoJSON.FeatureCollection;
     const meta = (await mRes.json()) as BasemapMeta;
-    if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) return null;
+    if (
+      geojson.type !== "FeatureCollection" ||
+      !Array.isArray(geojson.features)
+    )
+      return null;
     return { meta, geojson };
   } catch {
     return null;

@@ -116,8 +116,8 @@
   color: var(--color-text);
 }
 
-.stageButton[aria-pressed='true'] {
-  background: var(--color-accent);
+.stageButton[aria-pressed="true"] {
+  background: var(--color-accent-deep);
   border-color: var(--color-accent-deep);
   color: var(--color-on-accent);
 }
@@ -136,7 +136,6 @@
 
 .stageSpan {
   font-size: 11px;
-  opacity: 0.85;
 }
 
 /* --- Body split --- */
@@ -240,8 +239,8 @@
   border-left: none;
 }
 
-.groupByToggle button[aria-pressed='true'] {
-  background: var(--color-accent);
+.groupByToggle button[aria-pressed="true"] {
+  background: var(--color-accent-deep);
   color: var(--color-on-accent);
 }
 
@@ -331,7 +330,7 @@
   background: var(--color-ground);
 }
 
-.occurrenceRow[aria-current='true'] {
+.occurrenceRow[aria-current="true"] {
   border-left-color: var(--color-accent);
   background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 }
@@ -414,7 +413,7 @@
   min-height: var(--target-min);
   padding: var(--space-2) var(--space-4);
   margin-top: var(--space-2);
-  background: var(--color-accent);
+  background: var(--color-accent-deep);
   color: var(--color-on-accent);
   border: 1px solid var(--color-accent-deep);
   border-radius: var(--radius-sm);
@@ -449,9 +448,13 @@
 /* --- Taxon profile --- */
 .profile {
   max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-5) var(--space-4);
+  margin: var(--space-5) auto;
+  padding: var(--space-5) var(--space-5) var(--space-6);
   width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
 }
 
 .back {

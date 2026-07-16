@@ -5,8 +5,8 @@
  * preserved by the caller (FONC-1340).
  */
 
-import type { ReactElement } from 'react';
-import styles from './exploration.module.css';
+import type { ReactElement } from "react";
+import styles from "./exploration.module.css";
 
 export function LoadingState({ label }: { label: string }): ReactElement {
   return (
@@ -20,7 +20,10 @@ export function EmptyState({ onReset }: { onReset: () => void }): ReactElement {
   return (
     <div className={styles.stateWrap} role="status">
       <p className={styles.stateTitle}>No occurrences at this age</p>
-      <p>No fossil occurrence overlaps the selected stage with the active filters.</p>
+      <p>
+        No fossil occurrence overlaps the selected stage with the active
+        filters.
+      </p>
       <button type="button" className={styles.primary} onClick={onReset}>
         Reset filters
       </button>
@@ -37,7 +40,9 @@ export function ErrorState({
 }): ReactElement {
   return (
     <div className={styles.stateWrap} role="alert">
-      <p className={`${styles.stateTitle} ${styles.errorTitle}`}>Could not load the snapshot</p>
+      <p className={`${styles.stateTitle} ${styles.errorTitle}`}>
+        Could not load the snapshot
+      </p>
       <p>{message}</p>
       <button type="button" className={styles.primary} onClick={onRetry}>
         Retry

@@ -12,27 +12,34 @@
  * directly, so they stay deterministic regardless of the shipped artifact.
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import type { SourceClient } from '../src/pipeline/sources.js';
-import { buildReadModel, serializeSnapshot } from '../src/pipeline/build.js';
-import { FixtureSourceClient } from '../src/pipeline/fixture-client.js';
-import { HttpSourceClient } from '../src/pipeline/http-client.js';
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import type { SourceClient } from "../src/pipeline/sources.js";
+import {
+  buildReadModel,
+  serializeSnapshotCompact,
+} from "../src/pipeline/build.js";
+import { FixtureSourceClient } from "../src/pipeline/fixture-client.js";
+import { HttpSourceClient } from "../src/pipeline/http-client.js";
 
 async function main(): Promise<void> {
-  const live = process.argv.slice(2).includes('--live');
+  const live = process.argv.slice(2).includes("--live");
   const client: SourceClient = live
-    ? new HttpSourceClient({ baseName: 'Dinosauria', interval: 'Maastrichtian' })
+    ? new HttpSourceClient({
+        baseName: "Dinosauria",
+        interval: "Maastrichtian",
+      })
     : new FixtureSourceClient();
-  if (live) console.log('Ingesting live from PBDB + Wikidata + Wikipedia/Commons…');
+  if (live)
+    console.log("Ingesting live from PBDB + Wikidata + Wikipedia/Commons…");
 
   const model = await buildReadModel(client);
-  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-  const outDir = join(repoRoot, 'public', 'data');
+  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const outDir = join(repoRoot, "public", "data");
   await mkdir(outDir, { recursive: true });
-  const outFile = join(outDir, 'snapshot.json');
-  await writeFile(outFile, serializeSnapshot(model), 'utf-8');
+  const outFile = join(outDir, "snapshot.json");
+  await writeFile(outFile, serializeSnapshotCompact(model), "utf-8");
   console.log(
     `Wrote web data artifact (${model.taxa.length} taxa, ` +
       `${model.occurrences.length} occurrences, retrievedOn ` +

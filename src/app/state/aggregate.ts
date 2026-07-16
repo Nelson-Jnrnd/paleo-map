@@ -4,9 +4,9 @@
  * viewport narrowing are unit-testable without React or a map canvas.
  */
 
-import type { ReadOccurrence } from '../../domain/index.js';
+import type { ReadOccurrence } from "../../domain/index.js";
 
-export type GroupBy = 'taxon' | 'formation';
+export type GroupBy = "taxon" | "formation";
 
 export interface OccurrenceGroup {
   /** Stable grouping key. */
@@ -66,15 +66,21 @@ export function groupOccurrences(
 ): OccurrenceGroup[] {
   const groups = new Map<string, OccurrenceGroup>();
   for (const o of occurrences) {
-    const key = by === 'taxon' ? o.taxonId : (o.formation ?? '—');
+    const key = by === "taxon" ? o.taxonId : (o.formation ?? "—");
     let group = groups.get(key);
     if (!group) {
       group =
-        by === 'taxon'
-          ? { key, label: o.taxonName, taxonId: o.taxonId, taxonName: o.taxonName, occurrences: [] }
+        by === "taxon"
+          ? {
+              key,
+              label: o.taxonName,
+              taxonId: o.taxonId,
+              taxonName: o.taxonName,
+              occurrences: [],
+            }
           : {
               key,
-              label: o.formation ?? 'Unknown formation',
+              label: o.formation ?? "Unknown formation",
               taxonId: null,
               taxonName: null,
               occurrences: [],
@@ -84,6 +90,8 @@ export function groupOccurrences(
     group.occurrences.push(o);
   }
   return [...groups.values()].sort(
-    (a, b) => b.occurrences.length - a.occurrences.length || a.label.localeCompare(b.label),
+    (a, b) =>
+      b.occurrences.length - a.occurrences.length ||
+      a.label.localeCompare(b.label),
   );
 }

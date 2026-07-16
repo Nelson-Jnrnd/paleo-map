@@ -8,18 +8,19 @@
  * React reducer + context (assumption A-2); URL/deep-link state is out of scope.
  */
 
-import { LATE_CRETACEOUS_STAGES } from '../../domain/index.js';
-import type { GeologicalStage, ReadOccurrence } from '../../domain/index.js';
-import type { ReadApi } from '../../read/api.js';
+import { LATE_CRETACEOUS_STAGES } from "../../domain/index.js";
+import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
+import type { ReadApi } from "../../read/api.js";
 
 /** MVP window stages, oldest → youngest (deep-time reads left → right). */
-export const EXPLORATION_STAGES: readonly GeologicalStage[] = LATE_CRETACEOUS_STAGES;
+export const EXPLORATION_STAGES: readonly GeologicalStage[] =
+  LATE_CRETACEOUS_STAGES;
 
-export const DEFAULT_STAGE = 'Maastrichtian';
+export const DEFAULT_STAGE = "Maastrichtian";
 /** MVP is dinosaurs-only (OQ-050); the group is present but vacuously satisfied. */
-export const DEFAULT_GROUP = 'Dinosaurs';
+export const DEFAULT_GROUP = "Dinosaurs";
 
-export type Screen = 'map' | 'profile';
+export type Screen = "map" | "profile";
 
 export interface ExplorationState {
   /** Selected geological stage — the timeline steps by stage (FONC-120). */
@@ -35,39 +36,47 @@ export const initialExplorationState: ExplorationState = {
   stageName: DEFAULT_STAGE,
   group: DEFAULT_GROUP,
   selectedOccurrenceId: null,
-  screen: 'map',
+  screen: "map",
   profileTaxonId: null,
 };
 
 export type ExplorationAction =
-  | { type: 'selectStage'; stageName: string }
-  | { type: 'selectOccurrence'; occurrenceId: string }
-  | { type: 'clearSelection' }
-  | { type: 'openProfile'; taxonId: string }
-  | { type: 'backToMap' }
-  | { type: 'reset' };
+  | { type: "selectStage"; stageName: string }
+  | { type: "selectOccurrence"; occurrenceId: string }
+  | { type: "clearSelection" }
+  | { type: "openProfile"; taxonId: string }
+  | { type: "backToMap" }
+  | { type: "reset" };
 
 export function explorationReducer(
   state: ExplorationState,
   action: ExplorationAction,
 ): ExplorationState {
   switch (action.type) {
-    case 'selectStage':
+    case "selectStage":
       // Age change: update in place; drop a selection that may no longer be
       // visible. Group/filters preserved (FONC-140, PERF-360).
-      return { ...state, stageName: action.stageName, selectedOccurrenceId: null };
-    case 'selectOccurrence':
-      return { ...state, selectedOccurrenceId: action.occurrenceId, screen: 'map' };
-    case 'clearSelection':
+      return {
+        ...state,
+        stageName: action.stageName,
+        selectedOccurrenceId: null,
+      };
+    case "selectOccurrence":
+      return {
+        ...state,
+        selectedOccurrenceId: action.occurrenceId,
+        screen: "map",
+      };
+    case "clearSelection":
       return { ...state, selectedOccurrenceId: null };
-    case 'openProfile':
+    case "openProfile":
       // Preserve selected age + filters across navigation (FONC-1010/1020).
-      return { ...state, screen: 'profile', profileTaxonId: action.taxonId };
-    case 'backToMap':
+      return { ...state, screen: "profile", profileTaxonId: action.taxonId };
+    case "backToMap":
       // Single-action return; age, filters and the selected occurrence persist
       // (FONC-1000/1080, CONS-470).
-      return { ...state, screen: 'map', profileTaxonId: null };
-    case 'reset':
+      return { ...state, screen: "map", profileTaxonId: null };
+    case "reset":
       // Reset filters to defaults (FONC-080); clears selection and view.
       return { ...initialExplorationState };
     default:

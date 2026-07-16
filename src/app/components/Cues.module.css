@@ -21,7 +21,11 @@
 
 .attention {
   color: var(--color-attention);
-  border-color: color-mix(in srgb, var(--color-attention) 40%, var(--color-border));
+  border-color: color-mix(
+    in srgb,
+    var(--color-attention) 40%,
+    var(--color-border)
+  );
 }
 
 .missing {

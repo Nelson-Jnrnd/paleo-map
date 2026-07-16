@@ -5,13 +5,16 @@
  * missing fields are legible at a glance, not hidden behind a hover (CONS-490).
  */
 
-import type { ReactElement, ReactNode } from 'react';
-import styles from './Cues.module.css';
-import { NOT_AVAILABLE } from '../format.js';
+import type { ReactElement, ReactNode } from "react";
+import styles from "./Cues.module.css";
+import { NOT_AVAILABLE } from "../format.js";
 
 export function ReconstructedCue(): ReactElement {
   return (
-    <span className={styles.chip} title="Paleogeographic position is modeled, not observed">
+    <span
+      className={styles.chip}
+      title="Paleogeographic position is modeled, not observed"
+    >
       <span className={styles.glyph} aria-hidden="true">
         ▲
       </span>
@@ -22,7 +25,10 @@ export function ReconstructedCue(): ReactElement {
 
 export function ApproximateCue(): ReactElement {
   return (
-    <span className={styles.chip} title="Time range is uncertain / spans more than one stage">
+    <span
+      className={styles.chip}
+      title="Time range is uncertain / spans more than one stage"
+    >
       <span className={styles.glyph} aria-hidden="true">
         ≈
       </span>
@@ -47,7 +53,11 @@ export function MissingValue(): ReactElement {
   return <span className={styles.missing}>{NOT_AVAILABLE}</span>;
 }
 
-export function AttentionNote({ children }: { children: ReactNode }): ReactElement {
+export function AttentionNote({
+  children,
+}: {
+  children: ReactNode;
+}): ReactElement {
   return (
     <span className={`${styles.chip} ${styles.attention}`} role="note">
       {children}

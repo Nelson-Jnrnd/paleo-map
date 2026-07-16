@@ -515,6 +515,41 @@ lifecycle/drift rules.
   step") after the owner corrected the "environment is limited" assumption; owner
   ratification invited.
 
+### AMEND-002: CI gates, served-artifact size, and accessibility contrast
+
+- **Date:** 2026-07-13
+- **Reason:** Wrap-up pass — realize the SPEC-002 CI/tooling gates that were "to be
+  filled at implementation", bound the served data size, and fix the WCAG contrast
+  failures the new axe gate surfaced.
+- **Changed requirements / behaviour:**
+  - **CI gates (SPEC-002 REQ-008/009/010, NFR-001/002):** CI now runs ESLint +
+    `eslint-plugin-jsx-a11y`, Prettier `--check`, the Playwright E2E suite, an
+    **axe** accessibility gate (`test/e2e/a11y.e2e.ts`, fails on serious/critical
+    WCAG 2 A/AA violations on the exploration view + taxon profile), and a
+    **size-budget** gate (`scripts/check_budget.ts`). ESLint/Prettier scope is the
+    UI code, tests, and scripts introduced here; extending Prettier to the
+    pre-existing data-layer files is a deliberate follow-up (no unrelated churn).
+  - **Served-artifact size (NFR-001):** the web snapshot is now written **minified**
+    (`serializeSnapshotCompact`, keys still sorted → deterministic), cutting the
+    committed file ~37% (6.97 MB → 4.52 MB; ~416 KB gzipped over the wire). The
+    budget gate ceilings it (raw ≤ 5 MB, gzip ≤ 550 KB, JS ≤ 320 KB gzip). Deeper
+    per-stage partitioning stays deferred: occurrences are ~71% of the payload and
+    the map needs them, so partitioning a single-window pull buys little; it becomes
+    the lever when the dataset spans multiple windows (V1).
+  - **Accessibility contrast:** the axe gate found WCAG-AA contrast failures in the
+    charter's muted greys, the accent-deep teal used as small text/button fills,
+    and the amber/error status hues. Tokens were **darkened** to meet 4.5:1
+    (`--color-text-muted/faint/id`, `--color-accent-deep`, `--color-attention`,
+    `--color-error`), white-on-teal button fills routed to the deeper teal, the
+    selected-stage span de-opacified, and the taxon profile placed on a white
+    surface. Accessibility (PERF-220…270) overrides the charter's exact hexes; a
+    charter note is warranted (flag for `/drift-check`).
+- **Test impact:** adds `test/e2e/a11y.e2e.ts`; group-header cap test
+  (`test/ui/occurrence-list.test.tsx`, SPEC-005 REQ-004); no behavioural test
+  changes to the loop.
+- **Human approval reference:** Owner-directed ("wrap up all loose ends, ci gates
+  and 7mb snapshot in this PR then open it"); ratification invited.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

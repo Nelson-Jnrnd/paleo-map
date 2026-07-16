@@ -6,38 +6,46 @@
  * CONS-450).
  */
 
-import { afterEach, expect, test } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
-import { ExplorationView } from '../../src/app/components/ExplorationView.js';
-import { fixtureApi } from './app-harness.js';
+import { afterEach, expect, test } from "vitest";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { ExplorationView } from "../../src/app/components/ExplorationView.js";
+import { fixtureApi } from "./app-harness.js";
 
 afterEach(cleanup);
 
-test('shows selected age in Ma, group, and a matching occurrence count', async () => {
+test("shows selected age in Ma, group, and a matching occurrence count", async () => {
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
 
   // Selected age is shown by stage name and Ma span (FONC-040/110), in the
   // permanent context bar (the banner landmark).
-  const banner = screen.getByRole('banner');
-  expect(within(banner).getByText('Selected age')).toBeInTheDocument();
+  const banner = screen.getByRole("banner");
+  expect(within(banner).getByText("Selected age")).toBeInTheDocument();
   expect(within(banner).getByText(/Maastrichtian/)).toBeInTheDocument();
   expect(within(banner).getByText(/72\.1–66 Ma/)).toBeInTheDocument();
 
   // Group defaults to dinosaurs and is permanently displayed (FONC-020/050).
-  expect(within(banner).getByText('Group')).toBeInTheDocument();
-  expect(within(banner).getByText('Dinosaurs')).toBeInTheDocument();
+  expect(within(banner).getByText("Group")).toBeInTheDocument();
+  expect(within(banner).getByText("Dinosaurs")).toBeInTheDocument();
 
   // Count matches the number of occurrences the API returns for the stage.
-  const expected = api.listOccurrences({ stage: 'Maastrichtian' }).length;
-  const countEl = screen.getByText((_c, el) => el?.getAttribute('aria-live') === 'polite');
+  const expected = api.listOccurrences({ stage: "Maastrichtian" }).length;
+  const countEl = screen.getByText(
+    (_c, el) => el?.getAttribute("aria-live") === "polite",
+  );
   expect(Number(countEl.textContent)).toBe(expected);
 
   // Not presented as a complete atlas of all Mesozoic life (FONC-400).
-  expect(screen.getByText(/not a complete atlas of Mesozoic life/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/not a complete atlas of Mesozoic life/i),
+  ).toBeInTheDocument();
 
   // The main controls (timeline, reset) stay visible (CONS-450).
-  expect(screen.getByRole('navigation', { name: /timeline/i })).toBeInTheDocument();
-  const header = screen.getByRole('banner');
-  expect(within(header).getByRole('button', { name: /Reset filters/i })).toBeInTheDocument();
+  expect(
+    screen.getByRole("navigation", { name: /timeline/i }),
+  ).toBeInTheDocument();
+  const header = screen.getByRole("banner");
+  expect(
+    within(header).getByRole("button", { name: /Reset filters/i }),
+  ).toBeInTheDocument();
 });

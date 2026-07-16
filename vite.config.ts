@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // Static SPA (SPEC-002 REQ-003). `pnpm run build` emits static assets under
 // `dist/`; the snapshot data artifact is written into `public/data/` by the
@@ -9,7 +9,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
-    target: 'es2022',
+    outDir: "dist",
+    target: "es2022",
   },
 });

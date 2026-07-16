@@ -10,13 +10,13 @@
  * Run manually to refresh the committed data:  pnpm run fetch:basemap
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { gzipSync } from 'node:zlib';
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
 
 const TARGET_AGE_MA = 70; // representative single reconstruction for the MVP window
-const MODEL = 'paleomap'; // Scotese PALEOMAP — matches PBDB pgm=scotese
+const MODEL = "paleomap"; // Scotese PALEOMAP — matches PBDB pgm=scotese
 const SOURCE_URL = `https://gws.gplates.org/reconstruct/coastlines/?time=${TARGET_AGE_MA}&model=${MODEL}`;
 const SIMPLIFY_TOLERANCE = 0.3; // degrees
 const COORD_DECIMALS = 2;
@@ -66,51 +66,56 @@ function round(ring: Pt[]): Pt[] {
 }
 
 interface FeatureCollection {
-  type: 'FeatureCollection';
+  type: "FeatureCollection";
   features: { geometry: { type: string; coordinates: Pt[][] } }[];
 }
 
 async function main(): Promise<void> {
   console.log(`Fetching coastlines: ${SOURCE_URL}`);
   const res = await fetch(SOURCE_URL);
-  if (!res.ok) throw new Error(`GPlates fetch failed (${res.status} ${res.statusText})`);
+  if (!res.ok)
+    throw new Error(`GPlates fetch failed (${res.status} ${res.statusText})`);
   const raw = (await res.json()) as FeatureCollection;
 
   const features = [];
   for (const f of raw.features) {
-    if (f.geometry.type !== 'Polygon') continue;
+    if (f.geometry.type !== "Polygon") continue;
     const outer = f.geometry.coordinates[0];
     if (!outer) continue;
     if (ringArea(outer) < SIMPLIFY_TOLERANCE * SIMPLIFY_TOLERANCE) continue; // drop specks
     const simplified = round(douglasPeucker(outer, SIMPLIFY_TOLERANCE));
     if (simplified.length < 4) continue;
     features.push({
-      type: 'Feature',
+      type: "Feature",
       properties: {},
-      geometry: { type: 'Polygon', coordinates: [simplified] },
+      geometry: { type: "Polygon", coordinates: [simplified] },
     });
   }
 
-  const geojson = { type: 'FeatureCollection', features };
+  const geojson = { type: "FeatureCollection", features };
   const meta = {
     name: `Late Cretaceous coastlines (${TARGET_AGE_MA} Ma)`,
-    source: 'GPlates Web Service (gws.gplates.org), PALEOMAP model',
+    source: "GPlates Web Service (gws.gplates.org), PALEOMAP model",
     sourceUrl: SOURCE_URL,
     // PALEOMAP is Scotese's model — the frame PBDB uses for pgm=scotese — so this
     // matches the snapshot's rotationModel and land/points align (REQ-002).
-    rotationModel: 'scotese',
+    rotationModel: "scotese",
     model: MODEL,
     targetAgeMa: TARGET_AGE_MA,
-    licence: 'CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)',
+    licence: "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
     note: `Single ${TARGET_AGE_MA} Ma reconstruction, representative for the Campanian–Maastrichtian window.`,
   };
 
-  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-  const outDir = join(repoRoot, 'public', 'basemap');
+  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const outDir = join(repoRoot, "public", "basemap");
   await mkdir(outDir, { recursive: true });
-  const body = JSON.stringify(geojson) + '\n';
-  await writeFile(join(outDir, 'late-cretaceous.geojson'), body, 'utf-8');
-  await writeFile(join(outDir, 'late-cretaceous.meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf-8');
+  const body = JSON.stringify(geojson) + "\n";
+  await writeFile(join(outDir, "late-cretaceous.geojson"), body, "utf-8");
+  await writeFile(
+    join(outDir, "late-cretaceous.meta.json"),
+    JSON.stringify(meta, null, 2) + "\n",
+    "utf-8",
+  );
   console.log(
     `Wrote ${features.length} coastline polygons ` +
       `(${(body.length / 1024).toFixed(0)} KB raw, ${(gzipSync(body).length / 1024).toFixed(0)} KB gzipped) → ${outDir}`,

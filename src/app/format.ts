@@ -5,9 +5,9 @@
  * label, never here as a blank default.
  */
 
-import type { GeologicalStage, TimeRange } from '../domain/index.js';
+import type { GeologicalStage, TimeRange } from "../domain/index.js";
 
-export const NOT_AVAILABLE = 'Not available';
+export const NOT_AVAILABLE = "Not available";
 
 /** e.g. { minMa: 66.5, maxMa: 68 } → "68–66.5 Ma" (older → younger). */
 export function formatMaRange(range: TimeRange | null | undefined): string {

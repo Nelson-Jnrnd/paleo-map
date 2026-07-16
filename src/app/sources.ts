@@ -5,10 +5,10 @@
  * source is never silently dropped.
  */
 
-import type { ReadApi } from '../read/api.js';
+import type { ReadApi } from "../read/api.js";
 
 export function sourceReference(api: ReadApi, sourceId: string | null): string {
-  if (!sourceId) return 'Unsourced';
+  if (!sourceId) return "Unsourced";
   const source = api.resolveSource(sourceId);
   return source ? source.reference : sourceId;
 }

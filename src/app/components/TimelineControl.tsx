@@ -7,10 +7,10 @@
  * signal — each button also carries its name and span as text (PERF-250).
  */
 
-import type { ReactElement } from 'react';
-import type { GeologicalStage } from '../../domain/index.js';
-import { formatStageSpan } from '../format.js';
-import styles from './exploration.module.css';
+import type { ReactElement } from "react";
+import type { GeologicalStage } from "../../domain/index.js";
+import { formatStageSpan } from "../format.js";
+import styles from "./exploration.module.css";
 
 interface TimelineControlProps {
   stages: readonly GeologicalStage[];
@@ -45,10 +45,12 @@ export function TimelineControl({
                     className={styles.stageDot}
                     style={{ background: stage.periodColour }}
                     aria-hidden="true"
-                  />{' '}
+                  />{" "}
                   {stage.name}
                 </span>
-                <span className={`${styles.stageSpan} mono`}>{formatStageSpan(stage)}</span>
+                <span className={`${styles.stageSpan} mono`}>
+                  {formatStageSpan(stage)}
+                </span>
               </button>
             </li>
           );

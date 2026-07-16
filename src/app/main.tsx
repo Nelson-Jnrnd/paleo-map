@@ -4,16 +4,16 @@
  * runtime reads only its own bundled data (SPEC-003 NFR-001).
  */
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './styles/tokens.css';
-import './styles/global.css';
-import { App } from './App.js';
-import { fetchReadModel } from './data/snapshot.js';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles/tokens.css";
+import "./styles/global.css";
+import { App } from "./App.js";
+import { fetchReadModel } from "./data/snapshot.js";
 
-const rootEl = document.getElementById('root');
+const rootEl = document.getElementById("root");
 if (!rootEl) {
-  throw new Error('Root element #root not found');
+  throw new Error("Root element #root not found");
 }
 
 createRoot(rootEl).render(

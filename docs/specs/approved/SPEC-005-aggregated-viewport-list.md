@@ -248,8 +248,10 @@ pipeline, or map-rendering change to undo.
 
 ## Open questions
 
-- [ ] Header-count cap if in-view taxa themselves grow large (deferred; collapsed
-  headers are cheap at current scale).
+- [x] Header-count cap if in-view taxa themselves grow large — **resolved**:
+  `GROUP_HEADER_CAP = 200` (count-sorted, so most abundant first) with a "showing
+  the top N of M — narrow/zoom" affordance; the selected group is always surfaced
+  (`test/ui/occurrence-list.test.tsx`).
 - [ ] Whether formation grouping should show stratigraphic order rather than count
   order (deferred; count order for both for now).
 

@@ -6,10 +6,10 @@
  * equivalent, canvas-independent route the charter requires.
  */
 
-import { buildReadModel } from '../../src/pipeline/build.js';
-import { FixtureSourceClient } from '../../src/pipeline/fixture-client.js';
-import { ReadApi } from '../../src/read/api.js';
-import type { ReadModel } from '../../src/domain/index.js';
+import { buildReadModel } from "../../src/pipeline/build.js";
+import { FixtureSourceClient } from "../../src/pipeline/fixture-client.js";
+import { ReadApi } from "../../src/read/api.js";
+import type { ReadModel } from "../../src/domain/index.js";
 
 export async function fixtureModel(): Promise<ReadModel> {
   return buildReadModel(new FixtureSourceClient());
@@ -25,6 +25,8 @@ export function fixtureLoader(): () => Promise<ReadModel> {
 }
 
 /** A loader that rejects, to drive the error state (FONC-1310). */
-export function failingLoader(message = 'network down'): () => Promise<ReadModel> {
+export function failingLoader(
+  message = "network down",
+): () => Promise<ReadModel> {
   return () => Promise.reject(new Error(message));
 }

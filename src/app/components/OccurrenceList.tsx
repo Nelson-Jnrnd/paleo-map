@@ -10,19 +10,22 @@
  * (CONS-130/140).
  */
 
-import { useState } from 'react';
-import type { ReactElement } from 'react';
-import type { ReadOccurrence } from '../../domain/index.js';
-import type { ReadApi } from '../../read/api.js';
-import type { GroupBy } from '../state/aggregate.js';
-import { groupOccurrences } from '../state/aggregate.js';
-import { formatMaRange } from '../format.js';
-import { sourceReference } from '../sources.js';
-import { ApproximateCue, MissingValue, ReconstructedCue } from './Cues.js';
-import styles from './exploration.module.css';
+import { useState } from "react";
+import type { ReactElement } from "react";
+import type { ReadOccurrence } from "../../domain/index.js";
+import type { ReadApi } from "../../read/api.js";
+import type { GroupBy } from "../state/aggregate.js";
+import { groupOccurrences } from "../state/aggregate.js";
+import { formatMaRange } from "../format.js";
+import { sourceReference } from "../sources.js";
+import { ApproximateCue, MissingValue, ReconstructedCue } from "./Cues.js";
+import styles from "./exploration.module.css";
 
 /** Max occurrence rows rendered per expanded group (the map holds them all). */
 export const GROUP_OCC_CAP = 50;
+/** Max group headers rendered at once, so the DOM stays bounded even if the
+ * number of in-view taxa itself grows large (SPEC-005 REQ-004 / open question). */
+export const GROUP_HEADER_CAP = 200;
 
 interface OccurrenceListProps {
   api: ReadApi;
@@ -59,9 +62,13 @@ function OccurrenceRow({
       aria-current={selected}
       onClick={() => onSelect(occurrence.id)}
     >
-      <span className={`${styles.occurrenceTaxon} sciName`}>{occurrence.taxonName}</span>
+      <span className={`${styles.occurrenceTaxon} sciName`}>
+        {occurrence.taxonName}
+      </span>
       <span className={styles.occurrenceMeta}>
-        <span className="mono">{formatMaRange(occurrence.timeRange.value)}</span>
+        <span className="mono">
+          {formatMaRange(occurrence.timeRange.value)}
+        </span>
         <span>{occurrence.formation ?? occurrence.collectionName}</span>
       </span>
       <span className={styles.cues}>
@@ -93,10 +100,18 @@ export function OccurrenceList({
   onOpenProfile,
 }: OccurrenceListProps): ReactElement {
   const [toggled, setToggled] = useState<ReadonlySet<string>>(new Set());
-  const groups = groupOccurrences(occurrences, groupBy);
+  const allGroups = groupOccurrences(occurrences, groupBy);
   const selectedGroupKey = selectedId
-    ? groups.find((g) => g.occurrences.some((o) => o.id === selectedId))?.key
+    ? allGroups.find((g) => g.occurrences.some((o) => o.id === selectedId))?.key
     : undefined;
+  // Bound the number of headers; groups are count-sorted, so this shows the most
+  // abundant first. A selected group beyond the cap is still surfaced.
+  const groups = allGroups.slice(0, GROUP_HEADER_CAP);
+  if (selectedGroupKey && !groups.some((g) => g.key === selectedGroupKey)) {
+    const sel = allGroups.find((g) => g.key === selectedGroupKey);
+    if (sel) groups.unshift(sel);
+  }
+  const hiddenGroups = allGroups.length - groups.length;
 
   const toggle = (key: string): void => {
     setToggled((prev) => {
@@ -111,28 +126,34 @@ export function OccurrenceList({
     <section aria-label="Visible occurrences">
       <div className={styles.listHeader}>
         <div className={styles.listHeaderTop}>
-          <span className={styles.statLabel}>{viewportActive ? 'In view' : 'All occurrences'}</span>
-          <div className={styles.groupByToggle} role="group" aria-label="Group occurrences by">
+          <span className={styles.statLabel}>
+            {viewportActive ? "In view" : "All occurrences"}
+          </span>
+          <div
+            className={styles.groupByToggle}
+            role="group"
+            aria-label="Group occurrences by"
+          >
             <button
               type="button"
-              aria-pressed={groupBy === 'taxon'}
-              onClick={() => onGroupByChange('taxon')}
+              aria-pressed={groupBy === "taxon"}
+              onClick={() => onGroupByChange("taxon")}
             >
               By taxon
             </button>
             <button
               type="button"
-              aria-pressed={groupBy === 'formation'}
-              onClick={() => onGroupByChange('formation')}
+              aria-pressed={groupBy === "formation"}
+              onClick={() => onGroupByChange("formation")}
             >
               By formation
             </button>
           </div>
         </div>
         <p className={styles.source}>
-          {groups.length} {groupBy === 'taxon' ? 'taxa' : 'formations'} · {occurrences.length}{' '}
-          occurrences{viewportActive ? ' in view' : ''} — documented discovery locations, not
-          ranges.
+          {allGroups.length} {groupBy === "taxon" ? "taxa" : "formations"} ·{" "}
+          {occurrences.length} occurrences{viewportActive ? " in view" : ""} —
+          documented discovery locations, not ranges.
         </p>
       </div>
 
@@ -146,7 +167,8 @@ export function OccurrenceList({
       ) : (
         <ul className={styles.groupList}>
           {groups.map((group) => {
-            const expanded = toggled.has(group.key) || group.key === selectedGroupKey;
+            const expanded =
+              toggled.has(group.key) || group.key === selectedGroupKey;
             const shown = group.occurrences.slice(0, GROUP_OCC_CAP);
             if (
               selectedId &&
@@ -157,7 +179,7 @@ export function OccurrenceList({
               if (sel) shown.unshift(sel);
             }
             const overflow = group.occurrences.length - shown.length;
-            const panelId = `group-${group.key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            const panelId = `group-${group.key.replace(/[^a-zA-Z0-9]/g, "-")}`;
             return (
               <li key={group.key} className={styles.group}>
                 <div className={styles.groupHead}>
@@ -169,12 +191,16 @@ export function OccurrenceList({
                     onClick={() => toggle(group.key)}
                   >
                     <span className={styles.disclosure} aria-hidden="true">
-                      {expanded ? '▾' : '▸'}
+                      {expanded ? "▾" : "▸"}
                     </span>
-                    <span className={groupBy === 'taxon' ? 'sciName' : undefined}>
+                    <span
+                      className={groupBy === "taxon" ? "sciName" : undefined}
+                    >
                       {group.label}
                     </span>
-                    <span className={`${styles.groupCount} mono`}>{group.occurrences.length}</span>
+                    <span className={`${styles.groupCount} mono`}>
+                      {group.occurrences.length}
+                    </span>
                   </button>
                   {group.taxonId && (
                     <button
@@ -199,8 +225,12 @@ export function OccurrenceList({
                       </li>
                     ))}
                     {overflow > 0 && (
-                      <li className={styles.source} style={{ padding: 'var(--space-2) var(--space-4)' }}>
-                        Showing {shown.length} of {group.occurrences.length} — zoom in for the rest.
+                      <li
+                        className={styles.source}
+                        style={{ padding: "var(--space-2) var(--space-4)" }}
+                      >
+                        Showing {shown.length} of {group.occurrences.length} —
+                        zoom in for the rest.
                       </li>
                     )}
                   </ul>
@@ -208,6 +238,16 @@ export function OccurrenceList({
               </li>
             );
           })}
+          {hiddenGroups > 0 && (
+            <li
+              className={styles.source}
+              style={{ padding: "var(--space-3) var(--space-4)" }}
+            >
+              Showing the top {groups.length} of {allGroups.length}{" "}
+              {groupBy === "taxon" ? "taxa" : "formations"} by count — narrow by
+              age or zoom the map for the rest.
+            </li>
+          )}
         </ul>
       )}
     </section>
