@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Interactive Mesozoic Dinosaur Atlas — data layer (SPEC-001).",
   "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"
   },
