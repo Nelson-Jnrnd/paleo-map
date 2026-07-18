@@ -24,6 +24,16 @@ export function serializeSnapshot(model: ReadModel): string {
   return JSON.stringify(model, sortedReplacer(), 2) + '\n';
 }
 
+/**
+ * Compact (whitespace-free) variant of the canonical serializer for the web
+ * artifact. Keys are still sorted, so it stays deterministic/byte-stable; it just
+ * drops indentation (SPEC-003 AMEND-002: the served file needs no pretty-print —
+ * ~37% smaller on disk; the wire is gzipped either way).
+ */
+export function serializeSnapshotCompact(model: ReadModel): string {
+  return JSON.stringify(model, sortedReplacer()) + '\n';
+}
+
 function sortedReplacer(): (key: string, value: unknown) => unknown {
   return (_key, value) => {
     if (value && typeof value === 'object' && !Array.isArray(value)) {

@@ -1,6 +1,9 @@
 node_modules/
 dist/
 data/snapshots/
+test-results/
+playwright-report/
 coverage/
 *.log
 .DS_Store
+scratch-*.png

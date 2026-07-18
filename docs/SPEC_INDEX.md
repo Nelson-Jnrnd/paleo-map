@@ -31,6 +31,9 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | ------- | ----- | ------ | ----- | ------------- | ----------- | -------- |
 | SPEC-001 | Data architecture & model | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-001-data-architecture.md`](specs/approved/SPEC-001-data-architecture.md) |
 | SPEC-002 | Technology stack | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-002-technology-stack.md`](specs/approved/SPEC-002-technology-stack.md) |
+| SPEC-003 | Exploration view — first UI vertical slice | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-003-exploration-view.md`](specs/approved/SPEC-003-exploration-view.md) |
+| SPEC-004 | Paleogeographic basemap — reconstructed continents | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-004-paleogeographic-basemap.md`](specs/approved/SPEC-004-paleogeographic-basemap.md) |
+| SPEC-005 | Aggregated, viewport-linked occurrence list | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-005-aggregated-viewport-list.md`](specs/approved/SPEC-005-aggregated-viewport-list.md) |
 
 > Keep this table in sync with the frontmatter of each spec. `/spec-report` and
 > `scripts/validate_drift.py` help detect drift between this index and the

@@ -1,6 +1,9 @@
 name: ci
 
-# Build/typecheck/test for the data layer (SPEC-001, SPEC-002 REQ-007/008/010).
+# Build/typecheck/lint/test for the data layer (SPEC-001) and the UI (SPEC-002,
+# SPEC-003/004/005). Two jobs: `build` runs the fast gates (type-check, ESLint +
+# jsx-a11y, Prettier, unit/component tests, static build, size budget); `e2e`
+# runs the Playwright browser suite incl. the axe accessibility gate.
 # The governance workflow remains separate (docs/spec checks).
 
 on:
@@ -10,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  data-layer:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,5 +34,41 @@ jobs:
       - name: Type-check
         run: pnpm run typecheck
 
-      - name: Unit / integration tests
+      - name: Lint (ESLint + jsx-a11y)
+        run: pnpm run lint
+
+      - name: Format check (Prettier)
+        run: pnpm run format
+
+      - name: Unit / integration / UI tests
         run: pnpm test
+
+      - name: Static production build
+        run: pnpm run build
+
+      - name: Size budget (bundle + data artifact)
+        run: pnpm run check:budget
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E + accessibility (Playwright + axe)
+        run: pnpm run e2e

@@ -1,0 +1,10 @@
+{
+  "name": "Late Cretaceous coastlines (70 Ma)",
+  "source": "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+  "sourceUrl": "https://gws.gplates.org/reconstruct/coastlines/?time=70&model=paleomap",
+  "rotationModel": "scotese",
+  "model": "paleomap",
+  "targetAgeMa": 70,
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "note": "Single 70 Ma reconstruction, representative for the Campanian–Maastrichtian window."
+}

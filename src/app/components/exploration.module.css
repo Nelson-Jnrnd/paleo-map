@@ -1,0 +1,527 @@
+/* Exploration-view layout and surfaces (charter §4/§5). Palette/type via tokens.
+   Shared across the exploration components. */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* --- Context bar (permanent age / group / count) --- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+}
+
+.brandTitle {
+  font-size: 16px;
+}
+
+.brandSub {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.context {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+}
+
+.statValue {
+  font-size: 15px;
+  color: var(--color-text-hi);
+  font-weight: 600;
+}
+
+.countValue {
+  color: var(--color-accent-deep);
+}
+
+.reset {
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--target-min);
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.reset:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent-deep);
+}
+
+/* --- Timeline --- */
+.timeline {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.timelineLabel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 96px;
+}
+
+.stageList {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stageButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.stageButton[aria-pressed="true"] {
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
+  color: var(--color-on-accent);
+}
+
+.stageDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.stageName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stageSpan {
+  font-size: 11px;
+}
+
+/* --- Body split --- */
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.mapPane {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: radial-gradient(
+    circle at 50% 45%,
+    var(--color-ocean-inner),
+    var(--color-ocean-outer)
+  );
+}
+
+.basemapAttribution {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+  max-width: 340px;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.reconstructionBanner {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.sidebar {
+  width: 360px;
+  max-width: 42vw;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+  overflow-y: auto;
+}
+
+/* --- Occurrence list --- */
+.listHeader {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Grouped / aggregated list (SPEC-005) --- */
+.listHeaderTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.groupByToggle {
+  display: inline-flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.groupByToggle button {
+  padding: 2px var(--space-2);
+  min-height: var(--target-min);
+  font-size: 11px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: none;
+  border-left: 1px solid var(--color-border);
+}
+
+.groupByToggle button:first-child {
+  border-left: none;
+}
+
+.groupByToggle button[aria-pressed="true"] {
+  background: var(--color-accent-deep);
+  color: var(--color-on-accent);
+}
+
+.groupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.groupHead {
+  display: flex;
+  align-items: stretch;
+}
+
+.groupToggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: var(--color-text-hi);
+  font-size: 14px;
+}
+
+.groupToggle:hover {
+  background: var(--color-ground);
+}
+
+.disclosure {
+  color: var(--color-text-faint);
+  font-size: 11px;
+  width: 10px;
+}
+
+.groupCount {
+  margin-left: auto;
+  color: var(--color-accent-deep);
+  font-size: 13px;
+}
+
+.groupProfile {
+  padding: 0 var(--space-3);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-divider);
+  color: var(--color-accent-deep);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.groupProfile:hover {
+  background: var(--color-ground);
+}
+
+.group .list {
+  background: color-mix(in srgb, var(--color-ground) 40%, var(--color-surface));
+}
+
+.group .occurrenceRow {
+  padding-left: calc(var(--space-4) + var(--space-3));
+}
+
+.occurrenceRow {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  min-height: var(--target-min);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-divider);
+  border-left: 3px solid transparent;
+  color: var(--color-text);
+}
+
+.occurrenceRow:hover {
+  background: var(--color-ground);
+}
+
+.occurrenceRow[aria-current="true"] {
+  border-left-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+
+.occurrenceTaxon {
+  font-size: 15px;
+  color: var(--color-text-hi);
+}
+
+.occurrenceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.cues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.source {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+/* --- Occurrence panel --- */
+.panel {
+  padding: var(--space-4);
+  border-bottom: 2px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-accent) 4%, var(--color-surface));
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.panelClose {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 18px;
+  line-height: 1;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0;
+}
+
+.fieldLabel {
+  font-size: var(--text-min);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-id);
+  align-self: center;
+}
+
+.fieldValue {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
+  background: var(--color-accent-deep);
+  color: var(--color-on-accent);
+  border: 1px solid var(--color-accent-deep);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: var(--color-accent-deep);
+}
+
+/* --- States --- */
+.stateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  min-height: 240px;
+}
+
+.stateTitle {
+  font-size: 17px;
+}
+
+.errorTitle {
+  color: var(--color-error);
+}
+
+/* --- Taxon profile --- */
+.profile {
+  max-width: 720px;
+  margin: var(--space-5) auto;
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.back {
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--target-min);
+  background: transparent;
+  color: var(--color-accent-deep);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+}
+
+.back:hover {
+  border-color: var(--color-accent);
+}
+
+.profileHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.profileHeader h1 {
+  font-size: 26px;
+}
+
+.profileMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.section {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.occCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.occCard:last-child {
+  border-bottom: none;
+}
+
+/* Interpretative data is visually separated from fossil-derived data
+   (charter §2, FONC-670, CONS-440). */
+.interpretativeBlock {
+  background: var(--color-ground);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.interpretativeHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}

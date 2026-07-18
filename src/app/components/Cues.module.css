@@ -1,0 +1,38 @@
+/* Provenance / status cues — meaning-only, always carrying a text label so they
+   never rely on colour alone (charter §2/§4, PERF-250). */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-ground);
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.glyph {
+  font-family: var(--font-mono);
+}
+
+.attention {
+  color: var(--color-attention);
+  border-color: color-mix(
+    in srgb,
+    var(--color-attention) 40%,
+    var(--color-border)
+  );
+}
+
+.missing {
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+.interpretative {
+  border-style: dashed;
+}
