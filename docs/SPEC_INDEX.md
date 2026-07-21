@@ -33,7 +33,9 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-002 | Technology stack | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-002-technology-stack.md`](specs/approved/SPEC-002-technology-stack.md) |
 | SPEC-003 | Exploration view — first UI vertical slice | Implemented | nelsonjeanrenaud@gmail.com | — | #6 | [`specs/implemented/SPEC-003-exploration-view.md`](specs/implemented/SPEC-003-exploration-view.md) |
 | SPEC-004 | Paleogeographic basemap — reconstructed continents | Implemented | nelsonjeanrenaud@gmail.com | — | #6 | [`specs/implemented/SPEC-004-paleogeographic-basemap.md`](specs/implemented/SPEC-004-paleogeographic-basemap.md) |
-| SPEC-005 | Aggregated, viewport-linked occurrence list | Implemented | nelsonjeanrenaud@gmail.com | — | #6 | [`specs/implemented/SPEC-005-aggregated-viewport-list.md`](specs/implemented/SPEC-005-aggregated-viewport-list.md) |
+| SPEC-005 | Aggregated, viewport-linked occurrence list | Superseded | nelsonjeanrenaud@gmail.com | — | #6 | [`specs/archived/SPEC-005-aggregated-viewport-list.md`](specs/archived/SPEC-005-aggregated-viewport-list.md) |
+| SPEC-006 | App loading experience — splash and progress | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-006-app-loading-experience.md`](specs/approved/SPEC-006-app-loading-experience.md) |
+| SPEC-007 | Provenance tag & taxon-profile simplification | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md`](specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md) |
 
 > Keep this table in sync with the frontmatter of each spec. `/spec-report` and
 > `scripts/validate_drift.py` help detect drift between this index and the

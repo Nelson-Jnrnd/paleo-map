@@ -40,16 +40,14 @@ export interface Assertion<T = string> {
 }
 
 /**
- * The four derived display flags (design §4). Computed from structure, so they
- * cannot drift from the data (DATA-003). Never persisted as editable fields.
+ * The derived display flags (design §4). Computed from structure, so they cannot
+ * drift from the data (DATA-003, SPEC-007 AMEND). Never persisted as editable
+ * fields. SPEC-007 retired the `reconstructed` and `interpretative` flags; the
+ * two that carry independent signal remain.
  */
 export interface ProvenanceView {
-  /** value is a paleocoordinate produced by a rotation model. */
-  reconstructed: boolean;
   /** the time range spans more than one geologic stage / has wide bounds. */
   approximate: boolean;
-  /** the value's source kind is Encyclopedic or Editorial (tertiary). */
-  interpretative: boolean;
   /** the value is null. */
   missing: boolean;
 }
@@ -67,11 +65,6 @@ export interface Provenanced<T> {
   provenance: ProvenanceView;
 }
 
-/** interpretative flag: tertiary sources (Encyclopedic/Editorial) — design §4. */
-export function isInterpretative(kind: SourceKind): boolean {
-  return kind === 'Encyclopedic' || kind === 'Editorial';
-}
-
 /** missing flag: a null/undefined value — design §4. */
 export function isMissing(value: unknown): boolean {
   return value === null || value === undefined;
@@ -79,24 +72,18 @@ export function isMissing(value: unknown): boolean {
 
 export interface ProvenanceInput {
   value: unknown;
-  sourceKind: SourceKind;
-  /** true when the value is a paleocoordinate from a rotation model. */
-  reconstructed?: boolean;
   /** true when the value's time range spans multiple stages / wide bounds. */
   approximate?: boolean;
 }
 
 /**
- * Derive the four display flags from structure (DATA-003). `reconstructed` and
- * `approximate` are supplied by the caller from the relevant structural fields
- * (paleocoordinate presence, time-range span); `interpretative` and `missing`
- * are computed here from the source kind and the value itself.
+ * Derive the display flags from structure (DATA-003, SPEC-007). `approximate` is
+ * supplied by the caller from the time-range span; `missing` is computed here
+ * from the value itself.
  */
 export function deriveProvenanceView(input: ProvenanceInput): ProvenanceView {
   return {
-    reconstructed: input.reconstructed ?? false,
     approximate: input.approximate ?? false,
-    interpretative: isInterpretative(input.sourceKind),
     missing: isMissing(input.value),
   };
 }

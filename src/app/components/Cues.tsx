@@ -1,49 +1,25 @@
 /**
- * Small, reusable provenance/uncertainty cues (SPEC-003 REQ-003/006/007; charter
- * §2). Each cue carries a visible text label — never colour alone (PERF-250) —
- * so reconstructed positions, approximate ranges, interpretative data and
- * missing fields are legible at a glance, not hidden behind a hover (CONS-490).
+ * Small, reusable provenance/uncertainty cues (SPEC-003 REQ-006/007; charter §2).
+ * Each cue carries a visible text label — never colour alone (PERF-250) — so a
+ * multi-stage time range and missing fields are legible at a glance, not hidden
+ * behind a hover (CONS-490). SPEC-007 retired the reconstructed/interpretative
+ * cues and relabelled the time cue to the factual "spans multiple stages".
  */
 
 import type { ReactElement, ReactNode } from "react";
 import styles from "./Cues.module.css";
 import { NOT_AVAILABLE } from "../format.js";
 
-export function ReconstructedCue(): ReactElement {
+export function MultiStageCue(): ReactElement {
   return (
     <span
       className={styles.chip}
-      title="Paleogeographic position is modeled, not observed"
-    >
-      <span className={styles.glyph} aria-hidden="true">
-        ▲
-      </span>
-      Reconstructed
-    </span>
-  );
-}
-
-export function ApproximateCue(): ReactElement {
-  return (
-    <span
-      className={styles.chip}
-      title="Time range is uncertain / spans more than one stage"
+      title="Time range spans more than one geological stage"
     >
       <span className={styles.glyph} aria-hidden="true">
         ≈
       </span>
-      Approximate
-    </span>
-  );
-}
-
-export function InterpretativeCue(): ReactElement {
-  return (
-    <span
-      className={`${styles.chip} ${styles.interpretative}`}
-      title="Inferred (encyclopedic/editorial), not fossil-derived"
-    >
-      Interpretative
+      Spans multiple stages
     </span>
   );
 }

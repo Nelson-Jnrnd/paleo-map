@@ -35,12 +35,16 @@ click (CONS-490):
 
 - Fossil points are **discovery evidence**, never a distribution range or an
   exact life position (FONC-1150, CONS-130/140).
-- **Reconstructed** paleo positions and **approximate** time ranges are labeled
-  as such (FONC-1130/1140).
-- **Interpretative** data (diet, mass, behavior) is visually separated from
-  fossil-derived data and never mixed in one field (FONC-670, CONS-440).
+- **Reconstructed** paleo positions carry a standing map-level "Paleogeographic
+  reconstruction" label, and time ranges that **span multiple stages** are labeled
+  as such (FONC-1130/1140). *(SPEC-007, 2026-07-21: the per-occurrence
+  "reconstructed" chip was retired in favour of the standing map label; the time
+  cue was reworded from "approximate" to the factual "spans multiple stages".)*
 - **Missing** data is shown with an explicit label, never a blank or a silent
   default (FONC-490, FONC-1120, PERF-180).
+- *(SPEC-007, 2026-07-21, owner-approved: the fossil-derived vs. **interpretative**
+  distinction was removed from the product — FONC-670/1110 retired. Sources remain
+  shown, so provenance stays inspectable.)*
 - Every visible occurrence and time range carries an **identifiable source**
   (FONC-1100, PERF-140/150).
 
@@ -96,9 +100,8 @@ Everything else is cool neutral. Two additional colour systems exist, both
 
 | Status | Cue | Meaning |
 | --- | --- | --- |
-| Reconstructed | ▲ + neutral chip | Paleogeographic position is modeled, not observed |
-| Approximate | ≈ + neutral chip | Time range is uncertain / broad |
-| Interpretative | muted, separated block | Inferred, not fossil-derived |
+| Reconstructed | ▲ standing map label | Paleogeographic positions are modeled, not observed (SPEC-007: standing label, not a per-occurrence chip) |
+| Spans multiple stages | ≈ + neutral chip | Time range spans more than one geological stage (SPEC-007: reworded from "Approximate") |
 | Incomplete / attention | muted amber `#8a5a12`, sparing | Profile is partial (a "note", not an error) |
 | Missing | explicit "Not available" label | Field has no sourced value |
 | Error | red `#c0392b`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |

@@ -41,9 +41,8 @@ test("PERF-370: empty result → empty state → reset filters", async () => {
   expect(
     within(timeline).getByRole("button", { name: /Maastrichtian/ }),
   ).toHaveAttribute("aria-pressed", "true");
-  // Occurrences are back (a Tyrannosaurus row is visible again).
-  expect(
-    screen.getAllByRole("button", { name: /Tyrannosaurus/ }).length,
-  ).toBeGreaterThan(0);
+  // Occurrences are back: the sidebar prompts map selection (SPEC-007 removed the
+  // list), which only renders when the filtered set is non-empty.
+  expect(screen.getByText(/Select a point on the map/i)).toBeInTheDocument();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

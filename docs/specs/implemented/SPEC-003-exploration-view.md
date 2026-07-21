@@ -550,6 +550,58 @@ SPEC-004's real basemap; A-3's CI gates landed via AMEND-002).
 - **Human approval reference:** Owner-directed ("wrap up all loose ends, ci gates
   and 7mb snapshot in this PR then open it"); owner ratified 2026-07-21.
 
+### AMEND-003: Provenance cue simplification & profile reorder (via SPEC-007)
+
+- **Date:** 2026-07-21
+- **Reason:** Owner-approved provenance simplification (SPEC-007).
+- **Changed requirements / behaviour:**
+  - **REQ-002/003 (cues):** the per-occurrence **"Reconstructed"** cue is removed
+    from the list, panel, and profile; the standing map-level "Paleogeographic
+    reconstruction" banner (REQ-002) remains as the single reconstruction
+    disclosure. The **"Approximate"** time cue is reworded to the factual **"Spans
+    multiple stages"** (same `spansMultipleStages` derivation). The
+    **"Interpretative"** cue/block framing is removed.
+  - **REQ-003 (list) is KEPT, not deleted.** Although the owner initially chose to
+    delete REQ-003 wholesale, implementation established that the occurrence list is
+    the only keyboard-accessible and only headless-testable path to an occurrence
+    (the map canvas needs WebGL); deleting it would force deleting the core-loop
+    scenario tests (PERF-340/360/370), which `CLAUDE.md` forbids. Per that blocking
+    conflict the list is retained with its cues stripped — delivering the intended
+    decluttering without losing the accessible path or core-loop verification. See
+    SPEC-007 REQ-001 resolution.
+  - **REQ-007 (profile):** the summary/biology block is moved **above** the
+    occurrence list so it is visible without scrolling past every occurrence
+    (previously ~19.6k px down for a 164-occurrence taxon).
+- **Test impact:** `occurrence-list`, `occurrence-panel`, and `data-003` tests
+  updated to the new cues/flags (no tests skipped or deleted); scenario tests
+  unchanged and still green.
+- **Human approval reference:** Owner "implement spec 007 i approve it" (2026-07-21);
+  the REQ-003-retention resolution recorded in SPEC-007 after surfacing the
+  test/accessibility blocker.
+- **Superseded by AMEND-004** (REQ-003 subsequently deleted).
+
+### AMEND-004: REQ-003 deleted — occurrence list removed (via SPEC-007 AMEND-002)
+
+- **Date:** 2026-07-21
+- **Reason:** AMEND-003 retained the list to avoid deleting the core-loop tests;
+  the owner then authorized removing those tests ("I allow you to remove that test.
+  it's cleaner"), so **REQ-003 is deleted in full** and the occurrence-list
+  component removed.
+- **Changed behaviour:** `OccurrenceList.tsx` and the SPEC-005 aggregation
+  (`state/aggregate.ts`) are deleted; `ExplorationView` selects occurrences from the
+  map only (panel on select, empty state when the filter is empty, otherwise a
+  "Select a point on the map" prompt). SPEC-005 → Superseded.
+- **Test impact:** `occurrence-list`, `aggregate`, and `scenario-perf-340` tests
+  removed; e2e PERF-340/SPEC-005 and the a11y profile-nav test removed;
+  `occurrence-panel` rewired to a direct render; `scenario-perf-370` made
+  list-independent. `scenario-perf-360` unchanged. No test skipped.
+- **Accessibility regression (recorded):** REQ-003 was the app's only keyboard/
+  screen-reader path to occurrences; with it gone, selection is map-canvas-only —
+  a known deviation from PERF-220…270 / charter §2, accepted by the owner. A future
+  accessible occurrence selector is recorded as follow-up in SPEC-007 AMEND-002.
+- **Human approval reference:** Owner "I allow you to remove that test. it's
+  cleaner" (2026-07-21).
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

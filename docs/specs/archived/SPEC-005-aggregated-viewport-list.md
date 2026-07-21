@@ -2,18 +2,23 @@
 doc_type: spec
 spec_id: SPEC-005
 title: Aggregated, viewport-linked occurrence list
-status: Implemented
+status: Superseded
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: [6]
 affected_components: [app-frontend, exploration-view, map-rendering, occurrence-list]
 affected_interfaces: []
 supersedes: []
-superseded_by:
+superseded_by: SPEC-007
 depends_on: [SPEC-003, SPEC-004]
 conflicts_with: []
-last_verified_at: 2026-07-13
+last_verified_at: 2026-07-21
 ---
+
+> **Superseded by SPEC-007 (2026-07-21, owner-approved).** SPEC-007 deleted the
+> occurrence list (SPEC-003 REQ-003) that this spec aggregated and viewport-linked;
+> with the list gone the aggregation/viewport code (`src/app/state/aggregate.ts`)
+> and this spec's requirements no longer apply. Retained for history.
 
 # SPEC-005: Aggregated, viewport-linked occurrence list
 
@@ -311,7 +316,16 @@ grouped-list suite) + 3 Playwright E2E green; `pnpm run build` within budget.
 
 ## Spec amendments
 
-_None._
+### AMEND-001: Superseded — occurrence list removed (via SPEC-007)
+
+- **Date:** 2026-07-21
+- **Reason:** SPEC-007 (owner-approved) removed the occurrence list this spec is
+  built on. The aggregation/viewport helpers (`src/app/state/aggregate.ts`) and the
+  list component were deleted; this spec's requirements are no longer in force.
+- **Impact:** Status → `Superseded` (`superseded_by: SPEC-007`). No replacement
+  surface for the aggregation was requested.
+- **Human approval reference:** Owner "I allow you to remove that test. it's
+  cleaner" (2026-07-21), authorizing the list deletion and its test removal.
 
 ## Review checklist
 

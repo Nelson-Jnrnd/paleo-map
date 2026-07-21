@@ -9,7 +9,7 @@
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import type { ReadApi } from "../read/api.js";
-import type { ModelLoader } from "./data/snapshot.js";
+import type { LoadProgress, ModelLoader } from "./data/snapshot.js";
 import { readApiFromModel } from "./data/snapshot.js";
 import { ExplorationView } from "./components/ExplorationView.js";
 import { ErrorState, LoadingState } from "./components/states.js";
@@ -21,12 +21,16 @@ type Status =
 
 export function App({ loader }: { loader: ModelLoader }): ReactElement {
   const [status, setStatus] = useState<Status>({ kind: "loading" });
+  const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     setStatus({ kind: "loading" });
-    loader()
+    setProgress(null);
+    loader((p) => {
+      if (!cancelled) setProgress(p);
+    })
       .then((model) => {
         if (!cancelled)
           setStatus({ kind: "ready", api: readApiFromModel(model) });
@@ -45,7 +49,7 @@ export function App({ loader }: { loader: ModelLoader }): ReactElement {
   }, [loader, attempt]);
 
   if (status.kind === "loading") {
-    return <LoadingState label="Loading the dated snapshot…" />;
+    return <LoadingState progress={progress} />;
   }
   if (status.kind === "error") {
     return (

@@ -18,6 +18,6 @@ if (!rootEl) {
 
 createRoot(rootEl).render(
   <StrictMode>
-    <App loader={() => fetchReadModel()} />
+    <App loader={(onProgress) => fetchReadModel(undefined, onProgress)} />
   </StrictMode>,
 );

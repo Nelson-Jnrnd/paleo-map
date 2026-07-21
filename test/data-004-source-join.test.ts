@@ -11,7 +11,8 @@ describe('DATA-004: PBDB + Wikidata + Wikipedia join with typed source kinds', (
     const model = await buildFixtureModel();
     const trex = model.profiles.find((p) => p.taxonId === 'txn:tyrannosaurus')!;
     expect(trex.summary).not.toBeNull();
-    expect(trex.summary!.provenance.interpretative).toBe(true);
+    // The summary resolves to an Encyclopedic (tertiary) source — the source kind
+    // is the record of that; SPEC-007 retired the derived interpretative flag.
     const src = model.sources[trex.summary!.sourceId!]!;
     expect(src.kind).toBe('Encyclopedic');
   });
@@ -31,7 +32,6 @@ describe('DATA-004: PBDB + Wikidata + Wikipedia join with typed source kinds', (
     // The typed chain records it was obtained via the PBDB Database source.
     expect(src.derivedFrom).toBe('src:pbdb');
     expect(model.sources['src:pbdb']!.kind).toBe('Database');
-    expect(occ.timeRange.provenance.interpretative).toBe(false);
   });
 
   it('editorial values chain back to the encyclopedic article they draw on', async () => {

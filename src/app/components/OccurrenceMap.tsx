@@ -25,7 +25,13 @@ import type {
 import type { ReadOccurrence } from "../../domain/index.js";
 import { describeFrame, loadBasemap } from "../data/basemap.js";
 import type { Basemap } from "../data/basemap.js";
-import type { Bounds } from "../state/aggregate.js";
+/** Map bounds in degrees (as reported by the map). */
+export interface Bounds {
+  west: number;
+  south: number;
+  east: number;
+  north: number;
+}
 import styles from "./exploration.module.css";
 
 interface OccurrenceMapProps {
