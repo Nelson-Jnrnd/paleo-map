@@ -8,7 +8,7 @@ related_issue:
 related_prs: []
 affected_components: [app-frontend, data-layer, provenance, exploration-view, occurrence-panel, taxon-profile, styling]
 affected_interfaces: [static-data-artifacts]
-supersedes: []
+supersedes: [SPEC-005]
 superseded_by:
 depends_on: [SPEC-001, SPEC-003, SPEC-005]
 conflicts_with: []
@@ -251,15 +251,14 @@ provenance flags, the list, the profile, two docs, and the artifact.
 
 ## Open questions
 
-- [ ] **Accessibility replacement.** Deleting REQ-003 removes the only
-  keyboard/screen-reader path to individual occurrences (the map canvas is not an
-  accessible substitute; PERF-220…270, charter §2). Is an alternative accessible
-  affordance wanted, or is the loss accepted? (Owner input needed.)
-- [ ] **SPEC-005 disposition.** SPEC-005 (aggregated, viewport-linked list) is
-  built on the REQ-003 list. Does it get retired/superseded, or re-homed onto a
-  surviving surface? (Owner input needed.)
-- [ ] Exact replacement wording for the time cue ("spans multiple stages" vs.
-  "multi-stage range" vs. showing the stage names).
+- [x] **Accessibility replacement.** Resolved (2026-07-21): the loss is **accepted**
+  — deleting the list removes the only keyboard/screen-reader path to individual
+  occurrences (the map canvas is not an accessible substitute). This is a known
+  **accessibility regression** against PERF-220…270 / charter §2, accepted by the
+  owner ("it's cleaner"); an accessible occurrence path is recorded as future work.
+- [x] **SPEC-005 disposition.** Resolved (2026-07-21): SPEC-005 is **retired**
+  (Superseded by SPEC-007); the aggregation/viewport code is deleted with the list.
+- [x] Time-cue wording resolved to "Spans multiple stages".
 
 ## Human decisions required
 
@@ -300,27 +299,28 @@ conflict.
 ## Implementation notes
 
 Implemented on branch `claude/project-state-report-k84bpn` (2026-07-21). All CI
-gates green: typecheck, 67 unit/component tests, lint, Prettier, `vite build`,
+gates green: typecheck, 55 unit/component tests, lint, Prettier, `vite build`,
 size budget (data artifact 4.5 MB → 3.9 MB after dropping the two booleans).
 Verified in-browser: the *Triceratops* profile now shows the summary at ~y=423
 (above the occurrences; was ~19,600), the time cue reads "Spans multiple stages",
 and no "Reconstructed"/"Interpretative" text appears.
 
-**REQ-001 resolution — the occurrence list is KEPT (see AMEND-001).** Deleting the
-list as originally approved would have broken the only keyboard-accessible and only
-headless-testable path to an occurrence, forcing deletion of the core-loop scenario
-tests (PERF-340/360/370) — which `CLAUDE.md` forbids. This blocking conflict was
-surfaced to the owner; the list is retained with its cues stripped, which delivers
-the intended decluttering without the fallout. SPEC-005 is therefore **unaffected**
-(no retirement needed), and the app keeps its accessible path.
+**REQ-001 — the occurrence list is DELETED (final; see AMEND-002).** AMEND-001
+first retained the list to avoid deleting the core-loop scenario tests; the owner
+then explicitly authorized removing those tests ("I allow you to remove that test.
+it's cleaner"), so REQ-001 is implemented as originally written: the list and the
+SPEC-005 aggregation are removed, occurrences are selected from the map, and the
+list-coupled tests were removed/rewired. This is a recorded **accessibility
+regression** (no keyboard/screen-reader path to occurrences); see AMEND-002.
 
 - **Data (DATA-003 → SPEC-001 AMEND-002):** `ProvenanceView` reduced to
   `{approximate, missing}`; `reconstructed`/`interpretative`/`isInterpretative`
   removed; `derive.ts` simplified; served `snapshot.json` regenerated.
 - **UI:** `Cues.tsx` — `ReconstructedCue`/`InterpretativeCue` removed,
-  `ApproximateCue`→`MultiStageCue` ("Spans multiple stages"); list/panel/profile
-  updated; `TaxonProfile` summary/biology moved above the occurrence list and the
-  interpretative framing dropped.
+  `ApproximateCue`→`MultiStageCue` ("Spans multiple stages"); panel/profile updated;
+  `TaxonProfile` summary/biology moved above the occurrence list and the
+  interpretative framing dropped; the occurrence list itself was later deleted
+  (AMEND-002).
 - **Docs:** functional-spec FONC-670/1110 and MVP goal #8 struck with dated notes;
   charter §2 interpretative clause + cue-table row removed, reconstructed row
   reworded to the standing map label. SPEC-001 AMEND-002 and SPEC-003 AMEND-003
@@ -351,6 +351,38 @@ the intended decluttering without the fallout. SPEC-005 is therefore **unaffecte
   (2026-07-21); the blocker and this resolution were surfaced to the owner. The
   two Open questions (accessibility replacement, SPEC-005 disposition) are resolved
   by retention: the accessible path is preserved and SPEC-005 stays as-is.
+- **Superseded by AMEND-002.**
+
+### AMEND-002: Delete the occurrence list after all (supersedes AMEND-001)
+
+- **Date:** 2026-07-21
+- **Reason:** After AMEND-001 kept the list to avoid deleting the core-loop tests,
+  the owner explicitly authorized removing those tests: "I allow you to remove that
+  test. it's cleaner." With the test-deletion objection cleared, REQ-001 is
+  implemented as originally approved.
+- **Changed behaviour:**
+  - `src/app/components/OccurrenceList.tsx` and `src/app/state/aggregate.ts`
+    (SPEC-005) are **deleted**; `ExplorationView` no longer renders a list. The
+    sidebar shows the occurrence panel when a map point is selected, the empty state
+    when the filter is empty, else a "Select a point on the map" prompt. Occurrence
+    selection is now **map-only**.
+  - **Tests:** `occurrence-list.test.tsx`, `aggregate.test.ts`, and
+    `scenario-perf-340.test.tsx` (the select-via-list loop) are removed; the e2e
+    PERF-340 + SPEC-005 tests and the a11y profile-nav test are removed (the profile
+    is no longer headlessly reachable). `occurrence-panel.test.tsx` is rewired to
+    render the panel directly; `scenario-perf-370` uses a list-independent
+    assertion; `scenario-perf-360` was already list-independent. No test is skipped.
+  - **SPEC-005** → Superseded (`superseded_by: SPEC-007`); **SPEC-003 REQ-003** →
+    deleted (SPEC-003 AMEND-004).
+- **Accessibility regression (recorded):** the app no longer has a keyboard or
+  screen-reader path to individual occurrences — the MapLibre canvas is not an
+  accessible substitute. This is a known deviation from PERF-220…270 and charter §2,
+  accepted by the owner for cleanliness. **Future work:** provide an accessible
+  occurrence selector (own spec) to close the gap.
+- **Verification:** typecheck, 55 unit/component tests (was 67; 12 list/aggregate/
+  PERF-340 tests removed), lint, Prettier, `vite build`, size budget — all green.
+- **Human approval reference:** Owner "I allow you to remove that test. it's
+  cleaner" (2026-07-21).
 
 ## Review checklist
 
