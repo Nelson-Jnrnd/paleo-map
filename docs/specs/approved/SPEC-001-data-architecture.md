@@ -367,6 +367,23 @@ automated tests:
   (paleocoordinate source), DATA-005 (snapshot metadata), and NFR-001
   (reproducible, model-pinned paleocoordinates).
 
+### AMEND-002: Retire two of the four DATA-003 derived flags
+
+- **Date:** 2026-07-21
+- **Decision by:** nelsonjeanrenaud@gmail.com (owner-approved, via SPEC-007)
+- **Change:** DATA-003's derived `ProvenanceView` is reduced from four flags to
+  **two**. The `reconstructed` and `interpretative` flags are removed; `approximate`
+  and `missing` remain. `deriveProvenanceView` no longer takes a source kind or a
+  reconstructed input, and the served read-model artifact no longer carries those
+  two booleans (regenerated; ~4.5 MB → ~3.9 MB raw).
+- **Rationale:** `reconstructed` was structurally identical to `!missing` on a
+  paleoposition (no independent signal); `interpretative` (the fossil-derived vs.
+  tertiary distinction) was removed from the product per SPEC-007. Source kind is
+  still recorded on each `Source`, so provenance remains inspectable.
+- **Impact:** No new requirement ID; narrows DATA-003. Governed by SPEC-007, which
+  also strikes the dependent functional-spec requirements (FONC-670/1110) and the
+  charter's interpretative clause.
+
 ## Review checklist
 
 - [x] Requirements have IDs, statements, rationale, acceptance criteria.

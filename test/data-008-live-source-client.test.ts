@@ -131,16 +131,16 @@ describe('DATA-004 (live): HttpSourceClient maps upstreams into a valid model', 
   it('builds a valid, wired read model from the live subset', async () => {
     const model = await buildReadModel(new HttpSourceClient({ log: () => {} }));
 
-    // Occurrence resolves to the captured genus, with reconstructed paleocoords.
+    // Occurrence resolves to the captured genus, with a paleocoordinate from the
+    // pinned rotation model.
     const occ = model.occurrences.find((o) => o.id === 'occ:1')!;
     expect(occ.taxonId).toBe('txn:38613');
     expect(occ.paleoPosition.value?.rotationModel).toBe('scotese');
-    expect(occ.paleoPosition.provenance.reconstructed).toBe(true);
+    expect(occ.paleoPosition.value).not.toBeNull();
 
     // Profile carries the encyclopedic summary + a showable, licensed image.
     const profile = model.profiles.find((p) => p.taxonId === 'txn:38613')!;
     expect(profile.summary?.value).toContain('theropod');
-    expect(profile.summary?.provenance.interpretative).toBe(true); // Encyclopedic
     expect(profile.images).toHaveLength(1);
     expect(profile.images[0]).toMatchObject({ licence: 'CC BY-SA 3.0', credit: 'Jane Doe' });
 

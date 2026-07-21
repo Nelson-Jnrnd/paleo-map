@@ -3,10 +3,11 @@
  * occurrence (occurrence row → Open taxon profile), and offers a single "Back to
  * map" action that preserves the selected age and filters (FONC-990/1000/1010/
  * 1020/1070/1080, CONS-460/470). Shows name, rank, validity (flagging non-valid
- * status with its citation — FONC-720), time range, the taxon's occurrences with
- * modern + reconstructed positions and sources, and — visually separated —
- * interpretative biology (FONC-670, CONS-440). Minimal profiles are labeled
- * (FONC-1300) and missing fields read "Not available" (PERF-180).
+ * status with its citation — FONC-720), time range, a summary + biology block,
+ * and the taxon's occurrences with modern and paleogeographic positions and
+ * sources. Minimal profiles are labeled (FONC-1300) and missing fields read "Not
+ * available" (PERF-180). SPEC-007 moved the summary/biology above the occurrence
+ * list and retired the reconstructed and interpretative cues.
  */
 
 import type { ReactElement } from "react";
@@ -14,13 +15,7 @@ import type { ReadOccurrence, TimeRange } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange, NOT_AVAILABLE } from "../format.js";
 import { sourceReference } from "../sources.js";
-import {
-  ApproximateCue,
-  AttentionNote,
-  InterpretativeCue,
-  MissingValue,
-  ReconstructedCue,
-} from "./Cues.js";
+import { AttentionNote, MissingValue, MultiStageCue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 interface TaxonProfileProps {
@@ -126,61 +121,12 @@ export function TaxonProfile({
         <span className={styles.statLabel}>Time range</span>
         <p className={styles.fieldValue}>
           <span className="mono">{formatMaRange(range)}</span>{" "}
-          {approximate && <ApproximateCue />}
+          {approximate && <MultiStageCue />}
         </p>
       </div>
 
       <div className={styles.section}>
-        <span className={styles.statLabel}>
-          Occurrences ({occurrences.length})
-        </span>
-        <ul className={styles.list}>
-          {occurrences.map((o) => {
-            const paleo = o.paleoPosition.value;
-            return (
-              <li key={o.id} className={styles.occCard}>
-                <span className={styles.occurrenceMeta}>
-                  <span className="mono">
-                    {formatMaRange(o.timeRange.value)}
-                  </span>
-                  <span>{o.formation ?? o.collectionName}</span>
-                </span>
-                <span className={styles.occurrenceMeta}>
-                  <span>
-                    Modern: {o.modernPosition.value?.region ?? NOT_AVAILABLE}
-                  </span>
-                  {paleo ? (
-                    <span>
-                      Paleo:{" "}
-                      <span className="mono">
-                        {paleo.palaeoLat.toFixed(1)}°,{" "}
-                        {paleo.palaeoLng.toFixed(1)}°
-                      </span>{" "}
-                      <ReconstructedCue />
-                    </span>
-                  ) : (
-                    <span>
-                      Paleo: <MissingValue />
-                    </span>
-                  )}
-                </span>
-                <span className={styles.source}>
-                  Source: {sourceReference(api, o.modernPosition.sourceId)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
-      <div className={`${styles.section} ${styles.interpretativeBlock}`}>
-        <div className={styles.interpretativeHead}>
-          <span className={styles.statLabel}>Interpretative</span>
-          <InterpretativeCue />
-        </div>
-        <p className={styles.source}>
-          Inferred biology — separated from fossil-derived data.
-        </p>
+        <span className={styles.statLabel}>Summary &amp; biology</span>
 
         {profile?.summary?.value ? (
           <p className={styles.fieldValue}>{profile.summary.value}</p>
@@ -217,6 +163,48 @@ export function TaxonProfile({
             </div>
           ))}
         </dl>
+      </div>
+
+      <div className={styles.section}>
+        <span className={styles.statLabel}>
+          Occurrences ({occurrences.length})
+        </span>
+        <ul className={styles.list}>
+          {occurrences.map((o) => {
+            const paleo = o.paleoPosition.value;
+            return (
+              <li key={o.id} className={styles.occCard}>
+                <span className={styles.occurrenceMeta}>
+                  <span className="mono">
+                    {formatMaRange(o.timeRange.value)}
+                  </span>
+                  <span>{o.formation ?? o.collectionName}</span>
+                </span>
+                <span className={styles.occurrenceMeta}>
+                  <span>
+                    Modern: {o.modernPosition.value?.region ?? NOT_AVAILABLE}
+                  </span>
+                  {paleo ? (
+                    <span>
+                      Paleo:{" "}
+                      <span className="mono">
+                        {paleo.palaeoLat.toFixed(1)}°,{" "}
+                        {paleo.palaeoLng.toFixed(1)}°
+                      </span>
+                    </span>
+                  ) : (
+                    <span>
+                      Paleo: <MissingValue />
+                    </span>
+                  )}
+                </span>
+                <span className={styles.source}>
+                  Source: {sourceReference(api, o.modernPosition.sourceId)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

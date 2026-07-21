@@ -24,19 +24,12 @@ import type {
   ReadProfile,
   ReadTaxon,
   Source,
-  SourceKind,
   TimeRange,
 } from '../domain/index.js';
 import type { L1Snapshot } from './ingest.js';
 
 function byId<T extends { id: string }>(a: T, b: T): number {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-}
-
-function kindOf(sources: Map<string, Source>, sourceId: string): SourceKind {
-  const s = sources.get(sourceId);
-  if (!s) throw new Error(`derive: unresolved source '${sourceId}'`);
-  return s.kind;
 }
 
 export function derive(l1: L1Snapshot): ReadModel {
@@ -56,7 +49,7 @@ export function derive(l1: L1Snapshot): ReadModel {
             value: null,
             sourceId: null,
             editorial: false,
-            provenance: deriveProvenanceView({ value: null, sourceKind: 'Database' }),
+            provenance: deriveProvenanceView({ value: null }),
           },
           acceptedPer: null,
         };
@@ -66,7 +59,7 @@ export function derive(l1: L1Snapshot): ReadModel {
         value: accepted.status,
         sourceId: source.id,
         editorial: false,
-        provenance: deriveProvenanceView({ value: accepted.status, sourceKind: source.kind }),
+        provenance: deriveProvenanceView({ value: accepted.status }),
       };
       return {
         id: t.id,
@@ -86,24 +79,18 @@ export function derive(l1: L1Snapshot): ReadModel {
     .map((o): ReadOccurrence => {
       const ident = o.identifications[0]!;
       const c = collectionMap.get(o.collectionId)!;
-      const sourceKind = kindOf(sourceMap, c.sourceId);
 
       const modernPosition: Provenanced<ModernPosition> = {
         value: c.modern,
         sourceId: c.sourceId,
         editorial: false,
-        provenance: deriveProvenanceView({ value: c.modern, sourceKind }),
+        provenance: deriveProvenanceView({ value: c.modern }),
       };
       const paleoPosition: Provenanced<PaleogeographicPosition> = {
         value: c.paleo,
         sourceId: c.sourceId,
         editorial: false,
-        // A paleocoordinate is reconstructed by construction (design §4).
-        provenance: deriveProvenanceView({
-          value: c.paleo,
-          sourceKind,
-          reconstructed: c.paleo !== null,
-        }),
+        provenance: deriveProvenanceView({ value: c.paleo }),
       };
       const timeRange: Provenanced<TimeRange> = {
         value: c.timeRange,
@@ -111,7 +98,6 @@ export function derive(l1: L1Snapshot): ReadModel {
         editorial: false,
         provenance: deriveProvenanceView({
           value: c.timeRange,
-          sourceKind,
           approximate: spansMultipleStages(c.timeRange.minMa, c.timeRange.maxMa),
         }),
       };
@@ -143,7 +129,7 @@ export function derive(l1: L1Snapshot): ReadModel {
             value: enc.summary,
             sourceId: enc.articleSourceId,
             editorial: false,
-            provenance: deriveProvenanceView({ value: enc.summary, sourceKind: 'Encyclopedic' }),
+            provenance: deriveProvenanceView({ value: enc.summary }),
           }
         : null;
 
@@ -152,43 +138,37 @@ export function derive(l1: L1Snapshot): ReadModel {
             value: enc.commonName,
             sourceId: enc.articleSourceId,
             editorial: false,
-            provenance: deriveProvenanceView({ value: enc.commonName, sourceKind: 'Encyclopedic' }),
+            provenance: deriveProvenanceView({ value: enc.commonName }),
           }
         : null;
 
       const attributes: ReadAttribute[] = l1.attributes
         .filter((a) => a.taxonId === t.id)
-        .map((a): ReadAttribute => {
-          const kind = kindOf(sourceMap, a.item.assertion.sourceId);
-          return {
-            kind: a.item.kind,
-            value: {
-              value: a.item.assertion.value,
-              sourceId: a.item.assertion.sourceId,
-              editorial: false,
-              provenance: deriveProvenanceView({ value: a.item.assertion.value, sourceKind: kind }),
-            },
-          };
-        })
+        .map((a): ReadAttribute => ({
+          kind: a.item.kind,
+          value: {
+            value: a.item.assertion.value,
+            sourceId: a.item.assertion.sourceId,
+            editorial: false,
+            provenance: deriveProvenanceView({ value: a.item.assertion.value }),
+          },
+        }))
         .sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0));
 
       const measurements: ReadMeasurement[] = l1.measurements
         .filter((m) => m.taxonId === t.id)
-        .map((m): ReadMeasurement => {
-          const kind = kindOf(sourceMap, m.item.assertion.sourceId);
-          return {
-            kind: m.item.kind,
-            unit: m.item.unit,
-            lowerBound: m.item.lowerBound,
-            upperBound: m.item.upperBound,
-            value: {
-              value: m.item.value,
-              sourceId: m.item.assertion.sourceId,
-              editorial: false,
-              provenance: deriveProvenanceView({ value: m.item.value, sourceKind: kind }),
-            },
-          };
-        })
+        .map((m): ReadMeasurement => ({
+          kind: m.item.kind,
+          unit: m.item.unit,
+          lowerBound: m.item.lowerBound,
+          upperBound: m.item.upperBound,
+          value: {
+            value: m.item.value,
+            sourceId: m.item.assertion.sourceId,
+            editorial: false,
+            provenance: deriveProvenanceView({ value: m.item.value }),
+          },
+        }))
         .sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0));
 
       // DATA-007: only images whose licence can be honoured with a credit.

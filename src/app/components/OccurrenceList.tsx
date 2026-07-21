@@ -4,10 +4,10 @@
  * **linked to the map viewport**: it shows the taxa/occurrences in the current
  * view, each group expandable to its occurrence rows. This bounds the DOM at any
  * scale (SPEC-005 REQ-004, superseding the SPEC-003 AMEND-001 flat cap) while
- * keeping source + reconstructed/approximate/missing cues per occurrence
- * (FONC-1100/1130/1140/1150, PERF-140/150/250) and the selection→panel→profile
- * loop (FONC-270/1070). Occurrences are discovery evidence, not ranges
- * (CONS-130/140).
+ * keeping source + a multi-stage/missing cue per occurrence (FONC-1100/1150,
+ * PERF-140/150/250) and the selection→panel→profile loop (FONC-270/1070).
+ * Occurrences are discovery evidence, not ranges (CONS-130/140). SPEC-007 retired
+ * the per-row reconstructed cue.
  */
 
 import { useState } from "react";
@@ -18,7 +18,7 @@ import type { GroupBy } from "../state/aggregate.js";
 import { groupOccurrences } from "../state/aggregate.js";
 import { formatMaRange } from "../format.js";
 import { sourceReference } from "../sources.js";
-import { ApproximateCue, MissingValue, ReconstructedCue } from "./Cues.js";
+import { MissingValue, MultiStageCue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 /** Max occurrence rows rendered per expanded group (the map holds them all). */
@@ -53,7 +53,7 @@ function OccurrenceRow({
   selected: boolean;
   onSelect: (id: string) => void;
 }): ReactElement {
-  const approximate = occurrence.timeRange.provenance.approximate;
+  const multiStage = occurrence.timeRange.provenance.approximate;
   const paleoMissing = occurrence.paleoPosition.provenance.missing;
   return (
     <button
@@ -72,13 +72,11 @@ function OccurrenceRow({
         <span>{occurrence.formation ?? occurrence.collectionName}</span>
       </span>
       <span className={styles.cues}>
-        {approximate && <ApproximateCue />}
-        {paleoMissing ? (
+        {multiStage && <MultiStageCue />}
+        {paleoMissing && (
           <span className={styles.source}>
             Paleoposition: <MissingValue />
           </span>
-        ) : (
-          <ReconstructedCue />
         )}
       </span>
       <span className={styles.source}>

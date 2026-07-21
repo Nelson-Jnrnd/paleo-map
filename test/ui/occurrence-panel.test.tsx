@@ -41,17 +41,20 @@ test("occurrence panel shows provenance fields and the primary action", async ()
   ).toBeInTheDocument();
 });
 
-test("a reconstructed paleoposition is labeled in the panel", async () => {
+test("a paleoposition shows its coordinates without a reconstructed cue (SPEC-007)", async () => {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
 
-  // A Hell Creek occurrence has a reconstructed paleocoordinate.
+  // A Hell Creek occurrence has a paleocoordinate.
   const list = screen.getByRole("region", { name: /Visible occurrences/i });
   await user.click(within(list).getByRole("button", { name: /Tyrannosaurus/ }));
   await user.click(
     within(list).getAllByRole("button", { name: /Hell Creek/ })[0]!,
   );
   const panel = screen.getByRole("region", { name: /Occurrence:/i });
-  expect(within(panel).getByText("Reconstructed")).toBeInTheDocument();
+  // The paleocoordinate is shown (degree-marked values present), and the retired
+  // reconstructed cue is gone.
+  expect(within(panel).getAllByText(/°/).length).toBeGreaterThan(0);
+  expect(within(panel).queryByText("Reconstructed")).not.toBeInTheDocument();
 });

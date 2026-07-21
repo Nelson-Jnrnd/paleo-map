@@ -216,7 +216,7 @@ taxon profile is two actions).
 - **FONC-640** [V1] — The system should display a short descriptive summary for taxa at the Detailed profile or Featured species level.
 - **FONC-650** [V1] — The system should display related taxa when this information is available.
 - **FONC-660** [V1] — The system should display taxa known from the same formation or region and from an overlapping time range.
-- **FONC-670** [MVP] — The system must indicate when profile information is interpretative rather than directly derived from a fossil occurrence.
+- **FONC-670** [MVP] — ~~The system must indicate when profile information is interpretative rather than directly derived from a fossil occurrence.~~ **Retired by SPEC-007 (2026-07-21, owner-approved):** the fossil-derived vs. interpretative distinction is removed from the product. Sources are still shown (FONC-1090/1100) so provenance remains inspectable.
 
 ### 1.7 Classification and taxonomy
 
@@ -282,7 +282,7 @@ taxon profile is two actions).
 
 - **FONC-1090** [MVP] — The system must display the sources of the scientific data used.
 - **FONC-1100** [MVP] — The system must display an identifiable source for each visible fossil occurrence.
-- **FONC-1110** [MVP] — The system must distinguish data directly derived from fossil occurrences from interpretative data.
+- **FONC-1110** [MVP] — ~~The system must distinguish data directly derived from fossil occurrences from interpretative data.~~ **Retired by SPEC-007 (2026-07-21, owner-approved):** the fossil-derived vs. interpretative distinction is removed. Sources (FONC-1090/1100) and the missing-data label (FONC-1120) are retained.
 - **FONC-1120** [MVP] — The system must indicate when information is missing instead of replacing it with an unmarked assumption.
 - **FONC-1130** [MVP] — The system must indicate when a geographic position is reconstructed.
 - **FONC-1140** [MVP] — The system must indicate when a time range is approximate.
@@ -473,7 +473,7 @@ The MVP must allow users to:
 5. Select a fossil occurrence.
 6. Open a taxon profile from an occurrence.
 7. Display classification, time range, discovery locations and sources.
-8. Distinguish direct fossil data from interpretative data.
+8. ~~Distinguish direct fossil data from interpretative data.~~ *(Retired by SPEC-007, 2026-07-21 — the interpretative distinction is removed; sources remain shown.)*
 9. Clearly display missing, uncertain or reconstructed data.
 10. Avoid misleading representation of actual species distribution.
 

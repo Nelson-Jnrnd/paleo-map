@@ -41,8 +41,10 @@ test("groups occurrences by taxon with counts and expandable rows", async () => 
   await user.click(tyrannoToggle);
   expect(tyrannoToggle).toHaveAttribute("aria-expanded", "true");
   expect(within(list).getAllByText(/^Source:/).length).toBe(2); // two Tyrannosaurus occurrences
-  expect(within(list).getByText("Approximate")).toBeInTheDocument();
-  expect(within(list).getAllByText("Reconstructed").length).toBeGreaterThan(0);
+  // SPEC-007: the time cue is the factual "spans multiple stages"; the retired
+  // reconstructed cue is gone.
+  expect(within(list).getByText("Spans multiple stages")).toBeInTheDocument();
+  expect(within(list).queryByText("Reconstructed")).not.toBeInTheDocument();
 });
 
 test("a missing paleoposition is labelled in an expanded group", async () => {

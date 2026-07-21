@@ -1,10 +1,10 @@
 /**
  * Occurrence panel (SPEC-003 REQ-006). Shown when an occurrence is selected; its
  * one primary action is "Open taxon profile" (charter §5). Displays at minimum
- * the taxon, time range, modern location, reconstructed paleogeographic position
- * and source, with missing values shown as an explicit "Not available" label and
- * reconstructed/approximate labeled (FONC-289/290/890/900/910/920/930/1130/1140,
- * PERF-180).
+ * the taxon, time range, modern location, paleogeographic position and source,
+ * with missing values shown as an explicit "Not available" label and a
+ * multi-stage time range labelled (FONC-289/290/890/900/910/920/930/1150,
+ * PERF-180). SPEC-007 retired the reconstructed cue.
  */
 
 import type { ReactElement } from "react";
@@ -12,7 +12,7 @@ import type { ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange } from "../format.js";
 import { sourceReference } from "../sources.js";
-import { ApproximateCue, MissingValue, ReconstructedCue } from "./Cues.js";
+import { MissingValue, MultiStageCue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 interface OccurrencePanelProps {
@@ -30,7 +30,7 @@ export function OccurrencePanel({
 }: OccurrencePanelProps): ReactElement {
   const modern = occurrence.modernPosition.value;
   const paleo = occurrence.paleoPosition.value;
-  const approximate = occurrence.timeRange.provenance.approximate;
+  const multiStage = occurrence.timeRange.provenance.approximate;
 
   return (
     <section
@@ -55,7 +55,7 @@ export function OccurrencePanel({
           <span className="mono">
             {formatMaRange(occurrence.timeRange.value)}
           </span>{" "}
-          {approximate && <ApproximateCue />}
+          {multiStage && <MultiStageCue />}
         </dd>
 
         <dt className={styles.fieldLabel}>Modern location</dt>
@@ -75,12 +75,9 @@ export function OccurrencePanel({
         <dt className={styles.fieldLabel}>Paleogeographic position</dt>
         <dd className={styles.fieldValue}>
           {paleo ? (
-            <>
-              <span className="mono">
-                {paleo.palaeoLat.toFixed(1)}°, {paleo.palaeoLng.toFixed(1)}°
-              </span>{" "}
-              <ReconstructedCue />
-            </>
+            <span className="mono">
+              {paleo.palaeoLat.toFixed(1)}°, {paleo.palaeoLng.toFixed(1)}°
+            </span>
           ) : (
             <MissingValue />
           )}
