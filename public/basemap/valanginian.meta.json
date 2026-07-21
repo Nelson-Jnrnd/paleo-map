@@ -1,0 +1,10 @@
+{
+  "name": "Valanginian coastlines (136.2 Ma)",
+  "source": "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+  "sourceUrl": "https://gws.gplates.org/reconstruct/coastlines/?time=136.2&model=paleomap",
+  "rotationModel": "scotese",
+  "model": "paleomap",
+  "targetAgeMa": 136.2,
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "note": "Reconstruction at 136.2 Ma (midpoint of the Valanginian stage)."
+}

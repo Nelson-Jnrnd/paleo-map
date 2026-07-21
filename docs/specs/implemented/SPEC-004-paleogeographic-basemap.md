@@ -345,6 +345,29 @@ the simplifier — acceptable for a basemap.
 - **Human approval reference:** Made under owner direction after the owner
   challenged the "environment is limited" claim; owner ratified 2026-07-21.
 
+### AMEND-002: Per-stage, time-varying frames (SPEC-008 REQ-004)
+
+- **Date:** 2026-07-21
+- **Reason:** SPEC-008 widens the atlas to the whole Mesozoic, so a single 70 Ma
+  frame no longer corresponds to the selected age across most of the window. The
+  basemap must be time-varying.
+- **Changed requirements:** REQ-001/002/003 — the reconstructed coastlines are now
+  drawn from a set of **per-stage** GPlates/PALEOMAP frames (one per ICS Mesozoic
+  stage, at the stage midpoint age), selected client-side by the selected stage and
+  still sharing the occurrences' pinned `scotese` model. REQ-004 (graceful
+  degradation) is extended with a **nearest-available-frame** fallback (disclosed)
+  before the graticule.
+- **Behavioral impact:** Stepping the timeline visibly changes the coastlines; each
+  frame declares its target age + model; a stage with no frame shows the nearest
+  frame with a disclosure, or the graticule on total failure. `scripts/fetch_basemap.ts`
+  now emits `public/basemap/<slug>.geojson` + `.meta.json` per stage plus an
+  `index.json`; `src/app/data/basemap.ts` gains `selectFrame` + `loadBasemapFrameIndex`;
+  `OccurrenceMap` reloads the frame on stage change.
+- **Test impact:** `test/ui/basemap-frames.test.ts` covers exact/nearest/empty frame
+  selection and index loading; `test/ui/basemap.test.ts` unchanged.
+- **Human approval reference:** SPEC-008 scope approval — owner instructed
+  implementation, 2026-07-21.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

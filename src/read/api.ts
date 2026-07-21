@@ -38,6 +38,16 @@ export class ReadApi {
     return new ReadApi(JSON.parse(json) as ReadModel);
   }
 
+  /**
+   * A new API over the same shared reference (metadata/sources/taxa/profiles)
+   * but a different occurrence set — the seam for SPEC-008 stage-partitioned
+   * delivery, where occurrences are fetched per stage and joined to the reference
+   * loaded once at boot. No I/O.
+   */
+  withOccurrences(occurrences: ReadOccurrence[]): ReadApi {
+    return new ReadApi({ ...this.model, occurrences });
+  }
+
   metadata(): SnapshotMetadata {
     return this.model.metadata;
   }

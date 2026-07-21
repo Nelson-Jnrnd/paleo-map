@@ -1,0 +1,10 @@
+{
+  "name": "Coniacian coastlines (88.1 Ma)",
+  "source": "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+  "sourceUrl": "https://gws.gplates.org/reconstruct/coastlines/?time=88.1&model=paleomap",
+  "rotationModel": "scotese",
+  "model": "paleomap",
+  "targetAgeMa": 88.1,
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "note": "Reconstruction at 88.1 Ma (midpoint of the Coniacian stage)."
+}

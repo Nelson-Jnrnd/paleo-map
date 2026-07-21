@@ -8,15 +8,28 @@
  * React reducer + context (assumption A-2); URL/deep-link state is out of scope.
  */
 
-import { LATE_CRETACEOUS_STAGES } from "../../domain/index.js";
+import { MESOZOIC_PERIODS, MESOZOIC_STAGES } from "../../domain/index.js";
 import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 
-/** MVP window stages, oldest → youngest (deep-time reads left → right). */
-export const EXPLORATION_STAGES: readonly GeologicalStage[] =
-  LATE_CRETACEOUS_STAGES;
+/** Full Mesozoic stages, oldest → youngest (deep-time reads left → right). */
+export const EXPLORATION_STAGES: readonly GeologicalStage[] = MESOZOIC_STAGES;
+
+/** The three Mesozoic periods, for the timeline's period quick-select (REQ-003). */
+export const EXPLORATION_PERIODS: readonly string[] = MESOZOIC_PERIODS;
 
 export const DEFAULT_STAGE = "Maastrichtian";
+
+/**
+ * A sensible default representative stage per period for the quick-select jump
+ * (SPEC-008 REQ-003) when the runtime index supplies no data-driven choice. The
+ * production app overrides these with the most-populated stage from the index.
+ */
+export const DEFAULT_REPRESENTATIVE_STAGE: Readonly<Record<string, string>> = {
+  Triassic: "Norian",
+  Jurassic: "Kimmeridgian",
+  Cretaceous: "Maastrichtian",
+};
 /** MVP is dinosaurs-only (OQ-050); the group is present but vacuously satisfied. */
 export const DEFAULT_GROUP = "Dinosaurs";
 

@@ -1,0 +1,217 @@
+{
+  "model": "paleomap",
+  "rotationModel": "scotese",
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "frames": [
+    {
+      "stage": "Induan",
+      "slug": "induan",
+      "targetAgeMa": 251.6,
+      "geojsonUrl": "basemap/induan.geojson",
+      "metaUrl": "basemap/induan.meta.json"
+    },
+    {
+      "stage": "Olenekian",
+      "slug": "olenekian",
+      "targetAgeMa": 249.2,
+      "geojsonUrl": "basemap/olenekian.geojson",
+      "metaUrl": "basemap/olenekian.meta.json"
+    },
+    {
+      "stage": "Anisian",
+      "slug": "anisian",
+      "targetAgeMa": 244.6,
+      "geojsonUrl": "basemap/anisian.geojson",
+      "metaUrl": "basemap/anisian.meta.json"
+    },
+    {
+      "stage": "Ladinian",
+      "slug": "ladinian",
+      "targetAgeMa": 239.5,
+      "geojsonUrl": "basemap/ladinian.geojson",
+      "metaUrl": "basemap/ladinian.meta.json"
+    },
+    {
+      "stage": "Carnian",
+      "slug": "carnian",
+      "targetAgeMa": 232,
+      "geojsonUrl": "basemap/carnian.geojson",
+      "metaUrl": "basemap/carnian.meta.json"
+    },
+    {
+      "stage": "Norian",
+      "slug": "norian",
+      "targetAgeMa": 217.8,
+      "geojsonUrl": "basemap/norian.geojson",
+      "metaUrl": "basemap/norian.meta.json"
+    },
+    {
+      "stage": "Rhaetian",
+      "slug": "rhaetian",
+      "targetAgeMa": 205,
+      "geojsonUrl": "basemap/rhaetian.geojson",
+      "metaUrl": "basemap/rhaetian.meta.json"
+    },
+    {
+      "stage": "Hettangian",
+      "slug": "hettangian",
+      "targetAgeMa": 200.5,
+      "geojsonUrl": "basemap/hettangian.geojson",
+      "metaUrl": "basemap/hettangian.meta.json"
+    },
+    {
+      "stage": "Sinemurian",
+      "slug": "sinemurian",
+      "targetAgeMa": 196.2,
+      "geojsonUrl": "basemap/sinemurian.geojson",
+      "metaUrl": "basemap/sinemurian.meta.json"
+    },
+    {
+      "stage": "Pliensbachian",
+      "slug": "pliensbachian",
+      "targetAgeMa": 188.6,
+      "geojsonUrl": "basemap/pliensbachian.geojson",
+      "metaUrl": "basemap/pliensbachian.meta.json"
+    },
+    {
+      "stage": "Toarcian",
+      "slug": "toarcian",
+      "targetAgeMa": 179.5,
+      "geojsonUrl": "basemap/toarcian.geojson",
+      "metaUrl": "basemap/toarcian.meta.json"
+    },
+    {
+      "stage": "Aalenian",
+      "slug": "aalenian",
+      "targetAgeMa": 172.8,
+      "geojsonUrl": "basemap/aalenian.geojson",
+      "metaUrl": "basemap/aalenian.meta.json"
+    },
+    {
+      "stage": "Bajocian",
+      "slug": "bajocian",
+      "targetAgeMa": 169.6,
+      "geojsonUrl": "basemap/bajocian.geojson",
+      "metaUrl": "basemap/bajocian.meta.json"
+    },
+    {
+      "stage": "Bathonian",
+      "slug": "bathonian",
+      "targetAgeMa": 166.8,
+      "geojsonUrl": "basemap/bathonian.geojson",
+      "metaUrl": "basemap/bathonian.meta.json"
+    },
+    {
+      "stage": "Callovian",
+      "slug": "callovian",
+      "targetAgeMa": 163.4,
+      "geojsonUrl": "basemap/callovian.geojson",
+      "metaUrl": "basemap/callovian.meta.json"
+    },
+    {
+      "stage": "Oxfordian",
+      "slug": "oxfordian",
+      "targetAgeMa": 158.2,
+      "geojsonUrl": "basemap/oxfordian.geojson",
+      "metaUrl": "basemap/oxfordian.meta.json"
+    },
+    {
+      "stage": "Kimmeridgian",
+      "slug": "kimmeridgian",
+      "targetAgeMa": 152,
+      "geojsonUrl": "basemap/kimmeridgian.geojson",
+      "metaUrl": "basemap/kimmeridgian.meta.json"
+    },
+    {
+      "stage": "Tithonian",
+      "slug": "tithonian",
+      "targetAgeMa": 147.1,
+      "geojsonUrl": "basemap/tithonian.geojson",
+      "metaUrl": "basemap/tithonian.meta.json"
+    },
+    {
+      "stage": "Berriasian",
+      "slug": "berriasian",
+      "targetAgeMa": 142.4,
+      "geojsonUrl": "basemap/berriasian.geojson",
+      "metaUrl": "basemap/berriasian.meta.json"
+    },
+    {
+      "stage": "Valanginian",
+      "slug": "valanginian",
+      "targetAgeMa": 136.2,
+      "geojsonUrl": "basemap/valanginian.geojson",
+      "metaUrl": "basemap/valanginian.meta.json"
+    },
+    {
+      "stage": "Hauterivian",
+      "slug": "hauterivian",
+      "targetAgeMa": 131,
+      "geojsonUrl": "basemap/hauterivian.geojson",
+      "metaUrl": "basemap/hauterivian.meta.json"
+    },
+    {
+      "stage": "Barremian",
+      "slug": "barremian",
+      "targetAgeMa": 125.4,
+      "geojsonUrl": "basemap/barremian.geojson",
+      "metaUrl": "basemap/barremian.meta.json"
+    },
+    {
+      "stage": "Aptian",
+      "slug": "aptian",
+      "targetAgeMa": 117.2,
+      "geojsonUrl": "basemap/aptian.geojson",
+      "metaUrl": "basemap/aptian.meta.json"
+    },
+    {
+      "stage": "Albian",
+      "slug": "albian",
+      "targetAgeMa": 106.8,
+      "geojsonUrl": "basemap/albian.geojson",
+      "metaUrl": "basemap/albian.meta.json"
+    },
+    {
+      "stage": "Cenomanian",
+      "slug": "cenomanian",
+      "targetAgeMa": 97.2,
+      "geojsonUrl": "basemap/cenomanian.geojson",
+      "metaUrl": "basemap/cenomanian.meta.json"
+    },
+    {
+      "stage": "Turonian",
+      "slug": "turonian",
+      "targetAgeMa": 91.9,
+      "geojsonUrl": "basemap/turonian.geojson",
+      "metaUrl": "basemap/turonian.meta.json"
+    },
+    {
+      "stage": "Coniacian",
+      "slug": "coniacian",
+      "targetAgeMa": 88.1,
+      "geojsonUrl": "basemap/coniacian.geojson",
+      "metaUrl": "basemap/coniacian.meta.json"
+    },
+    {
+      "stage": "Santonian",
+      "slug": "santonian",
+      "targetAgeMa": 84.9,
+      "geojsonUrl": "basemap/santonian.geojson",
+      "metaUrl": "basemap/santonian.meta.json"
+    },
+    {
+      "stage": "Campanian",
+      "slug": "campanian",
+      "targetAgeMa": 77.9,
+      "geojsonUrl": "basemap/campanian.geojson",
+      "metaUrl": "basemap/campanian.meta.json"
+    },
+    {
+      "stage": "Maastrichtian",
+      "slug": "maastrichtian",
+      "targetAgeMa": 69.1,
+      "geojsonUrl": "basemap/maastrichtian.geojson",
+      "metaUrl": "basemap/maastrichtian.meta.json"
+    }
+  ]
+}

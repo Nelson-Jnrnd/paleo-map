@@ -23,8 +23,13 @@ import type {
   MapMouseEvent,
 } from "maplibre-gl";
 import type { ReadOccurrence } from "../../domain/index.js";
-import { describeFrame, loadBasemap } from "../data/basemap.js";
-import type { Basemap } from "../data/basemap.js";
+import {
+  describeFrame,
+  loadBasemap,
+  loadBasemapFrameIndex,
+  selectFrame,
+} from "../data/basemap.js";
+import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
 /** Map bounds in degrees (as reported by the map). */
 export interface Bounds {
   west: number;
@@ -40,6 +45,8 @@ interface OccurrenceMapProps {
   onSelect: (occurrenceId: string) => void;
   /** The occurrences' pinned rotation model, for basemap frame reconciliation. */
   occurrenceRotationModel: string;
+  /** Selected stage — selects the time-varying basemap frame (SPEC-008 REQ-004). */
+  stageName: string;
   /** Reports the map's current bounds on load and on pan/zoom (SPEC-005 REQ-002). */
   onViewportChange?: (bounds: Bounds) => void;
 }
@@ -87,6 +94,7 @@ export function OccurrenceMap({
   selectedId,
   onSelect,
   occurrenceRotationModel,
+  stageName,
   onViewportChange,
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -99,18 +107,45 @@ export function OccurrenceMap({
   const [available, setAvailable] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [basemap, setBasemap] = useState<Basemap | null>(null);
+  const [frameExact, setFrameExact] = useState(true);
+  const [frameIndex, setFrameIndex] = useState<BasemapFrameIndex | null>(null);
 
-  // Load the basemap once (independent of WebGL) so its attribution/disclosure
-  // shows even when the canvas cannot render (SPEC-004 REQ-004).
+  // Load the per-stage frame index once (independent of WebGL). Failure leaves it
+  // null → the effect below degrades to the graticule (SPEC-004/008 REQ-004).
   useEffect(() => {
     let cancelled = false;
-    void loadBasemap().then((b) => {
-      if (!cancelled) setBasemap(b);
+    void loadBasemapFrameIndex().then((idx) => {
+      if (!cancelled) setFrameIndex(idx);
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // Select and load the frame for the current stage; reload when the stage
+  // changes so the coastlines are time-varying (SPEC-008 REQ-004). Falls back to
+  // the nearest available frame (disclosed) or the graticule.
+  useEffect(() => {
+    let cancelled = false;
+    if (!frameIndex) {
+      setBasemap(null);
+      return;
+    }
+    const picked = selectFrame(stageName, frameIndex.frames);
+    if (!picked) {
+      setBasemap(null);
+      return;
+    }
+    setFrameExact(picked.exact);
+    void loadBasemap(picked.frame.geojsonUrl, picked.frame.metaUrl).then(
+      (b) => {
+        if (!cancelled) setBasemap(b);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [frameIndex, stageName]);
 
   // Initialise the map once.
   useEffect(() => {
@@ -271,7 +306,12 @@ export function OccurrenceMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !basemap) return;
-    if (map.getSource("basemap")) return;
+    const existing = map.getSource("basemap") as GeoJSONSource | undefined;
+    if (existing) {
+      // Time-varying frame: swap the coastlines when the stage changes (REQ-004).
+      existing.setData(basemap.geojson);
+      return;
+    }
     map.addSource("basemap", { type: "geojson", data: basemap.geojson });
     map.addLayer(
       {
@@ -346,6 +386,12 @@ export function OccurrenceMap({
           <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
           {basemap.meta.licence}
           <br />
+          {!frameExact && (
+            <>
+              Nearest available reconstruction ({basemap.meta.targetAgeMa} Ma)
+              shown for {stageName}.{" "}
+            </>
+          )}
           {frame.note} {basemap.meta.note}
         </div>
       )}

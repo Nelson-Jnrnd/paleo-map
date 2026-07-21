@@ -5,3 +5,4 @@ export * from './ingest.js';
 export * from './derive.js';
 export * from './validate.js';
 export * from './build.js';
+export * from './partition.js';

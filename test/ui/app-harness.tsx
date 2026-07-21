@@ -8,8 +8,11 @@
 
 import { buildReadModel } from "../../src/pipeline/build.js";
 import { FixtureSourceClient } from "../../src/pipeline/fixture-client.js";
+import { partitionReadModel } from "../../src/pipeline/partition.js";
+import type { AtlasPartition } from "../../src/pipeline/partition.js";
 import { ReadApi } from "../../src/read/api.js";
 import type { ReadModel } from "../../src/domain/index.js";
+import { DINOSAURIA_MESOZOIC } from "../../src/fixtures/dinosauria-mesozoic.js";
 
 export async function fixtureModel(): Promise<ReadModel> {
   return buildReadModel(new FixtureSourceClient());
@@ -17,6 +20,20 @@ export async function fixtureModel(): Promise<ReadModel> {
 
 export async function fixtureApi(): Promise<ReadApi> {
   return ReadApi.fromModel(await fixtureModel());
+}
+
+/** A full-Mesozoic (multi-period) model + API for SPEC-008 tests. */
+export async function mesozoicModel(): Promise<ReadModel> {
+  return buildReadModel(new FixtureSourceClient(DINOSAURIA_MESOZOIC));
+}
+
+export async function mesozoicApi(): Promise<ReadApi> {
+  return ReadApi.fromModel(await mesozoicModel());
+}
+
+/** The stage-partitioned artifacts for the multi-period fixture. */
+export async function mesozoicPartition(): Promise<AtlasPartition> {
+  return partitionReadModel(await mesozoicModel());
 }
 
 /** A stable loader that resolves the fixture model (for <App loader={...}/>). */

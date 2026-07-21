@@ -36,6 +36,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-005 | Aggregated, viewport-linked occurrence list | Superseded | nelsonjeanrenaud@gmail.com | — | #6 | [`specs/archived/SPEC-005-aggregated-viewport-list.md`](specs/archived/SPEC-005-aggregated-viewport-list.md) |
 | SPEC-006 | App loading experience — splash and progress | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-006-app-loading-experience.md`](specs/approved/SPEC-006-app-loading-experience.md) |
 | SPEC-007 | Provenance tag & taxon-profile simplification | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md`](specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md) |
+| SPEC-008 | Full-Mesozoic time window (252–66 Ma) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-008-full-mesozoic-time-window.md`](specs/approved/SPEC-008-full-mesozoic-time-window.md) |
 
 > Keep this table in sync with the frontmatter of each spec. `/spec-report` and
 > `scripts/validate_drift.py` help detect drift between this index and the
