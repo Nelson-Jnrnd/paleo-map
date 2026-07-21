@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-004
 title: Paleogeographic basemap — reconstructed continents under the occurrences
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [6]
 affected_components: [app-frontend, map-rendering]
 affected_interfaces: [static-data-artifacts]
 supersedes: []
@@ -241,12 +241,15 @@ graticule/ocean placeholder; occurrences and the loop are unaffected.
 
 ## Open questions
 
-- [x] **Coastline dataset / source** — resolved to schematic (see Human decisions);
-  real frame-matched data is the recorded upgrade path.
+- [x] **Coastline dataset / source** — resolved to **real GPlates PALEOMAP
+  (Scotese) coastlines** (see AMEND-001 and Human decisions). A schematic
+  placeholder was shipped first on the mistaken belief the environment could not
+  fetch data; that was disproved and replaced with real frame-matched geometry.
 - [x] One reconstruction for the window vs per-stage — resolved: one for the MVP;
   per-stage deferred.
-- [x] Fetch-and-simplify vs committed geometry — resolved: generated at
-  `predev`/`prebuild` by `scripts/gen_basemap.ts` (env cannot fetch real data).
+- [x] Fetch-and-simplify vs committed geometry — resolved: fetched + simplified by
+  `scripts/fetch_basemap.ts` from the GPlates Web Service and **committed** so
+  build/CI stay offline.
 
 ## Human decisions required
 
@@ -257,12 +260,12 @@ graticule/ocean placeholder; occurrences and the loop are unaffected.
   disproved, it was replaced with **real** reconstructed coastlines from the
   GPlates Web Service in the **same `scotese` frame as the occurrences**, so land
   and points align (REQ-002 matching branch). Geometry is fetched + simplified by
-  `scripts/fetch_basemap.ts` and **committed** so build/CI stay offline. **Owner:
-  ratification still invited.**
+  `scripts/fetch_basemap.ts` and **committed** so build/CI stay offline. **Owner
+  ratified 2026-07-21 ("I approve them, it's all good").**
 - [x] **One reconstruction for the MVP window** — confirmed; per-stage coastlines
   deferred.
 - [x] Approved — proceeded to implementation under owner direction; status set to
-  Approved. Owner ratification of the source choice above is still invited.
+  Approved. Owner ratified the source choice above on 2026-07-21.
 
 ## Conflict check
 
@@ -275,12 +278,12 @@ new data model. No contradiction with existing specs.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Map basemap layer | `src/app/components/OccurrenceMap.tsx` | _TBD_ | In Review |
-| REQ-002 | Frame metadata | basemap asset + map | _TBD_ | In Review |
-| REQ-003 | Attribution | map attribution control | _TBD_ | In Review |
-| REQ-004 | Fallback | `OccurrenceMap.tsx` | _TBD_ | In Review |
-| NFR-001 | Geometry asset | build/asset | _TBD_ | In Review |
-| SEC-001 | Static delivery | basemap asset | _TBD_ | In Review |
+| REQ-001 | Map basemap layer | `src/app/components/OccurrenceMap.tsx`, `src/app/data/basemap.ts` | `test/ui/basemap.test.ts` | Implemented |
+| REQ-002 | Frame metadata | `src/app/data/basemap.ts` + map | `test/ui/basemap.test.ts` | Implemented |
+| REQ-003 | Attribution | map attribution control | `test/ui/basemap.test.ts` | Implemented |
+| REQ-004 | Fallback | `src/app/components/OccurrenceMap.tsx` | `test/ui/basemap.test.ts` | Implemented |
+| NFR-001 | Geometry asset | `scripts/fetch_basemap.ts`, `public/basemap/late-cretaceous.geojson` | `test/ui/basemap.test.ts` | Implemented |
+| SEC-001 | Static delivery | committed basemap asset | `test/ui/basemap.test.ts` | Implemented |
 
 ## Implementation notes
 
@@ -340,7 +343,7 @@ the simplifier — acceptable for a basemap.
   "same reconstruction" note; `test/ui/basemap.test.ts` unchanged (frame logic
   covers both branches).
 - **Human approval reference:** Made under owner direction after the owner
-  challenged the "environment is limited" claim; owner ratification still invited.
+  challenged the "environment is limited" claim; owner ratified 2026-07-21.
 
 ## Review checklist
 
@@ -351,5 +354,5 @@ the simplifier — acceptable for a basemap.
 - [x] Open questions resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [x] Human approval recorded (proceeded under owner direction; source
-      ratification invited).
+- [x] Human approval recorded (proceeded under owner direction; owner ratified
+      2026-07-21).

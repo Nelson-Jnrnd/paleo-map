@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-003
 title: Exploration view — first UI vertical slice
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [6]
 affected_components: [app-frontend, map-rendering, styling, exploration-view, occurrence-panel, taxon-profile]
 affected_interfaces: [static-data-artifacts]
 supersedes: []
@@ -365,18 +365,18 @@ pass as automated tests.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Persistent age/group/count context | automated | `pnpm test` component test | `test/ui/exploration-context.test.tsx` | _TBD_ |
-| REQ-002 | Reconstruction-labeled MapLibre map, markers | manual + automated | mockup check + component test | `src/app/components/OccurrenceMap.tsx` | _TBD_ |
-| REQ-003 | Keyboard list, source + uncertainty per row | automated | `pnpm test` component test | `test/ui/occurrence-list.test.tsx` | _TBD_ |
-| REQ-004 | Stage step updates occurrences in place | automated | PERF-360 scenario test | `test/ui/scenario-perf-360.test.tsx` | _TBD_ |
-| REQ-005 | Dinosaurs default + reset + not-complete-atlas | automated | component test | `test/ui/exploration-context.test.tsx` | _TBD_ |
-| REQ-006 | Occurrence panel with provenance + primary action | automated | component test | `test/ui/occurrence-panel.test.tsx` | _TBD_ |
-| REQ-007 | Profile ≤2 actions; back ≤1; state preserved | automated | PERF-340 scenario test | `test/ui/scenario-perf-340.test.tsx` | _TBD_ |
-| REQ-008 | Loading/empty/error/minimal states | automated | PERF-370 + component tests | `test/ui/scenario-perf-370.test.tsx`, `test/ui/data-states.test.tsx` | _TBD_ |
-| NFR-001 | Static build, single local fetch | inspection | build + code inspection | `vite.config.ts`, `src/app/data/snapshot.ts` | _TBD_ |
-| NFR-002 | Token-driven styling, no CSS-in-JS | inspection | code + dependency check | `src/app/styles/tokens.css` | _TBD_ |
-| NFR-003 | ≤1 s in-memory re-filter; loading >500 ms | inspection + automated | code inspection + PERF-360 | `src/app/state/exploration.ts` | _TBD_ |
-| SEC-001 | No secret/telemetry/token map | inspection | code + dependency check | `src/app/components/OccurrenceMap.tsx` | _TBD_ |
+| REQ-001 | Persistent age/group/count context | automated | `pnpm test` component test | `test/ui/exploration-context.test.tsx` | #6 |
+| REQ-002 | Reconstruction-labeled MapLibre map, markers | manual + automated | mockup check + component test | `src/app/components/OccurrenceMap.tsx` | #6 |
+| REQ-003 | Keyboard list, source + uncertainty per row | automated | `pnpm test` component test | `test/ui/occurrence-list.test.tsx` | #6 |
+| REQ-004 | Stage step updates occurrences in place | automated | PERF-360 scenario test | `test/ui/scenario-perf-360.test.tsx` | #6 |
+| REQ-005 | Dinosaurs default + reset + not-complete-atlas | automated | component test | `test/ui/exploration-context.test.tsx` | #6 |
+| REQ-006 | Occurrence panel with provenance + primary action | automated | component test | `test/ui/occurrence-panel.test.tsx` | #6 |
+| REQ-007 | Profile ≤2 actions; back ≤1; state preserved | automated | PERF-340 scenario test | `test/ui/scenario-perf-340.test.tsx` | #6 |
+| REQ-008 | Loading/empty/error/minimal states | automated | PERF-370 + component tests | `test/ui/scenario-perf-370.test.tsx`, `test/ui/data-states.test.tsx` | #6 |
+| NFR-001 | Static build, single local fetch | inspection | build + code inspection | `vite.config.ts`, `src/app/data/snapshot.ts` | #6 |
+| NFR-002 | Token-driven styling, no CSS-in-JS | inspection | code + dependency check | `src/app/styles/tokens.css` | #6 |
+| NFR-003 | ≤1 s in-memory re-filter; loading >500 ms | inspection + automated | code inspection + PERF-360 | `src/app/state/exploration.ts` | #6 |
+| SEC-001 | No secret/telemetry/token map | inspection | code + dependency check | `src/app/components/OccurrenceMap.tsx` | #6 |
 
 ## Test plan
 
@@ -441,18 +441,18 @@ spec; `depends_on: [SPEC-001, SPEC-002]` is recorded in frontmatter.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Exploration shell / context bar | `src/app/components/ContextBar.tsx`, `ExplorationView.tsx` | `test/ui/exploration-context.test.tsx` | Approved |
-| REQ-002 | Map (MapLibre) | `src/app/components/OccurrenceMap.tsx` | manual + `test/ui/occurrence-list.test.tsx` | Approved |
-| REQ-003 | Occurrence list | `src/app/components/OccurrenceList.tsx` | `test/ui/occurrence-list.test.tsx` | Approved |
-| REQ-004 | Timeline | `src/app/components/TimelineControl.tsx`, `src/app/state/exploration.ts` | `test/ui/scenario-perf-360.test.tsx` | Approved |
-| REQ-005 | Group control / context | `src/app/components/ContextBar.tsx` | `test/ui/exploration-context.test.tsx` | Approved |
-| REQ-006 | Occurrence panel | `src/app/components/OccurrencePanel.tsx` | `test/ui/occurrence-panel.test.tsx` | Approved |
-| REQ-007 | Taxon profile | `src/app/components/TaxonProfile.tsx` | `test/ui/scenario-perf-340.test.tsx` | Approved |
-| REQ-008 | Data states | `src/app/components/states/*`, `App.tsx` | `test/ui/scenario-perf-370.test.tsx`, `test/ui/data-states.test.tsx` | Approved |
-| NFR-001 | Data load | `src/app/data/snapshot.ts`, `vite.config.ts` | build inspection | Approved |
-| NFR-002 | Tokens | `src/app/styles/tokens.css` | inspection | Approved |
-| NFR-003 | State/filtering | `src/app/state/exploration.ts` | `test/ui/scenario-perf-360.test.tsx` | Approved |
-| SEC-001 | Map style | `src/app/components/OccurrenceMap.tsx` | inspection | Approved |
+| REQ-001 | Exploration shell / context bar | `src/app/components/ContextBar.tsx`, `ExplorationView.tsx` | `test/ui/exploration-context.test.tsx` | Implemented |
+| REQ-002 | Map (MapLibre) | `src/app/components/OccurrenceMap.tsx` | manual + `test/ui/occurrence-list.test.tsx` | Implemented |
+| REQ-003 | Occurrence list | `src/app/components/OccurrenceList.tsx` | `test/ui/occurrence-list.test.tsx` | Implemented |
+| REQ-004 | Timeline | `src/app/components/TimelineControl.tsx`, `src/app/state/exploration.ts` | `test/ui/scenario-perf-360.test.tsx` | Implemented |
+| REQ-005 | Group control / context | `src/app/components/ContextBar.tsx` | `test/ui/exploration-context.test.tsx` | Implemented |
+| REQ-006 | Occurrence panel | `src/app/components/OccurrencePanel.tsx` | `test/ui/occurrence-panel.test.tsx` | Implemented |
+| REQ-007 | Taxon profile | `src/app/components/TaxonProfile.tsx` | `test/ui/scenario-perf-340.test.tsx` | Implemented |
+| REQ-008 | Data states | `src/app/components/states/*`, `App.tsx` | `test/ui/scenario-perf-370.test.tsx`, `test/ui/data-states.test.tsx` | Implemented |
+| NFR-001 | Data load | `src/app/data/snapshot.ts`, `vite.config.ts` | build inspection | Implemented |
+| NFR-002 | Tokens | `src/app/styles/tokens.css` | inspection | Implemented |
+| NFR-003 | State/filtering | `src/app/state/exploration.ts` | `test/ui/scenario-perf-360.test.tsx` | Implemented |
+| SEC-001 | Map style | `src/app/components/OccurrenceMap.tsx` | inspection | Implemented |
 
 ## Implementation notes
 
@@ -474,8 +474,8 @@ consuming the unchanged SPEC-001 `ReadApi`. Evidence:
 Assumptions A-1 (graticule basemap, no paleocoastline geometry), A-2
 (reducer/context state, no URL state) and A-3 (Playwright/axe CI gate deferred)
 are the scoped deviations from a fuller UI; each traces to a later slice. Status
-is kept `Approved` (not `Implemented`) until a PR reference exists to satisfy the
-lifecycle/drift rules.
+is `Implemented`: the slice merged in PR #6 (assumption A-1 is superseded by
+SPEC-004's real basemap; A-3's CI gates landed via AMEND-002).
 
 ## Spec amendments
 
@@ -513,7 +513,7 @@ lifecycle/drift rules.
   deterministic regardless of the shipped artifact.
 - **Human approval reference:** Made under owner direction ("do the next planned
   step") after the owner corrected the "environment is limited" assumption; owner
-  ratification invited.
+  ratified 2026-07-21 ("I approve them, it's all good").
 
 ### AMEND-002: CI gates, served-artifact size, and accessibility contrast
 
@@ -548,7 +548,7 @@ lifecycle/drift rules.
   (`test/ui/occurrence-list.test.tsx`, SPEC-005 REQ-004); no behavioural test
   changes to the loop.
 - **Human approval reference:** Owner-directed ("wrap up all loose ends, ci gates
-  and 7mb snapshot in this PR then open it"); ratification invited.
+  and 7mb snapshot in this PR then open it"); owner ratified 2026-07-21.
 
 ## Review checklist
 

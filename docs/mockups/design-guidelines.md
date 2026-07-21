@@ -80,8 +80,8 @@ tokens; do not hand-code a second theme.
 | Panel / surface | `#ffffff` | Sidebars, panels, cards, control bars |
 | Land | `#edf1f1`, coast `#a9b9c3` | Reconstructed continental masses |
 | Graticule / line | `#cdd9e0` grid · `#cfd8de` / `#dde5ea` borders & dividers | Map grid, borders |
-| Text | `#1f2b38` hi · `#33424f` · `#5f7180` muted · `#6e8091` faint · `#93a2ad` id | Type ramp |
-| **Accent — teal** | `#0f9d83` (deep `#0c8f76`, cluster `#17a98c`, on-accent `#ffffff`) | The single accent: the occurrence/data layer, selection, primary action, current-age handle |
+| Text | `#1f2b38` hi · `#33424f` · `#52606e` muted · `#5b6773` faint · `#5f6a75` id | Type ramp |
+| **Accent — teal** | `#0f9d83` (deep `#0a7f66`, cluster `#17a98c`, on-accent `#ffffff`) | The single accent: the occurrence/data layer, selection, primary action, current-age handle |
 
 Teal is the *only* accent, and it belongs to the data + interaction layer
 (occurrence markers, the selected point, primary buttons, the time handle).
@@ -99,9 +99,18 @@ Everything else is cool neutral. Two additional colour systems exist, both
 | Reconstructed | ▲ + neutral chip | Paleogeographic position is modeled, not observed |
 | Approximate | ≈ + neutral chip | Time range is uncertain / broad |
 | Interpretative | muted, separated block | Inferred, not fossil-derived |
-| Incomplete / attention | muted amber `#b7791f`, sparing | Profile is partial (a "note", not an error) |
+| Incomplete / attention | muted amber `#8a5a12`, sparing | Profile is partial (a "note", not an error) |
 | Missing | explicit "Not available" label | Field has no sourced value |
-| Error | red `#cf4436`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
+| Error | red `#c0392b`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
+
+> **Accessibility reconciliation (SPEC-003 AMEND-002).** The muted/faint/id greys,
+> the deep teal used for small text and button fills, and the amber/error status
+> hues above were **darkened from their original charter values** so that text and
+> UI meet WCAG 2 AA contrast (4.5:1), which the axe gate enforces. The values in
+> these tables are the shipped, AA-safe ones; where accessibility and the original
+> aesthetic hex conflict, **accessibility wins** (charter restraint is preserved —
+> only the luminance moved, not the hue family). The live source of truth is
+> `src/app/styles/tokens.css`.
 
 **Typography.** Three roles, chosen to avoid the generic system-sans default:
 
