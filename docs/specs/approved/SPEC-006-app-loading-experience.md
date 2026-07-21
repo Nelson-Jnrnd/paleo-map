@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-006
 title: App loading experience — splash and progress
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: [SPEC-003]
 conflicts_with: []
-last_verified_at:
+last_verified_at: 2026-07-21
 ---
 
 # SPEC-006: App loading experience — splash and progress
@@ -292,15 +292,47 @@ overlap or contradiction; `depends_on: [SPEC-003]` recorded in frontmatter.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| UX-001 | Pre-JS splash | `index.html` | E2E | Draft |
-| UX-002 | Progress indicator | progress module, `src/app/data/snapshot.ts` | unit + E2E | Draft |
-| UX-003 | Boot orchestration | `src/app/App.tsx` | E2E | Draft |
-| NFR-001 | Tokens / budget | `index.html`, `src/app/styles/tokens.css` | inspection + CI | Draft |
-| SEC-001 | Self-contained splash | `index.html` | inspection | Draft |
+| UX-001 | Pre-JS splash | `index.html` | `test/ui/splash.test.ts` + browser check | Implemented |
+| UX-002 | Progress indicator | `src/app/data/snapshot.ts`, `src/app/components/states.tsx` | `test/ui/load-progress.test.ts`, `test/ui/loading-state.test.tsx` | Implemented |
+| UX-003 | Boot orchestration | `src/app/App.tsx` | `test/ui/data-states.test.tsx` | Implemented |
+| NFR-001 | Tokens / budget | `index.html`, `src/app/components/exploration.module.css` | budget CI + inspection | Implemented |
+| SEC-001 | Self-contained splash | `index.html` | `test/ui/splash.test.ts` | Implemented |
 
 ## Implementation notes
 
-_(Filled at implementation.)_
+Implemented on branch `claude/project-state-report-k84bpn` (2026-07-21), additive
+to the SPEC-003 boot flow. Evidence:
+
+- **Pre-JS splash (UX-001, SEC-001):** inlined in `index.html` inside `#root`
+  (self-contained inline CSS, charter colours mirrored, no external asset). React
+  replaces it on mount. Verified in-browser: with JavaScript disabled the styled
+  splash renders (no white page); after mount `#app-splash` is gone. `test/ui/
+  splash.test.ts` asserts the markup precedes the app script and references no
+  external host.
+- **Determinate progress (UX-002):** `fetchReadModel` now streams the response
+  body (`ReadableStream` reader) and emits `LoadProgress` from bytes received vs.
+  `Content-Length`; `progressRatio` is a pure, clamped helper with an indeterminate
+  fallback when no length is exposed. `LoadingState` renders a `role="progressbar"`
+  with `aria-valuenow`/percentage (determinate) or MB-downloaded (indeterminate),
+  reduced-motion honoured in CSS. Tests: `test/ui/load-progress.test.ts`,
+  `test/ui/loading-state.test.tsx`.
+- **Phased handoff (UX-003):** `App` threads the progress callback into the loader,
+  shows the progress surface while loading, and hands off to the exploration view
+  once; the existing error/Retry path (SPEC-003 REQ-008) is preserved and still
+  covered by `test/ui/data-states.test.tsx`.
+- **NFR-001:** no runtime dependency added; splash/bar use charter tokens (bar) /
+  mirrored charter values (pre-JS splash); the size-budget gate passes
+  (`index.html` 3.15 kB; data + JS within budget).
+
+Decision on Open question 1: implemented the **byte-accurate streaming** reader
+(not a coarse phase-only indicator). Map-init is represented by the `preparing`
+phase label but the loader does not block on the canvas (the accessible path stays
+available). Code-splitting (Open question 2) remains deferred.
+
+Deviation: the pre-JS splash uses charter colour **values inlined** in
+`index.html` (it cannot reference `tokens.css` custom properties before the bundle
+loads); the values mirror the tokens and are commented as such. Recorded against
+NFR-001's "no stray hardcoded palette hexes" as a necessary, documented exception.
 
 ## Spec amendments
 

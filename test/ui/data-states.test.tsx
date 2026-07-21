@@ -19,9 +19,11 @@ test("shows a loading indicator while the snapshot loads (FONC-1260)", () => {
   const pending: () => Promise<ReadModel> = () =>
     new Promise<ReadModel>(() => {});
   render(<App loader={pending} />);
+  // SPEC-006: the loading surface shows a progressbar and a download label.
   expect(screen.getByRole("status")).toHaveTextContent(
-    /Loading the dated snapshot/i,
+    /Downloading fossil data/i,
   );
+  expect(screen.getByRole("progressbar")).toBeInTheDocument();
 });
 
 test("shows an error with Retry that recovers (FONC-1310/1330)", async () => {

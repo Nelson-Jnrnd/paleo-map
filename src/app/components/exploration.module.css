@@ -445,6 +445,53 @@
   color: var(--color-error);
 }
 
+/* --- Load progress (SPEC-006 UX-002) --- */
+.progressTrack {
+  width: 100%;
+  max-width: 320px;
+  height: 6px;
+  background: var(--color-grid);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--color-accent-deep);
+  border-radius: var(--radius-sm);
+  transition: width 180ms ease-out;
+}
+
+.progressIndeterminate {
+  width: 40%;
+  animation: progressSlide 1.1s ease-in-out infinite;
+}
+
+.progressDetail {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressBar {
+    transition: none;
+  }
+  .progressIndeterminate {
+    width: 100%;
+    animation: none;
+  }
+}
+
 /* --- Taxon profile --- */
 .profile {
   max-width: 720px;

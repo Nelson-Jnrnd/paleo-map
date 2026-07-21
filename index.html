@@ -8,9 +8,92 @@
       name="description"
       content="Explore where and when non-avian dinosaurs are known from fossil evidence across the Mesozoic, with sources and uncertainty always visible."
     />
+    <!--
+      Pre-JS splash (SPEC-006 UX-001). Painted before the app bundle executes so
+      the first frame is never a blank white page. Self-contained: inline CSS
+      only, no external font/image/stylesheet (SEC-001). The colours mirror the
+      design charter tokens (docs/mockups/design-guidelines.md §4 / tokens.css);
+      they must be inline here because tokens.css only loads with the bundle.
+      React replaces #root on mount, removing this automatically.
+    -->
+    <style>
+      #app-splash {
+        --splash-ground: #e9eef2;
+        --splash-ocean: #d7e4ec;
+        --splash-ink: #1f2b38;
+        --splash-muted: #52606e;
+        --splash-accent: #0a7f66;
+        --splash-grid: #cdd9e0;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 24px;
+        text-align: center;
+        background: var(--splash-ground);
+        color: var(--splash-ink);
+        font-family: "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+      }
+      #app-splash .splash-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      #app-splash .splash-sub {
+        margin: 0;
+        font-size: 13px;
+        color: var(--splash-muted);
+      }
+      #app-splash .splash-track {
+        width: 100%;
+        max-width: 320px;
+        height: 6px;
+        margin-top: 4px;
+        background: var(--splash-grid);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      #app-splash .splash-bar {
+        width: 40%;
+        height: 100%;
+        background: var(--splash-accent);
+        border-radius: 4px;
+        animation: splashSlide 1.1s ease-in-out infinite;
+      }
+      @keyframes splashSlide {
+        0% {
+          transform: translateX(-110%);
+        }
+        100% {
+          transform: translateX(320%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash .splash-bar {
+          width: 100%;
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-splash" role="status" aria-live="polite">
+        <p class="splash-title">Interactive Mesozoic Dinosaur Atlas</p>
+        <p class="splash-sub">Loading fossil data…</p>
+        <div
+          class="splash-track"
+          role="progressbar"
+          aria-label="Loading fossil data"
+        >
+          <div class="splash-bar"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

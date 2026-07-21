@@ -6,12 +6,64 @@
  */
 
 import type { ReactElement } from "react";
+import type { LoadProgress } from "../data/snapshot.js";
 import styles from "./exploration.module.css";
 
-export function LoadingState({ label }: { label: string }): ReactElement {
+function formatMb(bytes: number): string {
+  return `${(bytes / 1_000_000).toFixed(1)} MB`;
+}
+
+/**
+ * Loading surface (SPEC-003 REQ-008; SPEC-006 UX-002/003). Shows a determinate
+ * progress bar when the download reports a byte ratio, and a labelled
+ * indeterminate bar otherwise. The bar is a `role="progressbar"` so assistive
+ * tech announces progress; the phase/percentage is also plain text (never
+ * colour-only — PERF-250). Reduced motion is honoured in CSS.
+ */
+export function LoadingState({
+  label,
+  progress,
+}: {
+  label?: string;
+  progress?: LoadProgress | null;
+}): ReactElement {
+  const phase = progress?.phase;
+  const ratio = progress?.ratio;
+  const determinate = typeof ratio === "number";
+  const percent = determinate ? Math.round(ratio * 100) : undefined;
+
+  const phaseLabel =
+    label ??
+    (phase === "preparing"
+      ? "Preparing the view…"
+      : phase === "ready"
+        ? "Ready"
+        : "Downloading fossil data…");
+
+  const detail =
+    determinate && percent !== undefined
+      ? `${percent}%`
+      : progress?.receivedBytes
+        ? formatMb(progress.receivedBytes)
+        : null;
+
   return (
     <div className={styles.stateWrap} role="status" aria-live="polite">
-      <p className={styles.stateTitle}>{label}</p>
+      <p className={styles.stateTitle}>{phaseLabel}</p>
+      <div
+        className={styles.progressTrack}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        {...(determinate ? { "aria-valuenow": percent } : {})}
+        aria-label={phaseLabel}
+      >
+        <div
+          className={`${styles.progressBar} ${determinate ? "" : styles.progressIndeterminate}`}
+          style={determinate ? { width: `${percent}%` } : undefined}
+        />
+      </div>
+      {detail && <p className={styles.progressDetail}>{detail}</p>}
     </div>
   );
 }
