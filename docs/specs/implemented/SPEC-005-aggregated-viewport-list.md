@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-005
 title: Aggregated, viewport-linked occurrence list
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [6]
 affected_components: [app-frontend, exploration-view, map-rendering, occurrence-list]
 affected_interfaces: []
 supersedes: []
@@ -223,12 +223,12 @@ action (REQ-003); keeps the DOM bounded at any scale, replacing the flat cap
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Grouped headers + counts + toggle + group-by | automated | unit + component | `test/ui/aggregate.test.ts`, `test/ui/occurrence-list.test.tsx` | _TBD_ |
-| REQ-002 | Viewport narrows list; missing-paleo kept | automated | unit bounds + component header | `test/ui/aggregate.test.ts` | _TBD_ |
-| REQ-003 | Loop + provenance + header profile action | automated | PERF-340 + component | `test/ui/scenario-perf-340.test.tsx` | _TBD_ |
-| REQ-004 | Bounded DOM; per-group cap + overflow hint | automated | component (large group) | `test/ui/occurrence-list.test.tsx` | _TBD_ |
-| REQ-005 | No-map grouping; empty-view message | automated | component | `test/ui/occurrence-list.test.tsx` | _TBD_ |
-| NFR-001 | In-memory O(n), no I/O on pan | inspection + E2E | code + live pan | `src/app/state/aggregate.ts` | _TBD_ |
+| REQ-001 | Grouped headers + counts + toggle + group-by | automated | unit + component | `test/ui/aggregate.test.ts`, `test/ui/occurrence-list.test.tsx` | #6 |
+| REQ-002 | Viewport narrows list; missing-paleo kept | automated | unit bounds + component header | `test/ui/aggregate.test.ts` | #6 |
+| REQ-003 | Loop + provenance + header profile action | automated | PERF-340 + component | `test/ui/scenario-perf-340.test.tsx` | #6 |
+| REQ-004 | Bounded DOM; per-group cap + overflow hint | automated | component (large group) | `test/ui/occurrence-list.test.tsx` | #6 |
+| REQ-005 | No-map grouping; empty-view message | automated | component | `test/ui/occurrence-list.test.tsx` | #6 |
+| NFR-001 | In-memory O(n), no I/O on pan | inspection + E2E | code + live pan | `src/app/state/aggregate.ts` | #6 |
 
 ## Test plan
 
@@ -259,7 +259,7 @@ pipeline, or map-rendering change to undo.
 
 - [x] Build the **aggregate-by-taxon/formation + viewport-linked** list and ship it —
   directed by the owner ("Aggregate-by-taxon/formation + viewport-linked. spec it and
-  do it"), 2026-07-13. Owner ratification of the spec invited.
+  do it"), 2026-07-13. Owner ratified 2026-07-21 ("I approve them, it's all good").
 
 ## Conflict check
 
@@ -273,12 +273,12 @@ in the functional specification) and no SPEC-001/002 decision. No blocking confl
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Grouping | `src/app/state/aggregate.ts`, `src/app/components/OccurrenceList.tsx` | `test/ui/aggregate.test.ts` | Approved |
-| REQ-002 | Viewport link | `OccurrenceMap.tsx` (onViewportChange), `ExplorationView.tsx`, `aggregate.ts` | `test/ui/aggregate.test.ts` | Approved |
-| REQ-003 | Loop | `OccurrenceList.tsx`, `OccurrencePanel.tsx` | `test/ui/scenario-perf-340.test.tsx` | Approved |
-| REQ-004 | Bounded render | `OccurrenceList.tsx` | `test/ui/occurrence-list.test.tsx` | Approved |
-| REQ-005 | Fallback/empty | `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/occurrence-list.test.tsx` | Approved |
-| NFR-001 | Filter/group | `src/app/state/aggregate.ts` | inspection | Approved |
+| REQ-001 | Grouping | `src/app/state/aggregate.ts`, `src/app/components/OccurrenceList.tsx` | `test/ui/aggregate.test.ts` | Implemented |
+| REQ-002 | Viewport link | `OccurrenceMap.tsx` (onViewportChange), `ExplorationView.tsx`, `aggregate.ts` | `test/ui/aggregate.test.ts` | Implemented |
+| REQ-003 | Loop | `OccurrenceList.tsx`, `OccurrencePanel.tsx` | `test/ui/scenario-perf-340.test.tsx` | Implemented |
+| REQ-004 | Bounded render | `OccurrenceList.tsx` | `test/ui/occurrence-list.test.tsx` | Implemented |
+| REQ-005 | Fallback/empty | `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/occurrence-list.test.tsx` | Implemented |
+| NFR-001 | Filter/group | `src/app/state/aggregate.ts` | inspection | Implemented |
 
 ## Implementation notes
 
@@ -322,4 +322,4 @@ _None._
 - [x] Open questions resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed (supersedes SPEC-003 AMEND-001 list cap).
-- [x] Human approval recorded (owner-directed; ratification invited).
+- [x] Human approval recorded (owner-directed; owner ratified 2026-07-21).
