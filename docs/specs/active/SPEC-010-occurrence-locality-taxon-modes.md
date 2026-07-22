@@ -6,8 +6,8 @@ status: Draft
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
-affected_components: [app-frontend, exploration-view, map-rendering, occurrence-list, context-bar, read-model, pipeline, styling]
-affected_interfaces: [ReadOccurrence, ReadTaxon, ReadApi]
+affected_components: [app-frontend, exploration-view, map-rendering, occurrence-list, context-bar, read-model, pipeline, ingestion, styling]
+affected_interfaces: [ReadOccurrence, ReadTaxon, ReadApi, PbdbOccRecord, PbdbTaxonRecord]
 supersedes: []
 superseded_by:
 depends_on: [SPEC-001, SPEC-003, SPEC-008, SPEC-009]
@@ -27,8 +27,11 @@ taxonomic name). In Taxon mode the map still plots every real occurrence — a t
 right-hand list becomes one row per taxon and selecting a taxon **focuses all of its
 occurrences at once** (emphasised on the map, the rest dimmed) and routes to its
 profile. Taxon mode carries a **rank selector** so the Explorer can roll records up to a
-chosen rank (e.g. group by Genus instead of Species). Occurrence mode is the default and
-its current behaviour is unchanged.
+chosen rank (e.g. group by Family instead of Genus). Because the current snapshot pulls
+**only genera**, delivering the rank selector requires a **pipeline change** — ingesting
+the Dinosauria taxonomic hierarchy (taxa at several ranks with resolvable parent links)
+from PBDB — which this spec includes (owner-directed to do the pipeline work in this same
+change). Occurrence mode is the default and its current behaviour is unchanged.
 
 ## Context
 
@@ -46,24 +49,33 @@ non-goal ("no taxon/formation aggregation … this list is flat"). This spec is 
 owner-directed return of grouping — but generalised into a first-class **mode** the user
 picks, not a fixed layout.
 
-Two enabling facts from the data layer make the new modes honest and cheap:
+Two enabling facts from the data layer, established by inspecting the built snapshot and
+the pipeline (2026-07-22):
 
-- A **collection** already carries one real paleocoordinate (`Collection.paleo`), and
-  every occurrence carries its `collectionId` at L1 (`src/pipeline/sources.ts`,
-  `ingest.ts`). Collapsing co-located occurrences to one **locality** marker is therefore
-  *not* inventing a position — it is the collection's own point. `derive.ts` currently
-  drops `collectionId` from `ReadOccurrence` (keeping only `collectionName`), so it must
-  be exposed (DATA-001).
-- Every taxon already carries `parentId` at L1 (`sources.ts`, `ingest.ts`), but
-  `ReadTaxon` does not expose it, so a rank roll-up has no ancestry to walk. Exposing the
-  taxonomic parent linkage (DATA-002) enables the rank selector.
+- **Localities are ready today.** A collection already carries one real paleocoordinate
+  (`Collection.paleo`), and every occurrence carries its `collectionId` at L1
+  (`src/pipeline/sources.ts`, `ingest.ts`). Collapsing co-located occurrences to one
+  **locality** marker is therefore *not* inventing a position — it is the collection's
+  own point. `derive.ts` currently drops `collectionId` from `ReadOccurrence` (keeping
+  only `collectionName`), so it must be exposed (DATA-001).
+- **The taxonomic hierarchy is absent by our own scoping, not by PBDB.** The built
+  `reference.json` holds **2124 taxa, all rank `Genus`, zero `parentId`**, and only ~43 %
+  of a stage's occurrences resolve to one of those genera (the rest are higher-clade
+  "*… indet.*" identifications). This is because `HttpSourceClient.pbdbTaxa()` queries
+  PBDB with **`&rank=genus`** — we pull genera only. PBDB is itself a taxonomy database
+  and holds the full parent tree; in fact our occurrences query already uses
+  `show=class`, so the higher classification (family/order/class) is **already returned
+  and discarded** (`PbdbOccRecord` only reads `gnl`). A rank roll-up therefore has no
+  ancestry to walk **until the pull is widened** — the owner directed doing that pipeline
+  work here (decision 2026-07-22, "b").
 
 The owner directed this in chat (2026-07-22): separate an occurrence mode from a
 **taxon** mode grouped by taxon, with a **rank selector inside** taxon mode; agreed the
 map should keep the real occurrence points and make the taxon the unit of
-list/selection/focus (interpretation "A", **not** a centroid glyph); and agreed to
-**also build the Locality** grouping as the honest fix for the overplotting of
-co-located records.
+list/selection/focus (interpretation "A", **not** a centroid glyph); agreed to **also
+build the Locality** grouping as the honest fix for the overplotting of co-located
+records; and, on learning the missing hierarchy is our scoping choice, directed doing the
+**pipeline hierarchy work in this branch** rather than deferring it.
 
 ## Problem statement
 
@@ -72,7 +84,9 @@ There is only one way to read the map and list — as individual records. That i
 and become individually un-clickable at high zoom, and it offers no way to ask the two
 questions a paleontologist actually asks: *"what is at this place?"* (locality) and
 *"where and when did this taxon live?"* (taxon). Meanwhile the spatial cluster count
-(“42”) mixes records and taxa and silently reads as diversity when it only means density.
+(“42”) mixes records and taxa and silently reads as diversity when it only means density;
+and grouping by anything coarser than the identified taxon is impossible because the
+snapshot only holds genera.
 
 ## Goals
 
@@ -83,14 +97,20 @@ questions a paleontologist actually asks: *"what is at this place?"* (locality) 
   spatial-cluster count legibly mean "records here" (density), not diversity.
 - Add **Locality mode**: collapse occurrences that share a `collectionId` into one
   marker at the collection's real paleocoordinate; the list becomes one row per
-  locality; selecting a locality inspects the taxa recorded there.
+  locality; selecting a locality inspects the taxa recorded there. Locality markers are
+  spatially clustered like occurrence points (Q2 decision, 2026-07-22).
 - Add **Taxon mode** (interpretation A): the map still plots **every** occurrence; the
-  list becomes one row per taxon (name + occurrence count + aggregate Ma span);
-  selecting a taxon **focuses all of its occurrences** (emphasised, the rest dimmed) and
-  routes to the taxon profile (SPEC-003 loop).
+  list becomes one row per taxon **currently in the viewport** (SPEC-009-consistent, Q3
+  decision), showing name + occurrence count + aggregate Ma span; selecting a taxon
+  **focuses all of its occurrences** (emphasised, the rest dimmed) and routes to the
+  taxon profile (SPEC-003 loop).
 - Add a **rank selector** inside Taxon mode that rolls occurrences up their taxonomic
   parent chain to a chosen rank (Species / Genus / Family / Clade), so grouping
   granularity is the user's choice.
+- **Widen the ingestion** so the snapshot carries the Dinosauria taxonomic hierarchy —
+  taxa at the ranks needed for roll-up, each with its real rank and a parent link that
+  resolves within the snapshot — replacing the genus-only pull, deterministically and
+  within the size budget.
 - Preserve the SPEC-009 viewport-linkage and two-way map↔list highlighting under every
   mode; preserve keyboard/screen-reader operability throughout.
 
@@ -105,18 +125,23 @@ questions a paleontologist actually asks: *"what is at this place?"* (locality) 
 - **No multi-select** of taxa/localities, no set operations, no cross-mode comparison
   view. One selection at a time (as today).
 - **No free-text search, faceted filters, or a classification browser** (still SPEC-009
-  non-goals).
-- **No change to the snapshot's taxonomic coverage or time window** (SPEC-008), the
-  basemap frames (SPEC-004), continuous/sub-stage time (SPEC-008 REQ-002), or URL/deep-
-  link state (SPEC-009 assumption A-2 stands).
+  non-goals). The rank selector is a single granularity control, not a tree navigator.
+- **No change to the time window** (SPEC-008 REQ-001 Mesozoic bounds), the basemap frames
+  (SPEC-004), continuous/sub-stage time (SPEC-008 REQ-002), or URL/deep-link state
+  (SPEC-009 assumption A-2 stands). The *taxonomic* coverage does change (DATA-003).
+- **No new base_name or non-Dinosauria clades.** The widened pull stays within
+  `base_name=Dinosauria` (SPEC-008 scope); it adds *ranks/parents inside that clade*, not
+  new taxa outside it.
+- **No new runtime egress** — the hierarchy is fetched at ingestion (build) time only;
+  the app still reads the static snapshot (DATA-005).
 - **No new spatial index** — a linear scan / hash-group over the loaded stage set is
   ample at MVP volume.
 
 ## Users or actors
 
 The **Explorer**, including keyboard and screen-reader users. Downstream: the **pipeline
-/ snapshot** (must expose two already-present L1 fields), and the **read API** consumed
-by the exploration view.
+/ ingestion** (widened PBDB pull + snapshot rebuild), and the **read API** consumed by
+the exploration view.
 
 ## Functional requirements
 
@@ -161,22 +186,24 @@ by the exploration view.
 - **Statement:** In **Locality** mode the map must render **one marker per collection**
   (grouping every visible occurrence that shares a `collectionId`) placed at that
   collection's **own reconstructed paleocoordinate** — never a computed/averaged
-  position. Each locality marker must convey how many records (and how many distinct
-  taxa) it groups without colour-alone. The viewport-linked list must show **one row per
-  locality** (collection or formation name + distinct-taxon count + the locality's Ma
-  range), and selecting a locality must open a panel that lists the **taxa/occurrences
-  recorded at that locality**, each row reaching the occurrence panel / taxon profile
-  (SPEC-003 loop preserved). Occurrences sharing a collection but differing only in
-  identification collapse into that one locality.
+  position — and those locality markers must be **spatially clustered** at low zoom the
+  same way occurrence points are (Q2 decision, 2026-07-22). Each locality marker must
+  convey how many records (and how many distinct taxa) it groups without colour-alone.
+  The viewport-linked list must show **one row per locality** (collection or formation
+  name + distinct-taxon count + the locality's Ma range), and selecting a locality must
+  open a panel that lists the **taxa/occurrences recorded at that locality**, each row
+  reaching the occurrence panel / taxon profile (SPEC-003 loop preserved). Occurrences
+  sharing a collection but differing only in identification collapse into that one
+  locality.
 - **Rationale:** A collection is a real place with one real paleocoordinate, so
   collapsing to it is honest and directly fixes overplotting of co-located records; it
   answers "what is at this place?".
 - **Acceptance criteria:** Given N occurrences across M collections in view, the map
-  renders M locality markers at the collections' paleocoordinates and the list shows M
-  rows; a marker/row for a collection with k records over j taxa reports j distinct taxa;
-  a collection with no paleocoordinate is excluded from the map (as occurrences are today)
-  but still reachable in the list fallback; selecting a locality lists its taxa and each
-  reaches the panel/profile.
+  renders M locality markers at the collections' paleocoordinates (spatially clustered at
+  low zoom) and the list shows M rows; a marker/row for a collection with k records over
+  j taxa reports j distinct taxa; a collection with no paleocoordinate is excluded from
+  the map (as occurrences are today) but still reachable in the list fallback; selecting
+  a locality lists its taxa and each reaches the panel/profile.
 - **Verification method:** unit test (grouping fold) + component test.
 - **Evidence location:** `test/ui/grouping.test.ts`, `test/ui/locality-mode.test.tsx`, `src/app/state/grouping.ts`.
 
@@ -184,22 +211,23 @@ by the exploration view.
 
 - **Statement:** In **Taxon** mode the map must continue to plot **every** occurrence at
   its real paleocoordinate (no collapsing, no centroid, no range polygon). The viewport-
-  linked list must show **one row per taxon** in view (accepted scientific name + count
-  of that taxon's occurrences + the taxon's aggregate Ma span across those occurrences).
-  Selecting a taxon (from the list or by picking one of its points on the map) must
-  **focus the whole taxon**: all of that taxon's occurrence points are emphasised and the
-  rest are visibly **dimmed** (emphasis + reduced prominence, not colour-hue identity),
-  and the panel/route target becomes the **taxon profile** (SPEC-003 REQ-007). The
-  SPEC-009 transient hover-highlight coupling must keep working (hovering a taxon row
-  emphasises that taxon's points and vice-versa), with highlight weaker than the taxon
-  focus, which is weaker-or-equal to a single occurrence's selection detail.
+  linked list must show **one row per taxon whose points are currently in the viewport**
+  (SPEC-009-consistent; the count reads as "taxa on screen" — Q3 decision, 2026-07-22),
+  each row carrying the accepted scientific name + the count of that taxon's occurrences
+  in view + the taxon's aggregate Ma span across those occurrences. Selecting a taxon
+  (from the list or by picking one of its points on the map) must **focus the whole
+  taxon**: all of that taxon's occurrence points are emphasised and the rest are visibly
+  **dimmed** (emphasis + reduced prominence, not colour-hue identity), and the
+  panel/route target becomes the **taxon profile** (SPEC-003 REQ-007). The SPEC-009
+  transient hover-highlight coupling must keep working (hovering a taxon row emphasises
+  that taxon's points and vice-versa), with highlight weaker than the taxon focus.
 - **Rationale:** A taxon is a distribution across many localities and stages; showing the
   real points while making the taxon the unit of list/selection/focus answers "where &
   when did this taxon live?" without fabricating geometry (owner-chosen interpretation A).
 - **Acceptance criteria:** With mode = Taxa the list has one row per distinct taxon in
-  view with its occurrence count and aggregate span; selecting a taxon emphasises all its
-  points and dims non-members (assertable via the map paint expression / a focus id-set)
-  and the panel shows the taxon profile; the map still contains one feature per
+  view with its in-view occurrence count and aggregate span; selecting a taxon emphasises
+  all its points and dims non-members (assertable via the map paint expression / a focus
+  id-set) and the panel shows the taxon profile; the map still contains one feature per
   occurrence (feature count unchanged from Occurrence mode); no per-taxon hue is assigned.
 - **Verification method:** component test + unit test (per-taxon aggregation) + inspection of the map focus/dim paint.
 - **Evidence location:** `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`, `src/app/components/OccurrenceMap.tsx`.
@@ -207,24 +235,25 @@ by the exploration view.
 ### REQ-005: Rank selector within Taxon mode
 
 - **Statement:** While in Taxon mode the view must present a **rank selector** offering
-  the taxonomic ranks available in the data (from `Species` up through `Genus`,
-  `Family`, `Clade`). Choosing a rank must **roll each occurrence up its taxonomic parent
-  chain to the nearest ancestor at that rank** and group the list/focus at that rolled-up
-  taxon; occurrences whose identified taxon has no ancestor at the chosen rank must be
-  handled by an explicit, disclosed rule (grouped under their finest available taxon, and
-  counted in a stated "not classified at this rank" bucket — never silently dropped). The
-  default rank must be the **finest** (the identified taxon, i.e. no roll-up), preserving
-  REQ-004's behaviour. The selector must be hidden or disabled outside Taxon mode and be
-  keyboard-operable with a legible current value.
+  the taxonomic ranks available in the snapshot (from `Species` up through `Genus`,
+  `Family`, and the major `Clade` levels). Choosing a rank must **roll each occurrence up
+  its taxonomic parent chain (DATA-002/003) to the nearest ancestor at that rank** and
+  group the list/focus at that rolled-up taxon; occurrences whose identified taxon has no
+  ancestor at the chosen rank must be handled by an explicit, disclosed rule (grouped
+  under their finest available taxon and counted in a stated "not classified at this
+  rank" bucket — never silently dropped). The default rank must be the **finest** (the
+  identified taxon, i.e. no roll-up), preserving REQ-004's behaviour. The selector must
+  be hidden or disabled outside Taxon mode and be keyboard-operable with a legible
+  current value.
 - **Rationale:** Records sit at different ranks; letting the Explorer choose the grouping
-  rank (e.g. collapse species into their genus) is the owner's stated requirement and the
+  rank (e.g. collapse genera into their family) is the owner's stated requirement and the
   natural granularity control for Taxon mode.
 - **Acceptance criteria:** In Taxon mode the selector lists the ranks present in the
-  snapshot; default groups at the identified taxon; choosing `Genus` re-groups two
-  species of one genus into a single row/focus whose count is the sum; an occurrence with
+  snapshot; default groups at the identified taxon; choosing `Family` re-groups two
+  genera of one family into a single row/focus whose count is the sum; an occurrence with
   no ancestor at the chosen rank appears in the disclosed "not classified at this rank"
   bucket rather than vanishing; outside Taxon mode the selector is not offered.
-- **Verification method:** unit test (rank roll-up over a fixture ancestry) + component test.
+- **Verification method:** unit test (rank roll-up over the ingested ancestry) + component test.
 - **Evidence location:** `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx`, `src/app/state/grouping.ts`.
 
 ## Non-functional requirements
@@ -245,18 +274,38 @@ by the exploration view.
 - **Verification method:** code inspection + the existing no-egress test remains green + a11y lint (jsx-a11y) clean.
 - **Evidence location:** `src/app/state/grouping.ts`, `test/data-005-no-runtime-egress.test.ts`.
 
+### NFR-002: Snapshot stays deterministic and within the size budget
+
+- **Statement:** The widened ingestion (DATA-003) must remain **byte-stable** across
+  rebuilds (deterministic merge/sort, as SPEC-008 NFR-001/002) and every produced
+  artifact must stay within its `scripts/check_budget.ts` ceiling. If the added
+  hierarchy pushes `reference.json` past its current gzip/raw budget, the budget must be
+  **re-measured and the ceiling adjusted with justification** (per SPEC-008's "budgets
+  are measured, not decided up front"), not silently exceeded, and the change recorded as
+  a coordinated SPEC-008 NFR-002 adjustment.
+- **Rationale:** Adding families/orders/clades (and possibly species) enlarges the shared
+  reference; the size gate exists precisely so this cannot balloon unnoticed.
+- **Acceptance criteria:** `pnpm run check:budget` passes after the rebuild; any raised
+  ceiling is documented with the measured size; the snapshot is identical on a second
+  rebuild from the same pull.
+- **Verification method:** `pnpm run gen:web-data && pnpm run build && pnpm run check:budget` + a determinism check (double rebuild diff).
+- **Evidence location:** `scripts/check_budget.ts`, pipeline determinism test.
+
 ## Security and privacy considerations
 
-### SEC-001: No new egress or data source
+### SEC-001: No new runtime egress; ingestion-time only
 
-- **Statement:** No new network calls, secrets, tokens, or data sources. The two exposed
-  fields (DATA-001/002) come from the existing snapshot; all grouping is in-memory. The
-  map stays self-contained (SPEC-004 SEC-001 unchanged).
-- **Rationale:** Preserve the static, tokenless, no-egress guarantees.
+- **Statement:** The widened PBDB pull runs at **ingestion (build) time only**, like the
+  existing one (`HttpSourceClient`); no new runtime network calls, secrets, or tokens are
+  introduced, and the app still reads the static snapshot (DATA-005). The two exposed
+  read-model fields and the grouping are in-memory. The map stays self-contained
+  (SPEC-004 SEC-001 unchanged).
+- **Rationale:** Preserve the static, tokenless, no-runtime-egress guarantees while the
+  extra data is fetched only during the build.
 - **Acceptance criteria:** `test/data-005-no-runtime-egress.test.ts` stays green; no new
-  fetch/XHR is introduced.
+  fetch/XHR is added to the app; new fetches live only in the pipeline adapter.
 - **Verification method:** automated test + inspection.
-- **Evidence location:** `test/data-005-no-runtime-egress.test.ts`.
+- **Evidence location:** `test/data-005-no-runtime-egress.test.ts`, `src/pipeline/http-client.ts`.
 
 ## Data model impact
 
@@ -271,23 +320,50 @@ by the exploration view.
   are display strings and may collide.
 - **Acceptance criteria:** The `ReadOccurrence` type includes `collectionId: string`; the
   rebuilt snapshot populates it for every occurrence; occurrences sharing a collection
-  share the id; the snapshot remains byte-stable across rebuilds (NFR-001 determinism).
+  share the id; the snapshot remains byte-stable across rebuilds (NFR-002 determinism).
 - **Verification method:** type check + pipeline/derive unit test + snapshot rebuild.
 - **Evidence location:** `src/domain/snapshot.ts`, `src/pipeline/derive.ts`, pipeline tests.
 
-### DATA-002: Expose taxonomic parent linkage on `ReadTaxon`
+### DATA-002: Expose a resolvable taxonomic parent chain on `ReadTaxon`
 
 - **Statement:** `ReadTaxon` must expose the taxonomic **parent linkage** needed to walk
-  a taxon up to an ancestor of a chosen rank — at minimum `parentId` (present at L1;
-  `derive.ts` currently omits it). The read model must let the app resolve, for any
-  identified taxon, its nearest ancestor at a target rank using only in-snapshot taxa;
-  where the chain is incomplete in the snapshot the roll-up rule of REQ-005 applies.
-- **Rationale:** The rank selector (REQ-005) has no ancestry to roll up without it.
-- **Acceptance criteria:** `ReadTaxon` includes the parent linkage; given a species whose
-  genus is present in the snapshot, the app resolves the genus; the resolver is
-  deterministic and does no I/O.
-- **Verification method:** type check + unit test over a fixture ancestry.
+  a taxon up to an ancestor of a chosen rank — at minimum `parentId` — and every
+  `ReadTaxon` must carry its **real rank** (not the hardcoded `Genus`). The read model
+  must let the app resolve, for any identified taxon, its nearest ancestor at a target
+  rank using **only in-snapshot taxa** (the chain must be closed under the ingested set —
+  DATA-003 guarantees the referenced parents are present). Where a chain still ends below
+  a requested rank, the roll-up rule of REQ-005 applies.
+- **Rationale:** The rank selector (REQ-005) has no ancestry to roll up without a
+  parent chain whose links resolve inside the snapshot.
+- **Acceptance criteria:** `ReadTaxon` includes `parentId` and a correct `rank`; given a
+  genus whose family is present in the snapshot, the app resolves the family; the
+  resolver is deterministic and does no I/O; no `parentId` dangles outside the taxa set.
+- **Verification method:** type check + unit test over the ingested ancestry.
 - **Evidence location:** `src/domain/snapshot.ts`, `src/pipeline/derive.ts`, `test/ui/rank-rollup.test.ts`.
+
+### DATA-003: Ingest the Dinosauria taxonomic hierarchy (widened PBDB pull)
+
+- **Statement:** The ingestion (`HttpSourceClient`) must capture the **taxonomic
+  hierarchy within `base_name=Dinosauria`** — taxa at the ranks required for roll-up
+  (Species through the major clade levels, at least Species/Genus/Family/Clade) — each
+  taxon carrying its PBDB rank and a `parentId` that **resolves to another ingested
+  taxon**, forming a chain closed under the set (excepting the single agreed root). This
+  replaces the genus-only pull (`&rank=genus`) with a hierarchy-aware pull (e.g. removing
+  the rank filter / adding parent ingestion / consuming the `show=class` classification
+  columns already returned on occurrences), keeping the per-interval merge deterministic
+  (SPEC-008 REQ-001). Occurrence→taxon resolution must retain each occurrence's
+  **identified** taxon (at whatever rank), joined into the enriched taxa set so roll-up
+  can proceed; "*… indet.*" identifications resolve to their real higher taxon where PBDB
+  provides it. The snapshot must be rebuilt.
+- **Rationale:** The missing hierarchy is our scoping choice (`rank=genus`), not a PBDB
+  limitation; the owner directed widening the pull here so the rank selector has real
+  ancestry. PBDB already returns the higher classification we currently discard.
+- **Acceptance criteria:** The rebuilt `reference.json` contains taxa at more than one
+  rank with non-empty, resolvable `parentId` chains; a sampled genus resolves up to a
+  family/clade present in the set; occurrences still join to a taxon; the merge is
+  deterministic (byte-stable double rebuild); the pull stays within `base_name=Dinosauria`.
+- **Verification method:** pipeline unit/integration test (hierarchy shape + resolvability) + rebuild + budget gate (NFR-002).
+- **Evidence location:** `src/pipeline/http-client.ts`, `src/pipeline/ingest.ts`, `src/pipeline/derive.ts`, pipeline tests.
 
 ## API impact
 
@@ -304,8 +380,8 @@ by the exploration view.
   `OccurrenceList` renders rows polymorphic in the grouping unit.
 - **Rationale:** Keep derivations pure and testable independently of React/canvas
   (SPEC-002 pattern), consistent with `src/app/state/exploration.ts` and `viewport.ts`.
-- **Acceptance criteria:** Helpers are pure and unit-tested; no new fetch/XHR; existing
-  `ReadApi` egress guarantees unchanged.
+- **Acceptance criteria:** Helpers are pure and unit-tested; no new fetch/XHR in the app;
+  existing `ReadApi` egress guarantees unchanged.
 - **Verification method:** unit tests + inspection.
 - **Evidence location:** `src/app/state/grouping.ts`, `src/read/api.ts`.
 
@@ -332,8 +408,10 @@ by the exploration view.
 
 ## Configuration impact
 
-Adds view-layer constants only (mode enum, rank ladder, default mode = Occurrences,
-default rank = finest). No env vars, secrets, or feature flags.
+Adds view-layer constants (mode enum, rank ladder, default mode = Occurrences, default
+rank = finest) and changes the ingestion query configuration (drops the genus-only rank
+filter; captures ranks/parents). No env vars, secrets, or feature flags. The size budget
+constants in `scripts/check_budget.ts` may be re-measured (NFR-002).
 
 ## Error handling
 
@@ -341,9 +419,11 @@ default rank = finest). No env vars, secrets, or feature flags.
   still reachable via the list's no-map fallback.
 - Taxon whose identified rank has no ancestor at the chosen rank → the disclosed
   "not classified at this rank" bucket (REQ-005), never silently dropped.
-- Incomplete ancestry in the snapshot (missing intermediate taxon) → roll-up stops at the
-  finest resolvable ancestor and the record falls into the not-classified bucket for
-  ranks above it.
+- Incomplete ancestry from PBDB (a parent PBDB omits) → the ingestion must still produce a
+  closed chain (stop at the highest resolvable ancestor and mark the gap); roll-up above
+  the gap falls into the not-classified bucket. No dangling `parentId` may reach the app.
+- Widened pull exceeds a size budget → fail `check:budget` and re-measure the ceiling with
+  justification (NFR-002), never silently exceed.
 - Mode switch with a now-meaningless selection (e.g. a single occurrence selected, then
   switching to Taxa) → selection re-mapped to its taxon where possible, else cleared with
   the list still populated.
@@ -354,30 +434,33 @@ default rank = finest). No env vars, secrets, or feature flags.
   must not look broken.
 - A taxon with exactly one occurrence in view → one-row taxon with count 1 and a point
   Ma span.
-- Two species of one genus co-located in one collection → in Locality mode one marker
-  (2 taxa); in Taxon mode two rows at Species rank, one row at Genus rank.
+- Two genera of one family co-located in one collection → in Locality mode one marker
+  (2 taxa); in Taxon mode two rows at Genus rank, one row at Family rank.
+- "*… indet.*" occurrence identified above genus → resolves to its real higher taxon; at
+  a finer requested rank (Genus/Species) it lands in the not-classified bucket.
 - Very many groups in view → the SPEC-009 render cap + "showing X of Y" overflow applies
   to grouped rows too; the map stays the complete view.
 - Antimeridian-wrapping viewport (west > east) → the SPEC-009 bounds handling is reused
   unchanged for both occurrence and locality glyphs.
-- MVP snapshot may be effectively single-rank (dinosaur genera) → the rank selector may
-  offer few ranks; see Open questions.
+- Enlarged `reference.json` → watched by NFR-002 / the budget gate.
 
 ## Acceptance criteria
 
 Satisfied when: an always-visible mode control switches between Occurrences (default,
 behaviour unchanged), Localities, and Taxa, preserving stage + viewport (REQ-001);
 Occurrence mode is a SPEC-009 no-op with the cluster count legibly meaning "records"
-(REQ-002); Locality mode collapses shared-`collectionId` occurrences to one marker at the
-collection's real paleocoordinate with a per-locality list and taxa panel (REQ-003);
-Taxon mode keeps every real occurrence point, lists one row per taxon with count +
-aggregate span, and focuses a selected taxon's whole point-set (emphasis + dim, no hue
-identity, no fabricated glyph) routing to the taxon profile (REQ-004); a rank selector
-rolls occurrences up to a chosen rank with a disclosed not-classified bucket (REQ-005);
-`collectionId` and taxonomic parent linkage are exposed and the snapshot rebuilt
-(DATA-001/002); all grouping is in-memory, keyboard-accessible, within PERF-030, with no
-new egress (NFR-001/SEC-001); and the SPEC-009 viewport list, two-way highlighting, and
-the SPEC-003 selection→panel→profile loop still pass.
+(REQ-002); Locality mode collapses shared-`collectionId` occurrences to one spatially
+clustered marker at the collection's real paleocoordinate with a per-locality list and
+taxa panel (REQ-003); Taxon mode keeps every real occurrence point, lists one row per
+in-view taxon with count + aggregate span, and focuses a selected taxon's whole point-set
+(emphasis + dim, no hue identity, no fabricated glyph) routing to the taxon profile
+(REQ-004); a rank selector rolls occurrences up a real ingested ancestry to a chosen rank
+with a disclosed not-classified bucket (REQ-005); `collectionId`, a resolvable parent
+chain, and the widened Dinosauria hierarchy are ingested and the snapshot rebuilt
+deterministically within budget (DATA-001/002/003, NFR-002); all grouping is in-memory,
+keyboard-accessible, within PERF-030, with no new runtime egress (NFR-001/SEC-001); and
+the SPEC-009 viewport list, two-way highlighting, and the SPEC-003 selection→panel→
+profile loop still pass.
 
 ## Verification matrix
 
@@ -385,13 +468,15 @@ the SPEC-003 selection→panel→profile loop still pass.
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
 | REQ-001 | Three-mode control, default Occurrences, preserves stage/viewport | automated | component test | `test/ui/grouping-mode.test.tsx` | — |
 | REQ-002 | Occurrence mode == SPEC-009; cluster count = records | automated + inspection | SPEC-009 regression + component | `test/ui/occurrence-list.test.tsx`, `OccurrenceMap.tsx` | — |
-| REQ-003 | Locality collapse by collectionId at real paleocoord | automated | unit + component | `test/ui/grouping.test.ts`, `test/ui/locality-mode.test.tsx` | — |
-| REQ-004 | Taxon rows + whole-taxon focus/dim; points kept | automated + inspection | unit + component + paint | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts` | — |
-| REQ-005 | Rank roll-up + not-classified bucket | automated | unit + component | `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx` | — |
+| REQ-003 | Locality collapse by collectionId at real paleocoord, spatially clustered | automated | unit + component | `test/ui/grouping.test.ts`, `test/ui/locality-mode.test.tsx` | — |
+| REQ-004 | In-view taxon rows + whole-taxon focus/dim; points kept | automated + inspection | unit + component + paint | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts` | — |
+| REQ-005 | Rank roll-up over real ancestry + not-classified bucket | automated | unit + component | `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx` | — |
 | DATA-001 | `collectionId` on ReadOccurrence, snapshot rebuilt | automated | type + pipeline test + rebuild | `src/pipeline/derive.ts`, pipeline tests | — |
-| DATA-002 | Parent linkage on ReadTaxon; ancestor resolver | automated | type + unit | `test/ui/rank-rollup.test.ts` | — |
+| DATA-002 | Resolvable parent chain + real rank on ReadTaxon | automated | type + unit | `test/ui/rank-rollup.test.ts` | — |
+| DATA-003 | Widened Dinosauria hierarchy ingested, deterministic | automated | pipeline test + rebuild + budget | `src/pipeline/http-client.ts`, pipeline tests | — |
 | NFR-001 | In-memory O(n), keyboard, no egress | inspection + test | no-egress test + a11y lint | `test/data-005-no-runtime-egress.test.ts` | — |
-| SEC-001 | No new egress/data | automated | no-egress test | `test/data-005-no-runtime-egress.test.ts` | — |
+| NFR-002 | Deterministic + within (re-measured) budget | automated | `check:budget` + double-rebuild diff | `scripts/check_budget.ts` | — |
+| SEC-001 | No new runtime egress | automated | no-egress test | `test/data-005-no-runtime-egress.test.ts` | — |
 | API-001 | Pure grouping helpers, no I/O | automated | unit test | `src/app/state/grouping.ts` | — |
 | UX-001 | Domain terms, legible, states designed, no hue identity | automated + inspection | component test | `test/ui/grouping-mode.test.tsx` | — |
 
@@ -400,47 +485,53 @@ the SPEC-003 selection→panel→profile loop still pass.
 - Unit (`test/ui/grouping.test.ts`): group-by-collection fold (locality aggregates:
   paleocoordinate, distinct-taxon count, record count, Ma range) and group-by-taxon fold
   (occurrence ids, count, aggregate span); stable/deterministic ordering.
-- Unit (`test/ui/rank-rollup.test.ts`): ancestor-at-rank resolver over a fixture ancestry
-  (species→genus→family→clade), including missing-ancestor → not-classified bucket.
+- Unit (`test/ui/rank-rollup.test.ts`): ancestor-at-rank resolver over the ingested
+  ancestry (species→genus→family→clade), including missing-ancestor → not-classified
+  bucket, and closed-chain (no dangling parentId).
 - Component (`test/ui/grouping-mode.test.tsx`): the mode control (three options, default,
   `aria-pressed`, keyboard), stage/viewport preserved across a switch, legible labels.
 - Component (`test/ui/locality-mode.test.tsx`): M markers/rows for M collections; taxa
-  panel on select; single-member locality.
-- Component (`test/ui/taxon-mode.test.tsx`): one row per taxon with count + span; select →
-  focus id-set + profile route; rank selector re-groups species into genus; feature count
-  unchanged vs occurrence mode.
-- Regression: the full SPEC-009 suite (`occurrence-list`, `viewport`, `timeline-*`) and
-  the SPEC-003 loop tests stay green with mode = Occurrences.
-- Pipeline: derive test asserts `collectionId` + parent linkage on the read model; snapshot
-  rebuild (`pnpm run snapshot`) stays byte-stable.
+  panel on select; single-member locality; markers use the shared clustered source.
+- Component (`test/ui/taxon-mode.test.tsx`): one row per in-view taxon with count + span;
+  select → focus id-set + profile route; rank selector re-groups genera into a family;
+  feature count unchanged vs occurrence mode.
+- Pipeline (`test/pipeline-*`): the widened pull yields multi-rank taxa with resolvable
+  parents (fixture-backed); occurrence→taxon join holds; deterministic double-build diff;
+  derive exposes `collectionId` + `parentId` + real `rank`.
+- Budget: `pnpm run gen:web-data && pnpm run build && pnpm run check:budget` green (ceiling
+  re-measured + documented if the reference grew).
+- Regression: the full SPEC-009 suite (`occurrence-list`, `viewport`, `timeline-*`), the
+  SPEC-003 loop tests, and the SPEC-008 timescale/atlas tests stay green with mode =
+  Occurrences.
 - Full CI locally: typecheck, vitest, eslint (incl. jsx-a11y), Prettier, governance scripts.
 
 ## Rollback plan
 
-Additive. Data: the two exposed fields are backward-compatible additions to the read
-model (older readers ignore them); no field is removed or repurposed, so the snapshot can
-be rebuilt without breaking existing consumers. UI: remove the grouping-mode control and
-rank selector and force mode = Occurrences to return to SPEC-009 behaviour; delete
-`src/app/state/grouping.ts` and the new components/tests. No pipeline logic beyond the two
-copies to undo, no basemap/time-window change.
+Two separable layers. **UI:** remove the grouping-mode control and rank selector and force
+mode = Occurrences to return to SPEC-009 behaviour; delete `src/app/state/grouping.ts` and
+the new components/tests. **Data/pipeline:** the read-model additions (`collectionId`,
+`parentId`, real `rank`) are backward-compatible (older readers ignore them); to fully
+revert, restore the `&rank=genus` pull in `HttpSourceClient`, revert the `derive`/`ingest`
+changes, rebuild, and restore the prior `check_budget` ceilings. No time-window, basemap,
+or SPEC-001 domain-shape change to undo.
 
 ## Open questions
 
-- [ ] Does the current MVP snapshot actually contain **multiple taxonomic ranks with
-  resolvable ancestry** (species with genus/family parents present), or is it effectively
-  single-rank (dinosaur genera)? If single-rank, decide whether to ship the rank selector
-  **disabled with an explanatory note** or **defer REQ-005** until the snapshot carries
-  ancestry. (Needs a look at the built snapshot / owner decision.)
-- [ ] Should **Locality mode still cluster localities spatially** at low zoom (localities
-  can themselves overplot), or show every locality marker and rely on zoom? Proposed
-  default: keep MapLibre spatial clustering of the locality markers, consistent with
-  Occurrence mode.
-- [ ] In Taxon mode, should the list reflect the **viewport** (taxa with a point in view,
-  consistent with SPEC-009) or **all taxa at the age**? Proposed default: viewport-
-  consistent with SPEC-009 (the count reads as "taxa on screen").
-- [ ] Exact **focus vs highlight vs selection** visual hierarchy in Taxon mode (three
-  emphasis levels now: taxon focus set, transient hover highlight, single-occurrence
-  detail) — resolve during design against the charter's emphasis scale.
+- [x] Does the snapshot have resolvable multi-rank ancestry? **No, by our own scoping**
+  (`rank=genus`); PBDB has it and already returns higher classification we discard. The
+  owner directed **doing the pipeline hierarchy work in this branch** (DATA-003), not
+  deferring it (decision "b", 2026-07-22).
+- [x] Locality clustering at low zoom? **Spatially cluster the locality markers**, like
+  occurrence points (Q2 = a, 2026-07-22).
+- [x] Taxon list scope — viewport or whole age? **Viewport-linked**, SPEC-009-consistent
+  (Q3 = a, 2026-07-22).
+- [ ] Exact rank ladder to expose (which clade levels count as selectable "Clade" steps)
+  — resolve during ingestion against what PBDB returns for Dinosauria (e.g. Family /
+  Superfamily / Order / clade), so the selector is meaningful and not overlong.
+- [ ] Whether to also ingest **Species**-rank taxa (for a Species step) or stop at the
+  identified rank + Genus/Family/Clade — decide from the measured size cost (NFR-002).
+- [ ] Exact **focus vs highlight vs selection** visual hierarchy in Taxon mode — resolve
+  during design against the charter's emphasis scale.
 
 ## Human decisions required
 
@@ -448,28 +539,39 @@ copies to undo, no basemap/time-window change.
   selector inside** taxon mode — owner-directed (2026-07-22): "Il faudrait séparer un mode
   occurrence d'un mode species/taxon … groupé par species/taxon … taxon + selecteur de
   range a l'intérieur."
-- [x] Taxon mode keeps the **real occurrence points** and makes the taxon the unit of
-  list/selection/focus (**interpretation A**), rejecting a centroid/aggregated-glyph
-  approach — owner confirmed "3. A".
-- [x] **Also build the Locality** grouping as the honest fix for overplotting of
-  co-located records — owner confirmed "4. Ok et on peut construire".
-- [ ] Resolve the rank-selector data question above (single-rank MVP → disable vs defer).
+- [x] Taxon mode keeps the **real occurrence points** (interpretation A), rejecting a
+  centroid/aggregated-glyph approach — owner confirmed "3. A".
+- [x] **Also build the Locality** grouping — owner confirmed "4. Ok et on peut construire";
+  locality markers are **spatially clustered** — owner confirmed "q2 a".
+- [x] Taxon list is **viewport-linked** — owner confirmed "q3 a".
+- [x] Do the **pipeline hierarchy work in this branch** (widen the pull) rather than
+  deferring the rank selector — owner confirmed "on fait le chantier ici dans cette
+  branche. (b)" (2026-07-22).
+- [ ] Approve the coordinated **SPEC-008 NFR-002 budget adjustment** if `reference.json`
+  outgrows its ceiling (see NFR-002), and the SPEC-008 scope amendment recording that the
+  pull now spans the Dinosauria hierarchy, not genera only.
 - [ ] Owner ratification of this spec's exact wording (status → Approved) before
   implementation begins (Definition of Ready).
 
 ## Conflict check
 
-No hard conflict. This spec **extends** SPEC-009: it re-introduces the taxon/formation
-**aggregation** SPEC-009 listed as a non-goal, but does so as an opt-in mode layered on
-top of SPEC-009's flat default (mode = Occurrences), not by removing the flat list — the
-lineage is SPEC-005 (aggregated list) → SPEC-007 (removed) → SPEC-009 (flat, aggregation
-deferred) → SPEC-010 (aggregation as a user-selected mode). It depends on SPEC-001 (the
-`collectionId`/`parentId` already modelled at L1), SPEC-003 (exploration loop/panel/
-profile), SPEC-008 (stage-partitioned occurrence delivery — grouping operates per loaded
-stage), and SPEC-009 (viewport list + two-way highlight, reused under each mode). It
-touches SPEC-001's read model **additively** (DATA-001/002 expose existing L1 fields; no
-requirement changes), so no SPEC-001 amendment is required — but `affected_interfaces`
-records `ReadOccurrence`/`ReadTaxon`. Run `/drift-check` after implementation.
+No hard conflict, but two **coordinated touches** to record on approval:
+
+1. **SPEC-009 (extended, not reversed).** This spec re-introduces the taxon/formation
+   **aggregation** SPEC-009 listed as a non-goal, but as an opt-in mode layered on top of
+   SPEC-009's flat default (mode = Occurrences), not by removing the flat list — lineage
+   SPEC-005 (aggregated) → SPEC-007 (removed) → SPEC-009 (flat) → SPEC-010 (aggregation as
+   a mode). It reuses SPEC-009's viewport signal + two-way highlight under each mode.
+2. **SPEC-008 (taxonomic scope + budget).** DATA-003 widens the SPEC-008 pull from
+   "Dinosauria **genera**" to the Dinosauria **hierarchy**, and may raise the SPEC-008
+   NFR-002 size ceilings. On approval this requires a **SPEC-008 Spec Amendments** entry
+   (pull scope + budget), coordinated here — the time window and per-stage partitioning
+   are unchanged.
+
+It depends on SPEC-001 (read model / `collectionId` already modelled at L1; DATA-002/003
+extend it additively — no SPEC-001 field is removed or repurposed), SPEC-003 (exploration
+loop/panel/profile), SPEC-008 (per-stage delivery + the pull it amends), and SPEC-009
+(viewport list + highlight). Run `/drift-check` after implementation.
 
 ## Traceability table
 
@@ -481,9 +583,11 @@ records `ReadOccurrence`/`ReadTaxon`. Run `/drift-check` after implementation.
 | REQ-004 | Taxon mode focus/dim | `grouping.ts`, `OccurrenceMap.tsx`, `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/taxon-mode.test.tsx` | Planned |
 | REQ-005 | Rank roll-up | `grouping.ts` (ancestor-at-rank), rank selector control | `test/ui/rank-rollup.test.ts` | Planned |
 | DATA-001 | `collectionId` on read occ | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | pipeline tests | Planned |
-| DATA-002 | Parent linkage on read taxon | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/ui/rank-rollup.test.ts` | Planned |
+| DATA-002 | Parent chain + rank on read taxon | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/ui/rank-rollup.test.ts` | Planned |
+| DATA-003 | Widened hierarchy pull | `src/pipeline/http-client.ts`, `ingest.ts` | pipeline tests | Planned |
 | NFR-001 | In-memory/a11y | `grouping.ts`, components | inspection + no-egress | Planned |
-| SEC-001 | No egress | — | `test/data-005-no-runtime-egress.test.ts` | Planned |
+| NFR-002 | Deterministic + budget | `scripts/check_budget.ts`, pipeline | budget gate + double build | Planned |
+| SEC-001 | No runtime egress | `src/pipeline/http-client.ts` | `test/data-005-no-runtime-egress.test.ts` | Planned |
 | API-001 | Grouping helpers | `src/app/state/grouping.ts`, `src/read/api.ts` | `test/ui/grouping.test.ts` | Planned |
 | UX-001 | States/language | components, `exploration.module.css` | `test/ui/grouping-mode.test.tsx` | Planned |
 
@@ -493,9 +597,13 @@ Filled during implementation (see PR). Anticipated decisions: modes live in the
 `ExplorationView` reducer (`mode: 'occurrence' | 'locality' | 'taxon'`, `rank`); grouping
 is a pure module (`src/app/state/grouping.ts`) unit-tested without React; the map is fed
 either the occurrence feature collection (occurrence/taxon modes) or a per-collection
-locality feature collection (locality mode); taxon focus is a **set** of occurrence ids
-driving a dim-others paint expression (extending the SPEC-009 selected/highlighted paint),
-not a new colour scale.
+locality feature collection (locality mode), both through the existing clustered source;
+taxon focus is a **set** of occurrence ids driving a dim-others paint expression
+(extending the SPEC-009 selected/highlighted paint), not a new colour scale. Pipeline:
+prefer the fewest new PBDB calls — first consume the `show=class` classification already
+returned on occurrences and add parent taxa only where needed to close the chain; keep
+the per-interval deterministic merge; re-measure the reference budget and document any
+raised ceiling.
 
 ## Spec amendments
 
@@ -516,9 +624,10 @@ not a new colour scale.
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred (rank-selector data question
-      still open — see Human decisions required).
+- [x] Open questions are resolved or explicitly deferred (the three decision questions are
+      resolved; the remaining items are implementation-time details, explicitly deferred).
 - [x] Verification matrix covers every requirement.
-- [x] Conflict check completed (extends SPEC-009; additive to SPEC-001 read model).
+- [x] Conflict check completed (extends SPEC-009; coordinated SPEC-008 amendment for scope
+      + budget; additive to SPEC-001 read model).
 - [ ] Human approval recorded before status set to Approved (owner-directed the work;
       spec wording awaiting owner ratification).
