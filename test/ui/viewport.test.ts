@@ -60,7 +60,8 @@ test("occurrencesInView keeps only placeable points inside the bounds", () => {
   expect(result.map((o) => o.id)).toEqual(["a"]);
 });
 
-test("occurrencesInView with null bounds returns the full set (no map signal)", () => {
+test("occurrencesInView with null bounds lists every placeable occurrence (no map signal)", () => {
+  // Unplaceable occurrences are never listed, even in the no-map fallback.
   const list = [occ("a", { lng: 1, lat: 1 }), occ("b", null)];
-  expect(occurrencesInView(list, null).map((o) => o.id)).toEqual(["a", "b"]);
+  expect(occurrencesInView(list, null).map((o) => o.id)).toEqual(["a"]);
 });

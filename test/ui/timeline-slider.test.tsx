@@ -59,6 +59,15 @@ test("the selected stage name and its Ma span are always shown as text", () => {
   expect(screen.getByText("72.1–66 Ma")).toBeInTheDocument();
 });
 
+test("the timeline shows a Ma graduation (round tick labels + unit)", () => {
+  render(<Harness initial="Maastrichtian" />);
+  // Round Ma graduations across the Mesozoic window.
+  for (const label of ["100", "150", "200", "250"]) {
+    expect(screen.getByText(label)).toBeInTheDocument();
+  }
+  expect(screen.getByText("Ma")).toBeInTheDocument();
+});
+
 test("only the selected stage is pressed and in the tab order", () => {
   render(<Harness initial="Maastrichtian" />);
   const selected = screen.getByRole("button", { name: /Maastrichtian/ });

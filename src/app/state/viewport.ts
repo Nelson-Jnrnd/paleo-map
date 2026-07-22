@@ -36,19 +36,21 @@ export function withinBounds(
 }
 
 /**
- * The occurrences currently on screen: those with a reconstructed paleoposition
- * inside `bounds`. With `null` bounds (no viewport signal) every occurrence is
- * returned unchanged — the map-unavailable fallback.
+ * The occurrences currently on screen. The list mirrors the map's points, so an
+ * occurrence with no reconstructed paleoposition is **never** listed (SPEC-009
+ * REQ-003, owner decision 2026-07-22). With `null` bounds (no viewport signal) the
+ * fallback lists every *placeable* occurrence; with bounds it further narrows to
+ * those inside the viewport.
  */
 export function occurrencesInView(
   occurrences: readonly ReadOccurrence[],
   bounds: Bounds | null,
 ): ReadOccurrence[] {
-  if (!bounds) return [...occurrences];
   return occurrences.filter((o) => {
     const paleo = o.paleoPosition.value;
+    if (paleo == null) return false;
     return (
-      paleo != null && withinBounds(paleo.palaeoLng, paleo.palaeoLat, bounds)
+      bounds == null || withinBounds(paleo.palaeoLng, paleo.palaeoLat, bounds)
     );
   });
 }

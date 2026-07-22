@@ -212,6 +212,44 @@
   box-shadow: 0 0 0 1px var(--color-accent-deep);
 }
 
+/* Ma graduation axis beneath the stage track (SPEC-009 REQ-001). */
+.stageAxis {
+  position: relative;
+  height: 16px;
+  width: 100%;
+}
+
+.axisTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.axisTick::before {
+  content: "";
+  width: 1px;
+  height: 4px;
+  background: var(--color-grid);
+}
+
+.axisTickLabel {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.axisUnit {
+  position: absolute;
+  right: 0;
+  top: 5px;
+  font-size: 10px;
+  color: var(--color-text-faint);
+}
+
 /* The handle marking the selected step. */
 .stageThumb {
   position: absolute;

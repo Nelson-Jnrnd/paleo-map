@@ -103,16 +103,20 @@ returning list and the single-control slider), interacting with the exploration 
   shown as always-present text. The control must be operable by keyboard as a single
   slider: Left/Right (or Down/Up) move to the adjacent older/younger stage and
   Home/End jump to the first/last stage, with the focused step exposing the selection
-  to assistive tech (`aria-pressed`, plus a slider label/valuetext).
+  to assistive tech (`aria-pressed`, plus a slider label/valuetext). The track must
+  carry a **Ma graduation** (round-value tick marks with labels and a unit) so the
+  time axis is readable, not only implied by the steps.
 - **Rationale:** Equal-width chips misrepresent deep time; a proportional slider reads
-  as a timescale and is more ergonomic (owner request). Legible selection, not hidden
-  behind hover, is required by the charter (§4) and PERF-250 (never colour-alone).
+  as a timescale and is more ergonomic (owner request). A Ma graduation makes the scale
+  legible (owner request 2026-07-22). Legible selection, not hidden behind hover, is
+  required by the charter (§4) and PERF-250 (never colour-alone).
 - **Acceptance criteria:** The three period bands' widths are proportional to their
   combined stage spans (Cretaceous widest, Triassic/Jurassic narrower) within rounding;
   each stage exposes a control whose accessible name contains the stage name and whose
   `aria-pressed` is true only for the selected stage; pressing ArrowRight from
   Kimmeridgian moves selection to Tithonian (next younger), ArrowLeft moves older, and
-  End selects Maastrichtian; the selected stage name + span render as text at all times.
+  End selects Maastrichtian; the selected stage name + span render as text at all times;
+  round Ma tick labels (e.g. 100, 150, 200, 250) and a "Ma" unit are shown along the axis.
 - **Verification method:** automated component test + inspection.
 - **Evidence location:** `test/ui/timeline-slider.test.tsx`,
   `src/app/components/TimelineControl.tsx`.
@@ -260,10 +264,10 @@ Adds view-layer constants only (per-list render cap). No env, secrets, or featur
 
 ## Edge cases
 
-- Occurrence with no paleoposition → not placeable on the map, so it is **not** in the
-  viewport list (the list mirrors the map's points). Recorded assumption: unlike
-  SPEC-005, unplaceable occurrences are not force-listed, because this list's purpose
-  is "the points currently on screen".
+- Occurrence with no paleoposition → not placeable on the map, so it is **never** in
+  the list — including the no-map fallback (owner decision 2026-07-22). Unlike SPEC-005,
+  unplaceable occurrences are not force-listed, because this list's purpose is "the
+  points currently on screen".
 - Antimeridian-wrapping viewport bounds (west > east) → handled as a wrap in the bounds
   test.
 - Very many occurrences in view at world zoom → per-list cap + overflow note (REQ-003);
@@ -327,8 +331,8 @@ change to undo.
 - [x] Aggregate the list (SPEC-005-style) or flat? **Flat** per the owner's phrasing
   ("une liste des points affichés"); aggregation is an explicit non-goal here.
 - [x] Force-list unplaceable occurrences (SPEC-005) or mirror the map exactly?
-  **Mirror the map** — the list is "points on screen"; unplaceable occurrences are out
-  of scope for this list (recorded assumption, Edge cases).
+  **Mirror the map** — the list is "points on screen"; unplaceable occurrences are
+  never listed, including the no-map fallback (owner confirmed 2026-07-22).
 - [ ] Whether to add a formal a11y E2E for the restored occurrence path (deferred; the
   jsdom component test already exercises the keyboard path).
 

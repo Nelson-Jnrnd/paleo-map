@@ -62,6 +62,18 @@ export function TimelineControl({
   );
   const windowSpan = windowMaxMa - windowMinMa || 1;
 
+  // Ma graduation ticks at round values inside the window (REQ-001). 25 Ma steps
+  // give a readable density across the ~186 Myr Mesozoic; oldest (largest Ma) left.
+  const TICK_STEP_MA = 25;
+  const ticks: number[] = [];
+  for (
+    let ma = Math.ceil(windowMinMa / TICK_STEP_MA) * TICK_STEP_MA;
+    ma <= windowMaxMa;
+    ma += TICK_STEP_MA
+  ) {
+    ticks.push(ma);
+  }
+
   const selectedStage = stages.find((s) => s.name === selected);
   const selectedPeriod = selectedStage?.period;
 
@@ -207,6 +219,21 @@ export function TimelineControl({
               </button>
             );
           })}
+        </div>
+
+        {/* Ma graduation — decorative scale; the selected age is announced via the
+            readout and the stage buttons, so the axis is hidden from a11y. */}
+        <div className={styles.stageAxis} aria-hidden="true">
+          {ticks.map((ma) => (
+            <span
+              key={ma}
+              className={styles.axisTick}
+              style={{ left: pct((windowMaxMa - ma) / windowSpan) }}
+            >
+              <span className={`${styles.axisTickLabel} mono`}>{ma}</span>
+            </span>
+          ))}
+          <span className={styles.axisUnit}>Ma</span>
         </div>
       </div>
     </nav>
