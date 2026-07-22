@@ -185,6 +185,7 @@ export function ExplorationView({
         selected={state.stageName}
         onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
         onSelectPeriod={selectPeriod}
+        highlightRange={selectedOccurrence?.timeRange.value ?? null}
       />
       <div className={styles.body}>
         <div className={styles.mapPane}>

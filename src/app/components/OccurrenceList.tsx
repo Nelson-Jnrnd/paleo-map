@@ -17,7 +17,6 @@ import { useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 import type { ReadOccurrence } from "../../domain/index.js";
 import { formatMaRange } from "../format.js";
-import { MultiStageCue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 /** Max rows rendered at once; the map stays the complete view (REQ-003). */
@@ -129,9 +128,6 @@ export function OccurrenceList({
                   <span className="mono">
                     {formatMaRange(occurrence.timeRange.value)}
                   </span>
-                  {occurrence.timeRange.provenance.approximate && (
-                    <MultiStageCue />
-                  )}
                 </span>
               </button>
             </li>

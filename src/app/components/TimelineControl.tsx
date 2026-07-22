@@ -17,7 +17,7 @@
 
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent, ReactElement } from "react";
-import type { GeologicalStage } from "../../domain/index.js";
+import type { GeologicalStage, TimeRange } from "../../domain/index.js";
 import { PERIOD_COLOURS } from "../../domain/index.js";
 import { formatStageSpan } from "../format.js";
 import styles from "./exploration.module.css";
@@ -28,6 +28,12 @@ interface TimelineControlProps {
   selected: string;
   onSelect: (stageName: string) => void;
   onSelectPeriod: (period: string) => void;
+  /**
+   * Time range of the currently selected occurrence — highlighted on the frieze
+   * (band + period ring) so the selection's temporal extent is visible (SPEC-009
+   * REQ-005). Null when no occurrence is selected.
+   */
+  highlightRange?: TimeRange | null;
 }
 
 /** Fractional left offset + width (0…1) of a [maxMa, minMa] span on the track. */
@@ -53,6 +59,7 @@ export function TimelineControl({
   selected,
   onSelect,
   onSelectPeriod,
+  highlightRange = null,
 }: TimelineControlProps): ReactElement {
   // The full window: oldest stage's older bound → youngest stage's younger bound.
   const windowMaxMa = stages.reduce((m, s) => Math.max(m, s.startMa), 0);
@@ -157,6 +164,10 @@ export function TimelineControl({
               windowMaxMa,
               windowSpan,
             );
+            const inRange = highlightRange
+              ? Math.max(minMa, highlightRange.minMa) <
+                Math.min(maxMa, highlightRange.maxMa)
+              : false;
             return (
               <button
                 key={period}
@@ -164,6 +175,7 @@ export function TimelineControl({
                 className={styles.periodBand}
                 style={{ left: pct(left), width: pct(width) }}
                 aria-pressed={period === selectedPeriod}
+                data-inrange={inRange ? "true" : undefined}
                 onClick={() => onSelectPeriod(period)}
               >
                 <span
@@ -184,6 +196,22 @@ export function TimelineControl({
           aria-hidden="false"
           role="presentation"
         >
+          {highlightRange &&
+            (() => {
+              const hiMax = Math.min(highlightRange.maxMa, windowMaxMa);
+              const hiMin = Math.max(highlightRange.minMa, windowMinMa);
+              if (hiMax <= hiMin) return null;
+              return (
+                <span
+                  className={styles.rangeHighlight}
+                  aria-hidden="true"
+                  style={{
+                    left: pct((windowMaxMa - hiMax) / windowSpan),
+                    width: pct((hiMax - hiMin) / windowSpan),
+                  }}
+                />
+              );
+            })()}
           {stages.map((stage) => {
             const isSelected = stage.name === selected;
             const { left, width } = extent(

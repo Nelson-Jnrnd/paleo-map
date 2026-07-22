@@ -188,6 +188,42 @@ returning list and the single-control slider), interacting with the exploration 
 - **Evidence location:** `test/ui/occurrence-list.test.tsx`,
   `src/app/components/OccurrenceMap.tsx`.
 
+### REQ-005: Selecting an occurrence highlights its period on the frieze
+
+- **Statement:** When an occurrence is selected, the timeline must additionally
+  highlight that occurrence's **temporal extent** on the frieze: a to-scale band drawn
+  over the stages its time range spans, and the period delimitation(s) the range
+  overlaps visibly marked. The highlight must not intercept clicks on the stage steps
+  beneath it, and it clears when no occurrence is selected.
+- **Rationale:** Owner request (2026-07-22): moving the eye from a selected point to
+  *when* it lived should be immediate; the frieze band also conveys a multi-stage span
+  visually, replacing the removed text cue (REQ-006).
+- **Acceptance criteria:** With a selected occurrence whose range lies in the Late
+  Cretaceous, the Cretaceous period band is flagged in-range and the Triassic/Jurassic
+  bands are not; with no selection no band is flagged; the band overlay is
+  `pointer-events: none` so steps remain selectable.
+- **Verification method:** component test + inspection.
+- **Evidence location:** `test/ui/timeline-slider.test.tsx`,
+  `src/app/components/TimelineControl.tsx`.
+
+### REQ-006: Remove the "spans multiple stages" cue from the UI
+
+- **Statement:** The "Spans multiple stages" cue (`MultiStageCue`) must no longer be
+  rendered in the exploration UI — the occurrence list, the occurrence panel, or the
+  taxon profile. The underlying `approximate` derivation in the data layer
+  (SPEC-001 DATA-003, unchanged by SPEC-007) is **kept**; only the user-facing cue is
+  removed. This retires the user-facing part of **SPEC-007 REQ-002** (recorded as
+  SPEC-007 AMEND-004).
+- **Rationale:** Owner decision (2026-07-22): the cue is noise (it shows on ~all
+  occurrences); the frieze range highlight (REQ-005) now conveys a multi-stage span
+  where it matters (the selected occurrence).
+- **Acceptance criteria:** No component renders "Spans multiple stages"; the data
+  derivation and its domain test (`spec008-mesozoic-timescale`) stay green; typecheck
+  and lint pass with no unused-symbol errors.
+- **Verification method:** inspection + build + full test suite.
+- **Evidence location:** `src/app/components/OccurrenceList.tsx`,
+  `OccurrencePanel.tsx`, `TaxonProfile.tsx`.
+
 ## Non-functional requirements
 
 ### NFR-001: In-memory, O(n), keyboard-accessible, within PERF-030
@@ -297,6 +333,8 @@ profile loop still pass.
 | REQ-002 | Period bands proportional + jump preserved | automated | component + integration | `test/ui/timeline-slider.test.tsx`, `test/ui/timeline-periods.test.tsx` | — |
 | REQ-003 | Viewport list + fallback + empty-view + cap | automated | unit + component | `test/ui/viewport.test.ts`, `test/ui/occurrence-list.test.tsx` | — |
 | REQ-004 | Two-way highlight; highlight ≠ selection | automated + inspection | component + map paint inspection | `test/ui/occurrence-list.test.tsx`, `OccurrenceMap.tsx` | — |
+| REQ-005 | Selected occurrence highlights its period on the frieze | automated | component test | `test/ui/timeline-slider.test.tsx` | — |
+| REQ-006 | "Spans multiple stages" cue removed from UI | inspection + build | full test suite | list/panel/profile components | — |
 | NFR-001 | In-memory O(n), keyboard, no egress | inspection + test | no-egress test + a11y lint | `test/data-005-no-runtime-egress.test.ts` | — |
 | SEC-001 | No new egress/data | automated | no-egress test | `test/data-005-no-runtime-egress.test.ts` | — |
 | UX-001 | Accessible path + designed states | automated | component test | `test/ui/occurrence-list.test.tsx` | — |
@@ -356,8 +394,9 @@ logged as future work, without restoring the removed `reconstructed`/`interpreta
 cues or SPEC-005's aggregation. It depends on SPEC-003 (exploration loop/panel),
 SPEC-004 (map viewport signal), and SPEC-008 (full-Mesozoic stage table + period
 quick-select). No SPEC-001/002 decision changes. On approval, a SPEC-007 amendment
-note should record that the accessible occurrence path is restored here. `/drift-check`
-must be run after implementation.
+note records that the accessible occurrence path is restored here (AMEND-003) and the
+"spans multiple stages" cue is retired from the UI (AMEND-004), keeping the underlying
+`approximate` data derivation. `/drift-check` must be run after implementation.
 
 ## Traceability table
 
@@ -367,6 +406,8 @@ must be run after implementation.
 | REQ-002 | Period bands / jump | `TimelineControl.tsx`, `ExplorationView.tsx` | `test/ui/timeline-periods.test.tsx` | Implemented |
 | REQ-003 | Viewport list | `src/app/state/viewport.ts`, `src/app/components/OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/viewport.test.ts`, `test/ui/occurrence-list.test.tsx` | Implemented |
 | REQ-004 | Map↔list highlight | `OccurrenceMap.tsx`, `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/occurrence-list.test.tsx` | Implemented |
+| REQ-005 | Frieze period highlight | `TimelineControl.tsx`, `ExplorationView.tsx` | `test/ui/timeline-slider.test.tsx` | Implemented |
+| REQ-006 | Remove multi-stage cue | `OccurrenceList/OccurrencePanel/TaxonProfile.tsx` | full suite | Implemented |
 | NFR-001 | In-memory/a11y | `viewport.ts`, components | inspection + no-egress | Implemented |
 | SEC-001 | No egress | — | `test/data-005-no-runtime-egress.test.ts` | Implemented |
 | UX-001 | Accessible path/states | `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/occurrence-list.test.tsx` | Implemented |

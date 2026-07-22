@@ -163,6 +163,12 @@
   color: var(--color-on-accent);
 }
 
+/* Period(s) the selected occurrence's time range overlaps (SPEC-009 REQ-005). */
+.periodBand[data-inrange="true"]:not([aria-pressed="true"]) {
+  border-color: var(--color-accent-deep);
+  box-shadow: inset 0 0 0 1px var(--color-accent-deep);
+}
+
 /* Stage track — one proportional step per ICS stage; behaves as a single slider
    via roving tabindex. Steps are placed absolutely at their to-scale offset. */
 .stageTrack {
@@ -171,6 +177,20 @@
   width: 100%;
   border-radius: var(--radius-sm);
   background: var(--color-ground);
+}
+
+/* The selected occurrence's temporal extent, drawn over the stages it spans
+   (SPEC-009 REQ-005). Translucent so the underlying steps stay visible; does not
+   intercept clicks so the steps beneath remain selectable. */
+.rangeHighlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-inline: 2px solid var(--color-accent-deep);
 }
 
 .stageStep {

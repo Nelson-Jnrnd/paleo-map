@@ -112,6 +112,42 @@ test("arrow keys step to the adjacent older/younger stage (one tab stop)", async
   );
 });
 
+test("a selected occurrence highlights its period(s) on the frieze (REQ-005)", () => {
+  const { rerender } = render(
+    <TimelineControl
+      stages={EXPLORATION_STAGES}
+      periods={EXPLORATION_PERIODS}
+      selected="Maastrichtian"
+      onSelect={() => {}}
+      onSelectPeriod={() => {}}
+      highlightRange={null}
+    />,
+  );
+  // No selection → no period is flagged in-range.
+  expect(
+    screen.getByRole("button", { name: "Cretaceous" }),
+  ).not.toHaveAttribute("data-inrange");
+
+  // A Late-Cretaceous occurrence range flags the Cretaceous band, not the others.
+  rerender(
+    <TimelineControl
+      stages={EXPLORATION_STAGES}
+      periods={EXPLORATION_PERIODS}
+      selected="Maastrichtian"
+      onSelect={() => {}}
+      onSelectPeriod={() => {}}
+      highlightRange={{ minMa: 66, maxMa: 72 }}
+    />,
+  );
+  expect(screen.getByRole("button", { name: "Cretaceous" })).toHaveAttribute(
+    "data-inrange",
+    "true",
+  );
+  expect(screen.getByRole("button", { name: "Triassic" })).not.toHaveAttribute(
+    "data-inrange",
+  );
+});
+
 test("period bands report the chosen period (SPEC-008 REQ-003 preserved)", async () => {
   const user = userEvent.setup();
   const onSelectPeriod = vi.fn();

@@ -400,6 +400,25 @@ regression** (no keyboard/screen-reader path to occurrences); see AMEND-002.
 - **Test impact:** None here; SPEC-009 adds its own tests.
 - **Human approval reference:** Owner-directed SPEC-009 (2026-07-22).
 
+### AMEND-004: Retire the "spans multiple stages" UI cue (via SPEC-009 REQ-006)
+
+- **Date:** 2026-07-22
+- **Reason:** Owner decision (2026-07-22): the "Spans multiple stages" cue is noise (it
+  shows on ~all occurrences). SPEC-009 REQ-005 adds a frieze range-highlight that
+  conveys a multi-stage span visually for the selected occurrence, so the text cue is
+  no longer needed.
+- **Changed requirements:** REQ-002 (relabel `approximate` → "spans multiple stages")
+  is amended: the **user-facing cue is removed** from the occurrence list, occurrence
+  panel, and taxon profile. The **underlying `approximate` derivation** (SPEC-001
+  DATA-003) is unchanged — only the rendered cue is gone; `MultiStageCue` is no longer
+  used.
+- **Behavioral impact:** No "Spans multiple stages" text appears anywhere in the UI.
+  No data-artifact or schema change.
+- **Test impact:** No tests removed or skipped; the domain derivation test
+  (`spec008-mesozoic-timescale`) stays green. SPEC-009 adds the frieze-highlight test.
+- **Human approval reference:** Owner "supprime les tags spans multiple stages"
+  (2026-07-22).
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

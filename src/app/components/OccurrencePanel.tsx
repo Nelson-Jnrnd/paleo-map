@@ -12,7 +12,7 @@ import type { ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange } from "../format.js";
 import { sourceReference } from "../sources.js";
-import { MissingValue, MultiStageCue } from "./Cues.js";
+import { MissingValue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 interface OccurrencePanelProps {
@@ -30,7 +30,6 @@ export function OccurrencePanel({
 }: OccurrencePanelProps): ReactElement {
   const modern = occurrence.modernPosition.value;
   const paleo = occurrence.paleoPosition.value;
-  const multiStage = occurrence.timeRange.provenance.approximate;
 
   return (
     <section
@@ -54,8 +53,7 @@ export function OccurrencePanel({
         <dd className={styles.fieldValue}>
           <span className="mono">
             {formatMaRange(occurrence.timeRange.value)}
-          </span>{" "}
-          {multiStage && <MultiStageCue />}
+          </span>
         </dd>
 
         <dt className={styles.fieldLabel}>Modern location</dt>

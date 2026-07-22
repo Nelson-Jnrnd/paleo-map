@@ -15,7 +15,7 @@ import type { ReadOccurrence, TimeRange } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange, NOT_AVAILABLE } from "../format.js";
 import { sourceReference } from "../sources.js";
-import { AttentionNote, MissingValue, MultiStageCue } from "./Cues.js";
+import { AttentionNote, MissingValue } from "./Cues.js";
 import styles from "./exploration.module.css";
 
 interface TaxonProfileProps {
@@ -55,7 +55,6 @@ export function TaxonProfile({
   // loaded; fall back to the loaded occurrences when no profile is present.
   const windowed = taxonTimeRange(occurrences);
   const range = profile?.timeSpan ?? windowed.range;
-  const approximate = profile?.timeSpanApproximate ?? windowed.approximate;
   const totalCount = profile?.occurrenceCount ?? occurrences.length;
 
   if (!taxon) {
@@ -126,8 +125,7 @@ export function TaxonProfile({
       <div className={styles.section}>
         <span className={styles.statLabel}>Time range</span>
         <p className={styles.fieldValue}>
-          <span className="mono">{formatMaRange(range)}</span>{" "}
-          {approximate && <MultiStageCue />}
+          <span className="mono">{formatMaRange(range)}</span>
         </p>
       </div>
 
