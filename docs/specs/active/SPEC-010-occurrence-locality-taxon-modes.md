@@ -104,9 +104,10 @@ snapshot only holds genera.
   decision), showing name + occurrence count + aggregate Ma span; selecting a taxon
   **focuses all of its occurrences** (emphasised, the rest dimmed) and routes to the
   taxon profile (SPEC-003 loop).
-- Add a **rank selector** inside Taxon mode that rolls occurrences up their taxonomic
-  parent chain to a chosen rank (Species / Genus / Family / Clade), so grouping
-  granularity is the user's choice.
+- Add a **rank selector** inside Taxon mode with a compact, public-legible ladder —
+  **Genus** (default) / **Family** / **Major group** — that rolls occurrences up their
+  taxonomic parent chain to the chosen tier (no Species tier), so grouping granularity is
+  the user's choice while staying recognisable to a non-specialist.
 - **Widen the ingestion** so the snapshot carries the Dinosauria taxonomic hierarchy —
   taxa at the ranks needed for roll-up, each with its real rank and a parent link that
   resolves within the snapshot — replacing the genus-only pull, deterministically and
@@ -234,25 +235,31 @@ the exploration view.
 
 ### REQ-005: Rank selector within Taxon mode
 
-- **Statement:** While in Taxon mode the view must present a **rank selector** offering
-  the taxonomic ranks available in the snapshot (from `Species` up through `Genus`,
-  `Family`, and the major `Clade` levels). Choosing a rank must **roll each occurrence up
-  its taxonomic parent chain (DATA-002/003) to the nearest ancestor at that rank** and
-  group the list/focus at that rolled-up taxon; occurrences whose identified taxon has no
-  ancestor at the chosen rank must be handled by an explicit, disclosed rule (grouped
-  under their finest available taxon and counted in a stated "not classified at this
-  rank" bucket — never silently dropped). The default rank must be the **finest** (the
-  identified taxon, i.e. no roll-up), preserving REQ-004's behaviour. The selector must
-  be hidden or disabled outside Taxon mode and be keyboard-operable with a legible
-  current value.
-- **Rationale:** Records sit at different ranks; letting the Explorer choose the grouping
-  rank (e.g. collapse genera into their family) is the owner's stated requirement and the
-  natural granularity control for Taxon mode.
-- **Acceptance criteria:** In Taxon mode the selector lists the ranks present in the
-  snapshot; default groups at the identified taxon; choosing `Family` re-groups two
-  genera of one family into a single row/focus whose count is the sum; an occurrence with
-  no ancestor at the chosen rank appears in the disclosed "not classified at this rank"
-  bucket rather than vanishing; outside Taxon mode the selector is not offered.
+- **Statement:** While in Taxon mode the view must present a **rank selector** with a
+  **three-tier, public-legible ladder** — **Genus** (default), **Family**, and **Major
+  group** (a higher clade level) — labelled with the domain terms. **Species is not
+  offered** as a grouping tier (owner decision 2026-07-22): genus is the finest and most
+  recognisable level for a non-specialist (most well-known dinosaur names are genera), and
+  species-level identification is sparse. The default is **Genus** (not the raw identified
+  rank), so the view opens on the recognisable level. Choosing a tier must **roll each
+  occurrence up its taxonomic parent chain (DATA-002/003) to the nearest ancestor at that
+  tier** and group the list/focus at that rolled-up taxon; occurrences whose identified
+  taxon sits **above** the chosen tier (e.g. a "*Theropoda indet.*" record when grouping
+  at Genus) must be handled by an explicit, disclosed rule — counted in a stated "not
+  classified at this level" bucket, never silently dropped. The exact PBDB rank(s) mapped
+  to the **Major group** tier are pinned during ingestion so the tier lands on the
+  intuitive big groups (theropods, sauropods, ceratopsians…), since dinosaur clades below
+  Family do not follow a single Linnaean rank. The selector must be hidden or disabled
+  outside Taxon mode and be keyboard-operable with a legible current value.
+- **Rationale:** Records sit at different ranks; a compact Genus/Family/Major-group ladder
+  gives a non-paleontologist a correct-but-graspable granularity control (owner request
+  2026-07-22, "un juste niveau pour l'utilisateur qui n'est pas paléontologue mais en
+  restant correct"), while genus-as-default keeps the map immediately readable.
+- **Acceptance criteria:** In Taxon mode the selector offers exactly Genus/Family/Major
+  group (no Species); default groups at Genus; choosing `Family` re-groups two genera of
+  one family into a single row/focus whose count is the sum; a record identified only above
+  the chosen tier appears in the disclosed "not classified at this level" bucket rather
+  than vanishing; outside Taxon mode the selector is not offered.
 - **Verification method:** unit test (rank roll-up over the ingested ancestry) + component test.
 - **Evidence location:** `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx`, `src/app/state/grouping.ts`.
 
@@ -344,17 +351,19 @@ the exploration view.
 ### DATA-003: Ingest the Dinosauria taxonomic hierarchy (widened PBDB pull)
 
 - **Statement:** The ingestion (`HttpSourceClient`) must capture the **taxonomic
-  hierarchy within `base_name=Dinosauria`** — taxa at the ranks required for roll-up
-  (Species through the major clade levels, at least Species/Genus/Family/Clade) — each
-  taxon carrying its PBDB rank and a `parentId` that **resolves to another ingested
-  taxon**, forming a chain closed under the set (excepting the single agreed root). This
-  replaces the genus-only pull (`&rank=genus`) with a hierarchy-aware pull (e.g. removing
-  the rank filter / adding parent ingestion / consuming the `show=class` classification
-  columns already returned on occurrences), keeping the per-interval merge deterministic
-  (SPEC-008 REQ-001). Occurrence→taxon resolution must retain each occurrence's
-  **identified** taxon (at whatever rank), joined into the enriched taxa set so roll-up
-  can proceed; "*… indet.*" identifications resolve to their real higher taxon where PBDB
-  provides it. The snapshot must be rebuilt.
+  hierarchy within `base_name=Dinosauria`** sufficient for the REQ-005 ladder — taxa from
+  **Genus up through Family and the higher clade level(s)** mapped to the "Major group"
+  tier — each taxon carrying its PBDB rank and a `parentId` that **resolves to another
+  ingested taxon**, forming a chain closed under the set (excepting the single agreed
+  root). **Species-rank taxa need not be ingested as records** (genus is the finest tier —
+  REQ-005); a species-level occurrence resolves to its genus (as the pipeline already does
+  via `gnl`). This replaces the genus-only pull (`&rank=genus`) with a hierarchy-aware
+  pull (e.g. removing the rank filter / adding parent ingestion / consuming the
+  `show=class` classification columns already returned on occurrences), keeping the
+  per-interval merge deterministic (SPEC-008 REQ-001). Occurrence→taxon resolution must
+  retain each occurrence's **identified** taxon (at genus or above), joined into the
+  enriched taxa set so roll-up can proceed; "*… indet.*" identifications resolve to their
+  real higher taxon where PBDB provides it. The snapshot must be rebuilt.
 - **Rationale:** The missing hierarchy is our scoping choice (`rank=genus`), not a PBDB
   limitation; the owner directed widening the pull here so the rank selector has real
   ancestry. PBDB already returns the higher classification we currently discard.
@@ -525,13 +534,18 @@ or SPEC-001 domain-shape change to undo.
   occurrence points (Q2 = a, 2026-07-22).
 - [x] Taxon list scope — viewport or whole age? **Viewport-linked**, SPEC-009-consistent
   (Q3 = a, 2026-07-22).
-- [ ] Exact rank ladder to expose (which clade levels count as selectable "Clade" steps)
-  — resolve during ingestion against what PBDB returns for Dinosauria (e.g. Family /
-  Superfamily / Order / clade), so the selector is meaningful and not overlong.
-- [ ] Whether to also ingest **Species**-rank taxa (for a Species step) or stop at the
-  identified rank + Genus/Family/Clade — decide from the measured size cost (NFR-002).
+- [x] Rank ladder to expose? **Three public-legible tiers — Genus (default) / Family /
+  Major group — no Species** (owner decision 2026-07-22): genus is the recognisable level
+  for non-specialists and species ID is sparse.
+- [x] Ingest **Species**-rank taxa? **No** — genus is the finest tier, so species
+  occurrences roll up to their genus; not ingesting species also keeps the reference
+  smaller (NFR-002). Settled by the ladder decision above.
+- [ ] Which precise PBDB rank(s) back the **Major group** tier (dinosaur clades below
+  Family are not a single Linnaean rank) — pinned during ingestion so the tier lands on
+  the intuitive big groups (theropods, sauropods, ceratopsians…). Implementation detail.
 - [ ] Exact **focus vs highlight vs selection** visual hierarchy in Taxon mode — resolve
-  during design against the charter's emphasis scale.
+  during design against the charter's emphasis scale (three emphasis levels; no
+  colour-only signal). Implementation detail; owner will be shown the result.
 
 ## Human decisions required
 
@@ -547,6 +561,9 @@ or SPEC-001 domain-shape change to undo.
 - [x] Do the **pipeline hierarchy work in this branch** (widen the pull) rather than
   deferring the rank selector — owner confirmed "on fait le chantier ici dans cette
   branche. (b)" (2026-07-22).
+- [x] Rank ladder = **Genus (default) / Family / Major group, no Species** — owner
+  directed a level "correct but graspable for a non-paleontologist" (2026-07-22); genus
+  chosen because most well-known dinosaur names are genera.
 - [ ] Approve the coordinated **SPEC-008 NFR-002 budget adjustment** if `reference.json`
   outgrows its ceiling (see NFR-002), and the SPEC-008 scope amendment recording that the
   pull now spans the Dinosauria hierarchy, not genera only.
