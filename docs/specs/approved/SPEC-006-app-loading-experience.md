@@ -279,6 +279,8 @@ untouched.
 - [ ] Confirm scope **excludes** shrinking/partitioning the snapshot and skeleton/
   streaming render (this spec makes the existing wait legible only).
 - [ ] Approve the byte-accurate vs. phase-coarse progress choice (open question 1).
+- [ ] Approve AMEND-001 — adding the supplied banner illustration to the
+  post-mount loading view (owner-supplied asset, 2026-07-22; proposal above).
 
 ## Conflict check
 
@@ -338,7 +340,37 @@ NFR-001's "no stray hardcoded palette hexes" as a necessary, documented exceptio
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-001 (proposed, pending approval)
+
+- **Date:** 2026-07-22
+- **Reason:** The owner supplied a branded "dinosaur parade" illustration
+  (silhouette row of six clades over a pale bathymetric backdrop) intended for
+  the loading screen. UX-001/SEC-001 bind the **pre-JS** splash to inline CSS
+  only — "no external stylesheet, font, or image request" — so the banner
+  cannot be added there without changing that guarantee. This amendment
+  proposes adding it to the **post-mount** phased loading view instead (the
+  React-rendered progress surface, UX-002/UX-003, shown once the bundle has
+  executed), which is not subject to UX-001's pre-JS constraint. SEC-001's
+  "no third-party asset" wording is unaffected — the banner would be a bundled,
+  same-origin asset, not a third-party fetch.
+- **Changed requirements:** UX-001 and SEC-001 are unchanged (pre-JS splash
+  stays text/CSS-only, image-free). Adds a new acceptance detail to UX-002/
+  UX-003: the post-mount loading surface may render one static, bundled banner
+  image alongside the progress indicator. NFR-001's budget language would need
+  an explicit image ceiling (none currently exists in `scripts/check_budget.ts`
+  for non-data/non-JS assets) — proposed to add one sized to the optimized
+  (compressed/resized) asset, not the current ~1 MB source PNG.
+- **Behavioral impact:** Visual only. The post-mount loading view gains a
+  static illustration; no change to progress semantics, phase order, error/
+  retry handling, or the pre-JS splash.
+- **Test impact:** `test/ui/splash.test.ts` continues to assert the pre-JS
+  splash has no image reference (unchanged). `test/ui/loading-state.test.tsx`
+  would gain an assertion that the banner renders in the post-mount view and
+  does not block/delay the progress indicator or handoff.
+- **Human approval reference:** _pending — awaiting owner sign-off before
+  implementation._
+
+### AMEND-002
 
 - **Date:**
 - **Reason:**
