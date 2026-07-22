@@ -28,9 +28,12 @@ import {
   stageByName,
   visibleOccurrences,
 } from "../state/exploration.js";
+import { occurrencesInView } from "../state/viewport.js";
+import type { Bounds } from "../state/viewport.js";
 import { ContextBar } from "./ContextBar.js";
 import { TimelineControl } from "./TimelineControl.js";
 import { OccurrenceMap } from "./OccurrenceMap.js";
+import { OccurrenceList } from "./OccurrenceList.js";
 import { OccurrencePanel } from "./OccurrencePanel.js";
 import { TaxonProfile } from "./TaxonProfile.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
@@ -101,6 +104,10 @@ export function ExplorationView({
     initialExplorationState,
   );
   const [stageAttempt, setStageAttempt] = useState(0);
+  // Map viewport bounds (null until the map reports them / when no WebGL) and the
+  // transiently highlighted occurrence shared with the map (SPEC-009 REQ-003/004).
+  const [viewport, setViewport] = useState<Bounds | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const stage = stageByName(state.stageName);
   const stageStatus = useStageOccurrences(stageSource, stage, stageAttempt);
 
@@ -129,6 +136,18 @@ export function ExplorationView({
         : DEFAULT_REPRESENTATIVE_STAGE,
     [stageSource],
   );
+
+  // The occurrences currently on the map: narrowed to the viewport, or the full
+  // set when there is no viewport signal (SPEC-009 REQ-003).
+  const inView = useMemo(
+    () => occurrencesInView(occurrences, viewport),
+    [occurrences, viewport],
+  );
+
+  // Drop a stale highlight when the age changes (its occurrence may be gone).
+  useEffect(() => {
+    setHighlightedId(null);
+  }, [state.stageName]);
 
   const selectedOccurrence = state.selectedOccurrenceId
     ? (occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null)
@@ -166,6 +185,7 @@ export function ExplorationView({
         selected={state.stageName}
         onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
         onSelectPeriod={selectPeriod}
+        highlightRange={selectedOccurrence?.timeRange.value ?? null}
       />
       <div className={styles.body}>
         <div className={styles.mapPane}>
@@ -188,6 +208,9 @@ export function ExplorationView({
               }
               occurrenceRotationModel={stageApi.metadata().rotationModel}
               stageName={state.stageName}
+              onViewportChange={setViewport}
+              highlightedId={highlightedId}
+              onHover={setHighlightedId}
             />
           )}
         </div>
@@ -202,24 +225,30 @@ export function ExplorationView({
             </div>
           ) : occurrences.length === 0 ? (
             <EmptyState onReset={() => dispatch({ type: "reset" })} />
-          ) : selectedOccurrence ? (
-            <OccurrencePanel
-              api={stageApi}
-              occurrence={selectedOccurrence}
-              onOpenProfile={(taxonId) =>
-                dispatch({ type: "openProfile", taxonId })
-              }
-              onClose={() => dispatch({ type: "clearSelection" })}
-            />
           ) : (
-            <div className={styles.stateWrap} role="status">
-              <p className={styles.stateTitle}>
-                Select a point on the map to inspect an occurrence.
-              </p>
-              <p className={styles.source}>
-                {occurrences.length} occurrences at this age.
-              </p>
-            </div>
+            <>
+              {selectedOccurrence && (
+                <OccurrencePanel
+                  api={stageApi}
+                  occurrence={selectedOccurrence}
+                  onOpenProfile={(taxonId) =>
+                    dispatch({ type: "openProfile", taxonId })
+                  }
+                  onClose={() => dispatch({ type: "clearSelection" })}
+                />
+              )}
+              <OccurrenceList
+                occurrences={inView}
+                totalAtAge={occurrences.length}
+                viewportActive={viewport !== null}
+                selectedId={state.selectedOccurrenceId}
+                highlightedId={highlightedId}
+                onSelect={(occurrenceId) =>
+                  dispatch({ type: "selectOccurrence", occurrenceId })
+                }
+                onHover={setHighlightedId}
+              />
+            </>
           )}
         </aside>
       </div>

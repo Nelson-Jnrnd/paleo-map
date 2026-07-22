@@ -384,6 +384,41 @@ regression** (no keyboard/screen-reader path to occurrences); see AMEND-002.
 - **Human approval reference:** Owner "I allow you to remove that test. it's
   cleaner" (2026-07-21).
 
+### AMEND-003: Accessible occurrence path restored by SPEC-009
+
+- **Date:** 2026-07-22
+- **Reason:** The "Future work" recorded in AMEND-002 — an accessible occurrence
+  selector to replace the deleted list — is delivered by **SPEC-009**, which brings
+  back a viewport-linked occurrence list in the sidebar with a keyboard/screen-reader
+  path (row → occurrence panel → taxon profile).
+- **Changed behaviour:** No SPEC-007 requirement changes. This note records that the
+  accessibility regression AMEND-002 accepted (no keyboard/screen-reader path to an
+  individual occurrence) is **closed** by SPEC-009. The `reconstructed`/
+  `interpretative` cues SPEC-007 removed are **not** reintroduced (SPEC-009 non-goal).
+- **Behavioral impact:** Additive; the returning list is flat (no SPEC-005
+  aggregation) and mirrors the map's on-screen points.
+- **Test impact:** None here; SPEC-009 adds its own tests.
+- **Human approval reference:** Owner-directed SPEC-009 (2026-07-22).
+
+### AMEND-004: Retire the "spans multiple stages" UI cue (via SPEC-009 REQ-006)
+
+- **Date:** 2026-07-22
+- **Reason:** Owner decision (2026-07-22): the "Spans multiple stages" cue is noise (it
+  shows on ~all occurrences). SPEC-009 REQ-005 adds a frieze range-highlight that
+  conveys a multi-stage span visually for the selected occurrence, so the text cue is
+  no longer needed.
+- **Changed requirements:** REQ-002 (relabel `approximate` → "spans multiple stages")
+  is amended: the **user-facing cue is removed** from the occurrence list, occurrence
+  panel, and taxon profile. The **underlying `approximate` derivation** (SPEC-001
+  DATA-003) is unchanged — only the rendered cue is gone; `MultiStageCue` is no longer
+  used.
+- **Behavioral impact:** No "Spans multiple stages" text appears anywhere in the UI.
+  No data-artifact or schema change.
+- **Test impact:** No tests removed or skipped; the domain derivation test
+  (`spec008-mesozoic-timescale`) stays green. SPEC-009 adds the frieze-highlight test.
+- **Human approval reference:** Owner "supprime les tags spans multiple stages"
+  (2026-07-22).
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.
