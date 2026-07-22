@@ -77,11 +77,11 @@
   color: var(--color-accent-deep);
 }
 
-/* --- Timeline --- */
+/* --- Timeline (to-scale stepped slider, SPEC-009) --- */
 .timeline {
   display: flex;
   align-items: stretch;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-divider);
@@ -91,70 +91,33 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 96px;
+  gap: 2px;
+  min-width: 128px;
+}
+
+.timelineReadout {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.timelineReadoutName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-hi);
+}
+
+.timelineReadoutSpan {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .timelineBody {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
   flex: 1;
   min-width: 0;
-}
-
-.periodJump {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.periodButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: var(--target-min);
-  padding: var(--space-1) var(--space-3);
-  background: var(--color-ground);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.periodButton[aria-pressed="true"] {
-  background: var(--color-accent-deep);
-  border-color: var(--color-accent-deep);
-  color: var(--color-on-accent);
-}
-
-.stageList {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 128px;
-  overflow-y: auto;
-}
-
-.stageButton {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  min-height: var(--target-min);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-ground);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-}
-
-.stageButton[aria-pressed="true"] {
-  background: var(--color-accent-deep);
-  border-color: var(--color-accent-deep);
-  color: var(--color-on-accent);
 }
 
 .stageDot {
@@ -164,13 +127,102 @@
   display: inline-block;
 }
 
-.stageName {
-  font-size: 13px;
+/* Period delimitations — large, labelled, to-scale bands doubling as the jump
+   control (SPEC-009 REQ-002). Positioned absolutely over the shared track width. */
+.periodBands {
+  position: relative;
+  height: var(--target-min);
+  width: 100%;
+}
+
+.periodBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0 var(--space-2);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 12px;
   font-weight: 600;
 }
 
-.stageSpan {
-  font-size: 11px;
+.periodBand + .periodBand {
+  margin-left: 0;
+}
+
+.periodBand[aria-pressed="true"] {
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
+  color: var(--color-on-accent);
+}
+
+/* Stage track — one proportional step per ICS stage; behaves as a single slider
+   via roving tabindex. Steps are placed absolutely at their to-scale offset. */
+.stageTrack {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--color-ground);
+}
+
+.stageStep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.stageStepFill {
+  position: absolute;
+  inset: 6px 0.5px;
+  border-radius: 2px;
+  opacity: 0.45;
+}
+
+.stageStep:hover .stageStepFill,
+.stageStep:focus-visible .stageStepFill {
+  opacity: 0.8;
+}
+
+.stageStep:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+.stageStep[aria-pressed="true"] {
+  z-index: 3;
+}
+
+.stageStep[aria-pressed="true"] .stageStepFill {
+  inset: 2px 0;
+  opacity: 1;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-deep);
+}
+
+/* The handle marking the selected step. */
+.stageThumb {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: calc(100% + 6px);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-deep);
+  box-shadow: var(--shadow-panel);
 }
 
 /* --- Body split --- */
@@ -232,10 +284,22 @@
   overflow-y: auto;
 }
 
-/* --- Occurrence list --- */
+/* --- Occurrence list (SPEC-009: viewport-linked, cross-highlighted) --- */
+.listPane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .listHeader {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
+}
+
+.listCount {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
 }
 
 .list {
@@ -363,6 +427,13 @@
 
 .occurrenceRow:hover {
   background: var(--color-ground);
+}
+
+/* Transient cross-highlight (hover/focus on either surface) — weaker than the
+   selected row below (SPEC-009 REQ-004). */
+.occurrenceRow[data-highlighted="true"] {
+  background: var(--color-ground);
+  border-left-color: var(--color-accent-cluster);
 }
 
 .occurrenceRow[aria-current="true"] {

@@ -41,8 +41,9 @@ test("PERF-370: empty result → empty state → reset filters", async () => {
   expect(
     within(timeline).getByRole("button", { name: /Maastrichtian/ }),
   ).toHaveAttribute("aria-pressed", "true");
-  // Occurrences are back: the sidebar prompts map selection (SPEC-007 removed the
-  // list), which only renders when the filtered set is non-empty.
-  expect(screen.getByText(/Select a point on the map/i)).toBeInTheDocument();
+  // Occurrences are back: the sidebar lists the on-screen occurrences (SPEC-009
+  // restored the viewport-linked list), which only renders when the set is non-empty.
+  const list = screen.getByRole("region", { name: /occurrences on the map/i });
+  expect(within(list).getAllByRole("button").length).toBeGreaterThan(0);
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

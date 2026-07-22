@@ -30,13 +30,7 @@ import {
   selectFrame,
 } from "../data/basemap.js";
 import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
-/** Map bounds in degrees (as reported by the map). */
-export interface Bounds {
-  west: number;
-  south: number;
-  east: number;
-  north: number;
-}
+import type { Bounds } from "../state/viewport.js";
 import styles from "./exploration.module.css";
 
 interface OccurrenceMapProps {
@@ -49,13 +43,65 @@ interface OccurrenceMapProps {
   stageName: string;
   /** Reports the map's current bounds on load and on pan/zoom (SPEC-005 REQ-002). */
   onViewportChange?: (bounds: Bounds) => void;
+  /** Transiently highlighted occurrence, mirrored with the list (SPEC-009 REQ-004). */
+  highlightedId?: string | null;
+  /** Reports the point under the pointer (or null), for list cross-highlight. */
+  onHover?: (occurrenceId: string | null) => void;
 }
 
 const OCEAN_OUTER = "#d7e4ec";
 const LAND = "#edf1f1";
 const COAST = "#a9b9c3";
 const ACCENT = "#0f9d83";
+const ACCENT_DEEP = "#0a7f66";
 const ACCENT_CLUSTER = "#17a98c";
+
+/**
+ * Paint expressions for the individual-point layer given the current selection and
+ * highlight (SPEC-009 REQ-004). Selection is the strongest emphasis, highlight a
+ * weaker one; both darken the ring so they read without colour alone (PERF-250).
+ */
+function pointRadius(
+  selectedId: string | null,
+  highlightedId: string | null,
+): unknown {
+  return [
+    "case",
+    ["==", ["get", "id"], selectedId ?? ""],
+    9,
+    ["==", ["get", "id"], highlightedId ?? ""],
+    8,
+    6,
+  ];
+}
+
+function pointStrokeWidth(
+  selectedId: string | null,
+  highlightedId: string | null,
+): unknown {
+  return [
+    "case",
+    ["==", ["get", "id"], selectedId ?? ""],
+    3,
+    ["==", ["get", "id"], highlightedId ?? ""],
+    2.5,
+    1.5,
+  ];
+}
+
+function pointStrokeColor(
+  selectedId: string | null,
+  highlightedId: string | null,
+): unknown {
+  return [
+    "case",
+    ["==", ["get", "id"], selectedId ?? ""],
+    ACCENT_DEEP,
+    ["==", ["get", "id"], highlightedId ?? ""],
+    ACCENT_DEEP,
+    "#ffffff",
+  ];
+}
 
 /** Self-contained style — background only, no external tiles/glyphs (SEC-001). */
 const BASE_STYLE = {
@@ -96,6 +142,8 @@ export function OccurrenceMap({
   occurrenceRotationModel,
   stageName,
   onViewportChange,
+  highlightedId = null,
+  onHover,
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -104,6 +152,8 @@ export function OccurrenceMap({
   onSelectRef.current = onSelect;
   const onViewportChangeRef = useRef(onViewportChange);
   onViewportChangeRef.current = onViewportChange;
+  const onHoverRef = useRef(onHover);
+  onHoverRef.current = onHover;
   const [available, setAvailable] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [basemap, setBasemap] = useState<Basemap | null>(null);
@@ -237,19 +287,15 @@ export function OccurrenceMap({
             filter: ["!", ["has", "point_count"]],
             paint: {
               "circle-color": ACCENT,
-              "circle-radius": [
-                "case",
-                ["==", ["get", "id"], selectedId ?? ""],
-                9,
-                6,
-              ],
-              "circle-stroke-color": "#ffffff",
-              "circle-stroke-width": [
-                "case",
-                ["==", ["get", "id"], selectedId ?? ""],
-                3,
-                1.5,
-              ],
+              "circle-radius": pointRadius(selectedId, highlightedId) as never,
+              "circle-stroke-color": pointStrokeColor(
+                selectedId,
+                highlightedId,
+              ) as never,
+              "circle-stroke-width": pointStrokeWidth(
+                selectedId,
+                highlightedId,
+              ) as never,
             },
           });
           loadedRef.current = true;
@@ -286,6 +332,19 @@ export function OccurrenceMap({
               map.getCanvas().style.cursor = "";
             });
           }
+          // Report the point under the pointer so the list highlights in lock-step
+          // (SPEC-009 REQ-004). Only individual points hover; clusters do not.
+          map.on(
+            "mousemove",
+            "points",
+            (e: MapMouseEvent & { features?: GeoJSON.Feature[] }) => {
+              const id = e.features?.[0]?.properties?.["id"];
+              onHoverRef.current?.(typeof id === "string" ? id : null);
+            },
+          );
+          map.on("mouseleave", "points", () => {
+            onHoverRef.current?.(null);
+          });
         });
       } catch {
         setAvailable(false);
@@ -341,23 +400,26 @@ export function OccurrenceMap({
     source?.setData(toFeatureCollection(occurrences));
   }, [occurrences]);
 
-  // Sync the selected-point emphasis.
+  // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004).
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedRef.current || !map.getLayer("points")) return;
-    map.setPaintProperty("points", "circle-radius", [
-      "case",
-      ["==", ["get", "id"], selectedId ?? ""],
-      9,
-      6,
-    ]);
-    map.setPaintProperty("points", "circle-stroke-width", [
-      "case",
-      ["==", ["get", "id"], selectedId ?? ""],
-      3,
-      1.5,
-    ]);
-  }, [selectedId]);
+    map.setPaintProperty(
+      "points",
+      "circle-radius",
+      pointRadius(selectedId, highlightedId) as never,
+    );
+    map.setPaintProperty(
+      "points",
+      "circle-stroke-width",
+      pointStrokeWidth(selectedId, highlightedId) as never,
+    );
+    map.setPaintProperty(
+      "points",
+      "circle-stroke-color",
+      pointStrokeColor(selectedId, highlightedId) as never,
+    );
+  }, [selectedId, highlightedId]);
 
   const frame = basemap
     ? describeFrame(basemap.meta, occurrenceRotationModel)
