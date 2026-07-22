@@ -50,7 +50,13 @@ export function TaxonProfile({
   const taxon = api.getTaxon(taxonId);
   const profile = api.getProfile(taxonId);
   const occurrences = api.listOccurrences({ taxonId });
-  const { range, approximate } = taxonTimeRange(occurrences);
+  // Prefer the whole-snapshot aggregates (SPEC-008 AMEND-001) so the time span
+  // and count reflect the taxon's full record even when only one stage is
+  // loaded; fall back to the loaded occurrences when no profile is present.
+  const windowed = taxonTimeRange(occurrences);
+  const range = profile?.timeSpan ?? windowed.range;
+  const approximate = profile?.timeSpanApproximate ?? windowed.approximate;
+  const totalCount = profile?.occurrenceCount ?? occurrences.length;
 
   if (!taxon) {
     // Real data holds occurrences identified only to an indeterminate or higher
@@ -166,9 +172,13 @@ export function TaxonProfile({
       </div>
 
       <div className={styles.section}>
-        <span className={styles.statLabel}>
-          Occurrences ({occurrences.length})
-        </span>
+        <span className={styles.statLabel}>Occurrences ({totalCount})</span>
+        {occurrences.length < totalCount && (
+          <p className={styles.source}>
+            Showing {occurrences.length} at the selected age; step the timeline
+            to see this taxon at other ages.
+          </p>
+        )}
         <ul className={styles.list}>
           {occurrences.map((o) => {
             const paleo = o.paleoPosition.value;

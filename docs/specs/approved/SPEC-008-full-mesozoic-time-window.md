@@ -226,13 +226,20 @@ partitions the output, and enforces the size budget.
 
 ## Data model impact
 
-No read-model **schema** change. `timescale.ts` gains the full ICS Mesozoic stage
-table (a fixed reference, not sourced data). Delivery changes from one artifact to
-**per-stage artifacts + an index**; the `ReadModel` shape *within* a stage window is
-unchanged, and shared reference data (sources/taxa) is factored to a shared artifact
-to avoid duplication. The `approximate` flag becomes **meaningful/variable** again
-(against a full stage table it is no longer ~100% true) — no code change beyond the
-table, but explicitly re-verified (REQ-002).
+`timescale.ts` gains the full ICS Mesozoic stage table (a fixed reference, not
+sourced data). Delivery changes from one artifact to **per-stage artifacts + an
+index**; the `ReadModel` shape *within* a stage window is unchanged, and shared
+reference data (sources/taxa) is factored to a shared artifact to avoid
+duplication. The `approximate` flag becomes **meaningful/variable** again (against a
+full stage table it is no longer ~100% true) — no code change beyond the table, but
+explicitly re-verified (REQ-002).
+
+`ReadProfile` gains three **derived** fields — `occurrenceCount`, `timeSpan`,
+`timeSpanApproximate` (SPEC-008 AMEND-001) — precomputed per taxon so a
+stage-partitioned profile reports the taxon's whole-snapshot record rather than
+collapsing to the loaded stage. These are pure aggregates over the occurrences
+already in the model (no new source data), sorted/deterministic like every other
+derived field.
 
 ## API impact
 
@@ -393,14 +400,27 @@ loading/progress surface now also covers per-stage fetches). Recommended frontma
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-001: Whole-snapshot per-taxon aggregates on the profile
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-07-22
+- **Reason:** Stage-partitioned delivery (REQ-005) meant a taxon profile, built
+  from the shared reference plus only the active stage's occurrences, reported the
+  taxon's time range and occurrence count for that single stage — understating a
+  wide-ranging taxon (e.g. a taxon's span collapsed to the loaded window). The
+  profile must report the taxon's full record.
+- **Changed requirements:** REQ-005 (delivery) — the shared `reference.json` now
+  carries derived per-taxon aggregates so the profile is correct without loading
+  every stage. Adds `occurrenceCount`, `timeSpan`, `timeSpanApproximate` to
+  `ReadProfile` (derived fields; not new source data).
+- **Behavioral impact:** The profile's "Time range" and "Occurrences (N)" reflect
+  the taxon across the whole Mesozoic; the occurrence **list** still shows the
+  occurrences at the selected age, now explicitly disclosed ("Showing N at the
+  selected age…"). `derive.ts` computes the aggregates; the committed
+  `reference.json` was regenerated to include them.
+- **Test impact:** `test/spec008-taxon-aggregates.test.ts` (aggregate correctness)
+  and `test/ui/taxon-profile-aggregate.test.tsx` (the profile shows the full total +
+  the subset disclosure with only one stage loaded).
+- **Human approval reference:** Owner requested the fix, 2026-07-22.
 
 ## Review checklist
 
