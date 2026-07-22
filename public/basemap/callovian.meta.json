@@ -1,0 +1,10 @@
+{
+  "name": "Callovian coastlines (163.4 Ma)",
+  "source": "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+  "sourceUrl": "https://gws.gplates.org/reconstruct/coastlines/?time=163.4&model=paleomap",
+  "rotationModel": "scotese",
+  "model": "paleomap",
+  "targetAgeMa": 163.4,
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "note": "Reconstruction at 163.4 Ma (midpoint of the Callovian stage)."
+}

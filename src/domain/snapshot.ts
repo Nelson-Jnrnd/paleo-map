@@ -84,6 +84,16 @@ export interface ReadProfile {
   measurements: ReadMeasurement[];
   /** Only images whose licence is honoured with a credit (DATA-007). */
   images: ReadImage[];
+  /**
+   * Total occurrences of this taxon across the whole snapshot (SPEC-008
+   * AMEND-001). Precomputed so a stage-partitioned profile reports the taxon's
+   * full record, not just the currently-loaded stage.
+   */
+  occurrenceCount: number;
+  /** Aggregate time span across all the taxon's occurrences; null if undatable. */
+  timeSpan: TimeRange | null;
+  /** True when any constituent occurrence's date is approximate (DATA-003). */
+  timeSpanApproximate: boolean;
 }
 
 /** The complete L2+L3 read model — the static data-artifact contract. */

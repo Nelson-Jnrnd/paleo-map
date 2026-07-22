@@ -9,9 +9,10 @@
  * app read path, so DATA-005 ("no runtime egress to PBDB/Wikipedia") still holds:
  * the app reads the dated snapshot this produces, not the network.
  *
- * Scope is a single configured PBDB pull (default: Dinosauria genera in the
- * Maastrichtian) with paleocoordinates from the pinned Scotese/PALEOMAP model
- * (`pgm=scotese`, AMEND-001). Encyclopedic content is joined to PBDB taxa via a
+ * Scope is a configured PBDB pull (default under SPEC-008: Dinosauria genera
+ * across the whole Mesozoic — one query per period, Triassic/Jurassic/Cretaceous,
+ * merged deterministically) with paleocoordinates from the pinned Scotese/PALEOMAP
+ * model (`pgm=scotese`, AMEND-001). Encyclopedic content is joined to PBDB taxa via a
  * Wikidata QID discovered by taxon name (P225) — PBDB's own `P846` values on
  * Wikidata are legacy ids that no longer resolve in the current API, so the name
  * is the reliable bridge to the QID that then keys the article and image.
@@ -43,8 +44,12 @@ const USER_AGENT =
 export interface HttpSourceOptions {
   /** PBDB `base_name` for the pull. */
   baseName: string;
-  /** PBDB `interval` (one or more, comma-separated) for the time window. */
-  interval: string;
+  /**
+   * PBDB `interval`s to pull. SPEC-008 REQ-001 issues **one query per entry** and
+   * merges the results deterministically, so the full-Mesozoic default is the
+   * three periods rather than a single comma-joined interval.
+   */
+  intervals: string[];
   /** Human name + Ma bounds recorded in snapshot metadata. */
   timeWindow: { name: string; maxMa: number; minMa: number };
   /** Pinned plate-rotation model (AMEND-001). */
@@ -58,8 +63,10 @@ export interface HttpSourceOptions {
 
 export const DEFAULT_HTTP_SOURCE_OPTIONS: HttpSourceOptions = {
   baseName: 'Dinosauria',
-  interval: 'Maastrichtian',
-  timeWindow: { name: 'Maastrichtian', maxMa: 72.1, minMa: 66.0 },
+  // One query per Mesozoic period (SPEC-008 REQ-001) — friendlier to PBDB rate
+  // limits than one giant call, and merged deterministically below.
+  intervals: ['Triassic', 'Jurassic', 'Cretaceous'],
+  timeWindow: { name: 'Mesozoic', maxMa: 251.902, minMa: 66.0 },
   rotationModel: 'scotese',
   rotationModelVersion: 'PALEOMAP-2016',
 };
@@ -166,7 +173,9 @@ export class HttpSourceClient implements SourceClient {
 
     // --- PBDB: taxa (genera) → taxa, synthesized opinions, ecospace attributes ---
     const taxonRecords = await this.pbdbTaxa();
-    this.log(`PBDB: ${taxonRecords.length} genera in ${this.opts.baseName}/${this.opts.interval}`);
+    this.log(
+      `PBDB: ${taxonRecords.length} genera in ${this.opts.baseName}/[${this.opts.intervals.join(', ')}]`,
+    );
 
     const taxa: RawPbdbTaxon[] = [];
     const opinions: RawPbdbOpinion[] = [];
@@ -262,7 +271,25 @@ export class HttpSourceClient implements SourceClient {
 
     // --- PBDB: references (full citations) for every cited reference id ---
     const references = await this.pbdbReferences([...refIds]);
-    this.log(`PBDB: ${references.length} references resolved`);
+    // At full-Mesozoic scale a handful of cited occurrence/collection reference
+    // ids have no `refs/list` record (PBDB gaps). Backfill each with a minimal
+    // citation so every `sourceId` still resolves (DATA-001) — the id is a real
+    // PBDB reference, just not expandable to a full citation here.
+    const resolvedRefs = new Set(references.map((r) => r.id));
+    let backfilled = 0;
+    for (const id of refIds) {
+      if (!resolvedRefs.has(id)) {
+        references.push({
+          id,
+          reference: `PBDB reference ${id.replace(/^ref:/, '')} (citation unavailable)`,
+          pubYear: 0,
+        });
+        backfilled += 1;
+      }
+    }
+    this.log(
+      `PBDB: ${references.length} references (${backfilled} backfilled for integrity)`,
+    );
 
     // --- Wikidata QID join (by taxon name) + Wikipedia extracts + Commons media ---
     const names = taxa.map((t) => t.name);
@@ -295,23 +322,37 @@ export class HttpSourceClient implements SourceClient {
 
   // ---- PBDB ---------------------------------------------------------------
 
+  /**
+   * SPEC-008 REQ-001: one PBDB `taxa/list` query per configured interval, merged
+   * deterministically (stable sort + first-wins de-dup by `oid`) so a taxon that
+   * ranges across two periods is captured once and the result is byte-stable.
+   */
   private async pbdbTaxa(): Promise<PbdbTaxonRecord[]> {
-    const url =
-      `${PBDB_BASE}/taxa/list.json?base_name=${encodeURIComponent(this.opts.baseName)}` +
-      `&rank=genus&interval=${encodeURIComponent(this.opts.interval)}` +
-      `&show=attr,ecospace,parent&limit=100000`;
-    const { records } = await getJson<{ records: PbdbTaxonRecord[] }>(url);
-    return records ?? [];
+    const perInterval: PbdbTaxonRecord[][] = [];
+    for (const interval of this.opts.intervals) {
+      const url =
+        `${PBDB_BASE}/taxa/list.json?base_name=${encodeURIComponent(this.opts.baseName)}` +
+        `&rank=genus&interval=${encodeURIComponent(interval)}` +
+        `&show=attr,ecospace,parent&limit=100000`;
+      const { records } = await getJson<{ records: PbdbTaxonRecord[] }>(url);
+      perInterval.push(records ?? []);
+    }
+    return mergeById(perInterval.flat());
   }
 
+  /** As {@link pbdbTaxa}: one `occs/list` query per interval, merged by `oid`. */
   private async pbdbOccurrences(): Promise<PbdbOccRecord[]> {
-    const url =
-      `${PBDB_BASE}/occs/list.json?base_name=${encodeURIComponent(this.opts.baseName)}` +
-      `&interval=${encodeURIComponent(this.opts.interval)}` +
-      `&pgm=${encodeURIComponent(this.opts.rotationModel)}` +
-      `&show=class,coords,paleoloc,coll,loc,strat&limit=100000`;
-    const { records } = await getJson<{ records: PbdbOccRecord[] }>(url);
-    return records ?? [];
+    const perInterval: PbdbOccRecord[][] = [];
+    for (const interval of this.opts.intervals) {
+      const url =
+        `${PBDB_BASE}/occs/list.json?base_name=${encodeURIComponent(this.opts.baseName)}` +
+        `&interval=${encodeURIComponent(interval)}` +
+        `&pgm=${encodeURIComponent(this.opts.rotationModel)}` +
+        `&show=class,coords,paleoloc,coll,loc,strat&limit=100000`;
+      const { records } = await getJson<{ records: PbdbOccRecord[] }>(url);
+      perInterval.push(records ?? []);
+    }
+    return mergeById(perInterval.flat());
   }
 
   private async pbdbReferences(ids: string[]): Promise<RawPbdbReference[]> {
@@ -438,6 +479,22 @@ export class HttpSourceClient implements SourceClient {
 }
 
 // ---- helpers --------------------------------------------------------------
+
+/**
+ * Deterministically merge PBDB records pulled across several per-period queries
+ * (SPEC-008 REQ-001): de-duplicate by `oid` keeping the first occurrence of each
+ * id, then sort by `oid` so the merged list — and every artifact derived from it
+ * — is byte-stable regardless of query order (NFR-002). Pure and unit-testable.
+ */
+export function mergeById<T extends { oid: string }>(records: readonly T[]): T[] {
+  const byId = new Map<string, T>();
+  for (const r of records) {
+    if (!byId.has(r.oid)) byId.set(r.oid, r);
+  }
+  return [...byId.values()].sort((a, b) =>
+    a.oid < b.oid ? -1 : a.oid > b.oid ? 1 : 0,
+  );
+}
 
 async function getJson<T>(url: string, attempt = 1): Promise<T> {
   try {

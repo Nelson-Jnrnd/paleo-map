@@ -116,6 +116,31 @@ export function derive(l1: L1Snapshot): ReadModel {
     })
     .sort(byId);
 
+  // --- Per-taxon occurrence aggregates (SPEC-008 AMEND-001) ---
+  // Precomputed from the built occurrences so a stage-partitioned profile can
+  // report the taxon's whole-snapshot time span + total count without loading
+  // every stage. Deterministic (a pure fold over the sorted occurrences).
+  const occAggByTaxon = new Map<
+    string,
+    { minMa: number; maxMa: number; approximate: boolean; count: number }
+  >();
+  for (const o of occurrences) {
+    const agg = occAggByTaxon.get(o.taxonId) ?? {
+      minMa: Infinity,
+      maxMa: -Infinity,
+      approximate: false,
+      count: 0,
+    };
+    agg.count += 1;
+    const r = o.timeRange.value;
+    if (r) {
+      agg.minMa = Math.min(agg.minMa, r.minMa);
+      agg.maxMa = Math.max(agg.maxMa, r.maxMa);
+    }
+    if (o.timeRange.provenance.approximate) agg.approximate = true;
+    occAggByTaxon.set(o.taxonId, agg);
+  }
+
   // --- Profiles: biology (typed, sourced) + content level + shown images ---
   const encByTaxon = new Map(l1.encyclopedic.map((e) => [e.taxonId, e]));
   const editorialByTaxon = new Map(l1.editorial.map((e) => [e.taxonId, e.item]));
@@ -191,6 +216,12 @@ export function derive(l1: L1Snapshot): ReadModel {
         featured: editorialByTaxon.has(t.id),
       });
 
+      const agg = occAggByTaxon.get(t.id);
+      const timeSpan =
+        agg && Number.isFinite(agg.minMa)
+          ? { minMa: agg.minMa, maxMa: agg.maxMa }
+          : null;
+
       return {
         taxonId: t.id,
         contentLevel,
@@ -199,6 +230,9 @@ export function derive(l1: L1Snapshot): ReadModel {
         attributes,
         measurements,
         images,
+        occurrenceCount: agg?.count ?? 0,
+        timeSpan,
+        timeSpanApproximate: agg?.approximate ?? false,
       };
     })
     .sort((a, b) => (a.taxonId < b.taxonId ? -1 : a.taxonId > b.taxonId ? 1 : 0));

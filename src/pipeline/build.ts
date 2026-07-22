@@ -34,6 +34,15 @@ export function serializeSnapshotCompact(model: ReadModel): string {
   return JSON.stringify(model, sortedReplacer()) + '\n';
 }
 
+/**
+ * Compact, key-sorted serialization of any value (SPEC-008 REQ-005/NFR-002).
+ * The partitioned artifacts (index, reference, per-stage files) reuse the same
+ * canonical form as the snapshot so each one is byte-stable across rebuilds.
+ */
+export function serializeCompact(value: unknown): string {
+  return JSON.stringify(value, sortedReplacer()) + '\n';
+}
+
 function sortedReplacer(): (key: string, value: unknown) => unknown {
   return (_key, value) => {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
