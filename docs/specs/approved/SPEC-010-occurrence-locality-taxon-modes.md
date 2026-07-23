@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-010
 title: Grouping modes — occurrences, localities & taxa (with taxon-rank rollup)
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -567,8 +567,9 @@ or SPEC-001 domain-shape change to undo.
 - [ ] Approve the coordinated **SPEC-008 NFR-002 budget adjustment** if `reference.json`
   outgrows its ceiling (see NFR-002), and the SPEC-008 scope amendment recording that the
   pull now spans the Dinosauria hierarchy, not genera only.
-- [ ] Owner ratification of this spec's exact wording (status → Approved) before
-  implementation begins (Definition of Ready).
+- [x] Owner ratification of this spec's exact wording (status → Approved) before
+  implementation begins — **owner approved 2026-07-22** ("parfait je valide la spec tu
+  peux faire l'implémentation").
 
 ## Conflict check
 
@@ -646,5 +647,4 @@ raised ceiling.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed (extends SPEC-009; coordinated SPEC-008 amendment for scope
       + budget; additive to SPEC-001 read model).
-- [ ] Human approval recorded before status set to Approved (owner-directed the work;
-      spec wording awaiting owner ratification).
+- [x] Human approval recorded before status set to Approved (owner approved 2026-07-22).

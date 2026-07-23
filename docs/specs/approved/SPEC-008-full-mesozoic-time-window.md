@@ -422,6 +422,28 @@ loading/progress surface now also covers per-stage fetches). Recommended frontma
   the subset disclosure with only one stage loaded).
 - **Human approval reference:** Owner requested the fix, 2026-07-22.
 
+### AMEND-002: Widen the PBDB pull from genera to the Dinosauria hierarchy
+
+- **Date:** 2026-07-22
+- **Reason:** SPEC-010 (grouping modes) adds a Taxon-mode rank selector that rolls
+  occurrences up to Genus / Family / Major group. The pull scoped by REQ-001 was
+  `base_name=Dinosauria` at `rank=genus` only, so the snapshot held no families,
+  clades, or parent links to roll up. The missing hierarchy was our scoping choice,
+  not a PBDB limitation.
+- **Changed requirements:** REQ-001 (pull scope) — the ingestion now captures taxa at
+  Genus, Family, and the higher clade level(s) within `base_name=Dinosauria`, each with
+  its real rank and a `parentId` resolvable inside the snapshot. Species-rank taxa are
+  not ingested (genus is the finest grouping tier). The time window, per-stage
+  partitioning, and rotation model are unchanged.
+- **Behavioral impact:** `reference.json` gains ancestor taxa (families/clades) and
+  `parentId` links; the app can group/roll-up by rank. Genus grouping works on the
+  existing genus-only data; Family/Major-group tiers populate after a live refresh
+  (`pnpm run snapshot:app`). See SPEC-010 DATA-002/003, REQ-005.
+- **Test impact:** SPEC-010's pipeline and rank-rollup tests; NFR-002 re-measures the
+  `scripts/check_budget.ts` reference ceiling if the added taxa enlarge it.
+- **Human approval reference:** Owner directed the pipeline work, 2026-07-22 ("on fait
+  le chantier ici dans cette branche. (b)"). Full scope defined in SPEC-010.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

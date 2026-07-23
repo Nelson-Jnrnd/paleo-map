@@ -26,7 +26,8 @@ describe('SPEC-008 REQ-005: stage-partitioned delivery', () => {
       ['metadata', 'profiles', 'sources', 'taxa'],
     );
     expect(p.reference).not.toHaveProperty('occurrences');
-    expect(p.reference.taxa.length).toBe(4);
+    // 4 occurrence-bearing genera + their Family/clade ancestors (SPEC-010 DATA-003).
+    expect(p.reference.taxa.length).toBe(12);
   });
 
   it('the index lists every stage with counts, bounds and a data URL when non-empty', async () => {

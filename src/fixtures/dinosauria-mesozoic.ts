@@ -35,10 +35,20 @@ export const DINOSAURIA_MESOZOIC: SourceSubset = {
   ],
 
   taxa: [
-    { id: 'txn:plateosaurus', name: 'Plateosaurus', rank: 'Genus' },
-    { id: 'txn:allosaurus', name: 'Allosaurus', rank: 'Genus' },
-    { id: 'txn:tyrannosaurus', name: 'Tyrannosaurus', rank: 'Genus' },
-    { id: 'txn:triceratops', name: 'Triceratops', rank: 'Genus' },
+    // Genera (occurrence-bearing) with a full Genus → Family → Major-group clade →
+    // Dinosauria chain (SPEC-010 DATA-002/003) so Taxon-mode rank roll-up resolves.
+    { id: 'txn:plateosaurus', name: 'Plateosaurus', rank: 'Genus', parentId: 'txn:plateosauridae' },
+    { id: 'txn:allosaurus', name: 'Allosaurus', rank: 'Genus', parentId: 'txn:allosauridae' },
+    { id: 'txn:tyrannosaurus', name: 'Tyrannosaurus', rank: 'Genus', parentId: 'txn:tyrannosauridae' },
+    { id: 'txn:triceratops', name: 'Triceratops', rank: 'Genus', parentId: 'txn:ceratopsidae' },
+    { id: 'txn:plateosauridae', name: 'Plateosauridae', rank: 'Family', parentId: 'txn:sauropodomorpha' },
+    { id: 'txn:allosauridae', name: 'Allosauridae', rank: 'Family', parentId: 'txn:theropoda' },
+    { id: 'txn:tyrannosauridae', name: 'Tyrannosauridae', rank: 'Family', parentId: 'txn:theropoda' },
+    { id: 'txn:ceratopsidae', name: 'Ceratopsidae', rank: 'Family', parentId: 'txn:ceratopsia' },
+    { id: 'txn:sauropodomorpha', name: 'Sauropodomorpha', rank: 'Clade', parentId: 'txn:dinosauria' },
+    { id: 'txn:theropoda', name: 'Theropoda', rank: 'Clade', parentId: 'txn:dinosauria' },
+    { id: 'txn:ceratopsia', name: 'Ceratopsia', rank: 'Clade', parentId: 'txn:dinosauria' },
+    { id: 'txn:dinosauria', name: 'Dinosauria', rank: 'Clade' },
   ],
 
   opinions: [

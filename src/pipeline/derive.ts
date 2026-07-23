@@ -45,6 +45,7 @@ export function derive(l1: L1Snapshot): ReadModel {
           id: t.id,
           scientificName: t.scientificName,
           rank: t.rank,
+          ...(t.parentId ? { parentId: t.parentId } : {}),
           validity: {
             value: null,
             sourceId: null,
@@ -65,6 +66,7 @@ export function derive(l1: L1Snapshot): ReadModel {
         id: t.id,
         scientificName: t.scientificName,
         rank: t.rank,
+        ...(t.parentId ? { parentId: t.parentId } : {}),
         validity,
         acceptedPer: source.reference,
       };
@@ -106,6 +108,7 @@ export function derive(l1: L1Snapshot): ReadModel {
         id: o.id,
         taxonId: ident.taxonId,
         taxonName: taxonNameMap.get(ident.taxonId) ?? ident.taxonAsRecorded,
+        collectionId: o.collectionId,
         collectionName: c.name,
         formation: c.formation,
         member: c.member,
