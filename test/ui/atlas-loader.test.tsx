@@ -60,7 +60,8 @@ test("boot fetches only the index and reference", async () => {
 
   const boot = await bootAtlas();
   expect(boot.index.stages.length).toBe(30);
-  expect(boot.reference.taxa.length).toBe(4);
+  // 4 occurrence-bearing genera + their Family/clade ancestors (SPEC-010 DATA-003).
+  expect(boot.reference.taxa.length).toBe(12);
   expect(calls.filter((u) => u.includes("data/"))).toEqual([
     "data/index.json",
     "data/reference.json",

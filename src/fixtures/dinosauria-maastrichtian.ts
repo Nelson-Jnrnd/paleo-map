@@ -36,9 +36,16 @@ export const DINOSAURIA_MAASTRICHTIAN: SourceSubset = {
   ],
 
   taxa: [
+    // Genera (occurrence-bearing) → Family → Major-group clade → Dinosauria root
+    // (SPEC-010 DATA-002/003): the chain the rank selector rolls occurrences up.
     { id: 'txn:tyrannosaurus', name: 'Tyrannosaurus', rank: 'Genus', parentId: 'txn:tyrannosauridae' },
     { id: 'txn:triceratops', name: 'Triceratops', rank: 'Genus', parentId: 'txn:ceratopsidae' },
     { id: 'txn:nanotyrannus', name: 'Nanotyrannus', rank: 'Genus', parentId: 'txn:tyrannosauridae' },
+    { id: 'txn:tyrannosauridae', name: 'Tyrannosauridae', rank: 'Family', parentId: 'txn:theropoda' },
+    { id: 'txn:ceratopsidae', name: 'Ceratopsidae', rank: 'Family', parentId: 'txn:ceratopsia' },
+    { id: 'txn:theropoda', name: 'Theropoda', rank: 'Clade', parentId: 'txn:dinosauria' },
+    { id: 'txn:ceratopsia', name: 'Ceratopsia', rank: 'Clade', parentId: 'txn:dinosauria' },
+    { id: 'txn:dinosauria', name: 'Dinosauria', rank: 'Clade' },
   ],
 
   opinions: [

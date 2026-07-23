@@ -35,6 +35,12 @@ export interface ReadTaxon {
   id: string;
   scientificName: string;
   rank: TaxonomicRank;
+  /**
+   * PBDB parent taxon id, if any (SPEC-010 DATA-002). Exposes the taxonomic
+   * parent chain so Taxon mode can roll an occurrence up to a chosen rank
+   * (Genus / Family / Major group). Absent for the tree's root.
+   */
+  parentId?: string;
   /** Derived winning validity, shown with its citation (DATA-002). */
   validity: Provenanced<NomenclaturalStatus>;
   /** "per <source reference>" — the opinion/reference that won. */
@@ -45,6 +51,12 @@ export interface ReadOccurrence {
   id: string;
   taxonId: string;
   taxonName: string;
+  /**
+   * Stable id of the collection (locality) the occurrence belongs to (SPEC-010
+   * DATA-001). Occurrences sharing it are the same place, so Locality mode groups
+   * on this — not on the non-unique display `collectionName`.
+   */
+  collectionId: string;
   collectionName: string;
   formation: string | null;
   member: string | null;

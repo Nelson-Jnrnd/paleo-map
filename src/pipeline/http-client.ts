@@ -75,6 +75,7 @@ export const DEFAULT_HTTP_SOURCE_OPTIONS: HttpSourceOptions = {
 interface PbdbTaxonRecord {
   oid: string;
   nam: string;
+  rnk?: string | number; // PBDB rank: name ("genus") or numeric code (5 = genus)
   par?: string;
   att?: string;
   rid?: string;
@@ -171,10 +172,12 @@ export class HttpSourceClient implements SourceClient {
       timeWindow: this.opts.timeWindow,
     };
 
-    // --- PBDB: taxa (genera) → taxa, synthesized opinions, ecospace attributes ---
+    // --- PBDB: taxa (genera + their ancestors) → taxa, opinions, attributes ---
+    // SPEC-010 DATA-003: the occurrence-bearing genera plus the family/clade
+    // ancestors they roll up to, each with its real rank and a resolvable parent.
     const taxonRecords = await this.pbdbTaxa();
     this.log(
-      `PBDB: ${taxonRecords.length} genera in ${this.opts.baseName}/[${this.opts.intervals.join(', ')}]`,
+      `PBDB: ${taxonRecords.length} taxa (genera + ancestors) in ${this.opts.baseName}/[${this.opts.intervals.join(', ')}]`,
     );
 
     const taxa: RawPbdbTaxon[] = [];
@@ -187,7 +190,7 @@ export class HttpSourceClient implements SourceClient {
       taxa.push({
         id: t.oid,
         name: t.nam,
-        rank: 'Genus',
+        rank: mapPbdbRank(t.rnk),
         ...(t.par ? { parentId: t.par } : {}),
       });
       taxonIdByName.set(t.nam, t.oid);
@@ -323,9 +326,12 @@ export class HttpSourceClient implements SourceClient {
   // ---- PBDB ---------------------------------------------------------------
 
   /**
-   * SPEC-008 REQ-001: one PBDB `taxa/list` query per configured interval, merged
-   * deterministically (stable sort + first-wins de-dup by `oid`) so a taxon that
-   * ranges across two periods is captured once and the result is byte-stable.
+   * SPEC-008 REQ-001 + SPEC-010 DATA-003: one PBDB `taxa/list` query per interval
+   * for the occurrence-bearing **genera**, then a walk **up** the `par` chain to
+   * capture the ancestor taxa (families and higher clades) so any genus resolves
+   * to a Family / Major-group ancestor inside the snapshot. All merged
+   * deterministically (stable sort + first-wins de-dup by `oid`) so the result is
+   * byte-stable regardless of query order (NFR-002).
    */
   private async pbdbTaxa(): Promise<PbdbTaxonRecord[]> {
     const perInterval: PbdbTaxonRecord[][] = [];
@@ -337,7 +343,46 @@ export class HttpSourceClient implements SourceClient {
       const { records } = await getJson<{ records: PbdbTaxonRecord[] }>(url);
       perInterval.push(records ?? []);
     }
-    return mergeById(perInterval.flat());
+    const genera = mergeById(perInterval.flat());
+
+    // Walk up the parent chain, fetching each unseen ancestor once, until every
+    // referenced `par` is resolved (or PBDB returns nothing more). Bounded by the
+    // finite depth of the tree; the requested set stops cycles/re-fetches.
+    const known = new Map<string, PbdbTaxonRecord>(genera.map((t) => [t.oid, t]));
+    const requested = new Set<string>();
+    let frontier = new Set<string>(
+      genera.flatMap((t) => (t.par && !known.has(t.par) ? [t.par] : [])),
+    );
+    while (frontier.size > 0) {
+      // Only query ids never requested before, so a resolver that echoes known
+      // records (or a broken chain) can never loop forever.
+      const toFetch = [...frontier].filter((id) => !requested.has(id));
+      if (toFetch.length === 0) break;
+      for (const id of toFetch) requested.add(id);
+      const fetched = await this.pbdbTaxaByIds(toFetch);
+      if (fetched.length === 0) break;
+      const next = new Set<string>();
+      for (const t of fetched) {
+        if (!known.has(t.oid)) known.set(t.oid, t);
+        if (t.par && !known.has(t.par)) next.add(t.par);
+      }
+      frontier = next;
+    }
+    return mergeById([...known.values()]);
+  }
+
+  /** Fetch specific taxa by id (the ancestor walk in {@link pbdbTaxa}). */
+  private async pbdbTaxaByIds(ids: string[]): Promise<PbdbTaxonRecord[]> {
+    const out: PbdbTaxonRecord[] = [];
+    const numeric = ids.map((id) => id.replace(/^txn:/, ''));
+    for (const batch of chunk(numeric, 100)) {
+      const url =
+        `${PBDB_BASE}/taxa/list.json?taxon_id=${batch.join(',')}` +
+        `&show=attr,ecospace,parent`;
+      const { records } = await getJson<{ records: PbdbTaxonRecord[] }>(url);
+      out.push(...(records ?? []));
+    }
+    return out;
   }
 
   /** As {@link pbdbTaxa}: one `occs/list` query per interval, merged by `oid`. */
@@ -526,6 +571,41 @@ function toNum(v: number | string | undefined): number {
 function parseYear(attribution: string | undefined): string | null {
   const m = attribution?.match(/\b(1[6-9]\d{2}|20\d{2})\b/);
   return m ? m[1]! : null;
+}
+
+/**
+ * Map a PBDB rank to the domain's four-value rank (SPEC-010 DATA-003). PBDB returns
+ * `rnk` as a **name** ("genus") from some endpoints and a **numeric rank code**
+ * (5 = genus, 9 = family, 3 = species, …) from others, so both forms are handled.
+ * Genus and Family map directly; species/subgenus collapse to their obvious tier;
+ * every rank **above** family (superfamily, order, suborder, unranked clade, …)
+ * maps to `Clade` — the "Major group" tier space. The app's tier resolver then
+ * finds the true Family by rank and the Major group by a curated clade-name set, so
+ * the intermediate `Clade` nodes are inert chain links, not selectable tiers.
+ */
+export function mapPbdbRank(
+  rnk: string | number | undefined,
+): RawPbdbTaxon['rank'] {
+  // Numeric PBDB rank codes (2 subspecies, 3 species, 4 subgenus, 5 genus,
+  // 9 family; everything else is above family → Clade).
+  if (typeof rnk === 'number') {
+    if (rnk === 2 || rnk === 3) return 'Species';
+    if (rnk === 4 || rnk === 5) return 'Genus';
+    if (rnk === 9) return 'Family';
+    return 'Clade';
+  }
+  switch ((rnk ?? '').toLowerCase()) {
+    case 'species':
+    case 'subspecies':
+      return 'Species';
+    case 'genus':
+    case 'subgenus':
+      return 'Genus';
+    case 'family':
+      return 'Family';
+    default:
+      return 'Clade';
+  }
 }
 
 /** Map PBDB nomenclatural status text to the domain's `NomenclaturalStatus`. */

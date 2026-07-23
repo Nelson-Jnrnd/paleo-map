@@ -30,11 +30,21 @@ import {
 } from "../state/exploration.js";
 import { occurrencesInView } from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
+import {
+  NOT_CLASSIFIED_KEY,
+  groupByLocality,
+  groupByTaxon,
+  indexTaxaById,
+  resolveTierTaxon,
+} from "../state/grouping.js";
 import { ContextBar } from "./ContextBar.js";
+import { GroupingControls } from "./GroupingControls.js";
 import { TimelineControl } from "./TimelineControl.js";
 import { OccurrenceMap } from "./OccurrenceMap.js";
 import { OccurrenceList } from "./OccurrenceList.js";
 import { OccurrencePanel } from "./OccurrencePanel.js";
+import { LocalityList, TaxonList } from "./GroupedList.js";
+import { LocalityPanel, TaxonPanel } from "./GroupedPanels.js";
 import { TaxonProfile } from "./TaxonProfile.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
 import styles from "./exploration.module.css";
@@ -144,6 +154,75 @@ export function ExplorationView({
     [occurrences, viewport],
   );
 
+  // --- SPEC-010 grouping: derive locality/taxon groups from the in-view set ---
+  const taxaById = useMemo(
+    () => indexTaxaById(stageApi.listTaxa()),
+    [stageApi],
+  );
+
+  // Locality markers for the map cover the whole stage; the list is viewport-linked.
+  const mapLocalities = useMemo(
+    () => (state.mode === "locality" ? groupByLocality(occurrences) : []),
+    [state.mode, occurrences],
+  );
+  const listLocalities = useMemo(
+    () => (state.mode === "locality" ? groupByLocality(inView) : []),
+    [state.mode, inView],
+  );
+  const taxonGroups = useMemo(
+    () =>
+      state.mode === "taxon" ? groupByTaxon(inView, state.rank, taxaById) : [],
+    [state.mode, state.rank, inView, taxaById],
+  );
+
+  const selectedLocality = useMemo(
+    () =>
+      listLocalities.find((g) => g.collectionId === state.selectedLocalityId) ??
+      (state.selectedLocalityId
+        ? (groupByLocality(occurrences).find(
+            (g) => g.collectionId === state.selectedLocalityId,
+          ) ?? null)
+        : null),
+    [listLocalities, occurrences, state.selectedLocalityId],
+  );
+  const localityOccurrences = useMemo(
+    () =>
+      selectedLocality
+        ? occurrences.filter(
+            (o) => o.collectionId === selectedLocality.collectionId,
+          )
+        : [],
+    [selectedLocality, occurrences],
+  );
+  const selectedTaxonGroup = useMemo(
+    () => taxonGroups.find((g) => g.key === state.selectedTaxonKey) ?? null,
+    [taxonGroups, state.selectedTaxonKey],
+  );
+  const focusIds = useMemo(
+    () =>
+      state.mode === "taxon"
+        ? (selectedTaxonGroup?.occurrenceIds ?? null)
+        : null,
+    [state.mode, selectedTaxonGroup],
+  );
+
+  // Route a map feature click to the mode's selection (SPEC-010 REQ-001…004).
+  const handleMapSelect = (featureId: string): void => {
+    if (state.mode === "locality") {
+      dispatch({ type: "selectLocality", collectionId: featureId });
+    } else if (state.mode === "taxon") {
+      const occ = occurrences.find((o) => o.id === featureId);
+      if (!occ) return;
+      const resolved = resolveTierTaxon(occ.taxonId, state.rank, taxaById);
+      dispatch({
+        type: "selectTaxon",
+        taxonKey: resolved ? resolved.id : NOT_CLASSIFIED_KEY,
+      });
+    } else {
+      dispatch({ type: "selectOccurrence", occurrenceId: featureId });
+    }
+  };
+
   // Drop a stale highlight when the age changes (its occurrence may be gone).
   useEffect(() => {
     setHighlightedId(null);
@@ -192,6 +271,13 @@ export function ExplorationView({
           <span className={styles.reconstructionBanner}>
             <span aria-hidden="true">▲</span> Paleogeographic reconstruction
           </span>
+          {state.mode !== "taxon" && (
+            <p className={styles.mapLegend} role="note">
+              {state.mode === "locality"
+                ? "Each marker is one locality; clusters count how many localities are grouped here — not distinct taxa."
+                : "Clusters count fossil records at a location (density), not distinct taxa."}
+            </p>
+          )}
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}
@@ -202,15 +288,20 @@ export function ExplorationView({
           ) : (
             <OccurrenceMap
               occurrences={occurrences}
-              selectedId={state.selectedOccurrenceId}
-              onSelect={(occurrenceId) =>
-                dispatch({ type: "selectOccurrence", occurrenceId })
+              selectedId={
+                state.mode === "locality"
+                  ? state.selectedLocalityId
+                  : state.selectedOccurrenceId
               }
+              onSelect={handleMapSelect}
               occurrenceRotationModel={stageApi.metadata().rotationModel}
               stageName={state.stageName}
               onViewportChange={setViewport}
               highlightedId={highlightedId}
               onHover={setHighlightedId}
+              mode={state.mode}
+              localities={mapLocalities}
+              focusIds={focusIds}
             />
           )}
         </div>
@@ -227,27 +318,84 @@ export function ExplorationView({
             <EmptyState onReset={() => dispatch({ type: "reset" })} />
           ) : (
             <>
-              {selectedOccurrence && (
-                <OccurrencePanel
-                  api={stageApi}
-                  occurrence={selectedOccurrence}
-                  onOpenProfile={(taxonId) =>
-                    dispatch({ type: "openProfile", taxonId })
-                  }
-                  onClose={() => dispatch({ type: "clearSelection" })}
-                />
-              )}
-              <OccurrenceList
-                occurrences={inView}
-                totalAtAge={occurrences.length}
-                viewportActive={viewport !== null}
-                selectedId={state.selectedOccurrenceId}
-                highlightedId={highlightedId}
-                onSelect={(occurrenceId) =>
-                  dispatch({ type: "selectOccurrence", occurrenceId })
-                }
-                onHover={setHighlightedId}
+              <GroupingControls
+                mode={state.mode}
+                rank={state.rank}
+                onSelectMode={(mode) => dispatch({ type: "setMode", mode })}
+                onSelectRank={(rank) => dispatch({ type: "setRank", rank })}
               />
+
+              {state.mode === "occurrence" && (
+                <>
+                  {selectedOccurrence && (
+                    <OccurrencePanel
+                      api={stageApi}
+                      occurrence={selectedOccurrence}
+                      onOpenProfile={(taxonId) =>
+                        dispatch({ type: "openProfile", taxonId })
+                      }
+                      onClose={() => dispatch({ type: "clearSelection" })}
+                    />
+                  )}
+                  <OccurrenceList
+                    occurrences={inView}
+                    totalAtAge={occurrences.length}
+                    viewportActive={viewport !== null}
+                    selectedId={state.selectedOccurrenceId}
+                    highlightedId={highlightedId}
+                    onSelect={(occurrenceId) =>
+                      dispatch({ type: "selectOccurrence", occurrenceId })
+                    }
+                    onHover={setHighlightedId}
+                  />
+                </>
+              )}
+
+              {state.mode === "locality" && (
+                <>
+                  {selectedLocality && (
+                    <LocalityPanel
+                      group={selectedLocality}
+                      occurrences={localityOccurrences}
+                      onOpenProfile={(taxonId) =>
+                        dispatch({ type: "openProfile", taxonId })
+                      }
+                      onClose={() => dispatch({ type: "clearSelection" })}
+                    />
+                  )}
+                  <LocalityList
+                    groups={listLocalities}
+                    totalAtAge={occurrences.length}
+                    viewportActive={viewport !== null}
+                    selectedId={state.selectedLocalityId}
+                    onSelect={(collectionId) =>
+                      dispatch({ type: "selectLocality", collectionId })
+                    }
+                  />
+                </>
+              )}
+
+              {state.mode === "taxon" && (
+                <>
+                  {selectedTaxonGroup && (
+                    <TaxonPanel
+                      group={selectedTaxonGroup}
+                      onOpenProfile={(taxonId) =>
+                        dispatch({ type: "openProfile", taxonId })
+                      }
+                      onClose={() => dispatch({ type: "clearSelection" })}
+                    />
+                  )}
+                  <TaxonList
+                    groups={taxonGroups}
+                    viewportActive={viewport !== null}
+                    selectedKey={state.selectedTaxonKey}
+                    onSelect={(taxonKey) =>
+                      dispatch({ type: "selectTaxon", taxonKey })
+                    }
+                  />
+                </>
+              )}
             </>
           )}
         </aside>

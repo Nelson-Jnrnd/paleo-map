@@ -16,9 +16,12 @@ describe('DATA-001: structural provenance', () => {
 
   it('rejects a displayable value with no source and no editorial marker', async () => {
     const model = await buildFixtureModel();
-    // Corrupt a taxon validity to drop its source without marking it editorial.
-    model.taxa[0]!.validity.sourceId = null;
-    model.taxa[0]!.validity.editorial = false;
+    // Corrupt a *displayable* taxon validity (a genus with a winning opinion, not
+    // an ancestor whose validity is null) to drop its source without marking it
+    // editorial.
+    const valued = model.taxa.find((t) => t.validity.value !== null)!;
+    valued.validity.sourceId = null;
+    valued.validity.editorial = false;
     const violations = validateReadModel(model);
     expect(violations.length).toBeGreaterThan(0);
     expect(violations[0]!.message).toMatch(/no source/);
