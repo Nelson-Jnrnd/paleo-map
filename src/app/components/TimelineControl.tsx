@@ -8,15 +8,20 @@
  * quick-select; they carry their name as text and their ICS colour (meaning-only,
  * never colour-alone — charter §4, PERF-250).
  *
- * The stage track behaves as a single slider: only the selected step is in the tab
- * order (roving tabindex), and Arrow/Home/End move the selection to the adjacent
- * older/younger stage — one tab stop, keyboard-steppable (PERF-230). Each step is
- * still a real `<button>` with `aria-pressed`, and the selected stage name + Ma
- * span are always shown as text (never hover-only).
+ * The stage track behaves as a single slider: it can be **dragged** (press and
+ * hold the track, then move to scrub the selected age), and only the selected step
+ * is in the tab order (roving tabindex), with Arrow/Home/End moving the selection
+ * to the adjacent older/younger stage — one tab stop, keyboard-steppable
+ * (PERF-230). Each step is still a real `<button>` with `aria-pressed`, and the
+ * selected stage name + Ma span are always shown as text (never hover-only).
+ *
+ * The selected age is marked by a thin bar riding just above the track (never a
+ * bulky block), and a selected occurrence/taxon's temporal extent is drawn as a
+ * translucent bracketed band across the stages it spans (SPEC-009 REQ-005).
  */
 
 import { useEffect, useRef } from "react";
-import type { KeyboardEvent, ReactElement } from "react";
+import type { KeyboardEvent, PointerEvent, ReactElement } from "react";
 import type { GeologicalStage, TimeRange } from "../../domain/index.js";
 import { PERIOD_COLOURS } from "../../domain/index.js";
 import { formatStageSpan } from "../format.js";
@@ -87,7 +92,86 @@ export function TimelineControl({
   // Roving focus: after a keyboard step re-selects a stage, move focus to the
   // newly-selected step so the single-tab-stop slider keeps focus with it.
   const selectedRef = useRef<HTMLButtonElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const shouldFocus = useRef(false);
+
+  // Pointer drag: press-and-hold anywhere on the track, then move to scrub the
+  // selected age (the control acts as a real slider, not a row of buttons). A
+  // small movement threshold keeps a plain click delegating to the step button's
+  // own onClick, so click/keyboard selection is unchanged. Selection is derived
+  // from the pointer's x-position mapped back to Ma, so it works whether the
+  // pointer is over a step or the gaps between them.
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    dragging: boolean;
+  } | null>(null);
+  const DRAG_THRESHOLD_PX = 3;
+
+  const stageNameAtClientX = (clientX: number): string | null => {
+    const el = trackRef.current;
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return null;
+    const fraction = Math.min(
+      1,
+      Math.max(0, (clientX - rect.left) / rect.width),
+    );
+    const ma = windowMaxMa - fraction * windowSpan;
+    let best: GeologicalStage | undefined;
+    let bestDist = Number.POSITIVE_INFINITY;
+    for (const s of stages) {
+      if (ma <= s.startMa && ma >= s.endMa) return s.name;
+      const centre = (s.startMa + s.endMa) / 2;
+      const dist = Math.abs(centre - ma);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = s;
+      }
+    }
+    return best?.name ?? null;
+  };
+
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>): void => {
+    if (event.button !== 0) return;
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      dragging: false,
+    };
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>): void => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (!drag.dragging) {
+      if (Math.abs(event.clientX - drag.startX) < DRAG_THRESHOLD_PX) return;
+      drag.dragging = true;
+      // Capture so the scrub keeps tracking even if the pointer leaves the track;
+      // guarded because it throws where the pointer isn't active (older engines).
+      try {
+        trackRef.current?.setPointerCapture(drag.pointerId);
+      } catch {
+        /* capture is a best-effort enhancement */
+      }
+    }
+    event.preventDefault();
+    const name = stageNameAtClientX(event.clientX);
+    if (name && name !== selected) onSelect(name);
+  };
+
+  const endDrag = (): void => {
+    const drag = dragRef.current;
+    if (drag?.dragging) {
+      try {
+        trackRef.current?.releasePointerCapture(drag.pointerId);
+      } catch {
+        /* mirror of setPointerCapture's guard */
+      }
+    }
+    dragRef.current = null;
+  };
+
   useEffect(() => {
     if (shouldFocus.current) {
       selectedRef.current?.focus();
@@ -195,7 +279,29 @@ export function TimelineControl({
           className={styles.stageTrack}
           aria-hidden="false"
           role="presentation"
+          ref={trackRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
         >
+          {selectedStage &&
+            (() => {
+              const { left, width } = extent(
+                selectedStage.startMa,
+                selectedStage.endMa,
+                windowMaxMa,
+                windowSpan,
+              );
+              return (
+                <span
+                  className={styles.selectionBar}
+                  aria-hidden="true"
+                  style={{ left: pct(left), width: pct(width) }}
+                />
+              );
+            })()}
           {highlightRange &&
             (() => {
               const hiMax = Math.min(highlightRange.maxMa, windowMaxMa);
@@ -236,14 +342,9 @@ export function TimelineControl({
               >
                 <span
                   className={styles.stageStepFill}
-                  style={
-                    isSelected ? undefined : { background: stage.periodColour }
-                  }
+                  style={{ background: stage.periodColour }}
                   aria-hidden="true"
                 />
-                {isSelected && (
-                  <span className={styles.stageThumb} aria-hidden="true" />
-                )}
               </button>
             );
           })}

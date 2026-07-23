@@ -15,7 +15,11 @@
 
 import { useEffect, useMemo, useReducer, useState } from "react";
 import type { ReactElement } from "react";
-import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
+import type {
+  GeologicalStage,
+  ReadOccurrence,
+  TimeRange,
+} from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import type { StageSource } from "../data/atlas.js";
 import { representativeByPeriod } from "../data/atlas.js";
@@ -249,6 +253,22 @@ export function ExplorationView({
     if (target) dispatch({ type: "selectStage", stageName: target });
   };
 
+  // The temporal extent highlighted on the timeline follows the current mode's
+  // selection (SPEC-009 REQ-005): a selected occurrence's own range, or the Ma
+  // span aggregated across a selected taxon/locality group.
+  const spanRange = (
+    group: { minMa: number | null; maxMa: number | null } | null,
+  ): TimeRange | null =>
+    group && group.minMa !== null && group.maxMa !== null
+      ? { minMa: group.minMa, maxMa: group.maxMa }
+      : null;
+  const highlightRange: TimeRange | null =
+    state.mode === "taxon"
+      ? spanRange(selectedTaxonGroup)
+      : state.mode === "locality"
+        ? spanRange(selectedLocality)
+        : (selectedOccurrence?.timeRange.value ?? null);
+
   return (
     <div className={styles.app}>
       <ContextBar
@@ -264,7 +284,7 @@ export function ExplorationView({
         selected={state.stageName}
         onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
         onSelectPeriod={selectPeriod}
-        highlightRange={selectedOccurrence?.timeRange.value ?? null}
+        highlightRange={highlightRange}
       />
       <div className={styles.body}>
         <div className={styles.mapPane}>

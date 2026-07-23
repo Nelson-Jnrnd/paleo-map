@@ -8,11 +8,14 @@
  * Zoom/pan come from the built-in controls (FONC-250/260).
  *
  * The basemap is schematic and does not use the occurrences' rotation frame, so
- * the map discloses that mismatch in an always-present DOM overlay (SPEC-004
- * REQ-002/003) — visible even where WebGL is unavailable, which is also the
- * accessible, canvas-independent path (charter / SPEC-002 canvas-a11y edge case):
- * where WebGL is missing the map degrades to a note and the occurrence list
- * remains the equivalent route.
+ * the map discloses that source, rotation model + age, licence and any frame
+ * mismatch (SPEC-004 REQ-002/003) through a compact, keyboard-operable attribution
+ * control — an info button that opens the citation in a popover (mirroring
+ * MapLibre's own collapsible AttributionControl), so the text can't overlap the
+ * map. It renders even where WebGL is unavailable, which is also the accessible,
+ * canvas-independent path (charter / SPEC-002 canvas-a11y edge case): where WebGL
+ * is missing the map degrades to a note and the occurrence list remains the
+ * equivalent route.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -212,6 +215,9 @@ export function OccurrenceMap({
   const [basemap, setBasemap] = useState<Basemap | null>(null);
   const [frameExact, setFrameExact] = useState(true);
   const [frameIndex, setFrameIndex] = useState<BasemapFrameIndex | null>(null);
+  // Basemap provenance is disclosed via a compact info button so its text can't
+  // overlap the map; the details open in a popover anchored above the button.
+  const [attributionOpen, setAttributionOpen] = useState(false);
 
   // Load the per-stage frame index once (independent of WebGL). Failure leaves it
   // null → the effect below degrades to the graticule (SPEC-004/008 REQ-004).
@@ -516,17 +522,54 @@ export function OccurrenceMap({
         </div>
       )}
       {basemap && frame && (
-        <div className={styles.basemapAttribution} role="note">
-          <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
-          {basemap.meta.licence}
-          <br />
-          {!frameExact && (
-            <>
-              Nearest available reconstruction ({basemap.meta.targetAgeMa} Ma)
-              shown for {stageName}.{" "}
-            </>
+        <div className={styles.basemapAttribution}>
+          <button
+            type="button"
+            className={styles.attributionToggle}
+            aria-expanded={attributionOpen}
+            aria-label="Basemap source and reconstruction details"
+            onClick={() => setAttributionOpen((open) => !open)}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle
+                cx="8"
+                cy="8"
+                r="7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+              />
+              <circle cx="8" cy="4.4" r="1" fill="currentColor" />
+              <rect
+                x="7.15"
+                y="6.6"
+                width="1.7"
+                height="5.2"
+                rx="0.5"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+          {attributionOpen && (
+            <div className={styles.attributionPopover} role="note">
+              <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
+              {basemap.meta.licence}
+              <br />
+              {!frameExact && (
+                <>
+                  Nearest available reconstruction ({basemap.meta.targetAgeMa}{" "}
+                  Ma) shown for {stageName}.{" "}
+                </>
+              )}
+              {frame.note} {basemap.meta.note}
+            </div>
           )}
-          {frame.note} {basemap.meta.note}
         </div>
       )}
     </>
