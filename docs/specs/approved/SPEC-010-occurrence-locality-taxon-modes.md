@@ -602,9 +602,9 @@ loop/panel/profile), SPEC-008 (per-stage delivery + the pull it amends), and SPE
 | REQ-005 | Rank roll-up | `grouping.ts` (`resolveTierTaxon`), `GroupingControls.tsx` | `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx` | Implemented |
 | DATA-001 | `collectionId` on read occ | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/spec008-partition-determinism.test.ts`, `test/ui/grouping.test.ts` | Implemented |
 | DATA-002 | Parent chain + rank on read taxon | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/ui/rank-rollup.test.ts` | Implemented |
-| DATA-003 | Widened hierarchy pull | `src/pipeline/http-client.ts` (`pbdbTaxa`/`mapPbdbRank`) | `test/data-008-live-source-client.test.ts`, `test/ui/rank-rollup.test.ts` | Implemented (code); shipped data awaits a live refresh |
+| DATA-003 | Widened hierarchy pull | `src/pipeline/http-client.ts` (`pbdbTaxa`/`mapPbdbRank`) | `test/data-008-live-source-client.test.ts`, `test/data-010-rank-map.test.ts`, `test/ui/rank-rollup.test.ts` | Implemented; live-refreshed 2026-07-23 (2558 taxa, chains closed) |
 | NFR-001 | In-memory/a11y | `grouping.ts`, components | `test/data-005-no-runtime-egress.test.ts` + lint | Implemented |
-| NFR-002 | Deterministic + budget | `scripts/check_budget.ts`, pipeline | budget gate + double build | Deferred to live refresh |
+| NFR-002 | Deterministic + budget | `scripts/check_budget.ts`, pipeline | budget gate | Implemented — reference.json 1227 KB gz within the 1400 KB budget (no ceiling change) |
 | SEC-001 | No runtime egress | `src/pipeline/http-client.ts` | `test/data-005-no-runtime-egress.test.ts` | Implemented |
 | API-001 | Grouping helpers | `src/app/state/grouping.ts` | `test/ui/grouping.test.ts` | Implemented |
 | UX-001 | States/language | components, `exploration.module.css` | `test/ui/grouping-mode.test.tsx` | Implemented |
@@ -632,12 +632,14 @@ Delivered 2026-07-22. Decisions as built:
   whose primary action opens the full profile — so the focus/dim stays observable
   and the profile is one click away (rather than navigating away immediately).
 - **Pipeline (DATA-003):** kept the genus query, then walk the `par` chain via
-  `taxa/list?taxon_id=…` to close the ancestry, mapping PBDB ranks with `mapPbdbRank`.
-  This is validated by the fixture/`data-008` path; the **shipped `public/data` is
-  not rebuilt here** (a live full-Mesozoic pull would also refresh Wikidata/Wikipedia
-  content and is a data-ops step). On the current genus-only shipped data, **Genus
-  grouping works today**; Family/Major-group tiers populate after `pnpm run
-  snapshot:app` (NFR-002 budget to be re-measured then).
+  `taxa/list?taxon_id=…` to close the ancestry, mapping PBDB ranks with `mapPbdbRank`
+  (accepts PBDB's numeric rank codes as well as names). The shipped `public/data`
+  **was live-refreshed** (`pnpm run snapshot:app`, retrievedOn 2026-07-23): 2558 taxa
+  (2124 Genus / 148 Family / 286 Clade), 2557 with a `parentId`, zero dangling. All
+  three tiers populate on real data (Maastrichtian: 378 genera / 73 families / 15
+  major groups; the not-classified share falls from 57% at genus to 10% at major
+  group). reference.json is 1227 KB gz — within the 1400 KB budget (NFR-002), so no
+  ceiling change was needed.
 
 ## Spec amendments
 
