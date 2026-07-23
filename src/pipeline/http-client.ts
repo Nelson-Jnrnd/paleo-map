@@ -75,7 +75,7 @@ export const DEFAULT_HTTP_SOURCE_OPTIONS: HttpSourceOptions = {
 interface PbdbTaxonRecord {
   oid: string;
   nam: string;
-  rnk?: string; // PBDB rank name, e.g. "genus", "family", "unranked clade"
+  rnk?: string | number; // PBDB rank: name ("genus") or numeric code (5 = genus)
   par?: string;
   att?: string;
   rid?: string;
@@ -574,14 +574,26 @@ function parseYear(attribution: string | undefined): string | null {
 }
 
 /**
- * Map a PBDB rank name to the domain's four-value rank (SPEC-010 DATA-003). Genus
- * and Family map directly; species/subgenus collapse to their obvious tier; every
- * rank **above** family (superfamily, order, suborder, unranked clade, …) maps to
- * `Clade` — the "Major group" tier space. The app's tier resolver then finds the
- * true Family by rank and the Major group by a curated clade-name set, so the
- * intermediate `Clade` nodes are inert chain links, not selectable tiers.
+ * Map a PBDB rank to the domain's four-value rank (SPEC-010 DATA-003). PBDB returns
+ * `rnk` as a **name** ("genus") from some endpoints and a **numeric rank code**
+ * (5 = genus, 9 = family, 3 = species, …) from others, so both forms are handled.
+ * Genus and Family map directly; species/subgenus collapse to their obvious tier;
+ * every rank **above** family (superfamily, order, suborder, unranked clade, …)
+ * maps to `Clade` — the "Major group" tier space. The app's tier resolver then
+ * finds the true Family by rank and the Major group by a curated clade-name set, so
+ * the intermediate `Clade` nodes are inert chain links, not selectable tiers.
  */
-function mapPbdbRank(rnk: string | undefined): RawPbdbTaxon['rank'] {
+export function mapPbdbRank(
+  rnk: string | number | undefined,
+): RawPbdbTaxon['rank'] {
+  // Numeric PBDB rank codes (2 subspecies, 3 species, 4 subgenus, 5 genus,
+  // 9 family; everything else is above family → Clade).
+  if (typeof rnk === 'number') {
+    if (rnk === 2 || rnk === 3) return 'Species';
+    if (rnk === 4 || rnk === 5) return 'Genus';
+    if (rnk === 9) return 'Family';
+    return 'Clade';
+  }
   switch ((rnk ?? '').toLowerCase()) {
     case 'species':
     case 'subspecies':
