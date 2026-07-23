@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-010
 title: Grouping modes — occurrences, localities & taxa (with taxon-rank rollup)
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -595,46 +595,71 @@ loop/panel/profile), SPEC-008 (per-stage delivery + the pull it amends), and SPE
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Grouping-mode control | `ContextBar`/`GroupingModeControl`, `ExplorationView` reducer | `test/ui/grouping-mode.test.tsx` | Planned |
-| REQ-002 | Occurrence mode + cluster label | `OccurrenceMap.tsx`, `OccurrenceList.tsx` | `test/ui/occurrence-list.test.tsx` | Planned |
-| REQ-003 | Locality mode | `src/app/state/grouping.ts`, `OccurrenceMap.tsx`, `OccurrenceList.tsx` | `test/ui/locality-mode.test.tsx` | Planned |
-| REQ-004 | Taxon mode focus/dim | `grouping.ts`, `OccurrenceMap.tsx`, `OccurrenceList.tsx`, `ExplorationView.tsx` | `test/ui/taxon-mode.test.tsx` | Planned |
-| REQ-005 | Rank roll-up | `grouping.ts` (ancestor-at-rank), rank selector control | `test/ui/rank-rollup.test.ts` | Planned |
-| DATA-001 | `collectionId` on read occ | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | pipeline tests | Planned |
-| DATA-002 | Parent chain + rank on read taxon | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/ui/rank-rollup.test.ts` | Planned |
-| DATA-003 | Widened hierarchy pull | `src/pipeline/http-client.ts`, `ingest.ts` | pipeline tests | Planned |
-| NFR-001 | In-memory/a11y | `grouping.ts`, components | inspection + no-egress | Planned |
-| NFR-002 | Deterministic + budget | `scripts/check_budget.ts`, pipeline | budget gate + double build | Planned |
-| SEC-001 | No runtime egress | `src/pipeline/http-client.ts` | `test/data-005-no-runtime-egress.test.ts` | Planned |
-| API-001 | Grouping helpers | `src/app/state/grouping.ts`, `src/read/api.ts` | `test/ui/grouping.test.ts` | Planned |
-| UX-001 | States/language | components, `exploration.module.css` | `test/ui/grouping-mode.test.tsx` | Planned |
+| REQ-001 | Grouping-mode control | `GroupingControls.tsx`, `ExplorationView` reducer (`exploration.ts`) | `test/ui/grouping-mode.test.tsx` | Implemented |
+| REQ-002 | Occurrence mode + cluster legend | `ExplorationView.tsx` (`mapLegend`), `OccurrenceMap.tsx` | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx` | Implemented (AMEND-001) |
+| REQ-003 | Locality mode | `grouping.ts` (`groupByLocality`), `GroupedList.tsx`, `GroupedPanels.tsx`, `OccurrenceMap.tsx` | `test/ui/locality-mode.test.tsx`, `test/ui/grouping.test.ts` | Implemented |
+| REQ-004 | Taxon mode focus/dim | `grouping.ts` (`groupByTaxon`), `OccurrenceMap.tsx` (`pointOpacity`), `GroupedList.tsx`, `GroupedPanels.tsx`, `ExplorationView.tsx` | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts` | Implemented |
+| REQ-005 | Rank roll-up | `grouping.ts` (`resolveTierTaxon`), `GroupingControls.tsx` | `test/ui/rank-rollup.test.ts`, `test/ui/taxon-mode.test.tsx` | Implemented |
+| DATA-001 | `collectionId` on read occ | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/spec008-partition-determinism.test.ts`, `test/ui/grouping.test.ts` | Implemented |
+| DATA-002 | Parent chain + rank on read taxon | `src/domain/snapshot.ts`, `src/pipeline/derive.ts` | `test/ui/rank-rollup.test.ts` | Implemented |
+| DATA-003 | Widened hierarchy pull | `src/pipeline/http-client.ts` (`pbdbTaxa`/`mapPbdbRank`) | `test/data-008-live-source-client.test.ts`, `test/ui/rank-rollup.test.ts` | Implemented (code); shipped data awaits a live refresh |
+| NFR-001 | In-memory/a11y | `grouping.ts`, components | `test/data-005-no-runtime-egress.test.ts` + lint | Implemented |
+| NFR-002 | Deterministic + budget | `scripts/check_budget.ts`, pipeline | budget gate + double build | Deferred to live refresh |
+| SEC-001 | No runtime egress | `src/pipeline/http-client.ts` | `test/data-005-no-runtime-egress.test.ts` | Implemented |
+| API-001 | Grouping helpers | `src/app/state/grouping.ts` | `test/ui/grouping.test.ts` | Implemented |
+| UX-001 | States/language | components, `exploration.module.css` | `test/ui/grouping-mode.test.tsx` | Implemented |
 
 ## Implementation notes
 
-Filled during implementation (see PR). Anticipated decisions: modes live in the
-`ExplorationView` reducer (`mode: 'occurrence' | 'locality' | 'taxon'`, `rank`); grouping
-is a pure module (`src/app/state/grouping.ts`) unit-tested without React; the map is fed
-either the occurrence feature collection (occurrence/taxon modes) or a per-collection
-locality feature collection (locality mode), both through the existing clustered source;
-taxon focus is a **set** of occurrence ids driving a dim-others paint expression
-(extending the SPEC-009 selected/highlighted paint), not a new colour scale. Pipeline:
-prefer the fewest new PBDB calls — first consume the `show=class` classification already
-returned on occurrences and add parent taxa only where needed to close the chain; keep
-the per-interval deterministic merge; re-measure the reference budget and document any
-raised ceiling.
+Delivered 2026-07-22. Decisions as built:
+
+- **Modes/state** live in the `ExplorationView` reducer (`mode`, `rank`, plus a
+  per-mode selection: `selectedOccurrenceId` / `selectedLocalityId` /
+  `selectedTaxonKey`). A mode/stage/rank change clears stale selections while
+  preserving stage, mode and (upstream) the viewport.
+- **Grouping** is a pure module (`src/app/state/grouping.ts`), unit-tested without
+  React: `groupByLocality`, `groupByTaxon`, and `resolveTierTaxon` (ancestor-at-tier
+  over the parent chain, cycle-guarded). The **Major-group** tier is resolved by a
+  curated clade-name set (`MAJOR_GROUP_NAMES`), decoupling it from PBDB's noisy
+  sub-family/clade ranks; Family/Genus are resolved by rank. Records above the tier
+  fall in a disclosed **not-classified** bucket (never dropped).
+- **Map** is fed either the occurrence feature collection (occurrence/taxon modes)
+  or a per-collection locality collection (locality mode) through the same clustered
+  source; taxon **focus** is an array of occurrence ids driving a `circle-opacity`
+  dim-others expression (`pointOpacity`), extending the SPEC-009 paint — no new hue.
+- **Taxon-select interpretation (REQ-004):** selecting a taxon focuses its whole
+  point-set on the map (stays on the map screen) and opens a **taxon summary panel**
+  whose primary action opens the full profile — so the focus/dim stays observable
+  and the profile is one click away (rather than navigating away immediately).
+- **Pipeline (DATA-003):** kept the genus query, then walk the `par` chain via
+  `taxa/list?taxon_id=…` to close the ancestry, mapping PBDB ranks with `mapPbdbRank`.
+  This is validated by the fixture/`data-008` path; the **shipped `public/data` is
+  not rebuilt here** (a live full-Mesozoic pull would also refresh Wikidata/Wikipedia
+  content and is a data-ops step). On the current genus-only shipped data, **Genus
+  grouping works today**; Family/Major-group tiers populate after `pnpm run
+  snapshot:app` (NFR-002 budget to be re-measured then).
 
 ## Spec amendments
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-001: REQ-002 cluster semantics via a DOM legend, not a per-cluster name
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-07-22
+- **Reason:** REQ-002's acceptance asked for a **cluster's accessible name** to state
+  a record count. The map is a WebGL canvas with no per-feature DOM and no text glyphs
+  (SEC-001, self-contained), so a per-cluster accessible name is not achievable in this
+  architecture — the same reason SPEC-009 makes the list the accessible route.
+- **Changed requirements:** REQ-002 acceptance — the "records, not diversity" meaning is
+  now conveyed by a **persistent DOM legend** in the map pane (occurrence mode: "Clusters
+  count fossil records … not distinct taxa"; locality mode: the locality/marker wording),
+  always present and screen-reader reachable, instead of a per-cluster accessible name.
+- **Behavioral impact:** A legend appears over the map in occurrence and locality modes
+  (hidden in taxon mode, where points are not collapsed). No change to clustering itself.
+- **Test impact:** `test/ui/grouping-mode.test.tsx` asserts the legend; the SPEC-009
+  occurrence-list regression is unaffected.
+- **Human approval reference:** Mechanism-level adjustment within the approved intent
+  (disclose that a cluster counts records); flagged to the owner in the delivery summary.
 
 ## Review checklist
 

@@ -33,6 +33,10 @@ test("defaults to Occurrences and offers the three modes", async () => {
   expect(
     screen.getByRole("region", { name: /occurrences on the map/i }),
   ).toBeInTheDocument();
+  // REQ-002: the cluster legend discloses that a cluster counts records, not taxa.
+  expect(
+    screen.getByText(/clusters count fossil records .* not distinct taxa/i),
+  ).toBeInTheDocument();
 });
 
 test("switching to Localities re-renders the list under the new unit", async () => {

@@ -271,6 +271,13 @@ export function ExplorationView({
           <span className={styles.reconstructionBanner}>
             <span aria-hidden="true">▲</span> Paleogeographic reconstruction
           </span>
+          {state.mode !== "taxon" && (
+            <p className={styles.mapLegend} role="note">
+              {state.mode === "locality"
+                ? "Each marker is one locality; clusters count how many localities are grouped here — not distinct taxa."
+                : "Clusters count fossil records at a location (density), not distinct taxa."}
+            </p>
+          )}
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}
