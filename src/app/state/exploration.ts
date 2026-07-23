@@ -117,7 +117,11 @@ export function explorationReducer(
         screen: "map",
       };
     case "selectLocality":
-      return { ...state, ...NO_SELECTION, selectedLocalityId: action.collectionId };
+      return {
+        ...state,
+        ...NO_SELECTION,
+        selectedLocalityId: action.collectionId,
+      };
     case "selectTaxon":
       return { ...state, ...NO_SELECTION, selectedTaxonKey: action.taxonKey };
     case "clearSelection":

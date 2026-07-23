@@ -37,7 +37,9 @@ function GroupedListHeader({
 }: GroupedListHeaderProps): ReactElement {
   return (
     <div className={styles.listHeader}>
-      <span className={styles.statLabel}>{viewportActive ? "In view" : label}</span>
+      <span className={styles.statLabel}>
+        {viewportActive ? "In view" : label}
+      </span>
       <p className={styles.listCount}>
         <span className={`${styles.countValue} mono`}>{count}</span>{" "}
         {viewportActive
@@ -104,7 +106,9 @@ export function LocalityList({
               </span>
               <span className={styles.occurrenceMeta}>
                 <span className="mono">{g.taxonCount}</span> taxa ·{" "}
-                <span className="mono">{formatMaRange(span(g.minMa, g.maxMa))}</span>
+                <span className="mono">
+                  {formatMaRange(span(g.minMa, g.maxMa))}
+                </span>
               </span>
             </button>
           </li>
@@ -160,7 +164,9 @@ export function TaxonList({
               </span>
               <span className={styles.occurrenceMeta}>
                 <span className="mono">{g.count}</span> occurrence(s) ·{" "}
-                <span className="mono">{formatMaRange(span(g.minMa, g.maxMa))}</span>
+                <span className="mono">
+                  {formatMaRange(span(g.minMa, g.maxMa))}
+                </span>
               </span>
             </button>
           </li>

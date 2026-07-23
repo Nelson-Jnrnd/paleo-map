@@ -23,7 +23,11 @@ export type GroupingMode = "occurrence" | "locality" | "taxon";
 /** The public-legible rank ladder inside taxon mode (SPEC-010 REQ-005). */
 export type RankTier = "genus" | "family" | "majorGroup";
 
-export const RANK_TIERS: readonly RankTier[] = ["genus", "family", "majorGroup"];
+export const RANK_TIERS: readonly RankTier[] = [
+  "genus",
+  "family",
+  "majorGroup",
+];
 
 /** Domain labels for the tiers — domain language, legible as text (charter §2). */
 export const RANK_TIER_LABEL: Readonly<Record<RankTier, string>> = {
@@ -72,7 +76,9 @@ function matchesTier(taxon: ReadTaxon, tier: RankTier): boolean {
     case "family":
       return taxon.rank === "Family";
     case "majorGroup":
-      return taxon.rank === "Clade" && MAJOR_GROUP_NAMES.has(taxon.scientificName);
+      return (
+        taxon.rank === "Clade" && MAJOR_GROUP_NAMES.has(taxon.scientificName)
+      );
   }
 }
 
@@ -94,7 +100,9 @@ export function resolveTierTaxon(
   while (current && !seen.has(current.id)) {
     seen.add(current.id);
     if (matchesTier(current, tier)) return current;
-    current = current.parentId ? (taxaById.get(current.parentId) ?? null) : null;
+    current = current.parentId
+      ? (taxaById.get(current.parentId) ?? null)
+      : null;
   }
   return null;
 }
@@ -137,8 +145,10 @@ interface MaSpan {
 function extendSpan(span: MaSpan, o: ReadOccurrence): void {
   const range = o.timeRange.value;
   if (!range) return;
-  span.minMa = span.minMa === null ? range.minMa : Math.min(span.minMa, range.minMa);
-  span.maxMa = span.maxMa === null ? range.maxMa : Math.max(span.maxMa, range.maxMa);
+  span.minMa =
+    span.minMa === null ? range.minMa : Math.min(span.minMa, range.minMa);
+  span.maxMa =
+    span.maxMa === null ? range.maxMa : Math.max(span.maxMa, range.maxMa);
 }
 
 /**
@@ -173,7 +183,11 @@ export function groupByLocality(
   const groups = [...byId.values()];
   for (const g of groups) g.taxonCount = g.taxonIds.length;
   return groups.sort((a, b) =>
-    a.collectionId < b.collectionId ? -1 : a.collectionId > b.collectionId ? 1 : 0,
+    a.collectionId < b.collectionId
+      ? -1
+      : a.collectionId > b.collectionId
+        ? 1
+        : 0,
   );
 }
 

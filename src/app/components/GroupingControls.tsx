@@ -7,10 +7,7 @@
  */
 
 import type { ReactElement } from "react";
-import {
-  RANK_TIERS,
-  RANK_TIER_LABEL,
-} from "../state/grouping.js";
+import { RANK_TIERS, RANK_TIER_LABEL } from "../state/grouping.js";
 import type { GroupingMode, RankTier } from "../state/grouping.js";
 import styles from "./exploration.module.css";
 

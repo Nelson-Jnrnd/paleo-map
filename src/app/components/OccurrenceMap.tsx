@@ -154,7 +154,10 @@ function toLocalityFeatureCollection(
     if (!g.paleo) continue; // no paleocoordinate → not placeable
     features.push({
       type: "Feature",
-      geometry: { type: "Point", coordinates: [g.paleo.palaeoLng, g.paleo.palaeoLat] },
+      geometry: {
+        type: "Point",
+        coordinates: [g.paleo.palaeoLng, g.paleo.palaeoLat],
+      },
       properties: { id: g.collectionId, taxonCount: g.taxonCount },
     });
   }
@@ -457,7 +460,11 @@ export function OccurrenceMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedRef.current || !map.getLayer("points")) return;
-    map.setPaintProperty("points", "circle-opacity", pointOpacity(focusIds) as never);
+    map.setPaintProperty(
+      "points",
+      "circle-opacity",
+      pointOpacity(focusIds) as never,
+    );
     map.setPaintProperty(
       "points",
       "circle-stroke-opacity",

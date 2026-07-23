@@ -29,7 +29,8 @@ export function LocalityPanel({
 }: LocalityPanelProps): ReactElement {
   // Distinct taxa recorded here, in stable name order.
   const seen = new Map<string, string>();
-  for (const o of occurrences) if (!seen.has(o.taxonId)) seen.set(o.taxonId, o.taxonName);
+  for (const o of occurrences)
+    if (!seen.has(o.taxonId)) seen.set(o.taxonId, o.taxonName);
   const taxa = [...seen.entries()].sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
   return (
@@ -73,7 +74,9 @@ export function LocalityPanel({
               className={styles.occurrenceRow}
               onClick={() => onOpenProfile(taxonId)}
             >
-              <span className={`${styles.occurrenceTaxon} sciName`}>{taxonName}</span>
+              <span className={`${styles.occurrenceTaxon} sciName`}>
+                {taxonName}
+              </span>
               <span className={styles.occurrenceMeta}>Open profile →</span>
             </button>
           </li>
@@ -97,7 +100,9 @@ export function TaxonPanel({
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
       <div className={styles.panelHead}>
-        <h2 className={group.notClassified ? undefined : "sciName"}>{group.name}</h2>
+        <h2 className={group.notClassified ? undefined : "sciName"}>
+          {group.name}
+        </h2>
         <button
           type="button"
           className={styles.panelClose}
@@ -135,8 +140,8 @@ export function TaxonPanel({
         </button>
       ) : (
         <p className={styles.source}>
-          These records are identified only above this rank, so they have no single
-          taxon profile. Choose a coarser rank to group them.
+          These records are identified only above this rank, so they have no
+          single taxon profile. Choose a coarser rank to group them.
         </p>
       )}
     </section>

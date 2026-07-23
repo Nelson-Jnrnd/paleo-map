@@ -12,13 +12,23 @@ import {
 } from "../../src/app/state/grouping.js";
 import { mesozoicModel } from "./app-harness.js";
 
-function taxon(id: string, name: string, rank: ReadTaxon["rank"], parentId?: string): ReadTaxon {
+function taxon(
+  id: string,
+  name: string,
+  rank: ReadTaxon["rank"],
+  parentId?: string,
+): ReadTaxon {
   return {
     id,
     scientificName: name,
     rank,
     ...(parentId ? { parentId } : {}),
-    validity: { value: "Valid", sourceId: "s", editorial: false, provenance: { approximate: false, missing: false } },
+    validity: {
+      value: "Valid",
+      sourceId: "s",
+      editorial: false,
+      provenance: { approximate: false, missing: false },
+    },
     acceptedPer: "ref",
   };
 }
@@ -32,12 +42,18 @@ const CHAIN = indexTaxaById([
 
 describe("SPEC-010 REQ-005: resolveTierTaxon", () => {
   it("returns the taxon itself when it is already at the tier", () => {
-    expect(resolveTierTaxon("g:trex", "genus", CHAIN)?.scientificName).toBe("Tyrannosaurus");
+    expect(resolveTierTaxon("g:trex", "genus", CHAIN)?.scientificName).toBe(
+      "Tyrannosaurus",
+    );
   });
 
   it("walks up to the family and the major-group clade", () => {
-    expect(resolveTierTaxon("g:trex", "family", CHAIN)?.scientificName).toBe("Tyrannosauridae");
-    expect(resolveTierTaxon("g:trex", "majorGroup", CHAIN)?.scientificName).toBe("Theropoda");
+    expect(resolveTierTaxon("g:trex", "family", CHAIN)?.scientificName).toBe(
+      "Tyrannosauridae",
+    );
+    expect(
+      resolveTierTaxon("g:trex", "majorGroup", CHAIN)?.scientificName,
+    ).toBe("Theropoda");
   });
 
   it("returns null when no ancestor sits at the tier (record above it)", () => {

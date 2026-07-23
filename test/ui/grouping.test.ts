@@ -17,9 +17,15 @@ function occ(
   collectionId: string,
   minMa: number,
   maxMa: number,
-  paleo: { palaeoLat: number; palaeoLng: number } | null = { palaeoLat: 50, palaeoLng: -70 },
+  paleo: { palaeoLat: number; palaeoLng: number } | null = {
+    palaeoLat: 50,
+    palaeoLng: -70,
+  },
 ): ReadOccurrence {
-  const pv = { editorial: false, provenance: { approximate: false, missing: false } };
+  const pv = {
+    editorial: false,
+    provenance: { approximate: false, missing: false },
+  };
   return {
     id,
     taxonId,
@@ -28,7 +34,11 @@ function occ(
     collectionName: `Locality ${collectionId}`,
     formation: `Formation ${collectionId}`,
     member: null,
-    modernPosition: { value: { lat: 0, lng: 0, region: "x" }, sourceId: "s", ...pv },
+    modernPosition: {
+      value: { lat: 0, lng: 0, region: "x" },
+      sourceId: "s",
+      ...pv,
+    },
     paleoPosition: {
       value: paleo ? { ...paleo, rotationModel: "scotese" } : null,
       sourceId: "s",
@@ -38,13 +48,23 @@ function occ(
   };
 }
 
-function taxon(id: string, name: string, rank: ReadTaxon["rank"], parentId?: string): ReadTaxon {
+function taxon(
+  id: string,
+  name: string,
+  rank: ReadTaxon["rank"],
+  parentId?: string,
+): ReadTaxon {
   return {
     id,
     scientificName: name,
     rank,
     ...(parentId ? { parentId } : {}),
-    validity: { value: "Valid", sourceId: "s", editorial: false, provenance: { approximate: false, missing: false } },
+    validity: {
+      value: "Valid",
+      sourceId: "s",
+      editorial: false,
+      provenance: { approximate: false, missing: false },
+    },
     acceptedPer: "ref",
   };
 }
@@ -97,7 +117,11 @@ describe("SPEC-010 REQ-004/005: groupByTaxon with rank roll-up", () => {
 
   it("groups one row per genus at the genus tier", () => {
     const groups = groupByTaxon(occurrences, "genus", TAXA);
-    expect(groups.map((g) => g.name)).toEqual(["Nanotyrannus", "Triceratops", "Tyrannosaurus"]);
+    expect(groups.map((g) => g.name)).toEqual([
+      "Nanotyrannus",
+      "Triceratops",
+      "Tyrannosaurus",
+    ]);
     expect(groups.every((g) => g.count === 1)).toBe(true);
   });
 
@@ -128,7 +152,11 @@ describe("SPEC-010 REQ-004/005: groupByTaxon with rank roll-up", () => {
   });
 
   it("buckets a taxon absent from the snapshot as not-classified", () => {
-    const groups = groupByTaxon([occ("o1", "g:unknown", "colA", 66, 68)], "genus", TAXA);
+    const groups = groupByTaxon(
+      [occ("o1", "g:unknown", "colA", 66, 68)],
+      "genus",
+      TAXA,
+    );
     expect(groups).toHaveLength(1);
     expect(groups[0]!.notClassified).toBe(true);
   });

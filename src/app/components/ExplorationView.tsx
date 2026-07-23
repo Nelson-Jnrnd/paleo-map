@@ -155,7 +155,10 @@ export function ExplorationView({
   );
 
   // --- SPEC-010 grouping: derive locality/taxon groups from the in-view set ---
-  const taxaById = useMemo(() => indexTaxaById(stageApi.listTaxa()), [stageApi]);
+  const taxaById = useMemo(
+    () => indexTaxaById(stageApi.listTaxa()),
+    [stageApi],
+  );
 
   // Locality markers for the map cover the whole stage; the list is viewport-linked.
   const mapLocalities = useMemo(
@@ -167,7 +170,8 @@ export function ExplorationView({
     [state.mode, inView],
   );
   const taxonGroups = useMemo(
-    () => (state.mode === "taxon" ? groupByTaxon(inView, state.rank, taxaById) : []),
+    () =>
+      state.mode === "taxon" ? groupByTaxon(inView, state.rank, taxaById) : [],
     [state.mode, state.rank, inView, taxaById],
   );
 
@@ -184,7 +188,9 @@ export function ExplorationView({
   const localityOccurrences = useMemo(
     () =>
       selectedLocality
-        ? occurrences.filter((o) => o.collectionId === selectedLocality.collectionId)
+        ? occurrences.filter(
+            (o) => o.collectionId === selectedLocality.collectionId,
+          )
         : [],
     [selectedLocality, occurrences],
   );
@@ -194,7 +200,9 @@ export function ExplorationView({
   );
   const focusIds = useMemo(
     () =>
-      state.mode === "taxon" ? (selectedTaxonGroup?.occurrenceIds ?? null) : null,
+      state.mode === "taxon"
+        ? (selectedTaxonGroup?.occurrenceIds ?? null)
+        : null,
     [state.mode, selectedTaxonGroup],
   );
 
