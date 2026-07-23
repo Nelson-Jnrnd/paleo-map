@@ -31,22 +31,32 @@ import {
 } from "../data/basemap.js";
 import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
 import type { Bounds } from "../state/viewport.js";
+import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
 import styles from "./exploration.module.css";
 
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
   selectedId: string | null;
-  onSelect: (occurrenceId: string) => void;
+  onSelect: (featureId: string) => void;
   /** The occurrences' pinned rotation model, for basemap frame reconciliation. */
   occurrenceRotationModel: string;
   /** Selected stage — selects the time-varying basemap frame (SPEC-008 REQ-004). */
   stageName: string;
   /** Reports the map's current bounds on load and on pan/zoom (SPEC-005 REQ-002). */
   onViewportChange?: (bounds: Bounds) => void;
-  /** Transiently highlighted occurrence, mirrored with the list (SPEC-009 REQ-004). */
+  /** Transiently highlighted feature, mirrored with the list (SPEC-009 REQ-004). */
   highlightedId?: string | null;
-  /** Reports the point under the pointer (or null), for list cross-highlight. */
-  onHover?: (occurrenceId: string | null) => void;
+  /** Reports the feature under the pointer (or null), for list cross-highlight. */
+  onHover?: (featureId: string | null) => void;
+  /** Grouping unit: occurrence/taxon plot occurrences; locality plots collections (SPEC-010). */
+  mode?: GroupingMode;
+  /** Locality features for locality mode (one marker per collection, REQ-003). */
+  localities?: readonly LocalityGroup[];
+  /**
+   * Taxon focus (SPEC-010 REQ-004): the selected taxon's occurrence ids. When
+   * non-empty the map emphasises these points and dims the rest — no hue identity.
+   */
+  focusIds?: readonly string[] | null;
 }
 
 const OCEAN_OUTER = "#d7e4ec";
@@ -135,6 +145,43 @@ function toFeatureCollection(
   return { type: "FeatureCollection", features };
 }
 
+/** One marker per collection at its own paleocoordinate (SPEC-010 REQ-003). */
+function toLocalityFeatureCollection(
+  localities: readonly LocalityGroup[],
+): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = [];
+  for (const g of localities) {
+    if (!g.paleo) continue; // no paleocoordinate → not placeable
+    features.push({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [g.paleo.palaeoLng, g.paleo.palaeoLat] },
+      properties: { id: g.collectionId, taxonCount: g.taxonCount },
+    });
+  }
+  return { type: "FeatureCollection", features };
+}
+
+/** Choose the source features for the active mode (SPEC-010 REQ-002/003/004). */
+function featuresForMode(
+  mode: GroupingMode,
+  occurrences: readonly ReadOccurrence[],
+  localities: readonly LocalityGroup[],
+): GeoJSON.FeatureCollection {
+  return mode === "locality"
+    ? toLocalityFeatureCollection(localities)
+    : toFeatureCollection(occurrences);
+}
+
+/**
+ * Point opacity for the taxon focus (SPEC-010 REQ-004): when a taxon is selected
+ * its occurrence points stay fully opaque and the rest dim — emphasis, not hue.
+ * No focus → everything opaque.
+ */
+function pointOpacity(focusIds: readonly string[] | null | undefined): unknown {
+  if (!focusIds || focusIds.length === 0) return 1;
+  return ["case", ["in", ["get", "id"], ["literal", [...focusIds]]], 1, 0.2];
+}
+
 export function OccurrenceMap({
   occurrences,
   selectedId,
@@ -144,6 +191,9 @@ export function OccurrenceMap({
   onViewportChange,
   highlightedId = null,
   onHover,
+  mode = "occurrence",
+  localities = [],
+  focusIds = null,
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -242,7 +292,7 @@ export function OccurrenceMap({
         map.on("load", () => {
           map.addSource("occurrences", {
             type: "geojson",
-            data: toFeatureCollection(occurrences),
+            data: featuresForMode(mode, occurrences, localities),
             cluster: true,
             clusterRadius: 40,
           });
@@ -296,6 +346,8 @@ export function OccurrenceMap({
                 selectedId,
                 highlightedId,
               ) as never,
+              "circle-opacity": pointOpacity(focusIds) as never,
+              "circle-stroke-opacity": pointOpacity(focusIds) as never,
             },
           });
           loadedRef.current = true;
@@ -392,13 +444,26 @@ export function OccurrenceMap({
     );
   }, [mapLoaded, basemap]);
 
-  // Sync source data when the visible occurrences change (PERF-360).
+  // Sync source data when the visible occurrences, mode, or localities change
+  // (PERF-360; SPEC-010 REQ-002/003).
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedRef.current) return;
     const source = map.getSource("occurrences") as GeoJSONSource | undefined;
-    source?.setData(toFeatureCollection(occurrences));
-  }, [occurrences]);
+    source?.setData(featuresForMode(mode, occurrences, localities));
+  }, [occurrences, localities, mode]);
+
+  // Sync the taxon focus emphasis (SPEC-010 REQ-004).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current || !map.getLayer("points")) return;
+    map.setPaintProperty("points", "circle-opacity", pointOpacity(focusIds) as never);
+    map.setPaintProperty(
+      "points",
+      "circle-stroke-opacity",
+      pointOpacity(focusIds) as never,
+    );
+  }, [focusIds]);
 
   // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004).
   useEffect(() => {

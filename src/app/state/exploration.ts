@@ -11,6 +11,8 @@
 import { MESOZOIC_PERIODS, MESOZOIC_STAGES } from "../../domain/index.js";
 import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
+import { DEFAULT_RANK_TIER } from "./grouping.js";
+import type { GroupingMode, RankTier } from "./grouping.js";
 
 /** Full Mesozoic stages, oldest → youngest (deep-time reads left → right). */
 export const EXPLORATION_STAGES: readonly GeologicalStage[] = MESOZOIC_STAGES;
@@ -35,12 +37,22 @@ export const DEFAULT_GROUP = "Dinosaurs";
 
 export type Screen = "map" | "profile";
 
+export type { GroupingMode, RankTier } from "./grouping.js";
+
 export interface ExplorationState {
   /** Selected geological stage — the timeline steps by stage (FONC-120). */
   stageName: string;
   /** Selected taxonomic group, permanently displayed (FONC-050). */
   group: string;
+  /** Grouping unit for the map + list (SPEC-010 REQ-001). */
+  mode: GroupingMode;
+  /** Rank tier for taxon-mode roll-up (SPEC-010 REQ-005). */
+  rank: RankTier;
   selectedOccurrenceId: string | null;
+  /** Selected locality (collection id) in locality mode (SPEC-010 REQ-003). */
+  selectedLocalityId: string | null;
+  /** Selected taxon group key (rolled-up taxon id) in taxon mode (REQ-004). */
+  selectedTaxonKey: string | null;
   screen: Screen;
   profileTaxonId: string | null;
 }
@@ -48,18 +60,33 @@ export interface ExplorationState {
 export const initialExplorationState: ExplorationState = {
   stageName: DEFAULT_STAGE,
   group: DEFAULT_GROUP,
+  mode: "occurrence",
+  rank: DEFAULT_RANK_TIER,
   selectedOccurrenceId: null,
+  selectedLocalityId: null,
+  selectedTaxonKey: null,
   screen: "map",
   profileTaxonId: null,
 };
 
 export type ExplorationAction =
   | { type: "selectStage"; stageName: string }
+  | { type: "setMode"; mode: GroupingMode }
+  | { type: "setRank"; rank: RankTier }
   | { type: "selectOccurrence"; occurrenceId: string }
+  | { type: "selectLocality"; collectionId: string }
+  | { type: "selectTaxon"; taxonKey: string }
   | { type: "clearSelection" }
   | { type: "openProfile"; taxonId: string }
   | { type: "backToMap" }
   | { type: "reset" };
+
+/** Clear every per-mode selection — used on mode/stage/rank changes. */
+const NO_SELECTION = {
+  selectedOccurrenceId: null,
+  selectedLocalityId: null,
+  selectedTaxonKey: null,
+} as const;
 
 export function explorationReducer(
   state: ExplorationState,
@@ -68,20 +95,33 @@ export function explorationReducer(
   switch (action.type) {
     case "selectStage":
       // Age change: update in place; drop a selection that may no longer be
-      // visible. Group/filters preserved (FONC-140, PERF-360).
+      // visible. Group/mode/filters preserved (FONC-140, PERF-360).
       return {
         ...state,
         stageName: action.stageName,
-        selectedOccurrenceId: null,
+        ...NO_SELECTION,
       };
+    case "setMode":
+      // Switch the grouping unit; drop selections that no longer map. Stage,
+      // rank and (upstream) the map viewport are preserved (SPEC-010 REQ-001).
+      return { ...state, mode: action.mode, ...NO_SELECTION };
+    case "setRank":
+      // Re-grouping changes the taxon groups, so the current taxon selection is
+      // dropped; stage/mode preserved (SPEC-010 REQ-005).
+      return { ...state, rank: action.rank, selectedTaxonKey: null };
     case "selectOccurrence":
       return {
         ...state,
+        ...NO_SELECTION,
         selectedOccurrenceId: action.occurrenceId,
         screen: "map",
       };
+    case "selectLocality":
+      return { ...state, ...NO_SELECTION, selectedLocalityId: action.collectionId };
+    case "selectTaxon":
+      return { ...state, ...NO_SELECTION, selectedTaxonKey: action.taxonKey };
     case "clearSelection":
-      return { ...state, selectedOccurrenceId: null };
+      return { ...state, ...NO_SELECTION };
     case "openProfile":
       // Preserve selected age + filters across navigation (FONC-1010/1020).
       return { ...state, screen: "profile", profileTaxonId: action.taxonId };
