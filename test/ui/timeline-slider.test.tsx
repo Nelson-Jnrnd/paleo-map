@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TimelineControl } from "../../src/app/components/TimelineControl.js";
 import {
@@ -110,6 +110,77 @@ test("arrow keys step to the adjacent older/younger stage (one tab stop)", async
     "aria-pressed",
     "true",
   );
+});
+
+// jsdom's PointerEvent doesn't forward clientX, so build the native event by hand
+// with the coordinate defined — React reads clientX/pointerId off the nativeEvent.
+function pointer(type: string, clientX: number): Event {
+  const ev = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperty(ev, "clientX", { value: clientX });
+  Object.defineProperty(ev, "pointerId", { value: 1 });
+  Object.defineProperty(ev, "button", { value: 0 });
+  return ev;
+}
+
+test("the track scrubs as a slider: press-and-drag re-selects the stage under the pointer", () => {
+  render(<Harness initial="Maastrichtian" />);
+
+  // The track is the stage steps' shared parent; give it a real width so the
+  // pointer x maps back to an Ma value (jsdom reports 0 by default).
+  const track = screen.getByRole("button", { name: /Maastrichtian/ })
+    .parentElement as HTMLElement;
+  track.getBoundingClientRect = () =>
+    ({
+      left: 0,
+      top: 0,
+      right: 1000,
+      bottom: 26,
+      width: 1000,
+      height: 26,
+    }) as DOMRect;
+
+  // Press near the youngest (right) end, then drag to the oldest (left) end.
+  fireEvent(track, pointer("pointerdown", 990));
+  fireEvent(track, pointer("pointermove", 0));
+  fireEvent(track, pointer("pointerup", 0));
+
+  // The oldest stage (leftmost) is now selected — dragging moved the age.
+  expect(screen.getByRole("button", { name: /Induan/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  expect(screen.getByRole("button", { name: /Maastrichtian/ })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+});
+
+test("a plain press without movement does not scrub (click still selects)", () => {
+  render(<Harness initial="Maastrichtian" />);
+  const track = screen.getByRole("button", { name: /Maastrichtian/ })
+    .parentElement as HTMLElement;
+  track.getBoundingClientRect = () =>
+    ({
+      left: 0,
+      top: 0,
+      right: 1000,
+      bottom: 26,
+      width: 1000,
+      height: 26,
+    }) as DOMRect;
+
+  const campanian = screen.getByRole("button", { name: /Campanian/ });
+  // Down + up at the same point (no movement past the threshold) leaves the drag
+  // path inert, so the age is unchanged; the button's own click still selects.
+  fireEvent(track, pointer("pointerdown", 200));
+  fireEvent(track, pointer("pointerup", 200));
+  expect(screen.getByRole("button", { name: /Maastrichtian/ })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  fireEvent.click(campanian);
+  expect(campanian).toHaveAttribute("aria-pressed", "true");
 });
 
 test("a selected occurrence highlights its period(s) on the frieze (REQ-005)", () => {

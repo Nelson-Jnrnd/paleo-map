@@ -50,9 +50,10 @@ export function GroupingControls({
       </div>
 
       {mode === "taxon" && (
-        <label className={styles.statLabel}>
-          Group by rank{" "}
+        <label className={styles.rankField}>
+          <span className={styles.statLabel}>Group by rank</span>
           <select
+            className={styles.rankSelect}
             aria-label="Group by rank"
             value={rank}
             onChange={(e) => onSelectRank(e.target.value as RankTier)}

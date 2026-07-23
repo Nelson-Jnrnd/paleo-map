@@ -170,27 +170,64 @@
 }
 
 /* Stage track — one proportional step per ICS stage; behaves as a single slider
-   via roving tabindex. Steps are placed absolutely at their to-scale offset. */
+   that can be dragged (press-and-hold, then scrub) as well as stepped by keyboard
+   via roving tabindex. Steps are placed absolutely at their to-scale offset. The
+   top margin leaves room for the thin selection bar riding just above the track.
+   `touch-action: none` lets a touch drag scrub instead of scrolling the page. */
 .stageTrack {
   position: relative;
-  height: 30px;
+  height: 26px;
   width: 100%;
+  margin-top: 12px;
   border-radius: var(--radius-sm);
   background: var(--color-ground);
+  cursor: pointer;
+  touch-action: none;
 }
 
-/* The selected occurrence's temporal extent, drawn over the stages it spans
-   (SPEC-009 REQ-005). Translucent so the underlying steps stay visible; does not
-   intercept clicks so the steps beneath remain selectable. */
+.stageTrack:active {
+  cursor: grabbing;
+}
+
+/* The selected age — a thin styled bar riding just above the track at the selected
+   stage's to-scale extent (SPEC-009). Deliberately slim: it marks the age without
+   the bulky block/handle it replaces, so the range highlight below stays legible.
+   Non-interactive; the steps beneath carry the clicks. */
+.selectionBar {
+  position: absolute;
+  top: -9px;
+  height: 5px;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: 3px;
+  background: var(--color-accent-deep);
+  box-shadow: var(--shadow-panel);
+  transition:
+    left 120ms ease,
+    width 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectionBar {
+    transition: none;
+  }
+}
+
+/* The selected occurrence/taxon's temporal extent, drawn over the stages it spans
+   (SPEC-009 REQ-005). Translucent so the underlying steps stay visible, bracketed
+   left/right so its bounds read clearly; sits above the steps but below the
+   selection bar, and never intercepts clicks so the steps stay selectable. */
 .rangeHighlight {
   position: absolute;
   top: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-accent-cluster) 30%, transparent);
   border-inline: 2px solid var(--color-accent-deep);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
 .stageStep {
@@ -225,11 +262,13 @@
   z-index: 3;
 }
 
+/* The selected step keeps its period colour but reads fully saturated with an
+   accent ring — the age itself is marked by the thin selection bar above, so the
+   step no longer needs a bulky accent block. */
 .stageStep[aria-pressed="true"] .stageStepFill {
-  inset: 2px 0;
+  inset: 3px 0;
   opacity: 1;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent-deep);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-deep);
 }
 
 /* Ma graduation axis beneath the stage track (SPEC-009 REQ-001). */
@@ -270,19 +309,6 @@
   color: var(--color-text-faint);
 }
 
-/* The handle marking the selected step. */
-.stageThumb {
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: calc(100% + 6px);
-  border-radius: var(--radius-sm);
-  background: var(--color-accent-deep);
-  box-shadow: var(--shadow-panel);
-}
-
 /* --- Body split --- */
 .body {
   display: flex;
@@ -301,19 +327,71 @@
   );
 }
 
+/* Basemap provenance — a compact info button at the map's bottom-left corner; the
+   full source/licence/reconstruction text opens in a popover anchored above it,
+   so the disclosure never spills across the map. */
 .basemapAttribution {
   position: absolute;
   bottom: var(--space-3);
   left: var(--space-3);
-  z-index: 2;
-  max-width: 340px;
+  z-index: 3;
+}
+
+.attributionToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-panel);
+  cursor: pointer;
+}
+
+.attributionToggle:hover {
+  color: var(--color-accent-deep);
+  border-color: var(--color-accent);
+}
+
+.attributionToggle[aria-expanded="true"] {
+  color: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
+}
+
+.attributionToggle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.attributionPopover {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 0;
+  width: max-content;
+  max-width: 300px;
   padding: var(--space-2) var(--space-3);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-panel);
   font-size: 11px;
   line-height: 1.4;
   color: var(--color-text-muted);
+}
+
+/* Caret pointing down toward the info button. */
+.attributionPopover::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 12px;
+  border: 6px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.97);
+  filter: drop-shadow(0 1px 0 var(--color-border));
 }
 
 .reconstructionBanner {
@@ -399,6 +477,49 @@
 .groupByToggle button[aria-pressed="true"] {
   background: var(--color-accent-deep);
   color: var(--color-on-accent);
+}
+
+/* Rank selector (taxon mode) — styled to match the app's controls rather than the
+   raw browser combobox. Label above, a bordered select with a drawn caret. */
+.rankField {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rankSelect {
+  min-height: var(--target-min);
+  padding: 2px var(--space-5) 2px var(--space-2);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--color-text-hi);
+  background-color: var(--color-surface);
+  /* Drawn caret (no external asset) so the control is self-contained. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+  background-position:
+    right 12px center,
+    right 7px center;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.rankSelect:hover {
+  border-color: var(--color-accent);
+}
+
+.rankSelect:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 1px;
+  border-color: var(--color-accent-deep);
 }
 
 .groupList {
@@ -743,7 +864,8 @@
 .mapLegend {
   position: absolute;
   bottom: var(--space-3);
-  left: var(--space-3);
+  /* Clear the basemap info button that anchors the map's bottom-left corner. */
+  left: calc(var(--space-3) + 30px + var(--space-2));
   z-index: 2;
   max-width: 22rem;
   margin: 0;
