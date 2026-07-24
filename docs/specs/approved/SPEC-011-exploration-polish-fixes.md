@@ -94,8 +94,10 @@ legible and trustworthy.
 - No change to which data is shown, only how it is labelled and wrapped.
 - No new filter controls (the "filters" wording is corrected, not backfilled).
 - No redesign of the timeline or the occurrence/taxon/locality modes.
-- Changing the period quick-select **target** is out of scope until the owner
-  decides (see Human decisions required); this spec does not alter it.
+- Changing the period quick-select **target** was deferred to an owner decision;
+  resolved as option (a) on 2026-07-24 — the target is unchanged and a disclosing
+  caption is added (REQ-006, AMEND-001). This spec does not alter which stage is
+  selected.
 - No image/silhouette work (tracked separately as future scope).
 
 ## Users or actors
@@ -162,6 +164,25 @@ build-time ingestion pipeline that produces the static snapshot.
   dispatched action and its result are unchanged.
 - **Verification method:** automated component test asserting the new label and
   that the reset action still restores defaults.
+- **Evidence location:** filled at implementation.
+
+### REQ-006: Disclose the period quick-select target
+
+- **Statement:** The period quick-select keeps jumping to the period's
+  most-populated stage (SPEC-008 REQ-003, unchanged), and the timeline must
+  carry an always-visible caption stating that a period jumps to its most
+  fossil-rich stage — so landing on the Rhaetian when picking "Triassic" reads
+  as intended, not arbitrary.
+- **Rationale:** Owner decision (a) on 2026-07-24: the most-populated target is
+  the right default (period start is a near-empty map), but the behaviour must
+  be legible rather than surprising. The caption is static text, not a hover, per
+  the charter's "always legible" tenet.
+- **Acceptance criteria:** The timeline renders a visible hint (wording e.g.
+  "Periods jump to their most fossil-rich stage") near the period controls; the
+  quick-select still selects the `representative` stage; no change to which
+  stage is chosen.
+- **Verification method:** automated component test asserting the hint text is
+  present; manual read-through.
 - **Evidence location:** filled at implementation.
 
 ### REQ-005: Distinguish full-record span from per-age occurrences
@@ -251,7 +272,8 @@ period quick-select target recorded with the owner's answer before that item is
 | REQ-003 | Dangling parentheticals cleaned | automated | `test/spec011-clean-summary.test.ts` | passing | TBD |
 | REQ-004 | No "Reset filters"; reset still works | automated | `test/ui/exploration-context.test.tsx`, `test/ui/spec011-profile-labels.test.tsx` | passing | TBD |
 | REQ-005 | Header labelled full-record span | automated + manual | `test/ui/spec011-profile-labels.test.tsx` | passing | TBD |
-| NFR-001 | typecheck + tests green | CI | `pnpm run typecheck && pnpm test` (133 passing) | green locally | TBD |
+| REQ-006 | Timeline discloses most-fossil-rich target | automated + manual | `test/ui/timeline-periods.test.tsx` | passing | TBD |
+| NFR-001 | typecheck + tests green | CI | `pnpm run typecheck && pnpm test` | green locally | TBD |
 
 ## Test plan
 
@@ -275,15 +297,15 @@ persisted state, no interface change to undo.
 
 ## Human decisions required
 
-- [ ] **Period quick-select target.** Clicking "Triassic" currently jumps to the
+- [x] **Period quick-select target.** Clicking "Triassic" currently jumps to the
       Rhaetian (most-populated Triassic stage, SPEC-008 REQ-003), i.e. the end of
       the period, which reads as counterintuitive. But jumping to the period
       *start* (Induan) lands on a near-empty map — the opposite complaint. Which
       behaviour do you want?
       **(a)** Keep most-populated (unchanged) and add a small "showing the
       richest stage of the period" hint. **(b)** Jump to period start.
-      **(c)** Jump to period midpoint. — Answer: _____
-      This item is **not implemented** under this spec until you decide.
+      **(c)** Jump to period midpoint. — **Answer: (a)** (owner, 2026-07-24).
+      Implemented as REQ-006 via AMEND-001 below.
 
 ## Conflict check
 
@@ -305,6 +327,7 @@ and SPEC-011.
 | REQ-003 | pipeline ingest summary | `ingest.ts` `cleanSummary` + call site | `spec011-clean-summary.test.ts` | Done |
 | REQ-004 | ContextBar / states | `ContextBar.tsx`, `states.tsx` | `exploration-context.test.tsx`, `spec011-profile-labels.test.tsx` | Done |
 | REQ-005 | TaxonProfile time range | `TaxonProfile.tsx` (header label) | `spec011-profile-labels.test.tsx` | Done |
+| REQ-006 | TimelineControl period caption | `TimelineControl.tsx` (hint) | `timeline-periods.test.tsx` | Done |
 
 ## Implementation notes
 
@@ -321,12 +344,24 @@ and SPEC-011.
   `vitest run` (133 passing), `vite build`, `check:budget`, and the three
   governance validators (specs/governance OK; drift's only warning predates this
   change and concerns SPEC-002).
-- The period quick-select target (Human decisions required) is intentionally
-  untouched, awaiting the owner's a/b/c choice.
+- The period quick-select target was resolved as option (a) (owner, 2026-07-24):
+  the target stays the most-populated stage and a static caption on the timeline
+  discloses it (REQ-006 via AMEND-001).
 
 ## Spec amendments
 
-_None yet._
+### AMEND-001
+
+- **Date:** 2026-07-24
+- **Reason:** The "Human decisions required" item (period quick-select target)
+  was resolved by the owner in favour of option (a): keep the most-populated
+  target and make it legible with a caption.
+- **Changed requirements:** Adds REQ-006. No change to REQ-001…005.
+- **Behavioral impact:** No change to which stage the quick-select selects; adds
+  an always-visible caption to the timeline disclosing that periods jump to
+  their most fossil-rich stage.
+- **Test impact:** Adds a component test asserting the caption is present.
+- **Human approval reference:** Owner reply "a" on 2026-07-24.
 
 ## Review checklist
 
