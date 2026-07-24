@@ -58,17 +58,29 @@ async function main(): Promise<void> {
   // their imageUrl to local paths, so pictures are served offline with no
   // runtime egress. Only in live mode — the committed fixture URLs are not real.
   if (live) {
+    // Wikimedia throttles rapid *bursts* of downloads (the images succeed in
+    // isolation), so pace requests ~4/sec and retry the occasional throttle with
+    // longer backoff, sending a descriptive User-Agent.
+    const UA =
+      "MesozoicDinosaurAtlas/1.0 (https://github.com/Nelson-Jnrnd/paleo-map)";
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((r) => setTimeout(r, ms));
     const bundled = await bundleImages(
       partition.reference,
       outDir,
       async (url) => {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) return null;
-          return new Uint8Array(await res.arrayBuffer());
-        } catch {
-          return null;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          await sleep(attempt === 1 ? 250 : 1500 * (attempt - 1));
+          try {
+            const res = await fetch(url, { headers: { "User-Agent": UA } });
+            if (res.ok) return new Uint8Array(await res.arrayBuffer());
+            // Permanent failure (404/403/…) — give up; transient — retry.
+            if (res.status !== 429 && res.status < 500) return null;
+          } catch {
+            /* network blip — retry */
+          }
         }
+        return null;
       },
       (msg) => console.log(msg),
     );
