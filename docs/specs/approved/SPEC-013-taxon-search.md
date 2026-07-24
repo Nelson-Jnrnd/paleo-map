@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-013
 title: Taxon search — type a name, jump to its profile (with notability ranking)
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -22,8 +22,10 @@ last_verified_at: 2026-07-24
 There is **no way to search** the atlas: to reach *Velociraptor* an Explorer must
 guess its age and hunt the map. This spec adds a **search box** to the exploration
 shell: typing a taxon name (scientific or common) shows a short ranked list of
-matches, and choosing one **opens that taxon's profile directly** — no need to
-know when it lived. Results are ranked by match quality (prefix over substring)
+matches, and choosing one **selects that taxon on the map and shows it in the side
+panel** (Taxon mode) — no need to know when it lived, and the taxon lands in
+context with its distribution emphasised. Results are ranked by match quality
+(prefix over substring)
 and then by **notability**, reusing the existing `contentLevel` so the familiar
 "star" taxa (featured / detailed profiles) surface above obscure genera. Empty,
 no-match and typing states are all designed.
@@ -105,14 +107,22 @@ The Explorer typing into the search box; the in-memory read model.
 - **Verification method:** automated unit test.
 - **Evidence location:** filled at implementation.
 
-### REQ-004: Selecting a result opens the taxon profile
+### REQ-004: Selecting a result selects the taxon on the map + side panel
 
-- **Statement:** Choosing a result (click or Enter) opens that taxon's profile
-  (`openProfile`) and clears the query; the profile's existing "Back to map"
-  returns to the prior view.
-- **Rationale:** Jump straight to the taxon, independent of the current age.
-- **Acceptance criteria:** Selecting a result renders the taxon profile for the
-  chosen taxonId; the search list closes.
+- **Statement:** Choosing a result (click or Enter) **selects that taxon on the
+  map and surfaces it in the right-hand side panel** — it switches to Taxon
+  grouping and dispatches the taxon selection (`setMode: "taxon"` +
+  `selectTaxon`), emphasising the taxon's occurrences on the map and showing its
+  summary in the side panel — and clears the query. It does **not** jump
+  straight to the full profile; the existing "Open taxon profile" action in the
+  side panel remains the way into the profile.
+- **Rationale:** Owner decision (2026-07-24): the search should place the taxon
+  in context on the map and let the Explorer see its distribution first, not
+  yank them to a separate profile page.
+- **Acceptance criteria:** Selecting a result puts the app in Taxon mode with
+  that taxon selected (its side-panel summary shown and its occurrences
+  emphasised on the map); the search list closes; the profile is still reachable
+  from the side panel.
 - **Verification method:** automated component test.
 - **Evidence location:** filled at implementation.
 
@@ -180,6 +190,13 @@ opens the honest minimal/indeterminate profile the app already renders.
 - Very common substrings (e.g. "saurus") are capped by the result limit, ordered
   by notability so the list stays useful.
 - Whitespace-only query → treated as empty.
+- **Age-independence (REQ-004):** search matches taxa regardless of the selected
+  age, but the map only plots the selected stage. If the chosen taxon has no
+  occurrence at the current age, the selection moves the timeline to a stage
+  within the taxon's recorded range (its `timeSpan`) so its distribution is
+  actually visible; if it already occurs at the current age, the age is kept.
+- A taxon resolvable only above the current rank tier is selected at the tier
+  that contains it (default Genus for a genus match).
 
 ## Acceptance criteria
 
@@ -190,12 +207,12 @@ without knowing its age.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Search input present + reachable | automated | component test | TBD | TBD |
-| REQ-002 | Case-insensitive sci+common match, capped | automated | ranking unit test | TBD | TBD |
-| REQ-003 | Prefix>substring, then notability | automated | ranking unit test | TBD | TBD |
-| REQ-004 | Select opens the profile | automated | component test | TBD | TBD |
-| REQ-005 | No-match + empty states | automated | component test | TBD | TBD |
-| NFR-001 | a11y + in-memory + green checks | CI + test | component test; `pnpm test` | TBD | TBD |
+| REQ-001 | Search input present + reachable | automated | `spec013-search-ui.test.tsx` | passing | TBD |
+| REQ-002 | Case-insensitive sci+common match, capped | automated | `spec013-search.test.ts` | passing | TBD |
+| REQ-003 | Prefix>substring, then notability | automated | `spec013-search.test.ts` | passing | TBD |
+| REQ-004 | Select → taxon on map + side panel | automated | `spec013-search-ui.test.tsx`, `spec013-search.test.ts` (tier/stage) | passing | TBD |
+| REQ-005 | No-match + empty states | automated | `spec013-search-ui.test.tsx` | passing | TBD |
+| NFR-001 | a11y + in-memory + green checks | CI + test | `pnpm test` (combobox/listbox roles) | green locally | TBD |
 
 ## Test plan
 
@@ -210,9 +227,9 @@ no data or interface change to undo.
 
 ## Open questions
 
-- [ ] Should the empty-focus state suggest a few featured taxa (a "stars" teaser)
-      now, or defer to the later famous-dinos spec? (Default: defer; keep this
-      spec to search.)
+- [x] Should the empty-focus state suggest a few featured taxa (a "stars" teaser)
+      now, or defer to the later famous-dinos spec? — **Deferred** (owner,
+      2026-07-24): keep this spec to search; famous-dinos is a later spec.
 
 ## Human decisions required
 
@@ -229,15 +246,26 @@ additively; no requirement contradicts them. `conflicts_with` empty. Drift note
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | ContextBar search input | TBD | TBD | Pending |
-| REQ-002 | searchTaxa matching | TBD | TBD | Pending |
-| REQ-003 | searchTaxa ranking | TBD | TBD | Pending |
-| REQ-004 | openProfile wiring | TBD | TBD | Pending |
-| REQ-005 | search states | TBD | TBD | Pending |
+| REQ-001 | ContextBar search input | `TaxonSearch.tsx`, `ContextBar.tsx` | `spec013-search-ui.test.tsx` | Done |
+| REQ-002 | searchTaxa matching | `state/search.ts` `searchTaxa` | `spec013-search.test.ts` | Done |
+| REQ-003 | searchTaxa ranking | `state/search.ts` (notability) | `spec013-search.test.ts` | Done |
+| REQ-004 | select taxon on map + panel | `exploration.ts` `selectSearchTaxon`, `search.ts` `tierForRank`/`stageForTaxon`, `ExplorationView.tsx` | `spec013-search-ui.test.tsx`, `spec013-search.test.ts` | Done |
+| REQ-005 | search states | `TaxonSearch.tsx` (no-match) | `spec013-search-ui.test.tsx` | Done |
 
 ## Implementation notes
 
-To be filled during implementation.
+- Search is a pure `searchTaxa` over an in-memory index built in `ExplorationView`
+  from `api.listTaxa()` + each taxon's profile (`commonName`, `contentLevel`); no
+  fetch (DATA-005).
+- REQ-004 (owner amendment): choosing a result dispatches `selectSearchTaxon`,
+  which switches to Taxon mode at the taxon's tier (`tierForRank`), moves the age
+  into the taxon's recorded range when the current age misses it (`stageForTaxon`),
+  and selects the taxon — map emphasis + side panel — instead of opening the
+  profile; the profile stays reachable from the side panel's "Open taxon profile".
+- `TaxonSearch` is an accessible combobox/listbox (arrow keys, Enter, Escape;
+  `aria-activedescendant`); the no-match state is explicit (REQ-005).
+- Checks green locally: typecheck, `eslint .`, prettier, `vitest run` (144),
+  build. Empty-focus "featured taxa" teaser deferred per owner (Open questions).
 
 ## Spec amendments
 
@@ -252,4 +280,7 @@ _None yet._
 - [ ] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved. Owner approved
+      SPEC-013 on 2026-07-24 ("le reste je valide"), deferred the empty-focus
+      teaser, and amended REQ-004 so a result selects the taxon on the map + side
+      panel instead of opening the profile directly.

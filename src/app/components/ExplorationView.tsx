@@ -34,6 +34,8 @@ import {
 } from "../state/exploration.js";
 import { occurrencesInView } from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
+import { stageForTaxon, tierForRank } from "../state/search.js";
+import type { SearchableTaxon } from "../state/search.js";
 import {
   NOT_CLASSIFIED_KEY,
   groupByLocality,
@@ -150,6 +152,40 @@ export function ExplorationView({
         : DEFAULT_REPRESENTATIVE_STAGE,
     [stageSource],
   );
+
+  // SPEC-013: in-memory taxon search index (every taxon + its notability and
+  // common name), rebuilt only when the reference API changes.
+  const searchIndex = useMemo<SearchableTaxon[]>(
+    () =>
+      api.listTaxa().map((t) => {
+        const profile = api.getProfile(t.id);
+        return {
+          taxonId: t.id,
+          scientificName: t.scientificName,
+          commonName: profile?.commonName?.value ?? null,
+          contentLevel: profile?.contentLevel ?? "OccurrenceOnly",
+        };
+      }),
+    [api],
+  );
+
+  // Landing a search result (SPEC-013 REQ-004): switch to Taxon mode at the
+  // taxon's tier, move the age into its recorded range if the current age misses
+  // it, and select it — map emphasis + side panel, not a jump to the profile.
+  const onSearchSelect = (taxonId: string): void => {
+    const taxon = api.getTaxon(taxonId);
+    const profile = api.getProfile(taxonId);
+    dispatch({
+      type: "selectSearchTaxon",
+      taxonKey: taxonId,
+      rank: tierForRank(taxon?.rank ?? "Genus"),
+      stageName: stageForTaxon(
+        profile?.timeSpan ?? null,
+        state.stageName,
+        EXPLORATION_STAGES,
+      ),
+    });
+  };
 
   // The occurrences currently on the map: narrowed to the viewport, or the full
   // set when there is no viewport signal (SPEC-009 REQ-003).
@@ -276,6 +312,8 @@ export function ExplorationView({
         stageName={state.stageName}
         group={state.group}
         count={occurrences.length}
+        searchIndex={searchIndex}
+        onSearchSelect={onSearchSelect}
         onReset={() => dispatch({ type: "reset" })}
       />
       <TimelineControl
