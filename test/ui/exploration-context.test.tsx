@@ -46,6 +46,11 @@ test("shows selected age in Ma, group, and a matching occurrence count", async (
   ).toBeInTheDocument();
   const header = screen.getByRole("banner");
   expect(
-    within(header).getByRole("button", { name: /Reset filters/i }),
+    within(header).getByRole("button", { name: /Reset view/i }),
   ).toBeInTheDocument();
+  // The app exposes no user-set filters; the control must not imply otherwise
+  // (SPEC-011 REQ-004).
+  expect(
+    within(header).queryByRole("button", { name: /Reset filters/i }),
+  ).not.toBeInTheDocument();
 });

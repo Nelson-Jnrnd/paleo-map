@@ -115,7 +115,6 @@ export function TaxonProfile({
               Valid{taxon.acceptedPer ? ` · per ${taxon.acceptedPer}` : ""}
             </span>
           )}
-          <span className={styles.source}>Main content</span>
         </div>
         {isMinimal && (
           <AttentionNote>Occurrence only — minimal profile</AttentionNote>
@@ -123,7 +122,12 @@ export function TaxonProfile({
       </header>
 
       <div className={styles.section}>
-        <span className={styles.statLabel}>Time range</span>
+        {/* The taxon's full recorded span across all occurrences (SPEC-008
+            AMEND-001), labelled so it is not mistaken for a contradiction with
+            the per-age occurrence rows below (SPEC-011 REQ-005). */}
+        <span className={styles.statLabel}>
+          Recorded span · all occurrences
+        </span>
         <p className={styles.fieldValue}>
           <span className="mono">{formatMaRange(range)}</span>
         </p>

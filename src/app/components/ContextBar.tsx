@@ -63,7 +63,7 @@ export function ContextBar({
         </div>
 
         <button type="button" className={styles.reset} onClick={onReset}>
-          Reset filters
+          Reset view
         </button>
       </div>
     </header>

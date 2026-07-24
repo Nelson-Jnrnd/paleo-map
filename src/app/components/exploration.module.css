@@ -687,6 +687,11 @@
 .fieldValue {
   font-size: 13px;
   color: var(--color-text);
+  /* Allow the 1fr grid value track to shrink and long provenance / coordinate
+     strings to wrap, so they stay fully legible instead of clipping at the
+     panel edge (SPEC-011 REQ-001; charter §4 provenance always legible). */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .primary {

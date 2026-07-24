@@ -56,6 +56,28 @@ function editorialSourceId(taxonId: string): string {
   return `src:ed:${taxonId}`;
 }
 
+/**
+ * Normalise a Wikipedia lead extract so a pronunciation-only or empty leading
+ * parenthetical does not survive as a dangling fragment (SPEC-011 REQ-003).
+ * When the IPA glyph is absent from the extract, "Name (/ipa/; meaning …)"
+ * arrives as "Name (; meaning …)"; strip the dangling "; " so it reads
+ * "Name (meaning …)", and drop any parenthetical left entirely empty. A
+ * well-formed parenthetical (IPA present, or plain text) is left untouched.
+ */
+export function cleanSummary(text: string | null): string | null {
+  if (text === null) return null;
+  const out = text
+    // "(; meaning …" → "(meaning …"; "(;)" → "()".
+    .replace(/\(\s*;\s*/g, '(')
+    // Remove any now-empty parenthetical.
+    .replace(/\(\s*\)/g, '')
+    // Tidy the whitespace those removals can leave behind.
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/ +([,.;:])/g, '$1')
+    .trim();
+  return out;
+}
+
 export function ingest(subset: SourceSubset): L1Snapshot {
   const { metadata } = subset;
   const retrievedOn = metadata.retrievedOn;
@@ -95,7 +117,9 @@ export function ingest(subset: SourceSubset): L1Snapshot {
       url: binding.enwikiUrl,
       retrievedOn,
     });
-    const summary = wikipediaByQid.get(binding.qid)?.extract ?? null;
+    const summary = cleanSummary(
+      wikipediaByQid.get(binding.qid)?.extract ?? null,
+    );
     encyclopedic.push({
       taxonId: binding.pbdbTaxonId,
       qid: binding.qid,

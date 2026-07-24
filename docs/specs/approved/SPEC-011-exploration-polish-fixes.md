@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-011
 title: Exploration polish — panel text overflow, profile label cleanups, reset affordance & summary artifact
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -246,12 +246,12 @@ period quick-select target recorded with the owner's answer before that item is
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Source & paleo text fully visible at 320 px | manual + inspection | resize to 320 px; read panel | TBD | TBD |
-| REQ-002 | No "Main content" in header | automated | Vitest: TaxonProfile header | TBD | TBD |
-| REQ-003 | Dangling parentheticals cleaned | automated | Vitest: summary-cleaning unit | TBD | TBD |
-| REQ-004 | No "Reset filters"; reset still works | automated | Vitest: ContextBar/states | TBD | TBD |
-| REQ-005 | Header labelled full-record span | automated + manual | Vitest: TaxonProfile label | TBD | TBD |
-| NFR-001 | typecheck + tests green | CI | `pnpm run typecheck && pnpm test` | TBD | TBD |
+| REQ-001 | Source & paleo text fully visible at 320 px | manual + inspection | resize to 320 px; read panel | `exploration.module.css` `.fieldValue` (`min-width:0`, `overflow-wrap:anywhere`) | TBD |
+| REQ-002 | No "Main content" in header | automated | `test/ui/spec011-profile-labels.test.tsx` | passing | TBD |
+| REQ-003 | Dangling parentheticals cleaned | automated | `test/spec011-clean-summary.test.ts` | passing | TBD |
+| REQ-004 | No "Reset filters"; reset still works | automated | `test/ui/exploration-context.test.tsx`, `test/ui/spec011-profile-labels.test.tsx` | passing | TBD |
+| REQ-005 | Header labelled full-record span | automated + manual | `test/ui/spec011-profile-labels.test.tsx` | passing | TBD |
+| NFR-001 | typecheck + tests green | CI | `pnpm run typecheck && pnpm test` (133 passing) | green locally | TBD |
 
 ## Test plan
 
@@ -300,15 +300,29 @@ and SPEC-011.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | OccurrencePanel / exploration.module.css | TBD | TBD | Pending |
-| REQ-002 | TaxonProfile header | TBD | TBD | Pending |
-| REQ-003 | pipeline ingest summary | TBD | TBD | Pending |
-| REQ-004 | ContextBar / states | TBD | TBD | Pending |
-| REQ-005 | TaxonProfile time range | TBD | TBD | Pending |
+| REQ-001 | OccurrencePanel / exploration.module.css | `exploration.module.css` `.fieldValue` | manual @320px | Done |
+| REQ-002 | TaxonProfile header | `TaxonProfile.tsx` (removed stray span) | `spec011-profile-labels.test.tsx` | Done |
+| REQ-003 | pipeline ingest summary | `ingest.ts` `cleanSummary` + call site | `spec011-clean-summary.test.ts` | Done |
+| REQ-004 | ContextBar / states | `ContextBar.tsx`, `states.tsx` | `exploration-context.test.tsx`, `spec011-profile-labels.test.tsx` | Done |
+| REQ-005 | TaxonProfile time range | `TaxonProfile.tsx` (header label) | `spec011-profile-labels.test.tsx` | Done |
 
 ## Implementation notes
 
-To be filled during implementation.
+- REQ-001 is a pure CSS fix: the `1fr` grid value track defaulted to
+  `min-width:auto` and could not shrink; `min-width:0` + `overflow-wrap:anywhere`
+  on `.fieldValue` lets long source/coordinate strings wrap. Verified by
+  inspection; no unit test (CSS-only).
+- REQ-004: beyond the button label, the empty-state sentence "…with the active
+  filters." was corrected to "…overlaps the selected stage." — same defect
+  (implying filters that do not exist), kept in scope. Two pre-existing tests
+  (`exploration-context`, `scenario-perf-370`) that asserted the old
+  "Reset filters" label were updated to the new "Reset view" label.
+- Full CI-equivalent run green locally: typecheck, `eslint .`, prettier check,
+  `vitest run` (133 passing), `vite build`, `check:budget`, and the three
+  governance validators (specs/governance OK; drift's only warning predates this
+  change and concerns SPEC-002).
+- The period quick-select target (Human decisions required) is intentionally
+  untouched, awaiting the owner's a/b/c choice.
 
 ## Spec amendments
 
@@ -323,4 +337,6 @@ _None yet._
 - [ ] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved. Owner approved
+      REQ-001…005 on 2026-07-24 ("je valide"); the period quick-select target
+      (Human decisions required) remains open, not implemented.
