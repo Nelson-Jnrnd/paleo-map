@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-012
 title: Taxon-profile illustrations — Wikipedia/Commons lead image, clade-silhouette fallback & human size scale
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -264,13 +264,13 @@ silhouette.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Renderable + source URLs both present | automated | ingest/derive unit test | TBD | TBD |
-| REQ-002 | Offline render / budget respected | manual + budget | offline check; `check:budget` | TBD | TBD |
-| REQ-003 | Image shown with credit+licence+link+alt | automated | TaxonProfile component test | TBD | TBD |
-| REQ-004 | Fallback silhouette, labelled generic | automated | TaxonProfile component test | TBD | TBD |
-| REQ-005 | Size scale from BodyLength, or omitted | automated | TaxonProfile component test | TBD | TBD |
-| NFR-001 | offline + build + budget green | CI | `pnpm test && pnpm run build && pnpm run check:budget` | TBD | TBD |
-| NFR-002 | non-empty alt everywhere | automated | component test | TBD | TBD |
+| REQ-001 | Renderable + source URLs both present | automated | `ImageAsset`/`ReadImage.imageUrl` + `data-007-media-licence.test.ts` | passing | TBD |
+| REQ-002 | Offline render / budget respected | automated + budget | `test/spec012-bundle-images.test.ts`; `check:budget` images category | passing | TBD |
+| REQ-003 | Image shown with credit+licence+link+alt | automated | `test/ui/spec012-illustration.test.tsx` | passing | TBD |
+| REQ-004 | Fallback silhouette, labelled generic | automated | `test/ui/spec012-illustration.test.tsx` | passing | TBD |
+| REQ-005 | Size scale from BodyLength, or omitted | automated | `test/ui/spec012-illustration.test.tsx` | passing | TBD |
+| NFR-001 | offline + build + budget green | CI | `pnpm test` (137) + `build` + `check:budget` | green locally | TBD |
+| NFR-002 | non-empty alt everywhere | automated | `test/ui/spec012-illustration.test.tsx` | passing | TBD |
 
 ## Test plan
 
@@ -292,11 +292,11 @@ artifact. Bundled thumbnails are deleted with the generator revert.
 
 ## Human decisions required
 
-- [ ] **REQ-002 image delivery.** (a) **Bundle** downscaled thumbnails into
+- [x] **REQ-002 image delivery.** (a) **Bundle** downscaled thumbnails into
       `public/data/images/` at build (offline-safe, privacy-safe, small bundle
       cost) — *recommended*; or (b) reference remote `upload.wikimedia.org`
       thumbnails at runtime (zero bundle cost, but external egress + viewer-IP
-      disclosure + breaks offline). — Answer: _____
+      disclosure + breaks offline). — **Answer: (a) Bundle** (owner, 2026-07-24).
 
 ## Conflict check
 
@@ -310,15 +310,36 @@ SPEC-010/011/012.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | pipeline image capture | TBD | TBD | Pending |
-| REQ-002 | web-data generator / budget | TBD | TBD | Pending |
-| REQ-003 | TaxonProfile illustration | TBD | TBD | Pending |
-| REQ-004 | TaxonProfile fallback + clade map | TBD | TBD | Pending |
-| REQ-005 | TaxonProfile size scale | TBD | TBD | Pending |
+| REQ-001 | pipeline image capture | `http-client.ts` (thumburl), `profile.ts`/`snapshot.ts`/`sources.ts` `imageUrl`, `ingest.ts`, `derive.ts` | `data-007-media-licence.test.ts` | Done |
+| REQ-002 | web-data generator / budget | `scripts/bundle_images.ts`, `scripts/gen_web_data.ts`, `scripts/check_budget.ts` | `spec012-bundle-images.test.ts` | Done |
+| REQ-003 | TaxonProfile illustration | `Illustration.tsx`, `TaxonProfile.tsx` | `spec012-illustration.test.tsx` | Done |
+| REQ-004 | TaxonProfile fallback + clade map | `cladeSilhouette.ts`, `Illustration.tsx` | `spec012-illustration.test.tsx` | Done |
+| REQ-005 | TaxonProfile size scale | `Illustration.tsx` (`SizeScale`) | `spec012-illustration.test.tsx` | Done |
 
 ## Implementation notes
 
-To be filled during implementation.
+- REQ-001: the live client already fetched a Commons image per taxon but stored
+  only the description-page URL; it now also requests an `iiurlwidth=320`
+  thumbnail and stores its `thumburl` as the new renderable `imageUrl`, keeping
+  `sourceUrl` (description page) as the attribution link.
+- REQ-002: bundling runs **only in live mode** (`snapshot:app --live`) — the
+  committed fixture image URLs are not real. `bundleImages` downloads each remote
+  thumbnail into `public/data/images/`, rewrites `imageUrl` to a local path, and
+  clears the URL on failure so the profile falls back to a silhouette. A new
+  `check:budget` category caps per-image (200 KB raw) and aggregate (24 MB raw).
+- **Data-refresh follow-up:** the currently committed `public/data/reference.json`
+  predates this change, so its profile images carry no `imageUrl` yet — every
+  profile shows its clade **silhouette** today, and real Commons photos light up
+  after the owner runs a live refresh (`pnpm run snapshot:app --live`), which
+  bundles the thumbnails. The clade silhouettes (previously unused assets) are now
+  bundled and give every profile an immediate visual.
+- REQ-004: the silhouette is chosen by resolving the taxon up its parent chain to
+  the nearest major-group clade (reusing SPEC-010 `resolveTierTaxon`) and mapped
+  to one of the seven bundled `assets/clades/*` images (else `others`), always
+  labelled "generic … silhouette — not a photograph of this taxon".
+- Full CI-equivalent run green locally: typecheck, `eslint .`, prettier check,
+  `vitest run` (137 passing), `vite build`, `check:budget`, governance validators
+  (SPEC-012's "no amendment entries" drift note is informational, not blocking).
 
 ## Spec amendments
 
@@ -333,4 +354,6 @@ _None yet._
 - [ ] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved. Owner approved
+      SPEC-012 on 2026-07-24 ("on passe au B … pour les sources d'images
+      wikipedia c'est bon"), and chose delivery option (a) Bundle.

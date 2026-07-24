@@ -720,6 +720,74 @@
   background: var(--color-accent-deep);
 }
 
+/* --- Taxon-profile illustration + size scale (SPEC-012) --- */
+.illustration {
+  margin: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.illustrationImg,
+.silhouetteImg {
+  max-width: 100%;
+  max-height: 220px;
+  align-self: flex-start;
+  object-fit: contain;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+/* Silhouettes are flat group art — sit them on a pale panel and pad slightly so
+   they read as a diagram, not a photo. */
+.silhouetteImg {
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+}
+.illustrationCaption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-min);
+}
+.sourceLink {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+}
+.sizeScale {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sizeBars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sizeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sizeBarDino,
+.sizeBarHuman {
+  height: 12px;
+  min-width: 2px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.sizeBarDino {
+  background: var(--color-accent-deep);
+}
+.sizeBarHuman {
+  background: var(--color-text-muted);
+}
+.sizeBarValue {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 /* --- States --- */
 .stateWrap {
   display: flex;

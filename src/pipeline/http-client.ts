@@ -38,6 +38,8 @@ const PBDB_BASE = 'https://paleobiodb.org/data1.2';
 const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 const ENWIKI_API = 'https://en.wikipedia.org/w/api.php';
 const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
+/** Longest-edge width (px) requested for the renderable lead thumbnail (SPEC-012 REQ-002). */
+const COMMONS_THUMB_WIDTH = 320;
 const USER_AGENT =
   'paleo-map-ingestion/0.1 (https://github.com/Nelson-Jnrnd/paleo-map; SPEC-001 data layer)';
 
@@ -141,6 +143,8 @@ interface MwExtractResponse {
 interface CommonsPage {
   title: string;
   imageinfo?: Array<{
+    url?: string;
+    thumburl?: string;
     descriptionurl?: string;
     extmetadata?: Record<string, { value?: string }>;
   }>;
@@ -500,7 +504,8 @@ export class HttpSourceClient implements SourceClient {
       const titles = batch.map((f) => `File:${f.file}`).join('|');
       const url =
         `${COMMONS_API}?action=query&format=json&formatversion=2` +
-        `&prop=imageinfo&iiprop=extmetadata|url&titles=${encodeURIComponent(titles)}`;
+        `&prop=imageinfo&iiprop=extmetadata|url&iiurlwidth=${COMMONS_THUMB_WIDTH}` +
+        `&titles=${encodeURIComponent(titles)}`;
       const data = await getJson<CommonsResponse>(url);
       const resolve = titleResolver(data.query?.normalized, undefined);
       for (const page of data.query?.pages ?? []) {
@@ -515,6 +520,7 @@ export class HttpSourceClient implements SourceClient {
           type: 'FossilPhoto',
           credit: stripHtml(em.Artist?.value),
           licence: em.LicenseShortName?.value ?? null,
+          imageUrl: info.thumburl ?? info.url ?? '',
           sourceUrl: info.descriptionurl ?? page.title,
         });
       }

@@ -111,6 +111,9 @@ export interface RawImageAsset {
   type: 'FossilPhoto' | 'SkeletalMount' | 'ArtisticReconstruction' | 'Silhouette';
   credit: string | null;
   licence: string | null;
+  /** Directly renderable image (Commons thumbnail) — SPEC-012 REQ-001. */
+  imageUrl: string;
+  /** Commons file *description page* — the attribution link. */
   sourceUrl: string;
 }
 

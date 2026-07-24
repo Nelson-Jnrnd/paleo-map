@@ -230,6 +230,7 @@ export function ingest(subset: SourceSubset): L1Snapshot {
         type: img.type,
         credit: img.credit,
         licence: img.licence,
+        imageUrl: img.imageUrl,
         sourceUrl: img.sourceUrl,
         sourceId: enc ? enc.articleSourceId : PBDB_SOURCE_ID,
       },

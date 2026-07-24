@@ -37,6 +37,11 @@ const STAGE_RAW = 7 * MB;
 const BASEMAP_FRAME_GZIP = 150 * KB;
 const BASEMAP_INDEX_GZIP = 16 * KB;
 const JS_BUNDLE_GZIP = 320 * KB;
+// Bundled taxon-profile thumbnails (SPEC-012 REQ-002). Already-compressed
+// binaries, so budget the RAW bytes: a per-image cap and an aggregate ceiling
+// that keeps the committed image set from ballooning the repo.
+const IMAGE_RAW = 200 * KB;
+const IMAGES_TOTAL_RAW = 24 * MB;
 
 async function gzipBytes(path: string): Promise<number> {
   return gzipSync(await readFile(path)).length;
@@ -80,6 +85,27 @@ async function main(): Promise<void> {
         budgetBytes: STAGE_RAW,
       });
     }
+  }
+
+  // --- Bundled profile images (SPEC-012 REQ-002): per-image + aggregate raw ---
+  const imagesDir = join(dataDir, "images");
+  const imageFiles = await readdir(imagesDir).catch(() => [] as string[]);
+  let imagesTotalRaw = 0;
+  for (const name of imageFiles) {
+    const raw = (await stat(join(imagesDir, name))).size;
+    imagesTotalRaw += raw;
+    checks.push({
+      label: `data/images/${name} (raw)`,
+      actualBytes: raw,
+      budgetBytes: IMAGE_RAW,
+    });
+  }
+  if (imageFiles.length > 0) {
+    checks.push({
+      label: "data/images total (raw)",
+      actualBytes: imagesTotalRaw,
+      budgetBytes: IMAGES_TOTAL_RAW,
+    });
   }
 
   // --- Basemap frames + index ---

@@ -82,6 +82,9 @@ export interface ReadImage {
   type: ImageType;
   credit: string;
   licence: string;
+  /** Directly renderable image (bundled or Commons thumbnail) — SPEC-012 REQ-001. */
+  imageUrl: string;
+  /** Commons file *description page* — the human-facing attribution link. */
   sourceUrl: string;
   sourceId: string;
 }

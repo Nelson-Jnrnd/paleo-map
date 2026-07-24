@@ -5,3 +5,9 @@ declare module "*.module.css" {
 }
 
 declare module "*.css";
+
+/* Vite resolves an imported image asset to its served URL string. */
+declare module "*.png" {
+  const src: string;
+  export default src;
+}

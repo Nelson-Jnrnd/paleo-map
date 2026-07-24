@@ -16,6 +16,8 @@ import type { ReadApi } from "../../read/api.js";
 import { formatMaRange, NOT_AVAILABLE } from "../format.js";
 import { sourceReference } from "../sources.js";
 import { AttentionNote, MissingValue } from "./Cues.js";
+import { Illustration } from "./Illustration.js";
+import { silhouetteForTaxon } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
 
 interface TaxonProfileProps {
@@ -50,6 +52,9 @@ export function TaxonProfile({
   const taxon = api.getTaxon(taxonId);
   const profile = api.getProfile(taxonId);
   const occurrences = api.listOccurrences({ taxonId });
+  // Taxon lineage index, for resolving the taxon's major-group silhouette
+  // (SPEC-012 REQ-004).
+  const taxaById = new Map(api.listTaxa().map((t) => [t.id, t]));
   // Prefer the whole-snapshot aggregates (SPEC-008 AMEND-001) so the time span
   // and count reflect the taxon's full record even when only one stage is
   // loaded; fall back to the loaded occurrences when no profile is present.
@@ -78,6 +83,16 @@ export function TaxonProfile({
             </AttentionNote>
           </div>
         </header>
+        <Illustration
+          taxonName={fallbackName}
+          image={undefined}
+          imageSource={null}
+          silhouette={silhouetteForTaxon(
+            occurrences[0]?.taxonId ?? "",
+            taxaById,
+          )}
+          bodyLengthM={null}
+        />
         <div className={styles.section}>
           <span className={styles.statLabel}>Occurrences</span>
           <p className={styles.fieldValue}>
@@ -91,6 +106,17 @@ export function TaxonProfile({
 
   const validity = taxon.validity.value;
   const isMinimal = profile?.contentLevel === "OccurrenceOnly";
+
+  // Illustration inputs (SPEC-012): the lead showable image (licence + credit
+  // already guaranteed by DATA-007), the group silhouette fallback, and the body
+  // length for the size scale (metres; omitted when unknown).
+  const leadImage = profile?.images[0];
+  const silhouette = silhouetteForTaxon(taxonId, taxaById);
+  const bodyLength = profile?.measurements.find((m) => m.kind === "BodyLength");
+  const bodyLengthM =
+    bodyLength && bodyLength.value.value !== null
+      ? bodyLength.value.value
+      : null;
 
   return (
     <section
@@ -120,6 +146,25 @@ export function TaxonProfile({
           <AttentionNote>Occurrence only — minimal profile</AttentionNote>
         )}
       </header>
+
+      <Illustration
+        taxonName={taxon.scientificName}
+        image={leadImage}
+        imageSource={
+          leadImage ? (
+            <a
+              className={styles.sourceLink}
+              href={leadImage.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Commons
+            </a>
+          ) : null
+        }
+        silhouette={silhouette}
+        bodyLengthM={bodyLengthM}
+      />
 
       <div className={styles.section}>
         {/* The taxon's full recorded span across all occurrences (SPEC-008
