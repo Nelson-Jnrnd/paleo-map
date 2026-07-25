@@ -54,9 +54,12 @@ async function main(): Promise<void> {
     }
   }
 
-  // SPEC-012 REQ-002: bundle profile lead images into data/images/ and rewrite
-  // their imageUrl to local paths, so pictures are served offline with no
-  // runtime egress. Only in live mode — the committed fixture URLs are not real.
+  // SPEC-012 REQ-002 / SPEC-014 REQ-003: bundle profile images into data/images/
+  // and rewrite their imageUrl to local paths, so pictures are served offline
+  // with no runtime egress. Only in live mode — the committed fixture URLs are
+  // not real. A total-bytes cap keeps the gallery from ballooning the repo: every
+  // taxon's lead image is always bundled, gallery extras only until the cap.
+  const IMAGES_TOTAL_CAP_BYTES = 90 * 1024 * 1024;
   if (live) {
     // Wikimedia throttles rapid *bursts* of downloads (the images succeed in
     // isolation), so pace requests ~4/sec and retry the occasional throttle with
@@ -83,6 +86,7 @@ async function main(): Promise<void> {
         return null;
       },
       (msg) => console.log(msg),
+      IMAGES_TOTAL_CAP_BYTES,
     );
     console.log(
       `Bundled ${bundled} profile image(s) → ${join(outDir, "images")}`,

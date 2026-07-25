@@ -42,7 +42,9 @@ const JS_BUNDLE_GZIP = 320 * KB;
 // Sized to the shipped live pull (≈926 images / 43 MB, largest ≈0.94 MB) plus
 // headroom; if the set grows past this, slim the thumbnails or the taxa covered.
 const IMAGE_RAW = 1536 * KB;
-const IMAGES_TOTAL_RAW = 56 * MB;
+// Gallery bundling (SPEC-014 REQ-003) is capped at ~90 MB total by the generator;
+// gate a little above that so one last extra crossing the cap doesn't fail CI.
+const IMAGES_TOTAL_RAW = 100 * MB;
 
 async function gzipBytes(path: string): Promise<number> {
   return gzipSync(await readFile(path)).length;
