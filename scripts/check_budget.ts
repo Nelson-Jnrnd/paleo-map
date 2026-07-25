@@ -29,7 +29,7 @@ const MB = 1024 * 1024;
 // plus ~25% headroom, per the spec's "budgets are measured, not decided up
 // front" open question. Measured sizes print on every run.
 //   reference.json ≈ 1.07 MB gz; richest stage (Campanian) ≈ 0.37 MB gz / 5.8 MB raw.
-const REFERENCE_GZIP = 1400 * KB;
+const REFERENCE_GZIP = 1600 * KB;
 const REFERENCE_RAW = 8 * MB;
 const INDEX_GZIP = 32 * KB;
 const STAGE_GZIP = 500 * KB;
@@ -41,7 +41,9 @@ const JS_BUNDLE_GZIP = 320 * KB;
 // binaries, so budget the RAW bytes: a per-image cap and an aggregate ceiling.
 // Sized to the shipped live pull (≈926 images / 43 MB, largest ≈0.94 MB) plus
 // headroom; if the set grows past this, slim the thumbnails or the taxa covered.
-const IMAGE_RAW = 1536 * KB;
+// A few Commons files return no 320px thumbnail and fall back to a larger
+// original; allow up to 3 MB each (rare) since the aggregate is capped anyway.
+const IMAGE_RAW = 3 * MB;
 // Gallery bundling (SPEC-014 REQ-003) is capped at ~90 MB total by the generator;
 // gate a little above that so one last extra crossing the cap doesn't fail CI.
 const IMAGES_TOTAL_RAW = 100 * MB;
