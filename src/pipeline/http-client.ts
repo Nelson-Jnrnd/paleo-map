@@ -462,7 +462,15 @@ export class HttpSourceClient implements SourceClient {
         `OPTIONAL { ?item wdt:P18 ?image } ` +
         `OPTIONAL { ?item wdt:P373 ?commonscat } }`;
       const url = `${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`;
-      const data = await getJson<{ results: { bindings: SparqlBinding[] } }>(url);
+      let data: { results: { bindings: SparqlBinding[] } };
+      try {
+        data = await getJson<{ results: { bindings: SparqlBinding[] } }>(url);
+      } catch (err) {
+        // The P18/P373 OPTIONALs make the query heavier; a batch that times out
+        // must not abort the whole crawl.
+        this.log(`  ! wikidata batch failed, skipping: ${String(err)}`);
+        continue;
+      }
       const seen = new Set<string>();
       for (const b of data.results?.bindings ?? []) {
         const name = b.name.value;
@@ -502,19 +510,24 @@ export class HttpSourceClient implements SourceClient {
         `${ENWIKI_API}?action=query&format=json&redirects=1&formatversion=2` +
         `&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=3&exlimit=max` +
         `&piprop=name&titles=${encodeURIComponent(titles)}`;
-      const data = await getJson<MwExtractResponse>(url);
-      const resolve = titleResolver(data.query?.normalized, data.query?.redirects);
-      for (const page of data.query?.pages ?? []) {
-        if (page.missing) continue;
-        const requested = resolve(page.title);
-        const binding = byTitle.get(requested) ?? byTitle.get(page.title);
-        if (!binding) continue;
-        if (page.extract) {
-          wikipedia.push({ qid: binding.qid, extract: page.extract, url: binding.enwikiUrl });
+      try {
+        const data = await getJson<MwExtractResponse>(url);
+        const resolve = titleResolver(data.query?.normalized, data.query?.redirects);
+        for (const page of data.query?.pages ?? []) {
+          if (page.missing) continue;
+          const requested = resolve(page.title);
+          const binding = byTitle.get(requested) ?? byTitle.get(page.title);
+          if (!binding) continue;
+          if (page.extract) {
+            wikipedia.push({ qid: binding.qid, extract: page.extract, url: binding.enwikiUrl });
+          }
+          if (page.pageimage) {
+            imageFiles.push({ qid: binding.qid, file: page.pageimage });
+          }
         }
-        if (page.pageimage) {
-          imageFiles.push({ qid: binding.qid, file: page.pageimage });
-        }
+      } catch (err) {
+        // A transient failure on one batch must not abort the whole crawl.
+        this.log(`  ! wikipedia batch failed, skipping: ${String(err)}`);
       }
     }
     return { wikipedia, imageFiles };
@@ -567,23 +580,27 @@ export class HttpSourceClient implements SourceClient {
         `${COMMONS_API}?action=query&format=json&formatversion=2` +
         `&prop=imageinfo&iiprop=extmetadata|url&iiurlwidth=${COMMONS_THUMB_WIDTH}` +
         `&titles=${encodeURIComponent(titles)}`;
-      const data = await getJson<CommonsResponse>(url);
-      const resolve = titleResolver(data.query?.normalized, undefined);
-      for (const page of data.query?.pages ?? []) {
-        const info = page.imageinfo?.[0];
-        if (!info) continue;
-        const qid = qidByFileTitle.get(resolve(page.title)) ?? qidByFileTitle.get(page.title);
-        const taxonId = qid ? taxonByQid.get(qid) : undefined;
-        if (!taxonId) continue;
-        const em = info.extmetadata ?? {};
-        out.push({
-          taxonId,
-          type: 'FossilPhoto',
-          credit: stripHtml(em.Artist?.value),
-          licence: em.LicenseShortName?.value ?? null,
-          imageUrl: info.thumburl ?? info.url ?? '',
-          sourceUrl: info.descriptionurl ?? page.title,
-        });
+      try {
+        const data = await getJson<CommonsResponse>(url);
+        const resolve = titleResolver(data.query?.normalized, undefined);
+        for (const page of data.query?.pages ?? []) {
+          const info = page.imageinfo?.[0];
+          if (!info) continue;
+          const qid = qidByFileTitle.get(resolve(page.title)) ?? qidByFileTitle.get(page.title);
+          const taxonId = qid ? taxonByQid.get(qid) : undefined;
+          if (!taxonId) continue;
+          const em = info.extmetadata ?? {};
+          out.push({
+            taxonId,
+            type: 'FossilPhoto',
+            credit: stripHtml(em.Artist?.value),
+            licence: em.LicenseShortName?.value ?? null,
+            imageUrl: info.thumburl ?? info.url ?? '',
+            sourceUrl: info.descriptionurl ?? page.title,
+          });
+        }
+      } catch (err) {
+        this.log(`  ! commons batch failed, skipping: ${String(err)}`);
       }
     }
     return out;
