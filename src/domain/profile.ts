@@ -41,6 +41,9 @@ export interface ImageAsset {
   type: ImageType;
   credit: string | null;
   licence: string | null;
+  /** Directly renderable image (a bundled or Commons thumbnail) — SPEC-012 REQ-001. */
+  imageUrl: string;
+  /** Commons file *description page* — the human-facing attribution link. */
   sourceUrl: string;
   sourceId: string;
 }

@@ -9,6 +9,8 @@
 import type { ReactElement } from "react";
 import type { GeologicalStage } from "../../domain/index.js";
 import { formatStageSpan } from "../format.js";
+import { TaxonSearch } from "./TaxonSearch.js";
+import type { SearchableTaxon } from "../state/search.js";
 import styles from "./exploration.module.css";
 
 interface ContextBarProps {
@@ -16,6 +18,9 @@ interface ContextBarProps {
   stageName: string;
   group: string;
   count: number;
+  /** In-memory taxon search index + selection handler (SPEC-013). */
+  searchIndex: readonly SearchableTaxon[];
+  onSearchSelect: (taxonId: string) => void;
   onReset: () => void;
 }
 
@@ -24,6 +29,8 @@ export function ContextBar({
   stageName,
   group,
   count,
+  searchIndex,
+  onSearchSelect,
   onReset,
 }: ContextBarProps): ReactElement {
   return (
@@ -35,6 +42,8 @@ export function ContextBar({
           Mesozoic life
         </span>
       </div>
+
+      <TaxonSearch index={searchIndex} onSelect={onSearchSelect} />
 
       <div className={styles.context}>
         <div className={styles.stat}>
@@ -63,7 +72,7 @@ export function ContextBar({
         </div>
 
         <button type="button" className={styles.reset} onClick={onReset}>
-          Reset filters
+          Reset view
         </button>
       </div>
     </header>

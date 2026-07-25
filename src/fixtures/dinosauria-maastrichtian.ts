@@ -128,10 +128,10 @@ export const DINOSAURIA_MAASTRICHTIAN: SourceSubset = {
   ],
 
   images: [
-    { taxonId: 'txn:tyrannosaurus', type: 'ArtisticReconstruction', credit: 'Jane Doe (artist)', licence: 'CC BY-SA 4.0', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Trex.jpg' },
+    { taxonId: 'txn:tyrannosaurus', type: 'ArtisticReconstruction', credit: 'Jane Doe (artist)', licence: 'CC BY-SA 4.0', imageUrl: 'https://upload.wikimedia.org/thumb/Trex.jpg/320px-Trex.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Trex.jpg' },
     // No licence → cannot be honoured → dropped to the image-fallback state.
-    { taxonId: 'txn:tyrannosaurus', type: 'FossilPhoto', credit: 'Unknown', licence: null, sourceUrl: 'https://commons.wikimedia.org/wiki/File:Trex-skull.jpg' },
-    { taxonId: 'txn:triceratops', type: 'SkeletalMount', credit: 'Natural History Museum', licence: 'CC BY 2.0', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Triceratops-mount.jpg' },
+    { taxonId: 'txn:tyrannosaurus', type: 'FossilPhoto', credit: 'Unknown', licence: null, imageUrl: 'https://upload.wikimedia.org/thumb/Trex-skull.jpg/320px-Trex-skull.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Trex-skull.jpg' },
+    { taxonId: 'txn:triceratops', type: 'SkeletalMount', credit: 'Natural History Museum', licence: 'CC BY 2.0', imageUrl: 'https://upload.wikimedia.org/thumb/Triceratops-mount.jpg/320px-Triceratops-mount.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Triceratops-mount.jpg' },
   ],
 
   editorial: [

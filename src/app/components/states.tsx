@@ -72,12 +72,9 @@ export function EmptyState({ onReset }: { onReset: () => void }): ReactElement {
   return (
     <div className={styles.stateWrap} role="status">
       <p className={styles.stateTitle}>No occurrences at this age</p>
-      <p>
-        No fossil occurrence overlaps the selected stage with the active
-        filters.
-      </p>
+      <p>No fossil occurrence overlaps the selected stage.</p>
       <button type="button" className={styles.primary} onClick={onReset}>
-        Reset filters
+        Reset view
       </button>
     </div>
   );

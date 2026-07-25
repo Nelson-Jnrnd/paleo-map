@@ -206,6 +206,7 @@ export function derive(l1: L1Snapshot): ReadModel {
           type: img.item.type,
           credit: img.item.credit!,
           licence: img.item.licence!,
+          imageUrl: img.item.imageUrl,
           sourceUrl: img.item.sourceUrl,
           sourceId: img.item.sourceId,
         }))

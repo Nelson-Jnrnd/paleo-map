@@ -30,9 +30,9 @@ test("PERF-370: empty result → empty state → reset filters", async () => {
     within(emptyState).getByText(/No occurrences at this age/i),
   ).toBeInTheDocument();
 
-  // Reset filters (from the empty state) restores the default age + results.
+  // Reset view (from the empty state) restores the default age + results.
   await user.click(
-    within(emptyState).getByRole("button", { name: /Reset filters/i }),
+    within(emptyState).getByRole("button", { name: /Reset view/i }),
   );
 
   expect(

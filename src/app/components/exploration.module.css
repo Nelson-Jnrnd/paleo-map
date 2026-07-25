@@ -40,6 +40,59 @@
   gap: var(--space-5);
 }
 
+/* --- Taxon search (SPEC-013) --- */
+.search {
+  position: relative;
+  flex: 1 1 220px;
+  max-width: 340px;
+}
+.searchInput {
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+}
+.searchResults {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-panel);
+  max-height: 340px;
+  overflow-y: auto;
+}
+.searchOption {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.searchOptionActive {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+}
+.searchCommon {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+.searchNoMatch {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
 .stat {
   display: flex;
   flex-direction: column;
@@ -133,6 +186,12 @@
   position: relative;
   height: var(--target-min);
   width: 100%;
+}
+/* Static disclosure that a period jumps to its most fossil-rich stage
+   (SPEC-011 REQ-006). Faint and small so it informs without competing. */
+.periodHint {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
 }
 
 .periodBand {
@@ -687,6 +746,11 @@
 .fieldValue {
   font-size: 13px;
   color: var(--color-text);
+  /* Allow the 1fr grid value track to shrink and long provenance / coordinate
+     strings to wrap, so they stay fully legible instead of clipping at the
+     panel edge (SPEC-011 REQ-001; charter §4 provenance always legible). */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .primary {
@@ -707,6 +771,74 @@
 
 .primary:hover {
   background: var(--color-accent-deep);
+}
+
+/* --- Taxon-profile illustration + size scale (SPEC-012) --- */
+.illustration {
+  margin: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.illustrationImg,
+.silhouetteImg {
+  max-width: 100%;
+  max-height: 220px;
+  align-self: flex-start;
+  object-fit: contain;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+/* Silhouettes are flat group art — sit them on a pale panel and pad slightly so
+   they read as a diagram, not a photo. */
+.silhouetteImg {
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+}
+.illustrationCaption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-min);
+}
+.sourceLink {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+}
+.sizeScale {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sizeBars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sizeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sizeBarDino,
+.sizeBarHuman {
+  height: 12px;
+  min-width: 2px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.sizeBarDino {
+  background: var(--color-accent-deep);
+}
+.sizeBarHuman {
+  background: var(--color-text-muted);
+}
+.sizeBarValue {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 /* --- States --- */

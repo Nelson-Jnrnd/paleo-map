@@ -10,8 +10,8 @@ import { buildFixtureModel } from './helpers.js';
 
 describe('DATA-007: media licence compliance', () => {
   it('an image without a licence is not showable', () => {
-    const noLicence: ImageAsset = { type: 'FossilPhoto', credit: 'x', licence: null, sourceUrl: 'u', sourceId: 's' };
-    const ok: ImageAsset = { type: 'SkeletalMount', credit: 'x', licence: 'CC BY 2.0', sourceUrl: 'u', sourceId: 's' };
+    const noLicence: ImageAsset = { type: 'FossilPhoto', credit: 'x', licence: null, imageUrl: 'i', sourceUrl: 'u', sourceId: 's' };
+    const ok: ImageAsset = { type: 'SkeletalMount', credit: 'x', licence: 'CC BY 2.0', imageUrl: 'i', sourceUrl: 'u', sourceId: 's' };
     expect(isShowable(noLicence)).toBe(false);
     expect(isShowable(ok)).toBe(true);
   });

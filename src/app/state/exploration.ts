@@ -76,6 +76,16 @@ export type ExplorationAction =
   | { type: "selectOccurrence"; occurrenceId: string }
   | { type: "selectLocality"; collectionId: string }
   | { type: "selectTaxon"; taxonKey: string }
+  | {
+      // Search result chosen (SPEC-013 REQ-004): land the taxon in context — switch
+      // to Taxon mode at the tier that holds it, move the age into its range if
+      // needed, and select it (map emphasis + side panel), rather than opening the
+      // profile directly. The component computes rank + stage from the taxon.
+      type: "selectSearchTaxon";
+      taxonKey: string;
+      rank: RankTier;
+      stageName: string;
+    }
   | { type: "clearSelection" }
   | { type: "openProfile"; taxonId: string }
   | { type: "backToMap" }
@@ -124,6 +134,16 @@ export function explorationReducer(
       };
     case "selectTaxon":
       return { ...state, ...NO_SELECTION, selectedTaxonKey: action.taxonKey };
+    case "selectSearchTaxon":
+      return {
+        ...state,
+        mode: "taxon",
+        rank: action.rank,
+        stageName: action.stageName,
+        ...NO_SELECTION,
+        selectedTaxonKey: action.taxonKey,
+        screen: "map",
+      };
     case "clearSelection":
       return { ...state, ...NO_SELECTION };
     case "openProfile":

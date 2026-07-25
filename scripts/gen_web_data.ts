@@ -27,6 +27,7 @@ import { buildReadModel, serializeCompact } from "../src/pipeline/build.js";
 import { partitionReadModel } from "../src/pipeline/partition.js";
 import { FixtureSourceClient } from "../src/pipeline/fixture-client.js";
 import { HttpSourceClient } from "../src/pipeline/http-client.js";
+import { bundleImages } from "./bundle_images.js";
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -51,6 +52,41 @@ async function main(): Promise<void> {
     if (name === "snapshot.json" || name.startsWith("stage-")) {
       await rm(join(outDir, name));
     }
+  }
+
+  // SPEC-012 REQ-002: bundle profile lead images into data/images/ and rewrite
+  // their imageUrl to local paths, so pictures are served offline with no
+  // runtime egress. Only in live mode — the committed fixture URLs are not real.
+  if (live) {
+    // Wikimedia throttles rapid *bursts* of downloads (the images succeed in
+    // isolation), so pace requests ~4/sec and retry the occasional throttle with
+    // longer backoff, sending a descriptive User-Agent.
+    const UA =
+      "MesozoicDinosaurAtlas/1.0 (https://github.com/Nelson-Jnrnd/paleo-map)";
+    const sleep = (ms: number): Promise<void> =>
+      new Promise((r) => setTimeout(r, ms));
+    const bundled = await bundleImages(
+      partition.reference,
+      outDir,
+      async (url) => {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          await sleep(attempt === 1 ? 250 : 1500 * (attempt - 1));
+          try {
+            const res = await fetch(url, { headers: { "User-Agent": UA } });
+            if (res.ok) return new Uint8Array(await res.arrayBuffer());
+            // Permanent failure (404/403/…) — give up; transient — retry.
+            if (res.status !== 429 && res.status < 500) return null;
+          } catch {
+            /* network blip — retry */
+          }
+        }
+        return null;
+      },
+      (msg) => console.log(msg),
+    );
+    console.log(
+      `Bundled ${bundled} profile image(s) → ${join(outDir, "images")}`,
+    );
   }
 
   await writeFile(
