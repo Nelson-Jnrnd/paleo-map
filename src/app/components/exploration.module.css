@@ -773,7 +773,19 @@
   background: var(--color-accent-deep);
 }
 
-/* --- Taxon-profile illustration + size scale (SPEC-012) --- */
+/* --- Taxon-profile illustration + size scale (SPEC-012 / SPEC-014) --- */
+/* Gallery: wrap several images side by side; each figure keeps its own caption. */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.gallery .illustration {
+  margin: 0;
+  flex: 1 1 200px;
+  max-width: 260px;
+}
 .illustration {
   margin: var(--space-2) 0 0;
   display: flex;

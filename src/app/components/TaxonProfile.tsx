@@ -85,8 +85,7 @@ export function TaxonProfile({
         </header>
         <Illustration
           taxonName={fallbackName}
-          image={undefined}
-          imageSource={null}
+          images={[]}
           silhouette={silhouetteForTaxon(
             occurrences[0]?.taxonId ?? "",
             taxaById,
@@ -107,10 +106,11 @@ export function TaxonProfile({
   const validity = taxon.validity.value;
   const isMinimal = profile?.contentLevel === "OccurrenceOnly";
 
-  // Illustration inputs (SPEC-012): the lead showable image (licence + credit
-  // already guaranteed by DATA-007), the group silhouette fallback, and the body
-  // length for the size scale (metres; omitted when unknown).
-  const leadImage = profile?.images[0];
+  // Illustration inputs (SPEC-014 REQ-003/004): the showable image gallery
+  // (licence + credit already guaranteed by DATA-007), the group silhouette
+  // fallback, and the body length for the size scale (metres; omitted when
+  // unknown).
+  const galleryImages = profile?.images ?? [];
   const silhouette = silhouetteForTaxon(taxonId, taxaById);
   const bodyLength = profile?.measurements.find((m) => m.kind === "BodyLength");
   const bodyLengthM =
@@ -149,19 +149,7 @@ export function TaxonProfile({
 
       <Illustration
         taxonName={taxon.scientificName}
-        image={leadImage}
-        imageSource={
-          leadImage ? (
-            <a
-              className={styles.sourceLink}
-              href={leadImage.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Commons
-            </a>
-          ) : null
-        }
+        images={galleryImages}
         silhouette={silhouette}
         bodyLengthM={bodyLengthM}
       />

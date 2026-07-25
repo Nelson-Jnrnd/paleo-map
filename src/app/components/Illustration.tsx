@@ -1,13 +1,13 @@
 /**
- * Taxon-profile illustration (SPEC-012 REQ-003/004/005). Shows the licensed
- * Wikipedia/Commons lead image with its type, credit, licence and a source link
- * — provenance always visible, never behind a hover (charter §4/§5, FONC-1190/
- * 1200). When no showable image exists (or it fails to load) it falls back to a
- * generic, clearly-labelled clade silhouette (FONC-1240). An optional
- * human-relative size scale makes a body length tangible.
+ * Taxon-profile illustration (SPEC-012 → SPEC-014 REQ-003/004/005). Shows a
+ * gallery of the taxon's licensed Wikipedia/Commons images — each with its type,
+ * credit, licence and a Commons source link (provenance always visible, never
+ * behind a hover). When no showable image exists (or they all fail to load) it
+ * falls back to a clearly-labelled clade silhouette. An optional human-relative
+ * size scale makes a body length tangible.
  */
 
-import { useState, type ReactElement, type ReactNode } from "react";
+import { useState, type ReactElement } from "react";
 import type { ImageType, ReadImage } from "../../domain/index.js";
 import type { CladeSilhouette } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
@@ -24,10 +24,8 @@ const IMAGE_TYPE_LABEL: Readonly<Record<ImageType, string>> = {
 
 interface IllustrationProps {
   taxonName: string;
-  /** The lead showable image, if any (licence + credit already guaranteed). */
-  image: ReadImage | undefined;
-  /** The Commons source-page link node for the image's source. */
-  imageSource: ReactNode;
+  /** The showable images for this taxon (licence + credit already guaranteed). */
+  images: readonly ReadImage[];
   /** Generic group silhouette used when there is no showable image. */
   silhouette: CladeSilhouette;
   /** Body length in metres, or null when unknown (no invented number). */
@@ -75,33 +73,50 @@ function SizeScale({
 
 export function Illustration({
   taxonName,
-  image,
-  imageSource,
+  images,
   silhouette,
   bodyLengthM,
 }: IllustrationProps): ReactElement {
-  const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(image?.imageUrl) && !imageFailed;
+  // Track images that fail to load so a broken URL drops out of the gallery
+  // (and, if they all fail, we fall back to the silhouette).
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
+  const shown = images.filter(
+    (img) => img.imageUrl && !failed.has(img.imageUrl),
+  );
 
   return (
     <div className={styles.section}>
       <span className={styles.statLabel}>Illustration</span>
-      {showImage && image ? (
-        <figure className={styles.illustration}>
-          <img
-            className={styles.illustrationImg}
-            src={image.imageUrl}
-            alt={`${IMAGE_TYPE_LABEL[image.type]} of ${taxonName}`}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
-          <figcaption className={styles.illustrationCaption}>
-            <span>{IMAGE_TYPE_LABEL[image.type]}</span>
-            <span className={styles.source}>
-              {image.credit} · {image.licence} · {imageSource}
-            </span>
-          </figcaption>
-        </figure>
+      {shown.length > 0 ? (
+        <div className={styles.gallery}>
+          {shown.map((img) => (
+            <figure key={img.imageUrl} className={styles.illustration}>
+              <img
+                className={styles.illustrationImg}
+                src={img.imageUrl}
+                alt={`${IMAGE_TYPE_LABEL[img.type]} of ${taxonName}`}
+                loading="lazy"
+                onError={() =>
+                  setFailed((prev) => new Set(prev).add(img.imageUrl))
+                }
+              />
+              <figcaption className={styles.illustrationCaption}>
+                <span>{IMAGE_TYPE_LABEL[img.type]}</span>
+                <span className={styles.source}>
+                  {img.credit} · {img.licence} ·{" "}
+                  <a
+                    className={styles.sourceLink}
+                    href={img.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Commons
+                  </a>
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       ) : (
         <figure className={styles.illustration}>
           <img

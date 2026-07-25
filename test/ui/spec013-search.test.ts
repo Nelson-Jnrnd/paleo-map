@@ -82,13 +82,13 @@ test("stageForTaxon keeps or moves the age into the taxon's range (REQ-004)", ()
     { name: "Maastrichtian", startMa: 72.1, endMa: 66 },
   ];
   // Current age already overlaps the taxon's span → keep it.
-  expect(
-    stageForTaxon({ minMa: 68, maxMa: 70 }, "Maastrichtian", stages),
-  ).toBe("Maastrichtian");
-  // Current age misses the span → jump to the overlapping stage.
-  expect(stageForTaxon({ minMa: 210, maxMa: 220 }, "Maastrichtian", stages)).toBe(
-    "Norian",
+  expect(stageForTaxon({ minMa: 68, maxMa: 70 }, "Maastrichtian", stages)).toBe(
+    "Maastrichtian",
   );
+  // Current age misses the span → jump to the overlapping stage.
+  expect(
+    stageForTaxon({ minMa: 210, maxMa: 220 }, "Maastrichtian", stages),
+  ).toBe("Norian");
   // Unknown span → keep the current age (no invented jump).
   expect(stageForTaxon(null, "Campanian", stages)).toBe("Campanian");
 });
