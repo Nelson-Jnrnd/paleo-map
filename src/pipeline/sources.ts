@@ -78,6 +78,10 @@ export interface RawWikidataBinding {
   enwikiTitle: string;
   enwikiUrl: string;
   commonName?: string;
+  /** Wikidata P18 image file name (curated representative image) — SPEC-014 REQ-003. */
+  image?: string;
+  /** Wikidata P373 Commons category (for gallery images) — SPEC-014 REQ-003. */
+  commonsCategory?: string;
 }
 
 /** A Wikipedia article summary snapshot (CC BY-SA), keyed by Wikidata QID. */

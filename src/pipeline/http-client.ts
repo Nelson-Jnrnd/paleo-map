@@ -40,6 +40,10 @@ const ENWIKI_API = 'https://en.wikipedia.org/w/api.php';
 const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
 /** Longest-edge width (px) requested for the renderable lead thumbnail (SPEC-012 REQ-002). */
 const COMMONS_THUMB_WIDTH = 320;
+/** Max images kept per taxon for the profile gallery (SPEC-014 REQ-003). */
+const GALLERY_MAX = 6;
+/** Commons file titles we treat as gallery-worthy raster images. */
+const IMAGE_FILE_RE = /\.(jpe?g|png|gif|webp)$/i;
 const USER_AGENT =
   'paleo-map-ingestion/0.1 (https://github.com/Nelson-Jnrnd/paleo-map; SPEC-001 data layer)';
 
@@ -122,6 +126,8 @@ interface SparqlBinding {
   item: { value: string };
   article: { value: string };
   common?: { value: string };
+  image?: { value: string };
+  commonscat?: { value: string };
 }
 
 interface MwPage {
@@ -306,10 +312,24 @@ export class HttpSourceClient implements SourceClient {
     const { wikipedia, imageFiles } = await this.wikipediaExtracts(wikidata);
     this.log(`Wikipedia: ${wikipedia.length} article summaries captured`);
 
+    // Gallery candidates (SPEC-014 REQ-003), best-first: Wikidata P18 (curated) →
+    // Wikipedia pageimage → Commons-category members. Deduped per taxon by file
+    // title and capped at GALLERY_MAX so a taxon shows a small, relevant gallery.
+    const p18Files = wikidata.flatMap((b) =>
+      b.image ? [{ qid: b.qid, file: b.image }] : [],
+    );
+    const categoryFiles = await this.commonsCategoryFiles(wikidata);
+    const galleryFiles = capFilesPerQid(
+      [...p18Files, ...imageFiles, ...categoryFiles],
+      GALLERY_MAX,
+    );
+
     const taxonByQid = new Map(wikidata.map((b) => [b.qid, b.pbdbTaxonId]));
-    const images = await this.commonsImages(imageFiles, taxonByQid);
+    const images = await this.commonsImages(galleryFiles, taxonByQid);
     const showable = images.filter((i) => i.licence && i.credit).length;
-    this.log(`Commons: ${images.length} lead images (${showable} with licence + credit)`);
+    this.log(
+      `Commons: ${images.length} gallery images across taxa (${showable} with licence + credit)`,
+    );
 
     return {
       metadata,
@@ -434,11 +454,13 @@ export class HttpSourceClient implements SourceClient {
     for (const batch of chunk(names, 220)) {
       const values = batch.map((n) => `"${n.replace(/"/g, '\\"')}"`).join(' ');
       const query =
-        `SELECT ?name ?item ?article ?common WHERE { ` +
+        `SELECT ?name ?item ?article ?common ?image ?commonscat WHERE { ` +
         `VALUES ?name { ${values} } ` +
         `?item wdt:P225 ?name ; wdt:P31/wdt:P279* wd:Q16521 . ` +
         `?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . ` +
-        `OPTIONAL { ?item wdt:P1843 ?common FILTER(LANG(?common)="en") } }`;
+        `OPTIONAL { ?item wdt:P1843 ?common FILTER(LANG(?common)="en") } ` +
+        `OPTIONAL { ?item wdt:P18 ?image } ` +
+        `OPTIONAL { ?item wdt:P373 ?commonscat } }`;
       const url = `${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`;
       const data = await getJson<{ results: { bindings: SparqlBinding[] } }>(url);
       const seen = new Set<string>();
@@ -447,12 +469,18 @@ export class HttpSourceClient implements SourceClient {
         const pbdbTaxonId = taxonIdByName.get(name);
         if (!pbdbTaxonId || seen.has(name)) continue; // first article per taxon
         seen.add(name);
+        // P18 is a Special:FilePath URL; the file name is its last, decoded segment.
+        const image = b.image
+          ? decodeURIComponent(b.image.value.split('/').pop()!)
+          : undefined;
         out.push({
           qid: b.item.value.split('/').pop()!,
           pbdbTaxonId,
           enwikiTitle: decodeURIComponent(b.article.value.split('/wiki/').pop()!).replace(/_/g, ' '),
           enwikiUrl: b.article.value,
           ...(b.common ? { commonName: b.common.value } : {}),
+          ...(image ? { image } : {}),
+          ...(b.commonscat ? { commonsCategory: b.commonscat.value } : {}),
         });
       }
     }
@@ -490,6 +518,39 @@ export class HttpSourceClient implements SourceClient {
       }
     }
     return { wikipedia, imageFiles };
+  }
+
+  /**
+   * Extra gallery candidates from each taxon's Wikimedia Commons category
+   * (SPEC-014 REQ-003): one `categorymembers` query per taxon with a P373
+   * category, returning image file titles. Best-effort — a missing/empty
+   * category yields none; paced to stay friendly to the Commons API.
+   */
+  private async commonsCategoryFiles(
+    bindings: RawWikidataBinding[],
+  ): Promise<Array<{ qid: string; file: string }>> {
+    const out: Array<{ qid: string; file: string }> = [];
+    const withCat = bindings.filter((b) => b.commonsCategory);
+    for (const b of withCat) {
+      await sleep(60); // gentle pacing across many per-taxon queries
+      const url =
+        `${COMMONS_API}?action=query&format=json&formatversion=2` +
+        `&list=categorymembers&cmtype=file&cmlimit=${GALLERY_MAX + 4}` +
+        `&cmtitle=${encodeURIComponent(`Category:${b.commonsCategory}`)}`;
+      try {
+        const data = await getJson<{
+          query?: { categorymembers?: Array<{ title: string }> };
+        }>(url);
+        for (const m of data.query?.categorymembers ?? []) {
+          const file = m.title.replace(/^File:/, '');
+          if (!IMAGE_FILE_RE.test(file)) continue;
+          out.push({ qid: b.qid, file });
+        }
+      } catch {
+        /* best-effort — skip a category that fails */
+      }
+    }
+    return out;
   }
 
   private async commonsImages(
@@ -537,6 +598,30 @@ export class HttpSourceClient implements SourceClient {
  * id, then sort by `oid` so the merged list — and every artifact derived from it
  * — is byte-stable regardless of query order (NFR-002). Pure and unit-testable.
  */
+/**
+ * Dedup gallery-candidate files per taxon (by qid) on file title, preserving
+ * first-seen order (P18 → pageimage → category), and cap each taxon at `max`
+ * (SPEC-014 REQ-003). Pure/deterministic.
+ */
+export function capFilesPerQid(
+  files: ReadonlyArray<{ qid: string; file: string }>,
+  max: number,
+): Array<{ qid: string; file: string }> {
+  const perQid = new Map<string, Set<string>>();
+  const out: Array<{ qid: string; file: string }> = [];
+  for (const f of files) {
+    let seen = perQid.get(f.qid);
+    if (!seen) {
+      seen = new Set<string>();
+      perQid.set(f.qid, seen);
+    }
+    if (seen.has(f.file) || seen.size >= max) continue;
+    seen.add(f.file);
+    out.push(f);
+  }
+  return out;
+}
+
 export function mergeById<T extends { oid: string }>(records: readonly T[]): T[] {
   const byId = new Map<string, T>();
   for (const r of records) {
