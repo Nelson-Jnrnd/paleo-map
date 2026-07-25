@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-014
 title: Taxon page & data pipeline redesign — LLM enrichment, multi-image gallery, size hero, taxonomy tree
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -348,16 +348,17 @@ images are deleted with the generator revert.
       if needed. (Default: agent-first; no paid run unless you ask.)
 - [ ] **Gallery size** cap (default 4–6 images/taxon) and total image budget
       ceiling (bundling more images grows the repo — see SPEC-012's 43 MB).
-- [ ] Whether to keep a **photo** as hero when a great one exists, or always lead
-      with the size-vs-human silhouette (report recommended silhouette-first).
+- [x] Hero: **silhouette size-vs-human leads**, photo secondary (owner confirmed
+      2026-07-25).
 
 ## Human decisions required
 
-- [ ] **Confirm engine order** (open question 1): agent-authored cache first
-      (free), batch script only on request. No cost is incurred unless you opt
-      into Engine B.
-- [ ] **Confirm gallery/image budget** (open question 2) given repo-size impact.
-- [ ] **Charter amendment** (below) acknowledging relaxed provenance is accepted.
+- [x] **Engine order** (open question 1): agent-authored cache first (free), batch
+      script only on request — confirmed 2026-07-25.
+- [x] **Gallery/image budget** (open question 2): ~4–6 images/taxon — confirmed
+      2026-07-25 (total image budget tuned at implementation).
+- [x] **Charter amendment** (below): relaxed provenance accepted — confirmed
+      2026-07-25.
 
 ## Conflict check
 
@@ -414,4 +415,6 @@ _None yet._
 - [ ] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed (incl. charter amendment).
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved. Owner approved
+      SPEC-014 and all three confirmations (engine order, gallery budget, hero) on
+      2026-07-25 ("i confirm everything here").
