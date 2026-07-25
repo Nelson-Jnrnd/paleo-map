@@ -118,23 +118,32 @@ the Claude Batches API (build-time only).
   article; type checks.
 - **Evidence location:** filled at implementation.
 
-### REQ-002: Enrichment engine (Claude API, batched, cached)
+### REQ-002: Enrichment engine — pluggable, cached (the cache is the contract)
 
-- **Statement:** Enrichment calls the **Claude Messages API with structured
-  outputs** (a JSON schema constraining the record), executed through the
-  **Message Batches API**, from a build-time script. Each result is **cached
-  keyed by the source article's revision id** so re-runs only re-query changed
-  articles and the snapshot build stays deterministic (NFR-001/002). No enrichment
-  call happens at runtime.
-- **Rationale:** Batch = 50% cheaper, async, right tool for ~2100 one-shot
-  extractions; caching preserves determinism and offline runtime.
-- **Acceptance criteria:** A cached record is reused without re-calling the API
-  when the article revision is unchanged; the enrichment prompt is
-  **extract-don't-invent** (fields grounded in the article or `null`); the model
-  is configurable (default per Human decisions §); a dry-run/offline mode builds
-  from the cache with no network.
-- **Verification method:** unit tests on the cache key + prompt-builder + schema;
-  a recorded sample transcript; manual batch run.
+- **Statement:** Enrichment is defined by a **fixed extraction schema + rules +
+  a revision-keyed cache** (`enrichment/<taxonId>.json` carrying the record and
+  the source article `revid`). Populating that cache is **engine-agnostic** — the
+  build reads the committed cache and never calls an LLM at runtime. Two
+  interchangeable engines populate it:
+  - **Engine A — agent-authored (default, subscription-covered):** the coding
+    agent fetches each article and writes records conforming to the schema,
+    in **committable chunks** (highest-value taxa first). No per-token cost.
+  - **Engine B — batch script (optional accelerator):** a build-time script
+    calls the **Claude Messages API with structured outputs** via the **Batches
+    API** to fill the long tail fast, for a small per-token cost.
+  Either engine writes the identical cache format; the snapshot build is
+  deterministic given the committed cache (NFR-001/002).
+- **Rationale:** Owner wants to minimise cost — the agent can populate the cache
+  for free; the batch script is an escape hatch for doing all ~2100 at once. The
+  cache-as-contract makes the choice reversible and incremental.
+- **Acceptance criteria:** A cached record is reused without any LLM call when the
+  article `revid` is unchanged; extraction is **extract-don't-invent** (fields
+  grounded in the article or `null`); the schema/validator rejects malformed
+  records regardless of which engine wrote them; a build from cache needs no
+  network or API key.
+- **Verification method:** unit tests on the cache key + schema validator + prompt
+  rules; a sample of agent-authored and (if used) script-authored records
+  validated identically; offline build from cache.
 - **Evidence location:** filled at implementation.
 
 ### REQ-003: Multi-image gallery per taxon
@@ -238,11 +247,11 @@ the Claude Batches API (build-time only).
 
 ### SEC-001: Build-time secrets only
 
-- **Statement:** The Claude API key is used **only at build time** by the
-  enrichment script and never shipped to the client or committed. Runtime has no
-  keys and no third-party calls.
+- **Statement:** Engine A (agent-authored) uses no API key at all. If Engine B is
+  used, its Claude API key lives **only at build time** and is never shipped to
+  the client or committed. Runtime has no keys and no third-party calls.
 - **Acceptance criteria:** No API key in committed artifacts or client bundle;
-  enrichment cache contains only content, not credentials.
+  the enrichment cache contains only content, not credentials.
 - **Verification method:** inspection + secret scan.
 - **Evidence location:** filled at implementation.
 
@@ -332,9 +341,11 @@ images are deleted with the generator revert.
 
 ## Open questions
 
-- [ ] Enrichment **model**: Haiku 4.5 for extraction (cheapest, ~\$8 one-time),
-      Sonnet 5 for the readable-blurb rewrite, or one model for both? (Default:
-      Haiku 4.5 for extraction; revisit if blurb quality is weak.)
+- [ ] Enrichment **engine order**: default is **Engine A (agent-authored, free)**
+      populating the cache highest-value-taxa-first, with **Engine B (batch
+      script)** only if/when you want the full ~2100 finished fast. If Engine B is
+      used, model = Haiku 4.5 for extraction (~\$8 one-time), Sonnet 5 for blurbs
+      if needed. (Default: agent-first; no paid run unless you ask.)
 - [ ] **Gallery size** cap (default 4–6 images/taxon) and total image budget
       ceiling (bundling more images grows the repo — see SPEC-012's 43 MB).
 - [ ] Whether to keep a **photo** as hero when a great one exists, or always lead
@@ -342,8 +353,9 @@ images are deleted with the generator revert.
 
 ## Human decisions required
 
-- [ ] **Confirm the enrichment model + budget ceiling** (open question 1) — the
-      only cost-bearing choice.
+- [ ] **Confirm engine order** (open question 1): agent-authored cache first
+      (free), batch script only on request. No cost is incurred unless you opt
+      into Engine B.
 - [ ] **Confirm gallery/image budget** (open question 2) given repo-size impact.
 - [ ] **Charter amendment** (below) acknowledging relaxed provenance is accepted.
 
