@@ -17,6 +17,7 @@ import { formatMaRange, NOT_AVAILABLE } from "../format.js";
 import { sourceReference } from "../sources.js";
 import { AttentionNote, MissingValue } from "./Cues.js";
 import { Illustration } from "./Illustration.js";
+import { TaxonEnrichment } from "./TaxonEnrichment.js";
 import { silhouetteForTaxon } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
 
@@ -166,45 +167,55 @@ export function TaxonProfile({
         </p>
       </div>
 
-      <div className={styles.section}>
-        <span className={styles.statLabel}>Summary &amp; biology</span>
+      {profile?.enrichment ? (
+        // SPEC-014 REQ-005: the AI-assisted enrichment supersedes the raw
+        // Wikipedia summary + PBDB biology grid when a cached record exists.
+        <TaxonEnrichment enrichment={profile.enrichment} />
+      ) : (
+        <div className={styles.section}>
+          <span className={styles.statLabel}>Summary &amp; biology</span>
 
-        {profile?.summary?.value ? (
-          <p className={styles.fieldValue}>{profile.summary.value}</p>
-        ) : (
-          <p className={styles.fieldValue}>
-            Summary: <MissingValue />
-          </p>
-        )}
+          {profile?.summary?.value ? (
+            <p className={styles.fieldValue}>{profile.summary.value}</p>
+          ) : (
+            <p className={styles.fieldValue}>
+              Summary: <MissingValue />
+            </p>
+          )}
 
-        <dl className={styles.fieldGrid}>
-          {(profile?.attributes ?? []).map((attr) => (
-            <div key={attr.kind} style={{ display: "contents" }}>
-              <dt className={styles.fieldLabel}>{attr.kind}</dt>
-              <dd className={styles.fieldValue}>
-                {attr.value.value ?? NOT_AVAILABLE}
-              </dd>
-            </div>
-          ))}
-          {(profile?.measurements ?? []).map((m) => (
-            <div key={m.kind} style={{ display: "contents" }}>
-              <dt className={styles.fieldLabel}>{m.kind}</dt>
-              <dd className={styles.fieldValue}>
-                {m.value.value !== null ? (
-                  <span className="mono">
-                    {m.value.value} {m.unit}
-                    {m.lowerBound !== null && m.upperBound !== null
-                      ? ` (${m.lowerBound}–${m.upperBound} ${m.unit})`
-                      : ""}
-                  </span>
-                ) : (
-                  <MissingValue />
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+          <dl className={styles.fieldGrid}>
+            {/* PBDB Locomotion/Habitat are dropped from the page (SPEC-014 data
+                model impact); only Diet remains of the ecospace attributes. */}
+            {(profile?.attributes ?? [])
+              .filter((attr) => attr.kind === "Diet")
+              .map((attr) => (
+                <div key={attr.kind} style={{ display: "contents" }}>
+                  <dt className={styles.fieldLabel}>{attr.kind}</dt>
+                  <dd className={styles.fieldValue}>
+                    {attr.value.value ?? NOT_AVAILABLE}
+                  </dd>
+                </div>
+              ))}
+            {(profile?.measurements ?? []).map((m) => (
+              <div key={m.kind} style={{ display: "contents" }}>
+                <dt className={styles.fieldLabel}>{m.kind}</dt>
+                <dd className={styles.fieldValue}>
+                  {m.value.value !== null ? (
+                    <span className="mono">
+                      {m.value.value} {m.unit}
+                      {m.lowerBound !== null && m.upperBound !== null
+                        ? ` (${m.lowerBound}–${m.upperBound} ${m.unit})`
+                        : ""}
+                    </span>
+                  ) : (
+                    <MissingValue />
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
       <div className={styles.section}>
         <span className={styles.statLabel}>Occurrences ({totalCount})</span>

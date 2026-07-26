@@ -391,7 +391,7 @@ This is a deliberate softening; requirements still live only in specs.
 | REQ-002 | cache-as-contract + engines | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts` | `test/spec014-enrichment.test.ts` | Done (Engine A seeded 8 flagship records; Engine B optional) |
 | REQ-003 | image sourcing + gallery | TBD | TBD | Pending |
 | REQ-004 | PhyloPic + size hero | TBD | TBD | Pending |
-| REQ-005 | TaxonProfile redesign | TBD | TBD | Pending |
+| REQ-005 | TaxonProfile redesign | `src/app/components/TaxonEnrichment.tsx` (overview/fact-row/blurb/discovery/notable-facts + AI disclosure); wired in `TaxonProfile.tsx` | `test/ui/spec014-enrichment.test.tsx` | In progress — enrichment block done; taxonomy tree (REQ-006) + occurrences-collapse (REQ-007) pending |
 | REQ-006 | taxonomy tree | TBD | TBD | Pending |
 | REQ-007 | collapsed occurrences | TBD | TBD | Pending |
 

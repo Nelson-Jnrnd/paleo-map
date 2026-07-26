@@ -1020,3 +1020,93 @@
   font-size: var(--text-min);
   color: var(--color-text-muted);
 }
+
+/* --- Taxon enrichment (SPEC-014 REQ-005) --- */
+/* One-line "what it was", a scannable lead above the fact row. */
+.oneLiner {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  color: var(--color-text-hi);
+}
+
+/* Fact row: length · height · mass · diet · era. Neutral cards (teal stays the
+   single interaction accent, charter §4); numbers are mono with an est. cue. */
+.factRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.factChip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.factChipLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+}
+
+.factChipValue {
+  font-size: 13px;
+  color: var(--color-text-hi);
+}
+
+.factEst {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+}
+
+/* Collapsible "Discovery & naming" / "Notable facts" — quiet, scannable. */
+.collapsible {
+  margin-top: var(--space-3);
+}
+
+.collapsibleHead {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+
+.collapsibleHead:hover {
+  color: var(--color-text-muted);
+}
+
+.factList {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.factItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.factTag {
+  flex-shrink: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-2);
+}
