@@ -28,6 +28,10 @@ import { partitionReadModel } from "../src/pipeline/partition.js";
 import { FixtureSourceClient } from "../src/pipeline/fixture-client.js";
 import { HttpSourceClient } from "../src/pipeline/http-client.js";
 import { bundleImages } from "./bundle_images.js";
+import {
+  applyEnrichment,
+  loadEnrichmentCache,
+} from "../src/pipeline/enrichment.js";
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -39,10 +43,22 @@ async function main(): Promise<void> {
       "Ingesting live full-Mesozoic (Triassic/Jurassic/Cretaceous) from PBDB + Wikidata + Wikipedia/Commons…",
     );
 
-  const model = await buildReadModel(client);
+  const baseModel = await buildReadModel(client);
+
+  // SPEC-014 REQ-002: attach the committed enrichment cache (agent-authored by
+  // default). Read-only and offline — no LLM call here; a build with an empty
+  // cache simply ships no enrichment. A malformed cache file fails the build.
+  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const enrichmentDir = join(repoRoot, "enrichment");
+  const cache = await loadEnrichmentCache(enrichmentDir);
+  const model = applyEnrichment(baseModel, cache);
+  const enriched = model.profiles.filter((p) => p.enrichment !== null).length;
+  console.log(
+    `Enrichment: ${cache.size} cached record(s) → ${enriched} profile(s) enriched`,
+  );
+
   const partition = partitionReadModel(model);
 
-  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
   const outDir = join(repoRoot, "public", "data");
   await mkdir(outDir, { recursive: true });
 

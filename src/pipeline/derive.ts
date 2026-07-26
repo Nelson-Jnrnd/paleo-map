@@ -250,6 +250,9 @@ export function derive(l1: L1Snapshot): ReadModel {
         attributes,
         measurements,
         images,
+        // Attached from the committed enrichment cache in a later build step
+        // (SPEC-014 REQ-002); derive itself stays source-only and offline.
+        enrichment: null,
         occurrenceCount: agg?.count ?? 0,
         timeSpan,
         timeSpanApproximate: agg?.approximate ?? false,

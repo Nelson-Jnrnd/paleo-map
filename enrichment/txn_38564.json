@@ -1,0 +1,58 @@
+{
+  "taxonId": "txn:38564",
+  "taxonName": "Velociraptor",
+  "source": {
+    "article": "Velociraptor",
+    "url": "https://en.wikipedia.org/wiki/Velociraptor",
+    "revid": 1363630071
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": "raptor",
+    "pronunciation": null,
+    "nameMeaning": "\"Swift thief\"",
+    "oneLiner": "A small, feathered, sickle-clawed dromaeosaurid predator.",
+    "description": "Velociraptor was a small bipedal, feathered carnivore with a long tail and an enlarged sickle-shaped claw on each hindfoot used to tackle and restrain prey. It lived in Late Cretaceous Asia (Mongolia and China) and is distinguished by its long, low, upturned snout. Roughly the size of a turkey, it was far smaller than its Jurassic Park portrayal, which was based on the larger Deinonychus.",
+    "bodyLength": {
+      "value": 2.07,
+      "unit": "m",
+      "low": 1.5,
+      "high": 2.07,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 19.7,
+      "unit": "kg",
+      "low": 14.1,
+      "high": 19.7,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous, ~75–71 Ma",
+    "discovery": {
+      "year": 1924,
+      "who": "Henry Fairfield Osborn",
+      "where": "Djadochta Formation, Mongolia"
+    },
+    "notableFacts": [
+      {
+        "tag": "claw",
+        "text": "Had an enlarged sickle-shaped claw on each hindfoot to restrain prey."
+      },
+      {
+        "tag": "feathers",
+        "text": "Was a feathered dinosaur."
+      },
+      {
+        "tag": "fossil",
+        "text": "A famous specimen preserves a Velociraptor locked in combat with a Protoceratops."
+      },
+      {
+        "tag": "size",
+        "text": "Only about the size of a turkey — much smaller than in film."
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38677",
+  "taxonName": "Brachiosaurus",
+  "source": {
+    "article": "Brachiosaurus",
+    "url": "https://en.wikipedia.org/wiki/Brachiosaurus",
+    "revid": 1362749670
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Arm lizard\", for its proportionately long forelimbs",
+    "oneLiner": "A towering long-necked sauropod with longer arms than legs.",
+    "description": "Brachiosaurus was a large sauropod with a disproportionately long neck, small skull, and — unusually — longer forelimbs than hindlimbs, giving it a steeply inclined trunk and a proportionally short tail. It lived in the Late Jurassic of North America and was a high browser, cropping vegetation up to about 9 m off the ground. Unlike other sauropods, it was unsuited to rearing on its hindlimbs.",
+    "bodyLength": {
+      "value": 22,
+      "unit": "m",
+      "low": 18,
+      "high": 22,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 46.9,
+      "unit": "t",
+      "low": 28.3,
+      "high": 46.9,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic, ~155.6–145.5 Ma",
+    "discovery": {
+      "year": 1903,
+      "who": "Elmer S. Riggs",
+      "where": "Colorado River valley, western Colorado, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "anatomy",
+        "text": "Unusually for a sauropod, its forelimbs were longer than its hindlimbs."
+      },
+      {
+        "tag": "browsing",
+        "text": "A high browser, cropping vegetation as high as ~9 m off the ground."
+      },
+      {
+        "tag": "popculture",
+        "text": "Most popular depictions are actually based on the African relative Giraffatitan."
+      }
+    ]
+  }
+}

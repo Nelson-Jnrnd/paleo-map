@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38669",
+  "taxonName": "Diplodocus",
+  "source": {
+    "article": "Diplodocus",
+    "url": "https://en.wikipedia.org/wiki/Diplodocus",
+    "revid": 1363740101
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Double beam\", for the double-beamed chevron bones under its tail",
+    "oneLiner": "An enormous long-necked, whip-tailed diplodocid sauropod.",
+    "description": "Diplodocus was a very large, long-necked, quadrupedal sauropod with a long, whip-like tail and a largely horizontal posture. D. carnegii is one of the longest dinosaurs known from a complete skeleton, at 24–26 m. It lived in the Late Jurassic Morrison Formation of western North America, where its great size may have deterred predators like Allosaurus and Ceratosaurus.",
+    "bodyLength": {
+      "value": 25,
+      "unit": "m",
+      "low": 24,
+      "high": 26,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 14.8,
+      "unit": "t",
+      "low": 12,
+      "high": 14.8,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian), ~152–149 Ma",
+    "discovery": {
+      "year": 1877,
+      "who": "S. W. Williston (found); named by O. C. Marsh, 1878",
+      "where": null
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "One of the longest dinosaurs known from a complete skeleton (24–26 m)."
+      },
+      {
+        "tag": "tail",
+        "text": "Named \"double beam\" after the double-beamed chevron bones under its whip-like tail."
+      },
+      {
+        "tag": "skull",
+        "text": "No skull can be confidently assigned to Diplodocus itself."
+      }
+    ]
+  }
+}

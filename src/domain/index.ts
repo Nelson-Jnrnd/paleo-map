@@ -9,4 +9,5 @@ export * from './taxonomy.js';
 export * from './occurrence.js';
 export * from './timescale.js';
 export * from './profile.js';
+export * from './enrichment.js';
 export * from './snapshot.js';

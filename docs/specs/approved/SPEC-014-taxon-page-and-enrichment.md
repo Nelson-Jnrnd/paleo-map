@@ -314,8 +314,8 @@ verified by a screenshot on completion.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Typed nullable enrichment record | automated | schema + fixture unit test | TBD | TBD |
-| REQ-002 | Batched, schema-constrained, revision-cached | automated | cache/prompt/schema unit tests | TBD | TBD |
+| REQ-001 | Typed nullable enrichment record | automated | `src/domain/enrichment.ts` + `test/spec014-enrichment.test.ts` | `EnrichmentRecord` on `ReadProfile` | branch `claude/mesozoic-atlas-feedback-7orhwl` |
+| REQ-002 | Engine-agnostic, schema-validated, revision-cached | automated | `test/spec014-enrichment.test.ts` (validator/freshness/apply) + `validate:enrichment` | `enrichment/*.json` cache + `src/pipeline/enrichment.ts` | branch `claude/mesozoic-atlas-feedback-7orhwl` |
 | REQ-003 | Multi-image gallery, bundled, deduped | automated + budget | selection unit + gallery component + check:budget | TBD | TBD |
 | REQ-004 | Silhouette + size-vs-human hero | automated | resolve/scale unit + hero component | TBD | TBD |
 | REQ-005 | Full page layout + states | automated + manual | component tests + screenshot | TBD | TBD |
@@ -387,8 +387,8 @@ This is a deliberate softening; requirements still live only in specs.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | domain enrichment record | TBD | TBD | Pending |
-| REQ-002 | enrichment batch script + cache | TBD | TBD | Pending |
+| REQ-001 | domain enrichment record | `src/domain/enrichment.ts`; attached via `applyEnrichment` | `test/spec014-enrichment.test.ts` | Done (data); UI display in REQ-005 |
+| REQ-002 | cache-as-contract + engines | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts` | `test/spec014-enrichment.test.ts` | Done (Engine A seeded 8 flagship records; Engine B optional) |
 | REQ-003 | image sourcing + gallery | TBD | TBD | Pending |
 | REQ-004 | PhyloPic + size hero | TBD | TBD | Pending |
 | REQ-005 | TaxonProfile redesign | TBD | TBD | Pending |
