@@ -89,6 +89,21 @@ test("classifyRole buckets by category/filename and excludes off-topic (AMEND-00
       subcatRole: "ArtisticReconstruction",
     }),
   ).toBe("ArtisticReconstruction");
+  // Exclusion beats an art keyword: the "Humorous paleoart" golf cartoon whose
+  // categories match RESTORATION is still dropped (real Tyrannosaurus case).
+  expect(
+    classifyRole({
+      ...base,
+      file: "A cartoon golf and dinosaur club.jpg",
+      categories: "Humorous paleoart|Illustrations of golf",
+      isLead: true,
+    }),
+  ).toBeNull();
+  // Size/scale diagrams are dropped — the size comparison is the synthesized hero.
+  expect(
+    classifyRole({ ...base, file: "Atrociraptor size comparison.png" }),
+  ).toBeNull();
+  expect(classifyRole({ ...base, file: "Xixianykus Scale.png" })).toBeNull();
 });
 
 function cand(

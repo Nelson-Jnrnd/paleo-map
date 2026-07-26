@@ -52,8 +52,11 @@ const IMAGE_FILE_RE = /\.(jpe?g|png|gif|webp)$/i;
 // Role classification (SPEC-014 AMEND-001). A Commons candidate is slotted into a
 // semantic role from its categories → filename → description. Order matters:
 // exclusion first, then fossil (more specific), then restoration.
+// Off-topic or non-photographic files that must never fill a photo slot — incl.
+// size/scale diagrams (the size comparison is the synthesized hero, not scraped)
+// and non-scientific art (cartoons, memes, stamps, toys).
 const EXCLUDE_RE =
-  /\b(sign|signage|logo|map|stamp|coin|book|cover|golf|footprint|track|ichnite|locator|distribution|postage|banknote|plaque|mural)\b/i;
+  /\b(sign|signage|logo|map|stamp|coin|book|cover|golf|footprint|track|ichnite|locator|distribution|postage|banknote|plaque|mural|scale|size|cartoon|comic|humou?r|humorous|meme|caricature|toy|lego|plush)\b/i;
 const FOSSIL_RE =
   /\b(skeletons?|skeletal|skulls?|holotypes?|fossils?|mount(?:ed|s)?|specimens?|bones?|teeth|tooth|casts?|vertebrae?|femur|jaws?|braincase)\b/i;
 const RESTORATION_RE =
@@ -808,9 +811,11 @@ export function classifyRole(input: {
   subcatRole?: ImageType;
 }): ImageType | null {
   const hay = `${input.file} ${input.categories} ${input.description}`;
+  // Exclusion wins first: a size chart or a "Humorous paleoart" cartoon must be
+  // dropped even though it also matches an art keyword.
+  if (EXCLUDE_RE.test(hay)) return null;
   if (FOSSIL_RE.test(hay)) return 'FossilPhoto';
   if (RESTORATION_RE.test(hay)) return 'ArtisticReconstruction';
-  if (EXCLUDE_RE.test(hay)) return null;
   // Trust the curator: a file pulled from an "X skeletons" / "X life
   // restorations" subcategory takes that role even without a keyword of its own.
   if (input.subcatRole) return input.subcatRole;
