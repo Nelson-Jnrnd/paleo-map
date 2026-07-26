@@ -668,6 +668,7 @@ export class HttpSourceClient implements SourceClient {
     }
 
     for (const batch of chunk(files, 50)) {
+      await sleep(150); // pace metadata batches so Commons doesn't burst-throttle
       const titles = batch.map((f) => `File:${f.file}`).join('|');
       const url =
         `${COMMONS_API}?action=query&format=json&formatversion=2` +
@@ -876,15 +877,28 @@ export function mergeById<T extends { oid: string }>(records: readonly T[]): T[]
 }
 
 async function getJson<T>(url: string, attempt = 1): Promise<T> {
+  const MAX_ATTEMPTS = 6;
+  let res: Response | null = null;
   try {
-    const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-    return (await res.json()) as T;
-  } catch (err) {
-    if (attempt >= 4) throw err;
-    await sleep(500 * 2 ** (attempt - 1));
-    return getJson<T>(url, attempt + 1);
+    res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    });
+    if (res.ok) return (await res.json()) as T;
+  } catch {
+    /* network blip — fall through to the retry decision */
   }
+  // Retry throttling (429) and server errors with backoff; a real 4xx is
+  // permanent, so fail fast and let the caller skip it. Wikimedia bursts need
+  // patience — honour Retry-After, otherwise exponential backoff up to ~30s.
+  const status = res?.status;
+  const retryable = !res || status === 429 || (status !== undefined && status >= 500);
+  if (attempt >= MAX_ATTEMPTS || !retryable) {
+    throw new Error(`HTTP ${status ?? 'network-error'} for ${url}`);
+  }
+  const retryAfter = Number(res?.headers.get('retry-after')) || 0;
+  const backoff = retryAfter > 0 ? retryAfter * 1000 : Math.min(1000 * 2 ** (attempt - 1), 30000);
+  await sleep(backoff);
+  return getJson<T>(url, attempt + 1);
 }
 
 function sleep(ms: number): Promise<void> {
