@@ -13,6 +13,7 @@ import {
   spansMultipleStages,
 } from '../domain/index.js';
 import type {
+  ImageType,
   ModernPosition,
   PaleogeographicPosition,
   Provenanced,
@@ -27,6 +28,15 @@ import type {
   TimeRange,
 } from '../domain/index.js';
 import type { L1Snapshot } from './ingest.js';
+
+// Gallery display order (SPEC-014 AMEND-001): the life restoration leads, then
+// the fossil; skeletal mounts and silhouettes trail.
+const IMAGE_TYPE_ORDER: Readonly<Record<ImageType, number>> = {
+  ArtisticReconstruction: 0,
+  FossilPhoto: 1,
+  SkeletalMount: 2,
+  Silhouette: 3,
+};
 
 function byId<T extends { id: string }>(a: T, b: T): number {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
@@ -200,6 +210,8 @@ export function derive(l1: L1Snapshot): ReadModel {
         .sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0));
 
       // DATA-007: only images whose licence can be honoured with a credit.
+      // Order by semantic slot (life restoration leads, then fossil — SPEC-014
+      // AMEND-001), then by sourceUrl within a slot so rebuilds stay deterministic.
       const images: ReadImage[] = l1.images
         .filter((img) => img.taxonId === t.id && isShowable(img.item))
         .map((img): ReadImage => ({
@@ -210,7 +222,11 @@ export function derive(l1: L1Snapshot): ReadModel {
           sourceUrl: img.item.sourceUrl,
           sourceId: img.item.sourceId,
         }))
-        .sort((a, b) => (a.sourceUrl < b.sourceUrl ? -1 : a.sourceUrl > b.sourceUrl ? 1 : 0));
+        .sort(
+          (a, b) =>
+            IMAGE_TYPE_ORDER[a.type] - IMAGE_TYPE_ORDER[b.type] ||
+            (a.sourceUrl < b.sourceUrl ? -1 : a.sourceUrl > b.sourceUrl ? 1 : 0),
+        );
 
       const contentLevel = deriveContentLevel({
         hasSummary: summary !== null,
