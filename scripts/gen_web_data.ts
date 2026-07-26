@@ -72,8 +72,11 @@ async function main(): Promise<void> {
       partition.reference,
       outDir,
       async (url) => {
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          await sleep(attempt === 1 ? 250 : 1500 * (attempt - 1));
+        // Wikimedia burst-throttles (429) even when every file is available, so
+        // be patient: a steady ~3/sec base pace, then exponential backoff on a
+        // throttle/5xx across several attempts. Only a real 4xx (404/403) gives up.
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          await sleep(attempt === 1 ? 350 : 2000 * 2 ** (attempt - 2));
           try {
             const res = await fetch(url, { headers: { "User-Agent": UA } });
             if (res.ok) return new Uint8Array(await res.arrayBuffer());

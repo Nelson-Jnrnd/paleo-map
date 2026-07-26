@@ -80,6 +80,15 @@ test("classifyRole buckets by category/filename and excludes off-topic (AMEND-00
   expect(
     classifyRole({ ...base, file: "Dinosaur golf club logo.png" }),
   ).toBeNull();
+  // A file with no keyword of its own inherits the role of the subcategory it
+  // was gathered from (curator signal).
+  expect(
+    classifyRole({
+      ...base,
+      file: "Baby T-rex 0496.JPG",
+      subcatRole: "ArtisticReconstruction",
+    }),
+  ).toBe("ArtisticReconstruction");
 });
 
 function cand(

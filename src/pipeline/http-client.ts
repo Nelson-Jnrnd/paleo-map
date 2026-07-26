@@ -58,10 +58,6 @@ const FOSSIL_RE =
   /\b(skeletons?|skeletal|skulls?|holotypes?|fossils?|mount(?:ed|s)?|specimens?|bones?|teeth|tooth|casts?|vertebrae?|femur|jaws?|braincase)\b/i;
 const RESTORATION_RE =
   /\b(restorations?|reconstructions?|life\s*restorations?|palaeoart|paleoart|artists?|artwork|illustrations?)\b/i;
-/** Commons subcategory titles worth expanding for extra role candidates. */
-const ROLE_SUBCAT_RE = FOSSIL_RE.source
-  ? new RegExp(`${FOSSIL_RE.source}|${RESTORATION_RE.source}`, 'i')
-  : RESTORATION_RE;
 const USER_AGENT =
   'paleo-map-ingestion/0.1 (https://github.com/Nelson-Jnrnd/paleo-map; SPEC-001 data layer)';
 
@@ -337,12 +333,13 @@ export class HttpSourceClient implements SourceClient {
     // role-named subcategories), normalise their titles, dedupe per taxon, then
     // classify + slot each taxon into one restoration + one fossil image.
     const norm = (
-      f: { qid: string; file: string },
+      f: { qid: string; file: string; roleHint?: ImageType },
       source: GalleryFile['source'],
     ): GalleryFile => ({
       qid: f.qid,
       file: normalizeCommonsTitle(f.file),
       source,
+      ...(f.roleHint ? { roleHint: f.roleHint } : {}),
     });
     const p18Files = wikidata.flatMap((b) =>
       b.image ? [norm({ qid: b.qid, file: b.image }, 'p18')] : [],
@@ -581,27 +578,47 @@ export class HttpSourceClient implements SourceClient {
   private async commonsCategoryFiles(
     bindings: RawWikidataBinding[],
   ): Promise<Array<{ qid: string; file: string }>> {
-    const out: Array<{ qid: string; file: string }> = [];
+    const out: Array<{ qid: string; file: string; roleHint?: ImageType }> = [];
     const withCat = bindings.filter((b) => b.commonsCategory);
-    for (const b of withCat) {
-      await sleep(60); // gentle pacing across many per-taxon queries
-      const parent = await this.categoryMembers(b.commonsCategory!, 'file|subcat');
-      for (const m of parent) {
-        if (m.startsWith('File:')) {
-          const file = m.replace(/^File:/, '');
-          if (IMAGE_FILE_RE.test(file)) out.push({ qid: b.qid, file });
+    const pushFiles = (
+      qid: string,
+      members: string[],
+      roleHint?: ImageType,
+    ): void => {
+      for (const m of members) {
+        const file = m.replace(/^File:/, '');
+        if (m.startsWith('File:') && IMAGE_FILE_RE.test(file)) {
+          out.push({ qid, file, ...(roleHint ? { roleHint } : {}) });
         }
       }
-      // Expand up to 3 role-named subcategories for better fossil/restoration recall.
-      const subcats = parent
-        .filter((m) => m.startsWith('Category:') && ROLE_SUBCAT_RE.test(m))
-        .slice(0, 3);
-      for (const sub of subcats) {
+    };
+    for (const b of withCat) {
+      await sleep(60); // gentle pacing across many per-taxon queries
+      pushFiles(b.qid, await this.categoryMembers(b.commonsCategory!, 'file'));
+      // Subcategories are queried on their own so a busy parent's files can't
+      // crowd them out of the member window; expand up to two restoration- and
+      // two fossil-named subcats. Membership of a role-named subcat is itself a
+      // curator-provided signal, so files inherit it as a role hint.
+      await sleep(60);
+      const subcats = await this.categoryMembers(b.commonsCategory!, 'subcat');
+      const role = (re: RegExp): string[] =>
+        subcats
+          .filter((m) => re.test(m.replace(/^Category:/, '')))
+          .slice(0, 2);
+      const hinted: Array<[string, ImageType]> = [
+        ...role(RESTORATION_RE).map((s): [string, ImageType] => [
+          s,
+          'ArtisticReconstruction',
+        ]),
+        ...role(FOSSIL_RE).map((s): [string, ImageType] => [s, 'FossilPhoto']),
+      ];
+      for (const [sub, hint] of hinted) {
         await sleep(60);
-        for (const m of await this.categoryMembers(sub.replace(/^Category:/, ''), 'file')) {
-          const file = m.replace(/^File:/, '');
-          if (IMAGE_FILE_RE.test(file)) out.push({ qid: b.qid, file });
-        }
+        pushFiles(
+          b.qid,
+          await this.categoryMembers(sub.replace(/^Category:/, ''), 'file'),
+          hint,
+        );
       }
     }
     return out;
@@ -639,9 +656,11 @@ export class HttpSourceClient implements SourceClient {
     const out: GalleryCandidate[] = [];
     const qidByFileTitle = new Map<string, string>();
     const sourceByFileTitle = new Map<string, GalleryFile['source']>();
+    const hintByFileTitle = new Map<string, ImageType>();
     for (const f of files) {
       qidByFileTitle.set(`File:${f.file}`, f.qid);
       sourceByFileTitle.set(`File:${f.file}`, f.source);
+      if (f.roleHint) hintByFileTitle.set(`File:${f.file}`, f.roleHint);
     }
 
     for (const batch of chunk(files, 50)) {
@@ -671,11 +690,14 @@ export class HttpSourceClient implements SourceClient {
           // A lead image (P18 or the Wikipedia pageimage) is, for an extinct
           // taxon, almost always a life restoration — default it to one.
           const isLead = isP18 || source === 'pageimage';
+          const subcatRole =
+            hintByFileTitle.get(title) ?? hintByFileTitle.get(page.title);
           const role = classifyRole({
             file: title.replace(/^File:/, ''),
             categories: em.Categories?.value ?? '',
             description: stripHtml(em.ImageDescription?.value) ?? '',
             isLead,
+            ...(subcatRole ? { subcatRole } : {}),
           });
           if (!role) continue; // excluded (signage, maps, footprints, …)
           out.push({
@@ -716,6 +738,8 @@ export interface GalleryFile {
   file: string;
   /** Where the candidate came from — also its curation priority for dedupe/lead. */
   source: 'p18' | 'pageimage' | 'category';
+  /** Role implied by the role-named subcategory the file was gathered from. */
+  roleHint?: ImageType;
 }
 
 /**
@@ -780,11 +804,17 @@ export function classifyRole(input: {
   categories: string;
   description: string;
   isLead: boolean;
+  /** Role of the role-named subcategory the file was gathered from, if any. */
+  subcatRole?: ImageType;
 }): ImageType | null {
   const hay = `${input.file} ${input.categories} ${input.description}`;
   if (FOSSIL_RE.test(hay)) return 'FossilPhoto';
+  if (RESTORATION_RE.test(hay)) return 'ArtisticReconstruction';
   if (EXCLUDE_RE.test(hay)) return null;
-  if (RESTORATION_RE.test(hay) || input.isLead) return 'ArtisticReconstruction';
+  // Trust the curator: a file pulled from an "X skeletons" / "X life
+  // restorations" subcategory takes that role even without a keyword of its own.
+  if (input.subcatRole) return input.subcatRole;
+  if (input.isLead) return 'ArtisticReconstruction';
   return null;
 }
 
