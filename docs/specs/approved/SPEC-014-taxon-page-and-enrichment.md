@@ -57,7 +57,7 @@ the taxonomy parent chain (`ReadTaxon.parentId`, SPEC-010) all stay and are
 reused. SPEC-012 introduced clade silhouettes and a single bundled image; this
 spec extends that to a gallery + PhyloPic and adds the enrichment layer.
 
-## 1. Problem statement (evidence)
+## Problem statement
 
 Measured over the 2123 genera in the shipped `reference.json`:
 
@@ -404,7 +404,47 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ## Spec amendments
 
-_None yet._
+### AMEND-001: Semantic image slots (refines REQ-003)
+
+- **Date / owner:** 2026-07-26, owner-approved (chose "synthesize the size hero"
+  and "exactly 3 role slots" when asked).
+- **Trigger:** The shipped gallery selected images by source priority then
+  alphabetical filename with no relevance ranking, so taxa surfaced irrelevant
+  files (signage, footprints, a cartoon golf club) and, via a space-vs-underscore
+  dedupe gap, the **same** Commons file twice (e.g. Tyrannosaurus holotype mount).
+- **Behavioural change to REQ-003:** the gallery is no longer "first N distinct
+  filenames." Each taxon fills up to **three ordered, role-tagged slots**:
+  1. **Life restoration** — an artist's reconstruction. Primary candidate is
+     Wikidata `P18` (for extinct taxa the infobox lead is near-always paleoart);
+     otherwise the best restoration-classified Commons file; else the clade /
+     PhyloPic silhouette (REQ-004 fallback).
+  2. **Fossil** — a skeletal mount, skull, holotype or specimen photo, taken from
+     the best fossil-classified Commons file; **omitted** if none qualifies (never
+     force an off-topic image into the slot).
+  3. **Size comparison** — **always the synthesized size-vs-human hero** (REQ-004),
+     rendered from the enriched body length. Commons "scale diagram" files are
+     **not** scraped for this slot; the rendered hero is uniform and always
+     available. When length is unknown the slot degrades to the plain silhouette
+     per REQ-004.
+- **Classification:** each Commons candidate is assigned a role from, in priority,
+  its **Commons categories** → **filename** → **description**, matched against role
+  keyword sets (restoration: `restoration|reconstruction|life|paleoart`; fossil:
+  `skeleton|skull|holotype|fossil|mount|specimen|bones|teeth|cast`). An exclusion
+  set (`sign|logo|map|stamp|coin|book|golf|footprint|track|locator`) drops
+  off-topic files unless a slot would otherwise be empty.
+- **Candidate gathering:** broaden beyond the alphabetical head of `Category:X` by
+  reading the taxon category's **subcategories** and pulling files from those whose
+  names match a role (e.g. "Skeletons of X", "Life restorations of X"). Per-file
+  Commons `categories` and image `size` ride on the existing batched `imageinfo`
+  call, so classification adds no per-file round trips.
+- **Ranking within a slot:** `P18` wins the restoration slot; otherwise highest
+  native resolution, deterministic tiebreak by title — no reliance on API order, so
+  the deterministic-rebuild guarantee (NFR) holds.
+- **Dedupe fix:** the per-taxon dedupe key is normalised (`_`↔space,
+  first-letter case) and files are also deduped on the API-normalised title, so a
+  file arriving under two spellings (P18 vs category listing) collapses to one.
+- **Unchanged:** bundling mechanism, budget gate, offline delivery, per-image
+  attribution + Commons source link.
 
 ## Review checklist
 
