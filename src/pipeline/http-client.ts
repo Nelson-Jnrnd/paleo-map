@@ -45,7 +45,7 @@ const COMMONS_THUMB_WIDTH = 320;
  * AMEND-001). The gallery itself keeps at most one image per semantic role, but
  * we gather a wider pool so the best restoration/fossil can be chosen.
  */
-const CANDIDATE_MAX = 16;
+const CANDIDATE_MAX = 24;
 /** Commons file titles we treat as gallery-worthy raster images. */
 const IMAGE_FILE_RE = /\.(jpe?g|png|gif|webp)$/i;
 
@@ -596,13 +596,12 @@ export class HttpSourceClient implements SourceClient {
       }
     };
     for (const b of withCat) {
+      // Role-named subcategories ("X life restorations", "X skeletons") are the
+      // curated home of the best fossil/restoration, so gather them FIRST — a
+      // busy parent's alphabetical direct files would otherwise fill the per-taxon
+      // candidate budget and starve these. Membership is a curator-provided role
+      // signal, so files inherit it as a hint. Direct parent files come after.
       await sleep(60); // gentle pacing across many per-taxon queries
-      pushFiles(b.qid, await this.categoryMembers(b.commonsCategory!, 'file'));
-      // Subcategories are queried on their own so a busy parent's files can't
-      // crowd them out of the member window; expand up to two restoration- and
-      // two fossil-named subcats. Membership of a role-named subcat is itself a
-      // curator-provided signal, so files inherit it as a role hint.
-      await sleep(60);
       const subcats = await this.categoryMembers(b.commonsCategory!, 'subcat');
       const role = (re: RegExp): string[] =>
         subcats
@@ -623,6 +622,8 @@ export class HttpSourceClient implements SourceClient {
           hint,
         );
       }
+      await sleep(60);
+      pushFiles(b.qid, await this.categoryMembers(b.commonsCategory!, 'file'));
     }
     return out;
   }
