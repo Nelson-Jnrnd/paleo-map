@@ -1110,3 +1110,57 @@
   border-radius: var(--radius-sm);
   padding: 1px var(--space-2);
 }
+
+/* --- Taxonomy tree (SPEC-014 REQ-006) --- */
+.lineage {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) 0;
+}
+
+.lineageItem {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.lineageSep {
+  color: var(--color-text-faint);
+  margin: 0 var(--space-2);
+}
+
+/* Ancestor link — teal is the interaction accent (charter §4). */
+.lineageLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-accent-deep);
+  font-size: 13px;
+}
+
+.lineageLink:hover {
+  text-decoration: underline;
+}
+
+.lineageRank {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+}
+
+.lineageCurrent {
+  font-size: 13px;
+  color: var(--color-text-hi);
+  font-weight: 600;
+}
+
+/* Collapsed-occurrences summary detail (SPEC-014 REQ-007). */
+.occSummary {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+  text-transform: none;
+  letter-spacing: 0;
+}

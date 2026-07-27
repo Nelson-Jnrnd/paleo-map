@@ -18,6 +18,7 @@ import { sourceReference } from "../sources.js";
 import { AttentionNote, MissingValue } from "./Cues.js";
 import { Illustration } from "./Illustration.js";
 import { TaxonEnrichment } from "./TaxonEnrichment.js";
+import { TaxonomyTree } from "./TaxonomyTree.js";
 import { silhouetteForTaxon } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
 
@@ -25,6 +26,8 @@ interface TaxonProfileProps {
   api: ReadApi;
   taxonId: string;
   onBack: () => void;
+  /** Open another taxon's profile (SPEC-014 REQ-006: navigable ancestor links). */
+  onOpenTaxon: (taxonId: string) => void;
 }
 
 function taxonTimeRange(occurrences: readonly ReadOccurrence[]): {
@@ -49,6 +52,7 @@ export function TaxonProfile({
   api,
   taxonId,
   onBack,
+  onOpenTaxon,
 }: TaxonProfileProps): ReactElement {
   const taxon = api.getTaxon(taxonId);
   const profile = api.getProfile(taxonId);
@@ -62,6 +66,11 @@ export function TaxonProfile({
   const windowed = taxonTimeRange(occurrences);
   const range = profile?.timeSpan ?? windowed.range;
   const totalCount = profile?.occurrenceCount ?? occurrences.length;
+  // Distinct formations among the loaded occurrences, for the collapsed
+  // occurrences summary (SPEC-014 REQ-007).
+  const formationCount = new Set(
+    occurrences.map((o) => o.formation).filter((f): f is string => Boolean(f)),
+  ).size;
 
   if (!taxon) {
     // Real data holds occurrences identified only to an indeterminate or higher
@@ -217,8 +226,24 @@ export function TaxonProfile({
         </div>
       )}
 
-      <div className={styles.section}>
-        <span className={styles.statLabel}>Occurrences ({totalCount})</span>
+      <TaxonomyTree
+        taxonId={taxonId}
+        taxaById={taxaById}
+        onOpenTaxon={onOpenTaxon}
+      />
+
+      {/* SPEC-014 REQ-007: occurrences are collapsed by default behind a summary
+          (count · formations · span) and expand on demand — they are too long
+          for what most readers want first. */}
+      <details className={styles.section}>
+        <summary className={styles.collapsibleHead}>
+          <span>Fossil occurrences ({totalCount})</span>
+          <span className={styles.occSummary}>
+            {" "}
+            · {formationCount} formation{formationCount === 1 ? "" : "s"} ·{" "}
+            <span className="mono">{formatMaRange(range)}</span> — expand
+          </span>
+        </summary>
         {occurrences.length < totalCount && (
           <p className={styles.source}>
             Showing {occurrences.length} at the selected age; step the timeline
@@ -261,7 +286,7 @@ export function TaxonProfile({
             );
           })}
         </ul>
-      </div>
+      </details>
     </section>
   );
 }

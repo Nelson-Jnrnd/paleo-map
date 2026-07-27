@@ -21,15 +21,21 @@ test("shows the taxon's full total + span even when only one stage is loaded", a
   const api = ReadApi.fromModel({ ...model, occurrences: oneOccurrence });
 
   render(
-    <TaxonProfile api={api} taxonId="txn:tyrannosaurus" onBack={() => {}} />,
+    <TaxonProfile api={api} taxonId="txn:tyrannosaurus" onBack={() => {}} onOpenTaxon={() => {}} />,
   );
 
-  // The header count is the whole-snapshot total (2), not the loaded 1.
-  expect(screen.getByText(/Occurrences \(2\)/)).toBeInTheDocument();
+  // The collapsed occurrences summary shows the whole-snapshot total (2), not 1.
+  expect(screen.getByText(/Fossil occurrences \(2\)/)).toBeInTheDocument();
   // The full time span (74–66.5 Ma) spans both occurrences, not just occ:1.
-  expect(screen.getByText(/74–66\.5 Ma/)).toBeInTheDocument();
-  // The listed subset is disclosed.
+  expect(screen.getAllByText(/74–66\.5 Ma/).length).toBeGreaterThan(0);
+  // The listed subset is disclosed (rendered inside the collapsed details).
   expect(
     screen.getByText(/Showing 1 at the selected age/i),
   ).toBeInTheDocument();
+  // SPEC-014 REQ-007: the occurrences list is collapsed by default.
+  const details = screen
+    .getByText(/Fossil occurrences \(2\)/)
+    .closest("details");
+  expect(details).not.toBeNull();
+  expect((details as HTMLDetailsElement).open).toBe(false);
 });
