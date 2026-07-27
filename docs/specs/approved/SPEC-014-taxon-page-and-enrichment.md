@@ -390,7 +390,7 @@ This is a deliberate softening; requirements still live only in specs.
 | REQ-001 | domain enrichment record | `src/domain/enrichment.ts`; attached via `applyEnrichment` | `test/spec014-enrichment.test.ts` | Done (data); UI display in REQ-005 |
 | REQ-002 | cache-as-contract + engines | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts` | `test/spec014-enrichment.test.ts` | Done (Engine A seeded 8 flagship records; Engine B optional) |
 | REQ-003 | image sourcing + gallery | TBD | TBD | Pending |
-| REQ-004 | PhyloPic + size hero | TBD | TBD | Pending |
+| REQ-004 | PhyloPic + size hero | `scripts/fetch_silhouettes.ts` (resolve + fallback + bundle), `src/pipeline/silhouettes.ts` (index apply), `Illustration.tsx` (base visual + size-vs-human hero) | `test/spec014-silhouettes.test.ts` | Done — 2555/2555 taxa resolved to 450 unique silhouettes; hero scales to the enriched body length |
 | REQ-005 | TaxonProfile redesign | `src/app/components/TaxonEnrichment.tsx` + `TaxonomyTree.tsx`; wired in `TaxonProfile.tsx` (header → gallery/hero → overview + fact row → blurb → taxonomy → collapsible discovery/notable-facts → collapsed occurrences → sources) | `test/ui/spec014-enrichment.test.tsx`, `spec014-taxonomy.test.tsx` | Done (layout + enrichment, tree, collapse) |
 | REQ-006 | taxonomy tree | `src/app/components/lineage.ts` + `TaxonomyTree.tsx` (anchored at Dinosauria; navigable ancestor links via `openProfile`) | `test/ui/spec014-taxonomy.test.tsx` | Done |
 | REQ-007 | collapsed occurrences | `TaxonProfile.tsx` — `<details>` summary (count · formations · span) | `test/ui/taxon-profile-aggregate.test.tsx` | Done |

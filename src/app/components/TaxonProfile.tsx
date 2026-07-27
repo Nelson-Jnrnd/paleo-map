@@ -123,11 +123,14 @@ export function TaxonProfile({
   // unknown).
   const galleryImages = profile?.images ?? [];
   const silhouette = silhouetteForTaxon(taxonId, taxaById);
-  const bodyLength = profile?.measurements.find((m) => m.kind === "BodyLength");
+  // The size hero scales to the enriched body length (SPEC-014 REQ-004), falling
+  // back to a PBDB BodyLength measurement when there is no enrichment.
+  const pbdbLength = profile?.measurements.find((m) => m.kind === "BodyLength");
   const bodyLengthM =
-    bodyLength && bodyLength.value.value !== null
-      ? bodyLength.value.value
-      : null;
+    profile?.enrichment?.bodyLength?.value ??
+    (pbdbLength && pbdbLength.value.value !== null
+      ? pbdbLength.value.value
+      : null);
 
   return (
     <section
