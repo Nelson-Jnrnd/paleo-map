@@ -21,7 +21,12 @@ test("shows the taxon's full total + span even when only one stage is loaded", a
   const api = ReadApi.fromModel({ ...model, occurrences: oneOccurrence });
 
   render(
-    <TaxonProfile api={api} taxonId="txn:tyrannosaurus" onBack={() => {}} onOpenTaxon={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:tyrannosaurus"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
 
   // The collapsed occurrences summary shows the whole-snapshot total (2), not 1.

@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 /**
- * SPEC-014 REQ-003 — the taxon illustration renders a *gallery* of showable
- * images (each with its own type, credit, licence and Commons link), not just a
- * single lead image; with no images it falls back to the clade silhouette.
+ * SPEC-014 REQ-003 / AMEND-002 — the taxon illustration shows a large lead image
+ * with a thumbnail strip to switch it; the lead's type, credit, licence and
+ * Commons link are present (revealed on hover/focus). With no images it falls
+ * back to the taxon silhouette.
  */
 
 import { afterEach, expect, test } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Illustration } from "../../src/app/components/Illustration.js";
 import type { ReadImage } from "../../src/domain/index.js";
 import type { CladeSilhouette } from "../../src/app/components/cladeSilhouette.js";
@@ -34,27 +36,33 @@ const IMAGES: ReadImage[] = [
   },
 ];
 
-test("renders every showable image with its own provenance (REQ-003)", () => {
+test("shows a lead image with its provenance and a thumbnail to switch (REQ-003)", async () => {
   render(
     <Illustration
       taxonName="Tyrannosaurus"
       images={IMAGES}
       silhouette={SILHOUETTE}
       phylopicSilhouette={null}
-      bodyLengthM={null}
     />,
   );
 
+  // The first image is the lead, with its credit + a Commons link present.
   expect(
     screen.getByAltText("Skeletal mount of Tyrannosaurus"),
   ).toBeInTheDocument();
+  expect(screen.getByText(/Museum A/)).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /commons/i })).toBeInTheDocument();
+
+  // The second image is offered as a thumbnail; clicking it swaps the lead.
+  const thumb = screen.getByRole("button", {
+    name: /Show Artistic reconstruction/i,
+  });
+  await userEvent.setup().click(thumb);
   expect(
     screen.getByAltText("Artistic reconstruction of Tyrannosaurus"),
   ).toBeInTheDocument();
-  expect(screen.getByText(/Museum A/)).toBeInTheDocument();
   expect(screen.getByText(/Artist B/)).toBeInTheDocument();
-  // One Commons source link per image.
-  expect(screen.getAllByRole("link", { name: /commons/i })).toHaveLength(2);
+
   // No silhouette when real images exist.
   expect(
     screen.queryByAltText(/Generic .* silhouette/i),
@@ -68,7 +76,6 @@ test("falls back to the silhouette when there are no images (REQ-004)", () => {
       images={[]}
       silhouette={SILHOUETTE}
       phylopicSilhouette={null}
-      bodyLengthM={null}
     />,
   );
   expect(

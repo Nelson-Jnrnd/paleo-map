@@ -1,53 +1,15 @@
 /**
- * AI-assisted enrichment block on the taxon page (SPEC-014 REQ-001/005). Renders
- * the extract-don't-invent record distilled from the taxon's Wikipedia article: a
- * one-line "what it was", a fact row (length · height · mass · diet · era), a
- * plain-language blurb, and collapsible "Discovery & naming" and "Notable facts".
- *
- * Charter-bound (docs/mockups/design-guidelines.md): numbers are mono with units
- * and an explicit `estimated` cue so uncertainty stays legible (§2); missing facts
- * are simply omitted from the highlights row (the detailed biology block still
- * shows "Not available"); one quiet line discloses the AI assistance (NFR-002).
+ * Taxon "About" block (SPEC-014 REQ-001/005, AMEND-002). The plain-language blurb
+ * distilled from the taxon's Wikipedia article, then the notable facts as quiet
+ * prose (no tag chips), then a collapsible "Discovery & naming". The one-liner
+ * now leads the identity header, the numeric facts live in the spec table, and
+ * the AI disclosure sits in the page footer — so this block is just the reading
+ * content. Extract-don't-invent: absent fields are omitted (NFR-002).
  */
 
 import type { ReactElement } from "react";
-import type {
-  EnrichedMeasurement,
-  EnrichmentRecord,
-} from "../../domain/index.js";
+import type { EnrichmentRecord } from "../../domain/index.js";
 import styles from "./exploration.module.css";
-
-/** "12.4 m" (+ "12.3–13" range when given). Confidence is shown separately. */
-function measureText(m: EnrichedMeasurement): string {
-  const base = `${m.value} ${m.unit}`;
-  return m.low !== null && m.high !== null
-    ? `${base} · ${m.low}–${m.high}`
-    : base;
-}
-
-interface ChipSpec {
-  label: string;
-  measure?: EnrichedMeasurement | null;
-  text?: string | null;
-}
-
-function FactChip({ label, measure, text }: ChipSpec): ReactElement {
-  return (
-    <div className={styles.factChip}>
-      <span className={styles.factChipLabel}>{label}</span>
-      {measure ? (
-        <span className={`${styles.factChipValue} mono`}>
-          {measureText(measure)}
-          {measure.confidence === "estimated" && (
-            <span className={styles.factEst}> est.</span>
-          )}
-        </span>
-      ) : (
-        <span className={styles.factChipValue}>{text}</span>
-      )}
-    </div>
-  );
-}
 
 export function TaxonEnrichment({
   enrichment,
@@ -55,34 +17,22 @@ export function TaxonEnrichment({
   enrichment: EnrichmentRecord;
 }): ReactElement {
   const e = enrichment;
-  const discovery = e.discovery;
+  const d = e.discovery;
   const hasDiscovery =
-    e.pronunciation ||
-    e.nameMeaning ||
-    (discovery && (discovery.year || discovery.who || discovery.where));
-  const chips: ChipSpec[] = [
-    { label: "Length", measure: e.bodyLength },
-    { label: "Height", measure: e.height },
-    { label: "Mass", measure: e.mass },
-    { label: "Diet", text: e.diet },
-    { label: "Era", text: e.era },
-  ].filter((c) => c.measure || c.text);
+    e.pronunciation || e.nameMeaning || (d && (d.year || d.who || d.where));
 
   return (
-    <div className={styles.section}>
-      <span className={styles.statLabel}>Overview</span>
+    <div className={styles.block}>
+      <h3 className={styles.sectionH}>About</h3>
+      {e.description && <p className={styles.blurb}>{e.description}</p>}
 
-      {e.oneLiner && <p className={styles.oneLiner}>{e.oneLiner}</p>}
-
-      {chips.length > 0 && (
-        <div className={styles.factRow}>
-          {chips.map((c) => (
-            <FactChip key={c.label} {...c} />
+      {e.notableFacts.length > 0 && (
+        <ul className={styles.notables}>
+          {e.notableFacts.map((f, i) => (
+            <li key={i}>{f.text}</li>
           ))}
-        </div>
+        </ul>
       )}
-
-      {e.description && <p className={styles.fieldValue}>{e.description}</p>}
 
       {hasDiscovery && (
         <details className={styles.collapsible}>
@@ -102,45 +52,19 @@ export function TaxonEnrichment({
                 <dd className={styles.fieldValue}>{e.nameMeaning}</dd>
               </div>
             )}
-            {discovery &&
-              (discovery.year || discovery.who || discovery.where) && (
-                <div style={{ display: "contents" }}>
-                  <dt className={styles.fieldLabel}>Discovered</dt>
-                  <dd className={styles.fieldValue}>
-                    {[
-                      discovery.year !== null ? String(discovery.year) : null,
-                      discovery.who,
-                      discovery.where,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </dd>
-                </div>
-              )}
+            {d && (d.year || d.who || d.where) && (
+              <div style={{ display: "contents" }}>
+                <dt className={styles.fieldLabel}>Discovered</dt>
+                <dd className={styles.fieldValue}>
+                  {[d.year !== null ? String(d.year) : null, d.who, d.where]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </dd>
+              </div>
+            )}
           </dl>
         </details>
       )}
-
-      {e.notableFacts.length > 0 && (
-        <details className={styles.collapsible}>
-          <summary className={styles.collapsibleHead}>
-            Notable facts ({e.notableFacts.length})
-          </summary>
-          <ul className={styles.factList}>
-            {e.notableFacts.map((f, i) => (
-              <li key={i} className={styles.factItem}>
-                <span className={styles.factTag}>{f.tag}</span>
-                <span className={styles.fieldValue}>{f.text}</span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
-
-      <p className={styles.source}>
-        AI-assisted — distilled from this taxon&rsquo;s Wikipedia article; facts
-        not stated there are omitted, not invented.
-      </p>
     </div>
   );
 }

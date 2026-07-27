@@ -1,18 +1,22 @@
 /**
- * Taxonomy tree (SPEC-014 REQ-006). Renders the taxon's position in the tree as
- * its lineage up the parent chain (e.g. Dinosauria › Saurischia › Theropoda › …
- * › Genus). Ancestor names are links that open that taxon's profile; the current
- * taxon is the non-linked tail. Built from `parentId` alone (no new data). A
- * taxon with no parent record degrades to just itself.
- *
- * Charter-bound: scientific names are italic (§3, CONS-350); ranks are a quiet
- * secondary cue; the separator is a plain chevron, no decoration.
+ * Taxonomy breadcrumb (SPEC-014 REQ-006 / AMEND-002). The taxon's lineage as a
+ * compact top-of-page navigation: `Dinosauria › Theropoda › ⋯ › Genus`, anchored
+ * at Dinosauria (the atlas's scope root) with a long middle elided behind an
+ * expandable ⋯. Ancestor names are links that open that taxon's profile; the
+ * current taxon is the non-linked, emphasised tail. A taxon with no ancestry
+ * renders nothing.
  */
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import type { ReadTaxon } from "../../domain/index.js";
 import { taxonLineage } from "./lineage.js";
 import styles from "./exploration.module.css";
+
+const SCOPE_ROOT = "Dinosauria";
+/** Show every crumb when the lineage is at most this long; otherwise elide. */
+const ELIDE_ABOVE = 5;
+/** When eliding, keep this many trailing crumbs (parent chain + current). */
+const TAIL_KEEP = 2;
 
 interface TaxonomyTreeProps {
   taxonId: string;
@@ -20,55 +24,73 @@ interface TaxonomyTreeProps {
   onOpenTaxon: (taxonId: string) => void;
 }
 
-/**
- * The atlas is scoped to Dinosauria, so the lineage is anchored there: the
- * higher clades (Chordata, Vertebrata, …) are noise for this audience. If the
- * scope root isn't in the chain, the full lineage is shown.
- */
-const SCOPE_ROOT = "Dinosauria";
-
 export function TaxonomyTree({
   taxonId,
   taxaById,
   onOpenTaxon,
 }: TaxonomyTreeProps): ReactElement | null {
+  const [expanded, setExpanded] = useState(false);
   const full = taxonLineage(taxonId, taxaById);
   const rootIdx = full.findIndex((t) => t.scientificName === SCOPE_ROOT);
   const lineage = rootIdx > 0 ? full.slice(rootIdx) : full;
-  // Only itself (or nothing) resolved — no ancestry to show.
   if (lineage.length < 2) return null;
 
+  const elide = !expanded && lineage.length > ELIDE_ABOVE;
+  // When eliding: first crumb, then a ⋯ expander, then the last TAIL_KEEP crumbs.
+  const head = elide ? lineage.slice(0, 1) : lineage;
+  const tail = elide ? lineage.slice(lineage.length - TAIL_KEEP) : [];
+
+  const crumb = (t: ReadTaxon): ReactElement => {
+    const isCurrent = t.id === taxonId;
+    return isCurrent ? (
+      <span key={t.id} className={`sciName ${styles.crumbCurrent}`}>
+        {t.scientificName}
+      </span>
+    ) : (
+      <button
+        key={t.id}
+        type="button"
+        className={styles.crumbLink}
+        onClick={() => onOpenTaxon(t.id)}
+      >
+        <span className="sciName">{t.scientificName}</span>
+      </button>
+    );
+  };
+
+  const sep = (k: string): ReactElement => (
+    <span key={k} className={styles.crumbSep} aria-hidden="true">
+      ›
+    </span>
+  );
+
+  const parts: ReactElement[] = [];
+  head.forEach((t, i) => {
+    if (i > 0) parts.push(sep(`hs${i}`));
+    parts.push(crumb(t));
+  });
+  if (elide) {
+    parts.push(sep("es"));
+    parts.push(
+      <button
+        key="more"
+        type="button"
+        className={styles.crumbMore}
+        onClick={() => setExpanded(true)}
+        aria-label={`Show ${lineage.length - 1 - TAIL_KEEP} more clades`}
+      >
+        ⋯
+      </button>,
+    );
+    tail.forEach((t) => {
+      parts.push(sep(`ts${t.id}`));
+      parts.push(crumb(t));
+    });
+  }
+
   return (
-    <div className={styles.section}>
-      <span className={styles.statLabel}>Taxonomy</span>
-      <ol className={styles.lineage} aria-label="Taxonomic lineage">
-        {lineage.map((t, i) => {
-          const isCurrent = t.id === taxonId;
-          return (
-            <li key={t.id} className={styles.lineageItem}>
-              {i > 0 && (
-                <span className={styles.lineageSep} aria-hidden="true">
-                  ›
-                </span>
-              )}
-              {isCurrent ? (
-                <span className={`sciName ${styles.lineageCurrent}`}>
-                  {t.scientificName}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.lineageLink}
-                  onClick={() => onOpenTaxon(t.id)}
-                >
-                  <span className="sciName">{t.scientificName}</span>
-                  <span className={styles.lineageRank}> · {t.rank}</span>
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+    <nav className={styles.crumbs} aria-label="Taxonomy">
+      {parts}
+    </nav>
   );
 }

@@ -16,7 +16,12 @@ afterEach(cleanup);
 test("shows the licensed lead image with provenance + a size scale (REQ-003/005)", async () => {
   const api = await fixtureApi();
   render(
-    <TaxonProfile api={api} taxonId="txn:tyrannosaurus" onBack={() => {}} onOpenTaxon={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:tyrannosaurus"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
 
   // The image renders with descriptive alt text and the renderable URL.
@@ -40,7 +45,12 @@ test("shows the licensed lead image with provenance + a size scale (REQ-003/005)
 test("falls back to a labelled generic clade silhouette when no image is showable (REQ-004)", async () => {
   const api = await fixtureApi();
   render(
-    <TaxonProfile api={api} taxonId="txn:nanotyrannus" onBack={() => {}} onOpenTaxon={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:nanotyrannus"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
 
   // Nanotyrannus (a tyrannosaurid) has no showable image → theropod silhouette.

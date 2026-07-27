@@ -391,7 +391,7 @@ This is a deliberate softening; requirements still live only in specs.
 | REQ-002 | cache-as-contract + engines | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts` | `test/spec014-enrichment.test.ts` | Done (Engine A seeded 8 flagship records; Engine B optional) |
 | REQ-003 | image sourcing + gallery | TBD | TBD | Pending |
 | REQ-004 | PhyloPic + size hero | `scripts/fetch_silhouettes.ts` (resolve + fallback + bundle), `src/pipeline/silhouettes.ts` (index apply), `Illustration.tsx` (base visual + size-vs-human hero) | `test/spec014-silhouettes.test.ts` | Done — 2555/2555 taxa resolved to 450 unique silhouettes; hero scales to the enriched body length |
-| REQ-005 | TaxonProfile redesign | `src/app/components/TaxonEnrichment.tsx` + `TaxonomyTree.tsx`; wired in `TaxonProfile.tsx` (header → gallery/hero → overview + fact row → blurb → taxonomy → collapsible discovery/notable-facts → collapsed occurrences → sources) | `test/ui/spec014-enrichment.test.tsx`, `spec014-taxonomy.test.tsx` | Done (layout + enrichment, tree, collapse) |
+| REQ-005 | TaxonProfile redesign (AMEND-002 "spec sheet") | `TaxonProfile.tsx` (topbar+identity+hero grid+footer), `TaxonomyTree.tsx` (breadcrumb nav), `Illustration.tsx` (lead+thumbs, hover credit), `TaxonSpecTable.tsx` + `SizeHero.tsx` (ruled table + size hero), `TaxonEnrichment.tsx` (About: blurb+notable facts+discovery) | `test/ui/spec014-enrichment.test.tsx`, `spec014-gallery.test.tsx`, `spec014-taxonomy.test.tsx`, `spec011-profile-labels.test.tsx` | Done (Option A spec-sheet layout) |
 | REQ-006 | taxonomy tree | `src/app/components/lineage.ts` + `TaxonomyTree.tsx` (anchored at Dinosauria; navigable ancestor links via `openProfile`) | `test/ui/spec014-taxonomy.test.tsx` | Done |
 | REQ-007 | collapsed occurrences | `TaxonProfile.tsx` — `<details>` summary (count · formations · span) | `test/ui/taxon-profile-aggregate.test.tsx` | Done |
 
@@ -403,6 +403,39 @@ layer (schema + batch + cache + fields); (C) page redesign (hero, tree,
 collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ## Spec amendments
+
+### AMEND-002: Taxon page layout — "spec sheet" (refines REQ-005/006)
+
+- **Date / owner:** 2026-07-27, owner-approved (chose "Option A — Spec sheet"
+  from two annotated wireframes).
+- **Trigger:** The first implementation stacked ~12 equal-weight sections with no
+  hero, a ragged two-up image row, the "what it was" line stranded below the
+  images, boxed "fact chips" that read as generic/AI, and the taxonomy as a long
+  wall low on the page.
+- **Behavioural change to REQ-005 (layout):**
+  1. **Taxonomy is the top navigation** (refines REQ-006): a compact breadcrumb
+     directly under "Back to map" — `Dinosauria › Theropoda › ⋯ › Genus` with the
+     middle elided (expandable); ancestors remain navigable links.
+  2. **Identity header**: scientific name (+ short/common name) and the one-liner
+     sit together at the top, over a single period line (ICS period dot · recorded
+     span Ma · rank · validity).
+  3. **Two-column hero**: a **large** lead image on the left with a thumbnail
+     strip to switch it; the image **credit/type is revealed on hover/focus** (a
+     small always-present ⓘ affordance), not an always-on caption. On the right, a
+     **plain ruled spec table** — one field per line (length · height · weight ·
+     diet · period · age · occurrences), no boxes — with the compact size-vs-human
+     silhouette beneath it.
+  4. **About**: the plain-language blurb, then **notable facts as quiet prose**
+     (no tag chips), then a collapsible "Discovery & naming".
+  5. **Occurrences** stay collapsed (REQ-007); a single quiet **sources footer**
+     replaces the floating AI-disclosure line.
+- **Provenance note (charter §2 tension):** hiding the image credit behind
+  hover/focus departs from "provenance legible at a glance". Owner-directed for
+  this personal project; mitigated by a persistent ⓘ affordance and keyboard
+  focus revealing the credit. The taxon's data sources stay in the always-visible
+  footer, so provenance remains inspectable.
+- **Unchanged:** the enrichment content (REQ-001), silhouette resolution
+  (REQ-004), and occurrence collapse (REQ-007) — only their arrangement changes.
 
 ### AMEND-001: Semantic image slots (refines REQ-003)
 

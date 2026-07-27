@@ -50,7 +50,12 @@ test("shows an error with Retry that recovers (FONC-1310/1330)", async () => {
 test("labels a minimal (occurrence-only) profile (FONC-1300)", async () => {
   const api = await fixtureApi();
   render(
-    <TaxonProfile api={api} taxonId="txn:nanotyrannus" onBack={() => {}} onOpenTaxon={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:nanotyrannus"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
 
   expect(
@@ -64,7 +69,12 @@ test("labels a minimal (occurrence-only) profile (FONC-1300)", async () => {
 test("taxon profile for an indeterminate/unknown taxon is an honest, navigable screen", async () => {
   const api = await fixtureApi();
   render(
-    <TaxonProfile api={api} taxonId="txn:not-a-real-taxon" onBack={() => {}} onOpenTaxon={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:not-a-real-taxon"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
   expect(
     screen.getByRole("region", { name: /Taxon profile:/i }),
