@@ -108,6 +108,12 @@ export interface ReadProfile {
    */
   enrichment: EnrichmentRecord | null;
   /**
+   * Local path to the taxon's bundled PhyloPic silhouette (SPEC-014 REQ-004),
+   * resolved by name with a phylogenetic fallback to the nearest relative, or
+   * null when nothing resolved (the UI then uses a generic clade silhouette).
+   */
+  silhouette: string | null;
+  /**
    * Total occurrences of this taxon across the whole snapshot (SPEC-008
    * AMEND-001). Precomputed so a stage-partitioned profile reports the taxon's
    * full record, not just the currently-loaded stage.

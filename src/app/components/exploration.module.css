@@ -1164,3 +1164,40 @@
   text-transform: none;
   letter-spacing: 0;
 }
+
+/* --- Size-vs-human silhouette hero (SPEC-014 REQ-004) --- */
+.sizeHeroStage {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  min-height: 60px;
+  padding-top: var(--space-2);
+}
+
+.sizeHeroFig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+/* Silhouettes are black PhyloPic shapes; the human is subordinated so the taxon
+   reads as the subject (charter §5 hierarchy). */
+.sizeHeroDino {
+  height: auto;
+  max-width: 100%;
+  /* Render the black silhouette in the deep-ink text colour, not pure black. */
+  filter: brightness(0) saturate(100%) opacity(0.85);
+}
+
+.sizeHeroHuman {
+  width: auto;
+  filter: brightness(0) saturate(100%) opacity(0.4);
+}
+
+.sizeHeroCap {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

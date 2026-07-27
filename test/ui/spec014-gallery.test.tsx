@@ -40,6 +40,7 @@ test("renders every showable image with its own provenance (REQ-003)", () => {
       taxonName="Tyrannosaurus"
       images={IMAGES}
       silhouette={SILHOUETTE}
+      phylopicSilhouette={null}
       bodyLengthM={null}
     />,
   );
@@ -66,6 +67,7 @@ test("falls back to the silhouette when there are no images (REQ-004)", () => {
       taxonName="Obscurus"
       images={[]}
       silhouette={SILHOUETTE}
+      phylopicSilhouette={null}
       bodyLengthM={null}
     />,
   );

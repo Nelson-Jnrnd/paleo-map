@@ -2,9 +2,9 @@
  * Taxon-profile illustration (SPEC-012 → SPEC-014 REQ-003/004/005). Shows a
  * gallery of the taxon's licensed Wikipedia/Commons images — each with its type,
  * credit, licence and a Commons source link (provenance always visible, never
- * behind a hover). When no showable image exists (or they all fail to load) it
- * falls back to a clearly-labelled clade silhouette. An optional human-relative
- * size scale makes a body length tangible.
+ * behind a hover). When no showable image exists it falls back to the taxon's
+ * bundled PhyloPic silhouette (or a generic clade silhouette). A size-vs-human
+ * hero scales that silhouette against a human to make a body length tangible.
  */
 
 import { useState, type ReactElement } from "react";
@@ -14,6 +14,11 @@ import styles from "./exploration.module.css";
 
 /** Rough reference stature for the size comparison (metres). */
 const HUMAN_HEIGHT_M = 1.7;
+/** Bundled Homo sapiens silhouette for the size hero (SPEC-014 REQ-004). */
+const HUMAN_SILHOUETTE = "data/silhouettes/human.svg";
+/** Layout budgets (px) for the silhouette hero: dino length, human height. */
+const HERO_MAX_W = 240;
+const HERO_MAX_H = 170;
 
 const IMAGE_TYPE_LABEL: Readonly<Record<ImageType, string>> = {
   FossilPhoto: "Fossil photo",
@@ -26,13 +31,16 @@ interface IllustrationProps {
   taxonName: string;
   /** The showable images for this taxon (licence + credit already guaranteed). */
   images: readonly ReadImage[];
-  /** Generic group silhouette used when there is no showable image. */
+  /** Generic group silhouette used when there is no taxon silhouette or image. */
   silhouette: CladeSilhouette;
+  /** Bundled PhyloPic silhouette path for this taxon, or null (SPEC-014 REQ-004). */
+  phylopicSilhouette: string | null;
   /** Body length in metres, or null when unknown (no invented number). */
   bodyLengthM: number | null;
 }
 
-function SizeScale({
+/** Bar comparison — the fallback when no silhouette is available. */
+function SizeBars({
   taxonName,
   lengthM,
 }: {
@@ -40,33 +48,89 @@ function SizeScale({
   lengthM: number;
 }): ReactElement {
   const maxM = Math.max(lengthM, HUMAN_HEIGHT_M);
-  const dinoPct = (lengthM / maxM) * 100;
-  const humanPct = (HUMAN_HEIGHT_M / maxM) * 100;
+  return (
+    <div
+      className={styles.sizeBars}
+      role="img"
+      aria-label={`${taxonName} is about ${lengthM} metres long, compared with a ${HUMAN_HEIGHT_M} metre human.`}
+    >
+      <span className={styles.sizeRow}>
+        <span
+          className={styles.sizeBarDino}
+          style={{ width: `${(lengthM / maxM) * 100}%` }}
+        />
+        <span className={`${styles.sizeBarValue} mono`}>{lengthM} m</span>
+      </span>
+      <span className={styles.sizeRow}>
+        <span
+          className={styles.sizeBarHuman}
+          style={{ width: `${(HUMAN_HEIGHT_M / maxM) * 100}%` }}
+        />
+        <span className={`${styles.sizeBarValue} mono`}>
+          {HUMAN_HEIGHT_M} m human
+        </span>
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Size-vs-human hero: the taxon silhouette scaled to its body length beside a
+ * human scaled to 1.7 m on the same px-per-metre scale (SPEC-014 REQ-004). Falls
+ * back to bars when no silhouette is available.
+ */
+function SizeHero({
+  taxonName,
+  lengthM,
+  dinoSilhouette,
+}: {
+  taxonName: string;
+  lengthM: number;
+  dinoSilhouette: string | null;
+}): ReactElement {
   return (
     <div className={styles.sizeScale}>
       <span className={styles.statLabel}>Size vs human</span>
-      <div
-        className={styles.sizeBars}
-        role="img"
-        aria-label={`${taxonName} is about ${lengthM} metres long, compared with a ${HUMAN_HEIGHT_M} metre human.`}
-      >
-        <span className={styles.sizeRow}>
-          <span
-            className={styles.sizeBarDino}
-            style={{ width: `${dinoPct}%` }}
-          />
-          <span className={`${styles.sizeBarValue} mono`}>{lengthM} m</span>
-        </span>
-        <span className={styles.sizeRow}>
-          <span
-            className={styles.sizeBarHuman}
-            style={{ width: `${humanPct}%` }}
-          />
-          <span className={`${styles.sizeBarValue} mono`}>
-            {HUMAN_HEIGHT_M} m human
-          </span>
-        </span>
-      </div>
+      {dinoSilhouette ? (
+        (() => {
+          const pxPerM = Math.min(
+            HERO_MAX_W / lengthM,
+            HERO_MAX_H / HUMAN_HEIGHT_M,
+          );
+          return (
+            <div
+              className={styles.sizeHeroStage}
+              role="img"
+              aria-label={`${taxonName} is about ${lengthM} metres long, shown to scale beside a ${HUMAN_HEIGHT_M} metre human.`}
+            >
+              <figure className={styles.sizeHeroFig}>
+                <img
+                  className={styles.sizeHeroDino}
+                  src={dinoSilhouette}
+                  alt=""
+                  style={{ width: `${lengthM * pxPerM}px` }}
+                />
+                <figcaption className={`${styles.sizeHeroCap} mono`}>
+                  {lengthM} m
+                </figcaption>
+              </figure>
+              <figure className={styles.sizeHeroFig}>
+                <img
+                  className={styles.sizeHeroHuman}
+                  src={HUMAN_SILHOUETTE}
+                  alt=""
+                  style={{ height: `${HUMAN_HEIGHT_M * pxPerM}px` }}
+                />
+                <figcaption className={`${styles.sizeHeroCap} mono`}>
+                  {HUMAN_HEIGHT_M} m
+                </figcaption>
+              </figure>
+            </div>
+          );
+        })()
+      ) : (
+        <SizeBars taxonName={taxonName} lengthM={lengthM} />
+      )}
     </div>
   );
 }
@@ -75,6 +139,7 @@ export function Illustration({
   taxonName,
   images,
   silhouette,
+  phylopicSilhouette,
   bodyLengthM,
 }: IllustrationProps): ReactElement {
   // Track images that fail to load so a broken URL drops out of the gallery
@@ -117,6 +182,20 @@ export function Illustration({
             </figure>
           ))}
         </div>
+      ) : phylopicSilhouette ? (
+        <figure className={styles.illustration}>
+          <img
+            className={styles.silhouetteImg}
+            src={phylopicSilhouette}
+            alt={`Silhouette of ${taxonName}`}
+            loading="lazy"
+          />
+          <figcaption className={styles.illustrationCaption}>
+            <span className={styles.source}>
+              Silhouette (PhyloPic) — not a photograph of this taxon
+            </span>
+          </figcaption>
+        </figure>
       ) : (
         <figure className={styles.illustration}>
           <img
@@ -134,7 +213,11 @@ export function Illustration({
         </figure>
       )}
       {bodyLengthM !== null && bodyLengthM > 0 && (
-        <SizeScale taxonName={taxonName} lengthM={bodyLengthM} />
+        <SizeHero
+          taxonName={taxonName}
+          lengthM={bodyLengthM}
+          dinoSilhouette={phylopicSilhouette}
+        />
       )}
     </div>
   );

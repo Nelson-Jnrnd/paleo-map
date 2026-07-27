@@ -32,6 +32,10 @@ import {
   applyEnrichment,
   loadEnrichmentCache,
 } from "../src/pipeline/enrichment.js";
+import {
+  applySilhouettes,
+  loadSilhouetteIndex,
+} from "../src/pipeline/silhouettes.js";
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -51,10 +55,23 @@ async function main(): Promise<void> {
   const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
   const enrichmentDir = join(repoRoot, "enrichment");
   const cache = await loadEnrichmentCache(enrichmentDir);
-  const model = applyEnrichment(baseModel, cache);
-  const enriched = model.profiles.filter((p) => p.enrichment !== null).length;
+  const enrichedModel = applyEnrichment(baseModel, cache);
+  const enriched = enrichedModel.profiles.filter(
+    (p) => p.enrichment !== null,
+  ).length;
   console.log(
     `Enrichment: ${cache.size} cached record(s) → ${enriched} profile(s) enriched`,
+  );
+
+  // SPEC-014 REQ-004: attach the committed PhyloPic silhouette index (bundled
+  // SVGs under public/data/silhouettes/). Offline — no PhyloPic calls here.
+  const silhouettes = await loadSilhouetteIndex(
+    join(repoRoot, "silhouettes", "index.json"),
+  );
+  const model = applySilhouettes(enrichedModel, silhouettes);
+  const withSil = model.profiles.filter((p) => p.silhouette !== null).length;
+  console.log(
+    `Silhouettes: ${Object.keys(silhouettes.taxa).length} indexed → ${withSil} profile(s) with a PhyloPic silhouette`,
   );
 
   const partition = partitionReadModel(model);

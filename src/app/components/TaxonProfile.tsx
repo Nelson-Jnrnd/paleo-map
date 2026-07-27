@@ -100,6 +100,7 @@ export function TaxonProfile({
             occurrences[0]?.taxonId ?? "",
             taxaById,
           )}
+          phylopicSilhouette={null}
           bodyLengthM={null}
         />
         <div className={styles.section}>
@@ -161,6 +162,7 @@ export function TaxonProfile({
         taxonName={taxon.scientificName}
         images={galleryImages}
         silhouette={silhouette}
+        phylopicSilhouette={profile?.silhouette ?? null}
         bodyLengthM={bodyLengthM}
       />
 

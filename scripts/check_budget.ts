@@ -47,6 +47,9 @@ const IMAGE_RAW = 3 * MB;
 // Gallery bundling (SPEC-014 REQ-003) is capped at ~90 MB total by the generator;
 // gate a little above that so one last extra crossing the cap doesn't fail CI.
 const IMAGES_TOTAL_RAW = 100 * MB;
+// Bundled PhyloPic silhouettes (SPEC-014 REQ-004): small vector SVGs, deduped by
+// image, so the aggregate stays modest. Budget the total raw bytes.
+const SILHOUETTES_TOTAL_RAW = 12 * MB;
 
 async function gzipBytes(path: string): Promise<number> {
   return gzipSync(await readFile(path)).length;
@@ -59,8 +62,9 @@ async function main(): Promise<void> {
   const dataDir = "public/data";
   const dataFiles = await readdir(dataDir).catch(() => [] as string[]);
   for (const name of dataFiles) {
-    // The bundled images live in their own subdirectory, budgeted separately.
-    if (name === "images") continue;
+    // The bundled images + silhouettes live in their own subdirectories,
+    // budgeted separately below.
+    if (name === "images" || name === "silhouettes") continue;
     const path = join(dataDir, name);
     const gz = await gzipBytes(path);
     if (name === "index.json") {
@@ -112,6 +116,20 @@ async function main(): Promise<void> {
       label: "data/images total (raw)",
       actualBytes: imagesTotalRaw,
       budgetBytes: IMAGES_TOTAL_RAW,
+    });
+  }
+
+  // --- Bundled PhyloPic silhouettes (SPEC-014 REQ-004): aggregate raw ---
+  const silDir = join(dataDir, "silhouettes");
+  const silFiles = await readdir(silDir).catch(() => [] as string[]);
+  if (silFiles.length > 0) {
+    let silTotalRaw = 0;
+    for (const name of silFiles)
+      silTotalRaw += (await stat(join(silDir, name))).size;
+    checks.push({
+      label: "data/silhouettes total (raw)",
+      actualBytes: silTotalRaw,
+      budgetBytes: SILHOUETTES_TOTAL_RAW,
     });
   }
 
