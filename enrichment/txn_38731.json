@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38731",
+  "taxonName": "Dryosaurus",
+  "source": {
+    "article": "Dryosaurus",
+    "url": "https://en.wikipedia.org/wiki/Dryosaurus",
+    "revid": 1364978513
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "DRY-uh-SOR-us",
+    "nameMeaning": "\"Tree lizard\"",
+    "oneLiner": "A small, fast, bipedal ornithopod of the Late Jurassic.",
+    "description": "Dryosaurus was a small iguanodont ornithopod of the Late Jurassic of the western United States, an agile bipedal herbivore up to about 3 m long. It had a horny beak and cheek teeth for processing plants.",
+    "bodyLength": {
+      "value": 3,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 100,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic",
+    "discovery": {
+      "year": null,
+      "who": "Othniel Charles Marsh",
+      "where": "western United States"
+    },
+    "notableFacts": [
+      {
+        "tag": "agile",
+        "text": "A small, fast-running bipedal herbivore."
+      },
+      {
+        "tag": "beak",
+        "text": "Cropped plants with a horny beak and cheek teeth."
+      }
+    ]
+  }
+}

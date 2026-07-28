@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38765",
+  "taxonName": "Maiasaura",
+  "source": {
+    "article": "Maiasaura",
+    "url": "https://en.wikipedia.org/wiki/Maiasaura",
+    "revid": 1362514372
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Good mother lizard\"",
+    "oneLiner": "A hadrosaur that gave the first evidence of dinosaur parental care.",
+    "description": "Maiasaura was a large duck-billed hadrosaur of Late Cretaceous Montana, discovered at a nesting site during the 'dinosaur renaissance'. Evidence that it fed its young in the nest gave the first proof of parental and social behaviour in dinosaurs — hence 'good mother lizard'.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~76 Ma",
+    "discovery": {
+      "year": 1979,
+      "who": "Jack Horner & Bob Makela",
+      "where": "Montana, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "nesting",
+        "text": "Its nesting colonies gave the first evidence that dinosaurs cared for their young."
+      },
+      {
+        "tag": "name",
+        "text": "'Good mother lizard' — a rare feminine dinosaur name."
+      }
+    ]
+  }
+}

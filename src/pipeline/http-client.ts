@@ -18,7 +18,7 @@
  * is the reliable bridge to the QID that then keys the article and image.
  */
 
-import type { SnapshotMetadata } from '../domain/index.js';
+import type { ImageType, SnapshotMetadata } from '../domain/index.js';
 import type {
   RawBiologyAttribute,
   RawImageAsset,
@@ -40,6 +40,27 @@ const ENWIKI_API = 'https://en.wikipedia.org/w/api.php';
 const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
 /** Longest-edge width (px) requested for the renderable lead thumbnail (SPEC-012 REQ-002). */
 const COMMONS_THUMB_WIDTH = 320;
+/**
+ * Candidate files fetched + classified per taxon before slotting (SPEC-014
+ * AMEND-001). The gallery itself keeps at most one image per semantic role, but
+ * we gather a wider pool so the best restoration/fossil can be chosen.
+ */
+const CANDIDATE_MAX = 24;
+/** Commons file titles we treat as gallery-worthy raster images. */
+const IMAGE_FILE_RE = /\.(jpe?g|png|gif|webp)$/i;
+
+// Role classification (SPEC-014 AMEND-001). A Commons candidate is slotted into a
+// semantic role from its categories → filename → description. Order matters:
+// exclusion first, then fossil (more specific), then restoration.
+// Off-topic or non-photographic files that must never fill a photo slot — incl.
+// size/scale diagrams (the size comparison is the synthesized hero, not scraped)
+// and non-scientific art (cartoons, memes, stamps, toys).
+const EXCLUDE_RE =
+  /\b(sign|signage|logo|map|stamp|coin|book|cover|golf|footprint|track|ichnite|locator|distribution|postage|banknote|plaque|mural|scale|size|cartoon|comic|humou?r|humorous|meme|caricature|toy|lego|plush)\b/i;
+const FOSSIL_RE =
+  /\b(skeletons?|skeletal|skulls?|holotypes?|fossils?|mount(?:ed|s)?|specimens?|bones?|teeth|tooth|casts?|vertebrae?|femur|jaws?|braincase)\b/i;
+const RESTORATION_RE =
+  /\b(restorations?|reconstructions?|life\s*restorations?|palaeoart|paleoart|artists?|artwork|illustrations?)\b/i;
 const USER_AGENT =
   'paleo-map-ingestion/0.1 (https://github.com/Nelson-Jnrnd/paleo-map; SPEC-001 data layer)';
 
@@ -122,6 +143,8 @@ interface SparqlBinding {
   item: { value: string };
   article: { value: string };
   common?: { value: string };
+  image?: { value: string };
+  commonscat?: { value: string };
 }
 
 interface MwPage {
@@ -146,6 +169,8 @@ interface CommonsPage {
     url?: string;
     thumburl?: string;
     descriptionurl?: string;
+    width?: number;
+    height?: number;
     extmetadata?: Record<string, { value?: string }>;
   }>;
 }
@@ -306,10 +331,42 @@ export class HttpSourceClient implements SourceClient {
     const { wikipedia, imageFiles } = await this.wikipediaExtracts(wikidata);
     this.log(`Wikipedia: ${wikipedia.length} article summaries captured`);
 
+    // Gallery candidates (SPEC-014 REQ-003 / AMEND-001): pool files from Wikidata
+    // P18 (curated), the Wikipedia pageimage, and the Commons category (files +
+    // role-named subcategories), normalise their titles, dedupe per taxon, then
+    // classify + slot each taxon into one restoration + one fossil image.
+    const norm = (
+      f: { qid: string; file: string; roleHint?: ImageType },
+      source: GalleryFile['source'],
+    ): GalleryFile => ({
+      qid: f.qid,
+      file: normalizeCommonsTitle(f.file),
+      source,
+      ...(f.roleHint ? { roleHint: f.roleHint } : {}),
+    });
+    const p18Files = wikidata.flatMap((b) =>
+      b.image ? [norm({ qid: b.qid, file: b.image }, 'p18')] : [],
+    );
+    const categoryFiles = (await this.commonsCategoryFiles(wikidata)).map((f) =>
+      norm(f, 'category'),
+    );
+    // First-seen order (P18 → pageimage → category) is also the source priority,
+    // so dedupe keeps the most-curated instance of a file that appears twice.
+    const galleryFiles = capFilesPerQid(
+      [
+        ...p18Files,
+        ...imageFiles.map((f) => norm(f, 'pageimage')),
+        ...categoryFiles,
+      ],
+      CANDIDATE_MAX,
+    );
+
     const taxonByQid = new Map(wikidata.map((b) => [b.qid, b.pbdbTaxonId]));
-    const images = await this.commonsImages(imageFiles, taxonByQid);
-    const showable = images.filter((i) => i.licence && i.credit).length;
-    this.log(`Commons: ${images.length} lead images (${showable} with licence + credit)`);
+    const candidates = await this.commonsImages(galleryFiles, taxonByQid);
+    const images = selectGallerySlots(candidates);
+    this.log(
+      `Commons: ${candidates.length} classified candidate(s) → ${images.length} slotted gallery image(s)`,
+    );
 
     return {
       metadata,
@@ -434,25 +491,41 @@ export class HttpSourceClient implements SourceClient {
     for (const batch of chunk(names, 220)) {
       const values = batch.map((n) => `"${n.replace(/"/g, '\\"')}"`).join(' ');
       const query =
-        `SELECT ?name ?item ?article ?common WHERE { ` +
+        `SELECT ?name ?item ?article ?common ?image ?commonscat WHERE { ` +
         `VALUES ?name { ${values} } ` +
         `?item wdt:P225 ?name ; wdt:P31/wdt:P279* wd:Q16521 . ` +
         `?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . ` +
-        `OPTIONAL { ?item wdt:P1843 ?common FILTER(LANG(?common)="en") } }`;
+        `OPTIONAL { ?item wdt:P1843 ?common FILTER(LANG(?common)="en") } ` +
+        `OPTIONAL { ?item wdt:P18 ?image } ` +
+        `OPTIONAL { ?item wdt:P373 ?commonscat } }`;
       const url = `${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`;
-      const data = await getJson<{ results: { bindings: SparqlBinding[] } }>(url);
+      let data: { results: { bindings: SparqlBinding[] } };
+      try {
+        data = await getJson<{ results: { bindings: SparqlBinding[] } }>(url);
+      } catch (err) {
+        // The P18/P373 OPTIONALs make the query heavier; a batch that times out
+        // must not abort the whole crawl.
+        this.log(`  ! wikidata batch failed, skipping: ${String(err)}`);
+        continue;
+      }
       const seen = new Set<string>();
       for (const b of data.results?.bindings ?? []) {
         const name = b.name.value;
         const pbdbTaxonId = taxonIdByName.get(name);
         if (!pbdbTaxonId || seen.has(name)) continue; // first article per taxon
         seen.add(name);
+        // P18 is a Special:FilePath URL; the file name is its last, decoded segment.
+        const image = b.image
+          ? decodeURIComponent(b.image.value.split('/').pop()!)
+          : undefined;
         out.push({
           qid: b.item.value.split('/').pop()!,
           pbdbTaxonId,
           enwikiTitle: decodeURIComponent(b.article.value.split('/wiki/').pop()!).replace(/_/g, ' '),
           enwikiUrl: b.article.value,
           ...(b.common ? { commonName: b.common.value } : {}),
+          ...(image ? { image } : {}),
+          ...(b.commonscat ? { commonsCategory: b.commonscat.value } : {}),
         });
       }
     }
@@ -474,55 +547,182 @@ export class HttpSourceClient implements SourceClient {
         `${ENWIKI_API}?action=query&format=json&redirects=1&formatversion=2` +
         `&prop=extracts|pageimages&exintro=1&explaintext=1&exsentences=3&exlimit=max` +
         `&piprop=name&titles=${encodeURIComponent(titles)}`;
-      const data = await getJson<MwExtractResponse>(url);
-      const resolve = titleResolver(data.query?.normalized, data.query?.redirects);
-      for (const page of data.query?.pages ?? []) {
-        if (page.missing) continue;
-        const requested = resolve(page.title);
-        const binding = byTitle.get(requested) ?? byTitle.get(page.title);
-        if (!binding) continue;
-        if (page.extract) {
-          wikipedia.push({ qid: binding.qid, extract: page.extract, url: binding.enwikiUrl });
+      try {
+        const data = await getJson<MwExtractResponse>(url);
+        const resolve = titleResolver(data.query?.normalized, data.query?.redirects);
+        for (const page of data.query?.pages ?? []) {
+          if (page.missing) continue;
+          const requested = resolve(page.title);
+          const binding = byTitle.get(requested) ?? byTitle.get(page.title);
+          if (!binding) continue;
+          if (page.extract) {
+            wikipedia.push({ qid: binding.qid, extract: page.extract, url: binding.enwikiUrl });
+          }
+          if (page.pageimage) {
+            imageFiles.push({ qid: binding.qid, file: page.pageimage });
+          }
         }
-        if (page.pageimage) {
-          imageFiles.push({ qid: binding.qid, file: page.pageimage });
-        }
+      } catch (err) {
+        // A transient failure on one batch must not abort the whole crawl.
+        this.log(`  ! wikipedia batch failed, skipping: ${String(err)}`);
       }
     }
     return { wikipedia, imageFiles };
   }
 
+  /**
+   * Extra gallery candidates from each taxon's Wikimedia Commons category
+   * (SPEC-014 REQ-003 / AMEND-001): one `categorymembers` query per taxon with a
+   * P373 category returning direct file members *and* subcategories, then a
+   * bounded expansion of the role-named subcategories ("Skeletons of X", "Life
+   * restorations of X") where the best fossil/restoration usually live. Best-
+   * effort — a missing/empty category yields none; paced for the Commons API.
+   */
+  private async commonsCategoryFiles(
+    bindings: RawWikidataBinding[],
+  ): Promise<Array<{ qid: string; file: string }>> {
+    const out: Array<{ qid: string; file: string; roleHint?: ImageType }> = [];
+    const withCat = bindings.filter((b) => b.commonsCategory);
+    const pushFiles = (
+      qid: string,
+      members: string[],
+      roleHint?: ImageType,
+    ): void => {
+      for (const m of members) {
+        const file = m.replace(/^File:/, '');
+        if (m.startsWith('File:') && IMAGE_FILE_RE.test(file)) {
+          out.push({ qid, file, ...(roleHint ? { roleHint } : {}) });
+        }
+      }
+    };
+    for (const b of withCat) {
+      // Role-named subcategories ("X life restorations", "X skeletons") are the
+      // curated home of the best fossil/restoration, so gather them FIRST — a
+      // busy parent's alphabetical direct files would otherwise fill the per-taxon
+      // candidate budget and starve these. Membership is a curator-provided role
+      // signal, so files inherit it as a hint. Direct parent files come after.
+      await sleep(60); // gentle pacing across many per-taxon queries
+      const subcats = await this.categoryMembers(b.commonsCategory!, 'subcat');
+      const role = (re: RegExp): string[] =>
+        subcats
+          .filter((m) => re.test(m.replace(/^Category:/, '')))
+          .slice(0, 2);
+      const hinted: Array<[string, ImageType]> = [
+        ...role(RESTORATION_RE).map((s): [string, ImageType] => [
+          s,
+          'ArtisticReconstruction',
+        ]),
+        ...role(FOSSIL_RE).map((s): [string, ImageType] => [s, 'FossilPhoto']),
+      ];
+      for (const [sub, hint] of hinted) {
+        await sleep(60);
+        pushFiles(
+          b.qid,
+          await this.categoryMembers(sub.replace(/^Category:/, ''), 'file'),
+          hint,
+        );
+      }
+      await sleep(60);
+      pushFiles(b.qid, await this.categoryMembers(b.commonsCategory!, 'file'));
+    }
+    return out;
+  }
+
+  /** One `categorymembers` query; returns member titles (File:/Category: prefixed). */
+  private async categoryMembers(
+    category: string,
+    cmtype: 'file' | 'subcat' | 'file|subcat',
+  ): Promise<string[]> {
+    const url =
+      `${COMMONS_API}?action=query&format=json&formatversion=2` +
+      `&list=categorymembers&cmtype=${encodeURIComponent(cmtype)}&cmlimit=30` +
+      `&cmtitle=${encodeURIComponent(`Category:${category}`)}`;
+    try {
+      const data = await getJson<{
+        query?: { categorymembers?: Array<{ title: string }> };
+      }>(url);
+      return (data.query?.categorymembers ?? []).map((m) => m.title);
+    } catch {
+      return []; // best-effort — skip a category that fails
+    }
+  }
+
+  /**
+   * Fetch Commons imageinfo (thumbnail + attribution + dimensions + categories)
+   * for the candidate files and classify each into a semantic role (SPEC-014
+   * AMEND-001). Returns showable, role-tagged, resolution-scored candidates;
+   * `selectGallerySlots` then picks one per role.
+   */
   private async commonsImages(
-    files: Array<{ qid: string; file: string }>,
+    files: GalleryFile[],
     taxonByQid: Map<string, string>,
-  ): Promise<RawImageAsset[]> {
-    const out: RawImageAsset[] = [];
+  ): Promise<GalleryCandidate[]> {
+    const out: GalleryCandidate[] = [];
     const qidByFileTitle = new Map<string, string>();
-    for (const f of files) qidByFileTitle.set(`File:${f.file}`, f.qid);
+    const sourceByFileTitle = new Map<string, GalleryFile['source']>();
+    const hintByFileTitle = new Map<string, ImageType>();
+    for (const f of files) {
+      qidByFileTitle.set(`File:${f.file}`, f.qid);
+      sourceByFileTitle.set(`File:${f.file}`, f.source);
+      if (f.roleHint) hintByFileTitle.set(`File:${f.file}`, f.roleHint);
+    }
 
     for (const batch of chunk(files, 50)) {
+      await sleep(150); // pace metadata batches so Commons doesn't burst-throttle
       const titles = batch.map((f) => `File:${f.file}`).join('|');
       const url =
         `${COMMONS_API}?action=query&format=json&formatversion=2` +
-        `&prop=imageinfo&iiprop=extmetadata|url&iiurlwidth=${COMMONS_THUMB_WIDTH}` +
+        `&prop=imageinfo&iiprop=extmetadata|url|size&iiurlwidth=${COMMONS_THUMB_WIDTH}` +
         `&titles=${encodeURIComponent(titles)}`;
-      const data = await getJson<CommonsResponse>(url);
-      const resolve = titleResolver(data.query?.normalized, undefined);
-      for (const page of data.query?.pages ?? []) {
-        const info = page.imageinfo?.[0];
-        if (!info) continue;
-        const qid = qidByFileTitle.get(resolve(page.title)) ?? qidByFileTitle.get(page.title);
-        const taxonId = qid ? taxonByQid.get(qid) : undefined;
-        if (!taxonId) continue;
-        const em = info.extmetadata ?? {};
-        out.push({
-          taxonId,
-          type: 'FossilPhoto',
-          credit: stripHtml(em.Artist?.value),
-          licence: em.LicenseShortName?.value ?? null,
-          imageUrl: info.thumburl ?? info.url ?? '',
-          sourceUrl: info.descriptionurl ?? page.title,
-        });
+      try {
+        const data = await getJson<CommonsResponse>(url);
+        const resolve = titleResolver(data.query?.normalized, undefined);
+        for (const page of data.query?.pages ?? []) {
+          const info = page.imageinfo?.[0];
+          if (!info) continue;
+          const title = resolve(page.title);
+          const qid = qidByFileTitle.get(title) ?? qidByFileTitle.get(page.title);
+          const taxonId = qid ? taxonByQid.get(qid) : undefined;
+          if (!taxonId) continue;
+          const em = info.extmetadata ?? {};
+          const credit = stripHtml(em.Artist?.value);
+          const licence = em.LicenseShortName?.value ?? null;
+          // Only images that can be honoured with a credit are gallery-worthy.
+          if (!credit || !licence) continue;
+          const source =
+            sourceByFileTitle.get(title) ?? sourceByFileTitle.get(page.title);
+          const isP18 = source === 'p18';
+          // A lead image (P18 or the Wikipedia pageimage) is, for an extinct
+          // taxon, almost always a life restoration — default it to one.
+          const isLead = isP18 || source === 'pageimage';
+          const subcatRole =
+            hintByFileTitle.get(title) ?? hintByFileTitle.get(page.title);
+          const role = classifyRole({
+            file: title.replace(/^File:/, ''),
+            categories: em.Categories?.value ?? '',
+            description: stripHtml(em.ImageDescription?.value) ?? '',
+            isLead,
+            ...(subcatRole ? { subcatRole } : {}),
+          });
+          if (!role) continue; // excluded (signage, maps, footprints, …)
+          out.push({
+            taxonId,
+            role,
+            isP18,
+            area: (info.width ?? 0) * (info.height ?? 0),
+            title: title.replace(/^File:/, ''),
+            asset: {
+              taxonId,
+              type: role,
+              credit,
+              licence,
+              imageUrl: info.thumburl ?? info.url ?? '',
+              sourceUrl: info.descriptionurl ?? page.title,
+            },
+          });
+        }
+      } catch (err) {
+        this.log(`  ! commons batch failed, skipping: ${String(err)}`);
       }
     }
     return out;
@@ -537,6 +737,135 @@ export class HttpSourceClient implements SourceClient {
  * id, then sort by `oid` so the merged list — and every artifact derived from it
  * — is byte-stable regardless of query order (NFR-002). Pure and unit-testable.
  */
+/** A gallery-candidate Commons file, keyed to its taxon's Wikidata QID. */
+export interface GalleryFile {
+  qid: string;
+  file: string;
+  /** Where the candidate came from — also its curation priority for dedupe/lead. */
+  source: 'p18' | 'pageimage' | 'category';
+  /** Role implied by the role-named subcategory the file was gathered from. */
+  roleHint?: ImageType;
+}
+
+/**
+ * Dedup gallery-candidate files per taxon (by qid) on normalised file title,
+ * preserving first-seen order (P18 → pageimage → category), and cap each taxon
+ * at `max` candidates before classification (SPEC-014 REQ-003 / AMEND-001). Pure
+ * and generic so callers keep their per-file metadata (e.g. the P18 flag).
+ */
+export function capFilesPerQid<T extends { qid: string; file: string }>(
+  files: readonly T[],
+  max: number,
+): T[] {
+  const perQid = new Map<string, Set<string>>();
+  const out: T[] = [];
+  for (const f of files) {
+    let seen = perQid.get(f.qid);
+    if (!seen) {
+      seen = new Set<string>();
+      perQid.set(f.qid, seen);
+    }
+    if (seen.has(f.file) || seen.size >= max) continue;
+    seen.add(f.file);
+    out.push(f);
+  }
+  return out;
+}
+
+/**
+ * A Commons candidate after imageinfo fetch + role classification (SPEC-014
+ * AMEND-001): the ready-to-store asset plus the fields `selectGallerySlots`
+ * ranks on (role, whether it is the curated P18 lead, pixel area, title).
+ */
+export interface GalleryCandidate {
+  taxonId: string;
+  role: ImageType;
+  isP18: boolean;
+  area: number;
+  title: string;
+  asset: RawImageAsset;
+}
+
+/**
+ * Normalise a Commons file title so the same file arriving under different
+ * spellings collapses to one (SPEC-014 AMEND-001): MediaWiki treats spaces and
+ * underscores as equivalent and upper-cases the first title character, so P18's
+ * `Foo_Bar.jpg` and a category listing's `Foo Bar.jpg` are the same file.
+ */
+export function normalizeCommonsTitle(file: string): string {
+  const t = file.replace(/^File:/i, '').replace(/_/g, ' ').trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+}
+
+/**
+ * Classify a Commons candidate into a semantic gallery role from its categories
+ * → filename → description (SPEC-014 AMEND-001). Off-topic files (signage, maps,
+ * footprints, …) return `null` and are dropped. A lead image (Wikidata P18 or the
+ * Wikipedia pageimage) defaults to an artistic reconstruction unless it clearly
+ * reads as a fossil — for extinct taxa the lead is almost always a life restoration.
+ */
+export function classifyRole(input: {
+  file: string;
+  categories: string;
+  description: string;
+  isLead: boolean;
+  /** Role of the role-named subcategory the file was gathered from, if any. */
+  subcatRole?: ImageType;
+}): ImageType | null {
+  const hay = `${input.file} ${input.categories} ${input.description}`;
+  // Exclusion wins first: a size chart or a "Humorous paleoart" cartoon must be
+  // dropped even though it also matches an art keyword.
+  if (EXCLUDE_RE.test(hay)) return null;
+  if (FOSSIL_RE.test(hay)) return 'FossilPhoto';
+  if (RESTORATION_RE.test(hay)) return 'ArtisticReconstruction';
+  // Trust the curator: a file pulled from an "X skeletons" / "X life
+  // restorations" subcategory takes that role even without a keyword of its own.
+  if (input.subcatRole) return input.subcatRole;
+  if (input.isLead) return 'ArtisticReconstruction';
+  return null;
+}
+
+/**
+ * Slot classified candidates into the per-taxon gallery (SPEC-014 AMEND-001):
+ * one restoration (P18 wins, else largest) then one fossil (largest), in that
+ * display order. Deterministic — ties break on title — so rebuilds are stable
+ * (NFR). The size-vs-human hero is the synthesized third slot (rendered in the
+ * UI from body length), so it is not sourced here.
+ */
+export function selectGallerySlots(
+  candidates: readonly GalleryCandidate[],
+): RawImageAsset[] {
+  const byTaxon = new Map<string, GalleryCandidate[]>();
+  for (const c of candidates) {
+    const list = byTaxon.get(c.taxonId) ?? [];
+    list.push(c);
+    byTaxon.set(c.taxonId, list);
+  }
+  const best = (
+    pool: GalleryCandidate[],
+    role: ImageType,
+    preferP18: boolean,
+  ): GalleryCandidate | undefined =>
+    pool
+      .filter((c) => c.role === role)
+      .sort(
+        (a, b) =>
+          (preferP18 ? Number(b.isP18) - Number(a.isP18) : 0) ||
+          b.area - a.area ||
+          a.title.localeCompare(b.title),
+      )[0];
+
+  const out: RawImageAsset[] = [];
+  for (const taxonId of [...byTaxon.keys()].sort()) {
+    const pool = byTaxon.get(taxonId)!;
+    const restoration = best(pool, 'ArtisticReconstruction', true);
+    const fossil = best(pool, 'FossilPhoto', false);
+    if (restoration) out.push(restoration.asset);
+    if (fossil) out.push(fossil.asset);
+  }
+  return out;
+}
+
 export function mergeById<T extends { oid: string }>(records: readonly T[]): T[] {
   const byId = new Map<string, T>();
   for (const r of records) {
@@ -548,15 +877,28 @@ export function mergeById<T extends { oid: string }>(records: readonly T[]): T[]
 }
 
 async function getJson<T>(url: string, attempt = 1): Promise<T> {
+  const MAX_ATTEMPTS = 6;
+  let res: Response | null = null;
   try {
-    const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-    return (await res.json()) as T;
-  } catch (err) {
-    if (attempt >= 4) throw err;
-    await sleep(500 * 2 ** (attempt - 1));
-    return getJson<T>(url, attempt + 1);
+    res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    });
+    if (res.ok) return (await res.json()) as T;
+  } catch {
+    /* network blip — fall through to the retry decision */
   }
+  // Retry throttling (429) and server errors with backoff; a real 4xx is
+  // permanent, so fail fast and let the caller skip it. Wikimedia bursts need
+  // patience — honour Retry-After, otherwise exponential backoff up to ~30s.
+  const status = res?.status;
+  const retryable = !res || status === 429 || (status !== undefined && status >= 500);
+  if (attempt >= MAX_ATTEMPTS || !retryable) {
+    throw new Error(`HTTP ${status ?? 'network-error'} for ${url}`);
+  }
+  const retryAfter = Number(res?.headers.get('retry-after')) || 0;
+  const backoff = retryAfter > 0 ? retryAfter * 1000 : Math.min(1000 * 2 ** (attempt - 1), 30000);
+  await sleep(backoff);
+  return getJson<T>(url, attempt + 1);
 }
 
 function sleep(ms: number): Promise<void> {

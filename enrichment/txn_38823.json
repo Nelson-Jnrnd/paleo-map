@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38823",
+  "taxonName": "Nodosaurus",
+  "source": {
+    "article": "Nodosaurus",
+    "url": "https://en.wikipedia.org/wiki/Nodosaurus",
+    "revid": 1314528002
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Knobbed lizard\"",
+    "oneLiner": "An armoured nodosaur from the Cretaceous of Wyoming.",
+    "description": "Nodosaurus was a nodosaurid ankylosaur — an armoured herbivore without a tail club — from the Late Cretaceous of Wyoming. It was one of the first armoured dinosaurs described from North America.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1889,
+      "who": "Othniel Charles Marsh",
+      "where": "Wyoming, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "armour",
+        "text": "Its back was covered in bands of bony armour, but it lacked a tail club."
+      },
+      {
+        "tag": "history",
+        "text": "One of the first armoured dinosaurs named from North America, during the Bone Wars."
+      }
+    ]
+  }
+}

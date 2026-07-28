@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38827",
+  "taxonName": "Sauropelta",
+  "source": {
+    "article": "Sauropelta",
+    "url": "https://en.wikipedia.org/wiki/Sauropelta",
+    "revid": 1345593993
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "SOR-oh-PEL-tə",
+    "nameMeaning": "\"Shield lizard\"",
+    "oneLiner": "An Early Cretaceous nodosaur with long neck spines.",
+    "description": "Sauropelta was a nodosaurid — an armoured dinosaur without a tail club — of Early Cretaceous North America, about 5–6 m long. It carried extensive bony armour and large spines projecting from its neck, and had an unusually long tail.",
+    "bodyLength": {
+      "value": 6,
+      "unit": "m",
+      "low": 5.2,
+      "high": 6,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2,
+      "unit": "t",
+      "low": 1.5,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Early Cretaceous (Albian), ~108 Ma",
+    "discovery": {
+      "year": 1970,
+      "who": "John Ostrom",
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "spines",
+        "text": "Bore large defensive spines projecting from its neck."
+      },
+      {
+        "tag": "tail",
+        "text": "Its long tail made up about half its body length — but had no club."
+      }
+    ]
+  }
+}

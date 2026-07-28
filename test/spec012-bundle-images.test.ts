@@ -65,3 +65,35 @@ test("bundles downloadable images locally and clears failures", async () => {
   // Already-local URL → untouched.
   expect(imgs[2]!.imageUrl).toBe("data/images/already.jpg");
 });
+
+test("always bundles the lead image, caps gallery extras by total bytes (SPEC-014)", async () => {
+  const outDir = await tmp();
+  const reference = {
+    profiles: [
+      {
+        taxonId: "t1",
+        images: [
+          { imageUrl: "https://x/lead.jpg", sourceId: "src:wp:Q1" }, // lead
+          { imageUrl: "https://x/extra1.jpg", sourceId: "src:wp:Q1" }, // extra
+          { imageUrl: "https://x/extra2.jpg", sourceId: "src:wp:Q1" }, // extra
+        ],
+      },
+    ],
+  } as unknown as ReferenceModel;
+
+  // 10 bytes each; cap 15 → lead (always) + one extra fit; the second extra is
+  // dropped once the running total reaches the cap.
+  const bundled = await bundleImages(
+    reference,
+    outDir,
+    async () => new Uint8Array(10),
+    undefined,
+    15,
+  );
+
+  expect(bundled).toBe(2);
+  const imgs = reference.profiles[0]!.images;
+  expect(imgs[0]!.imageUrl).toMatch(/^data\/images\//); // lead bundled
+  expect(imgs[1]!.imageUrl).toMatch(/^data\/images\//); // first extra fits
+  expect(imgs[2]!.imageUrl).toBe(""); // budget spent → dropped
+});

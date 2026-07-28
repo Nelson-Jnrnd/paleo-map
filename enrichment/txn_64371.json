@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:64371",
+  "taxonName": "Cryolophosaurus",
+  "source": {
+    "article": "Cryolophosaurus",
+    "url": "https://en.wikipedia.org/wiki/Cryolophosaurus",
+    "revid": 1347338374
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "KRY-uh-LOH-fuh-SOR-us",
+    "nameMeaning": "\"Frozen crested lizard\"",
+    "oneLiner": "The first meat-eating dinosaur found in Antarctica.",
+    "description": "Cryolophosaurus was a large theropod of the Early Jurassic of Antarctica, 6–7 m long, with a distinctive crest running across the top of its skull. It was the first carnivorous dinosaur discovered on the continent and the first Antarctic dinosaur to be formally named.",
+    "bodyLength": {
+      "value": 7,
+      "unit": "m",
+      "low": 6,
+      "high": 7,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 465,
+      "unit": "kg",
+      "low": 350,
+      "high": 465,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Early Jurassic (Pliensbachian), ~196–188 Ma",
+    "discovery": {
+      "year": 1991,
+      "who": "William Hammer",
+      "where": "Antarctica"
+    },
+    "notableFacts": [
+      {
+        "tag": "antarctica",
+        "text": "The first carnivorous dinosaur discovered in Antarctica."
+      },
+      {
+        "tag": "crest",
+        "text": "Had an unusual crest running side-to-side across its skull."
+      }
+    ]
+  }
+}

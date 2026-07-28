@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38544",
+  "taxonName": "Ornithomimus",
+  "source": {
+    "article": "Ornithomimus",
+    "url": "https://en.wikipedia.org/wiki/Ornithomimus",
+    "revid": 1363838195
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Bird mimic\"",
+    "oneLiner": "A swift, feathered, toothless 'ostrich dinosaur'.",
+    "description": "Ornithomimus was a swift, feathered ornithomimid of Late Cretaceous western North America, with long legs and a small toothless beak that hints at an omnivorous diet. It is one of the classic 'ostrich dinosaurs'.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Omnivore",
+    "era": "Late Cretaceous (Campanian–Maastrichtian)",
+    "discovery": {
+      "year": 1890,
+      "who": "Othniel Charles Marsh",
+      "where": "Colorado, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "feathers",
+        "text": "Some specimens preserve evidence of feathers, including wing-like arm plumage."
+      },
+      {
+        "tag": "beak",
+        "text": "Its toothless beak suggests an omnivorous diet."
+      }
+    ]
+  }
+}

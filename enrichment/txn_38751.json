@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38751",
+  "taxonName": "Ouranosaurus",
+  "source": {
+    "article": "Ouranosaurus",
+    "url": "https://en.wikipedia.org/wiki/Ouranosaurus",
+    "revid": 1365749825
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Brave lizard\"",
+    "oneLiner": "A sail-backed iguanodontian of Cretaceous Africa.",
+    "description": "Ouranosaurus was a basal hadrosauriform ornithopod herbivore of Early Cretaceous Niger and Cameroon, 7–8.3 m long. It bore tall spines along its back that may have supported a sail or a fatty hump.",
+    "bodyLength": {
+      "value": 8.3,
+      "unit": "m",
+      "low": 7,
+      "high": 8.3,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2.2,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Early Cretaceous (Aptian)",
+    "discovery": {
+      "year": 1976,
+      "who": "Philippe Taquet",
+      "where": "Gadoufaoua, Niger"
+    },
+    "notableFacts": [
+      {
+        "tag": "sail",
+        "text": "Bore tall back spines that may have supported a sail or a hump."
+      },
+      {
+        "tag": "relative",
+        "text": "An early relative of the duck-billed hadrosaurs."
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:38583",
+  "taxonName": "Megalosaurus",
+  "source": {
+    "article": "Megalosaurus",
+    "url": "https://en.wikipedia.org/wiki/Megalosaurus",
+    "revid": 1365205283
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Great lizard\"",
+    "oneLiner": "A Middle Jurassic theropod — the first dinosaur ever scientifically named.",
+    "description": "Megalosaurus was a large carnivorous theropod from the Middle Jurassic of southern England. Named by William Buckland in 1824, it was the first dinosaur genus to be validly named. Because no complete skeleton has been found, much about its build is still unclear; early naturalists even mistook it for a giant quadrupedal lizard.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Middle Jurassic (Bathonian), ~166 Ma",
+    "discovery": {
+      "year": 1824,
+      "who": "William Buckland",
+      "where": "Oxfordshire, England"
+    },
+    "notableFacts": [
+      {
+        "tag": "history",
+        "text": "The first dinosaur genus to be validly named (Buckland, 1824)."
+      },
+      {
+        "tag": "dinosauria",
+        "text": "One of the three genera Richard Owen used to define Dinosauria in 1842."
+      },
+      {
+        "tag": "crystalpalace",
+        "text": "Inspired one of the famous Crystal Palace dinosaur sculptures."
+      }
+    ]
+  }
+}

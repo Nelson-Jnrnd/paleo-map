@@ -773,7 +773,19 @@
   background: var(--color-accent-deep);
 }
 
-/* --- Taxon-profile illustration + size scale (SPEC-012) --- */
+/* --- Taxon-profile illustration + size scale (SPEC-012 / SPEC-014) --- */
+/* Gallery: wrap several images side by side; each figure keeps its own caption. */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.gallery .illustration {
+  margin: 0;
+  flex: 1 1 200px;
+  max-width: 260px;
+}
 .illustration {
   margin: var(--space-2) 0 0;
   display: flex;
@@ -1007,4 +1019,483 @@
   border-radius: var(--radius-sm);
   font-size: var(--text-min);
   color: var(--color-text-muted);
+}
+
+/* --- Taxon enrichment (SPEC-014 REQ-005) --- */
+/* One-line "what it was", a scannable lead above the fact row. */
+.oneLiner {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  color: var(--color-text-hi);
+}
+
+/* Fact row: length · height · mass · diet · era. Neutral cards (teal stays the
+   single interaction accent, charter §4); numbers are mono with an est. cue. */
+.factRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.factChip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.factChipLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+}
+
+.factChipValue {
+  font-size: 13px;
+  color: var(--color-text-hi);
+}
+
+.factEst {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+}
+
+/* Collapsible "Discovery & naming" / "Notable facts" — quiet, scannable. */
+.collapsible {
+  margin-top: var(--space-3);
+}
+
+.collapsibleHead {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+
+.collapsibleHead:hover {
+  color: var(--color-text-muted);
+}
+
+.factList {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.factItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.factTag {
+  flex-shrink: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-id);
+  background: var(--color-ground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-2);
+}
+
+/* --- Taxonomy tree (SPEC-014 REQ-006) --- */
+.lineage {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) 0;
+}
+
+.lineageItem {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.lineageSep {
+  color: var(--color-text-faint);
+  margin: 0 var(--space-2);
+}
+
+/* Ancestor link — teal is the interaction accent (charter §4). */
+.lineageLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-accent-deep);
+  font-size: 13px;
+}
+
+.lineageLink:hover {
+  text-decoration: underline;
+}
+
+.lineageRank {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+}
+
+.lineageCurrent {
+  font-size: 13px;
+  color: var(--color-text-hi);
+  font-weight: 600;
+}
+
+/* Collapsed-occurrences summary detail (SPEC-014 REQ-007). */
+.occSummary {
+  color: var(--color-text-faint);
+  font-size: var(--text-min);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* --- Size-vs-human silhouette hero (SPEC-014 REQ-004) --- */
+.sizeHeroStage {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  min-height: 60px;
+  padding-top: var(--space-2);
+}
+
+.sizeHeroFig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+/* Silhouettes are black PhyloPic shapes; the human is subordinated so the taxon
+   reads as the subject (charter §5 hierarchy). */
+.sizeHeroDino {
+  height: auto;
+  max-width: 100%;
+  /* Render the black silhouette in the deep-ink text colour, not pure black. */
+  filter: brightness(0) saturate(100%) opacity(0.85);
+}
+
+.sizeHeroHuman {
+  width: auto;
+  filter: brightness(0) saturate(100%) opacity(0.4);
+}
+
+.sizeHeroCap {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ================= Taxon page — "spec sheet" layout (SPEC-014 AMEND-002) ===== */
+
+/* top bar: back + taxonomy breadcrumb nav */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  margin-bottom: var(--space-4);
+}
+
+/* taxonomy breadcrumb */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  font-size: 13px;
+  min-width: 0;
+}
+.crumbLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-accent-deep);
+  font-size: 13px;
+}
+.crumbLink:hover {
+  text-decoration: underline;
+}
+.crumbCurrent {
+  font-size: 13px;
+  color: var(--color-text-hi);
+  font-weight: 600;
+}
+.crumbSep {
+  color: var(--color-border);
+  margin: 0 7px;
+}
+.crumbMore {
+  background: transparent;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  color: var(--color-text-faint);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* identity header */
+.idHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.idName {
+  font-size: clamp(26px, 4.5vw, 36px);
+  line-height: 1.1;
+  margin: 0;
+}
+.idCommon {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-text-faint);
+  margin-left: 10px;
+}
+.idOneLiner {
+  font-size: 16px;
+  color: var(--color-text);
+  max-width: 60ch;
+  margin: 0;
+}
+.idMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.periodTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.periodDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+.metaSep {
+  color: var(--color-border);
+}
+.valid {
+  color: var(--color-accent-deep);
+}
+
+/* two-column hero: image + spec table */
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 240px);
+  gap: var(--space-5);
+  align-items: start;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+@media (max-width: 640px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* image gallery: big lead + thumbnail strip, hover-revealed credit */
+.galleryWrap {
+  min-width: 0;
+}
+.leadFigure {
+  margin: 0;
+}
+.leadFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-ground);
+}
+.leadImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.credInfo {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-style: italic;
+  display: grid;
+  place-items: center;
+}
+.credReveal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 11px;
+  font-size: 11px;
+  color: #eaf0f3;
+  background: linear-gradient(transparent, rgba(31, 43, 56, 0.74));
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.leadFrame:hover .credReveal,
+.leadFrame:focus-within .credReveal {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .credReveal {
+    transition: none;
+  }
+}
+.credLink {
+  color: #cdeee6;
+}
+
+.thumbStrip {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.thumb {
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-ground);
+  overflow: hidden;
+  cursor: pointer;
+  width: 60px;
+  height: 46px;
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.thumbOn {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.silhouetteBox {
+  background: var(--color-ground);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  place-items: center;
+}
+
+/* ruled spec table */
+.specAside {
+  min-width: 0;
+}
+.specTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+.specCaption {
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  font-weight: 600;
+  padding-bottom: var(--space-2);
+}
+.specTable th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  padding: 8px 0;
+  border-top: 1px solid var(--color-divider);
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+.specTable td {
+  text-align: right;
+  font-size: 13px;
+  color: var(--color-text-hi);
+  padding: 8px 0;
+  border-top: 1px solid var(--color-divider);
+  font-variant-numeric: tabular-nums;
+}
+.specTable tr:first-child th,
+.specTable tr:first-child td {
+  border-top: none;
+}
+
+/* About block + prose facts */
+.sectionH {
+  font-size: 16px;
+  color: var(--color-text-hi);
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+.blurb {
+  font-size: 14.5px;
+  color: var(--color-text);
+  max-width: 66ch;
+  margin: 0 0 var(--space-3);
+}
+.notables {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 66ch;
+}
+.notables li {
+  font-size: 14px;
+  color: var(--color-text);
+  padding-left: 16px;
+  position: relative;
+}
+.notables li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0.6;
+}
+
+/* sources footer */
+.foot {
+  font-size: 11.5px;
+  color: var(--color-text-faint);
+  border-top: 1px solid var(--color-divider);
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
 }

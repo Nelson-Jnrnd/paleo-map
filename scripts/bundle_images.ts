@@ -44,29 +44,49 @@ export async function bundleImages(
   outDir: string,
   fetchImage: ImageFetcher,
   log: (msg: string) => void = () => {},
+  maxTotalBytes: number = Number.POSITIVE_INFINITY,
 ): Promise<number> {
   const imagesDir = join(outDir, "images");
   await rm(imagesDir, { recursive: true, force: true });
   await mkdir(imagesDir, { recursive: true });
 
-  let bundled = 0;
+  type Img = ReferenceModel["profiles"][number]["images"][number];
+
+  // Every taxon's first remote image is a "lead" (always bundled); the rest are
+  // gallery "extras", bundled only until the total-bytes budget is reached — so
+  // repo size stays bounded regardless of gallery coverage (SPEC-014 REQ-003).
+  const lead: Img[] = [];
+  const extra: Img[] = [];
   for (const profile of reference.profiles) {
+    let isFirst = true;
     for (const img of profile.images) {
-      // Skip anything not a remote URL (already local, or empty).
-      if (!/^https?:/i.test(img.imageUrl)) continue;
-      const name = imageFileName(img.sourceId, img.imageUrl);
-      const bytes = await fetchImage(img.imageUrl);
-      if (!bytes) {
-        log(
-          `  ! image unavailable, using silhouette fallback: ${img.imageUrl}`,
-        );
-        img.imageUrl = "";
-        continue;
-      }
-      await writeFile(join(imagesDir, name), bytes);
-      img.imageUrl = `data/images/${name}`;
-      bundled++;
+      if (!/^https?:/i.test(img.imageUrl)) continue; // already local, or empty
+      (isFirst ? lead : extra).push(img);
+      isFirst = false;
     }
   }
+
+  let bundled = 0;
+  let totalBytes = 0;
+  const bundleOne = async (img: Img, budgeted: boolean): Promise<void> => {
+    if (budgeted && totalBytes >= maxTotalBytes) {
+      img.imageUrl = ""; // budget spent → drop this gallery extra
+      return;
+    }
+    const bytes = await fetchImage(img.imageUrl);
+    if (!bytes) {
+      log(`  ! image unavailable, using silhouette fallback: ${img.imageUrl}`);
+      img.imageUrl = "";
+      return;
+    }
+    const name = imageFileName(img.sourceId, img.imageUrl);
+    await writeFile(join(imagesDir, name), bytes);
+    img.imageUrl = `data/images/${name}`;
+    totalBytes += bytes.length;
+    bundled++;
+  };
+
+  for (const img of lead) await bundleOne(img, false);
+  for (const img of extra) await bundleOne(img, true);
   return bundled;
 }

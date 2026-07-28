@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:52983",
+  "taxonName": "Brontosaurus",
+  "source": {
+    "article": "Brontosaurus",
+    "url": "https://en.wikipedia.org/wiki/Brontosaurus",
+    "revid": 1362749745
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "BRON-tuh-SOR-us",
+    "nameMeaning": "\"Thunder lizard\"",
+    "oneLiner": "The archetypal long-necked sauropod of the Morrison Formation.",
+    "description": "Brontosaurus was a large diplodocid sauropod of the Late Jurassic Morrison Formation, the archetypal 'long-necked dinosaur' in popular culture. Long treated as a synonym of Apatosaurus, a 2015 study restored it as a distinct genus.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian–Tithonian), ~156–146 Ma",
+    "discovery": {
+      "year": 1879,
+      "who": "Othniel Charles Marsh",
+      "where": "Como Bluff, Wyoming, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "name",
+        "text": "The archetypal 'long-necked' dinosaur of popular culture."
+      },
+      {
+        "tag": "taxonomy",
+        "text": "Long sunk into Apatosaurus, it was restored as a separate genus in 2015."
+      }
+    ]
+  }
+}

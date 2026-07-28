@@ -1,0 +1,44 @@
+{
+  "taxonId": "txn:38522",
+  "taxonName": "Dilophosaurus",
+  "source": {
+    "article": "Dilophosaurus",
+    "url": "https://en.wikipedia.org/wiki/Dilophosaurus",
+    "revid": 1363106175
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "die-LOH-fuh-SOR-us",
+    "nameMeaning": "\"Two-crested lizard\"",
+    "oneLiner": "An Early Jurassic predator with a pair of head crests.",
+    "description": "Dilophosaurus was a theropod predator of Early Jurassic North America, about 7 m long, named for the pair of thin crests on its skull. It was one of the earliest large predatory dinosaurs.",
+    "bodyLength": {
+      "value": 7,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Early Jurassic, ~186 Ma",
+    "discovery": {
+      "year": 1970,
+      "who": "Samuel P. Welles",
+      "where": "Arizona, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "crests",
+        "text": "Named for the pair of thin, arching crests on its skull."
+      },
+      {
+        "tag": "film",
+        "text": "Portrayed with a frill and venom in Jurassic Park — both fictional."
+      }
+    ]
+  }
+}

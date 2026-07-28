@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38814",
+  "taxonName": "Stegosaurus",
+  "source": {
+    "article": "Stegosaurus",
+    "url": "https://en.wikipedia.org/wiki/Stegosaurus",
+    "revid": 1365429738
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Roof lizard\"",
+    "oneLiner": "A plated, spike-tailed herbivorous armoured dinosaur.",
+    "description": "Stegosaurus was a large, heavily built herbivorous quadruped with a rounded back, short forelimbs, a small head, and distinctive kite-shaped upright plates along its back with spikes on its tail. It lived in the Late Jurassic of the western United States and Portugal, alongside Apatosaurus, Diplodocus and Allosaurus. Its tail spikes were most likely defensive, while its plates were probably used for display and thermoregulation.",
+    "bodyLength": {
+      "value": 7.5,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 5,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian–Tithonian), ~155–145 Ma",
+    "discovery": {
+      "year": null,
+      "who": "Othniel Charles Marsh",
+      "where": "Dinosaur Ridge, Colorado, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "plates",
+        "text": "Bore distinctive kite-shaped back plates, likely used for display and thermoregulation."
+      },
+      {
+        "tag": "defense",
+        "text": "Its spiked tail was most likely used to defend against predators like Allosaurus."
+      },
+      {
+        "tag": "brain",
+        "text": "Had a relatively low brain-to-body mass ratio and a small head."
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38607",
+  "taxonName": "Albertosaurus",
+  "source": {
+    "article": "Albertosaurus",
+    "url": "https://en.wikipedia.org/wiki/Albertosaurus",
+    "revid": 1364262358
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Alberta lizard\"",
+    "oneLiner": "A tyrannosaurid apex predator of latest-Cretaceous Alberta.",
+    "description": "Albertosaurus was a large tyrannosaurid predator of northwestern North America, with short arms, two-fingered hands and a massive head full of sharp teeth. Smaller than its famous relative Tyrannosaurus, it may still have been the apex predator of its ecosystem.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Campanian–Maastrichtian), ~71 Ma",
+    "discovery": {
+      "year": 1905,
+      "who": "Henry Fairfield Osborn",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "senses",
+        "text": "Had a strong sense of smell, powerful binocular vision and a bone-crushing bite."
+      },
+      {
+        "tag": "bonebed",
+        "text": "A bonebed of many individuals hints it may have lived in groups."
+      }
+    ]
+  }
+}

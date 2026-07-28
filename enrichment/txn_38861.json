@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38861",
+  "taxonName": "Torosaurus",
+  "source": {
+    "article": "Torosaurus",
+    "url": "https://en.wikipedia.org/wiki/Torosaurus",
+    "revid": 1360958014
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Perforated lizard\", for the openings in its frill",
+    "oneLiner": "A ceratopsian bearing one of the largest skulls of any land animal.",
+    "description": "Torosaurus was a chasmosaurine ceratopsian of the very end of the Cretaceous, 7.5–9 m long, possessing an enormous elongated frill with large openings — giving it one of the largest skulls of any known land animal (up to 2.77 m). Some researchers argue it is simply a fully mature Triceratops.",
+    "bodyLength": {
+      "value": 9,
+      "unit": "m",
+      "low": 7.5,
+      "high": 9,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 8,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Maastrichtian), ~68–66 Ma",
+    "discovery": {
+      "year": 1891,
+      "who": "Othniel Charles Marsh",
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "skull",
+        "text": "Its frilled skull (up to 2.77 m) is among the largest of any land animal."
+      },
+      {
+        "tag": "triceratops",
+        "text": "Debated to be the mature adult form of Triceratops."
+      }
+    ]
+  }
+}

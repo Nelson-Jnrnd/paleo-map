@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:38844",
+  "taxonName": "Psittacosaurus",
+  "source": {
+    "article": "Psittacosaurus",
+    "url": "https://en.wikipedia.org/wiki/Psittacosaurus",
+    "revid": 1365260146
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "SIT-uh-kuh-SOR-us",
+    "nameMeaning": "\"Parrot lizard\", for its robust beak",
+    "oneLiner": "A small, early bipedal ceratopsian with a parrot-like beak.",
+    "description": "Psittacosaurus was a small early ceratopsian from the Early Cretaceous of Asia — a biped with a high skull and a robust parrot-like beak. It is the most species-rich non-avian dinosaur genus and one of the most completely known, from hundreds of individuals. One specimen preserves long bristle-like filaments on the tail.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Early Cretaceous, ~125–105 Ma",
+    "discovery": null,
+    "notableFacts": [
+      {
+        "tag": "diversity",
+        "text": "The most species-rich non-avian dinosaur genus — up to 13 species."
+      },
+      {
+        "tag": "beak",
+        "text": "Had a robust parrot-like beak."
+      },
+      {
+        "tag": "tail",
+        "text": "One specimen preserves long bristle-like filaments on the tail."
+      },
+      {
+        "tag": "record",
+        "text": "One of the most completely known dinosaurs — hundreds of individuals found."
+      }
+    ]
+  }
+}

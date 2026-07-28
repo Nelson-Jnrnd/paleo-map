@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38748",
+  "taxonName": "Camptosaurus",
+  "source": {
+    "article": "Camptosaurus",
+    "url": "https://en.wikipedia.org/wiki/Camptosaurus",
+    "revid": 1362750592
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "KAMP-tuh-SOR-us",
+    "nameMeaning": "\"Flexible lizard\"",
+    "oneLiner": "A sturdy, beaked ornithopod of the Late Jurassic.",
+    "description": "Camptosaurus was a plant-eating, beaked ornithopod of the Late Jurassic of western North America, a heavier-bodied relative of Iguanodon. It could walk on two legs or four.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Jurassic",
+    "discovery": {
+      "year": 1885,
+      "who": "Othniel Charles Marsh",
+      "where": "Como Bluff, Wyoming, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "relative",
+        "text": "An early, sturdy relative of Iguanodon."
+      },
+      {
+        "tag": "posture",
+        "text": "Could move on two legs or four."
+      }
+    ]
+  }
+}

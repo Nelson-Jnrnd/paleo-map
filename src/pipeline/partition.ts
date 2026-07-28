@@ -19,12 +19,20 @@ import {
   stagesInRange,
 } from '../domain/index.js';
 import type {
+  EnrichmentRecord,
   GeologicalStage,
   ReadModel,
   ReadOccurrence,
   Source,
   SnapshotMetadata,
 } from '../domain/index.js';
+
+/**
+ * Enrichment split out of the reference (SPEC-014 AMEND-004): a `taxonId →
+ * record` map served as its own artifact so the reference stays small and
+ * enrichment can scale to every genus without breaching the reference budget.
+ */
+export type EnrichmentMap = Record<string, EnrichmentRecord>;
 
 /** The shared reference artifact — everything except occurrences. */
 export interface ReferenceModel {
@@ -64,6 +72,8 @@ export interface AtlasStageEntry {
 export interface AtlasIndex {
   metadata: SnapshotMetadata;
   referenceUrl: string;
+  /** URL of the enrichment map artifact (SPEC-014 AMEND-004). */
+  enrichmentUrl: string;
   stages: AtlasStageEntry[];
 }
 
@@ -71,6 +81,8 @@ export interface AtlasIndex {
 export interface AtlasPartition {
   index: AtlasIndex;
   reference: ReferenceModel;
+  /** Enrichment split out of the reference (SPEC-014 AMEND-004). */
+  enrichment: EnrichmentMap;
   /** Only stages that hold ≥1 occurrence get a data file. */
   stages: StagePartition[];
 }
@@ -97,11 +109,19 @@ export function partitionReadModel(
   model: ReadModel,
   stages: readonly GeologicalStage[] = MESOZOIC_STAGES,
 ): AtlasPartition {
+  // Split enrichment out of the reference (SPEC-014 AMEND-004): collect it into
+  // its own map, and null it on the served profiles so the reference stays small.
+  const enrichment: EnrichmentMap = {};
+  const profiles = model.profiles.map((p) => {
+    if (p.enrichment) enrichment[p.taxonId] = p.enrichment;
+    return p.enrichment ? { ...p, enrichment: null } : p;
+  });
+
   const reference: ReferenceModel = {
     metadata: model.metadata,
     sources: model.sources,
     taxa: model.taxa,
-    profiles: model.profiles,
+    profiles,
   };
 
   const partitions: StagePartition[] = [];
@@ -135,8 +155,14 @@ export function partitionReadModel(
   });
 
   return {
-    index: { metadata: model.metadata, referenceUrl: `${DATA_DIR}/reference.json`, stages: entries },
+    index: {
+      metadata: model.metadata,
+      referenceUrl: `${DATA_DIR}/reference.json`,
+      enrichmentUrl: `${DATA_DIR}/enrichment.json`,
+      stages: entries,
+    },
     reference,
+    enrichment,
     stages: partitions,
   };
 }

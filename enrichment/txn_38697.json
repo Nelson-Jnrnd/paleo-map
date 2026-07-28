@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:38697",
+  "taxonName": "Camarasaurus",
+  "source": {
+    "article": "Camarasaurus",
+    "url": "https://en.wikipedia.org/wiki/Camarasaurus",
+    "revid": 1366473100
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "KAM-uh-ruh-SOR-us",
+    "nameMeaning": "\"Chambered lizard\", for the hollow chambers in its vertebrae",
+    "oneLiner": "The most common sauropod of the Late Jurassic Morrison Formation.",
+    "description": "Camarasaurus was a bulky sauropod with a proportionally short neck, a large, strongly built skull and powerful jaws bearing spoon-shaped teeth. The most common dinosaur of the Morrison Formation of western North America and one of the best-understood sauropods, it is known from over 530 specimens. It was probably a selective browser feeding 2–5 m off the ground.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian–Tithonian), ~155–143 Ma",
+    "discovery": {
+      "year": 1877,
+      "who": "Edward Drinker Cope",
+      "where": "Garden Park, Colorado, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "abundance",
+        "text": "The most common dinosaur of the Morrison Formation."
+      },
+      {
+        "tag": "jaws",
+        "text": "Powerful jaws and spoon-shaped teeth suited it to tough plants."
+      },
+      {
+        "tag": "age",
+        "text": "One specimen may have reached about 40 years old — among the oldest ages reported for a dinosaur."
+      }
+    ]
+  }
+}

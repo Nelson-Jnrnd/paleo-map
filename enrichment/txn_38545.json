@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38545",
+  "taxonName": "Struthiomimus",
+  "source": {
+    "article": "Struthiomimus",
+    "url": "https://en.wikipedia.org/wiki/Struthiomimus",
+    "revid": 1366105576
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Ostrich mimic\"",
+    "oneLiner": "A long-legged, toothless, ostrich-like omnivore.",
+    "description": "Struthiomimus was an ornithomimid ('ostrich dinosaur') of Late Cretaceous western North America — a long-legged, bipedal, toothless-beaked runner. Its abundance and beak suggest it was an opportunistic omnivore.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Omnivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1917,
+      "who": "Henry Fairfield Osborn",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "build",
+        "text": "Long-legged and ostrich-like, built for running."
+      },
+      {
+        "tag": "diet",
+        "text": "Its toothless beak suggests an opportunistic, largely plant-based omnivorous diet."
+      }
+    ]
+  }
+}

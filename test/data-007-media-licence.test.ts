@@ -35,4 +35,15 @@ describe('DATA-007: media licence compliance', () => {
     expect(trex.images[0]!.type).toBe('ArtisticReconstruction');
     expect(trex.images[0]!.licence).toBe('CC BY-SA 4.0');
   });
+
+  it('orders the gallery restoration-first, not by sourceUrl (SPEC-014 AMEND-001)', async () => {
+    const model = await buildFixtureModel();
+    const trike = model.profiles.find((p) => p.taxonId === 'txn:triceratops')!;
+    // The restoration's sourceUrl sorts *after* the mount's, so a plain URL sort
+    // would put the mount first; the life restoration must still lead.
+    expect(trike.images.map((i) => i.type)).toEqual([
+      'ArtisticReconstruction',
+      'SkeletalMount',
+    ]);
+  });
 });

@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38848",
+  "taxonName": "Protoceratops",
+  "source": {
+    "article": "Protoceratops",
+    "url": "https://en.wikipedia.org/wiki/Protoceratops",
+    "revid": 1363630267
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"First horned face\"",
+    "oneLiner": "A small, frilled ceratopsian of the Late Cretaceous Gobi Desert.",
+    "description": "Protoceratops was a small ceratopsian from the Late Cretaceous of Asia, 2–2.5 m long, with a proportionally large skull, a neck frill and a prominent parrot-like beak — but no true horns. The frill was likely used for display, combat and muscle attachment. It is extremely well known from the Mongolian Gobi.",
+    "bodyLength": {
+      "value": 2.5,
+      "unit": "m",
+      "low": 2,
+      "high": 2.5,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 104,
+      "unit": "kg",
+      "low": 62,
+      "high": 104,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous, ~75–71 Ma",
+    "discovery": {
+      "year": 1923,
+      "who": null,
+      "where": "Djadokhta Formation, Mongolia"
+    },
+    "notableFacts": [
+      {
+        "tag": "frill",
+        "text": "Had a bony neck frill and parrot-like beak, but no true horns."
+      },
+      {
+        "tag": "eggs",
+        "text": "Its Gobi nests were once wrongly blamed on Oviraptor, thought to be raiding them."
+      },
+      {
+        "tag": "record",
+        "text": "One of the best-known dinosaurs, from hatchling to adult."
+      }
+    ]
+  }
+}

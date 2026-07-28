@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38511",
+  "taxonName": "Herrerasaurus",
+  "source": {
+    "article": "Herrerasaurus",
+    "url": "https://en.wikipedia.org/wiki/Herrerasaurus",
+    "revid": 1359089778
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Herrera's lizard\"",
+    "oneLiner": "One of the earliest dinosaurs, a Late Triassic predator.",
+    "description": "Herrerasaurus was a lightly built carnivorous dinosaur of the Late Triassic of Argentina, about 6 m long, and one of the earliest dinosaurs known. Its fragmentary early finds long made its classification uncertain until a near-complete skeleton was found.",
+    "bodyLength": {
+      "value": 6,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 350,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Triassic (Carnian), ~231 Ma",
+    "discovery": {
+      "year": 1963,
+      "who": "Osvaldo Reig",
+      "where": "Ischigualasto, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "early",
+        "text": "Among the earliest known dinosaurs."
+      },
+      {
+        "tag": "named",
+        "text": "Named after Victorino Herrera, the rancher who found the first specimen."
+      }
+    ]
+  }
+}

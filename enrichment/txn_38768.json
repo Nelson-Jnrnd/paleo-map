@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38768",
+  "taxonName": "Saurolophus",
+  "source": {
+    "article": "Saurolophus",
+    "url": "https://en.wikipedia.org/wiki/Saurolophus",
+    "revid": 1357172163
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Crested lizard\"",
+    "oneLiner": "A spike-crested hadrosaur known from two continents.",
+    "description": "Saurolophus was a large duck-billed hadrosaur of the Late Cretaceous, distinguished by a spike-like crest projecting up and back from its skull. Unusually, it is known from both North America and Asia.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Maastrichtian), ~71.5–66 Ma",
+    "discovery": {
+      "year": 1912,
+      "who": "Barnum Brown",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "crest",
+        "text": "Bore a solid spike-like crest projecting up and back from the skull."
+      },
+      {
+        "tag": "range",
+        "text": "One of the few dinosaur genera known from two continents."
+      }
+    ]
+  }
+}

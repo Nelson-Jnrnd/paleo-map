@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38858",
+  "taxonName": "Pachyrhinosaurus",
+  "source": {
+    "article": "Pachyrhinosaurus",
+    "url": "https://en.wikipedia.org/wiki/Pachyrhinosaurus",
+    "revid": 1360647794
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Thick-nosed lizard\"",
+    "oneLiner": "A horned ceratopsian with a massive bony nose boss.",
+    "description": "Pachyrhinosaurus was a centrosaurine horned dinosaur of Late Cretaceous North America (Alberta to Alaska), notable for a thick, flat bony boss over its nose and eyes instead of horns. It is known from over a dozen skulls and rich bonebeds.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~73.5–72.5 Ma",
+    "discovery": {
+      "year": 1950,
+      "who": "Charles M. Sternberg",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "boss",
+        "text": "Had a massive bony boss over the nose instead of a horn."
+      },
+      {
+        "tag": "range",
+        "text": "One species lived as far north as Arctic Alaska."
+      }
+    ]
+  }
+}

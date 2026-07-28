@@ -7,3 +7,6 @@ coverage/
 *.log
 .DS_Store
 scratch-*.png
+gallery-*.png
+enriched-*.png
+enrich-batch-preview.json

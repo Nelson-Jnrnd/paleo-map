@@ -19,6 +19,7 @@ import type {
   ImageType,
   MeasurementKind,
 } from './profile.js';
+import type { EnrichmentRecord } from './enrichment.js';
 
 export interface SnapshotMetadata {
   /** Immutable import date (ISO 8601) — surfaced in the UI (FONC-1170). */
@@ -99,6 +100,19 @@ export interface ReadProfile {
   measurements: ReadMeasurement[];
   /** Only images whose licence is honoured with a credit (DATA-007). */
   images: ReadImage[];
+  /**
+   * AI-assisted enrichment distilled from the taxon's Wikipedia article
+   * (SPEC-014 REQ-001), or null when no cached record covers this taxon. Content
+   * only — extract-don't-invent; the source article + revid live in the build
+   * cache, and the page discloses the AI assistance once (NFR-002).
+   */
+  enrichment: EnrichmentRecord | null;
+  /**
+   * Local path to the taxon's bundled PhyloPic silhouette (SPEC-014 REQ-004),
+   * resolved by name with a phylogenetic fallback to the nearest relative, or
+   * null when nothing resolved (the UI then uses a generic clade silhouette).
+   */
+  silhouette: string | null;
   /**
    * Total occurrences of this taxon across the whole snapshot (SPEC-008
    * AMEND-001). Precomputed so a stage-partitioned profile reports the taxon's

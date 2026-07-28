@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:53193",
+  "taxonName": "Gorgosaurus",
+  "source": {
+    "article": "Gorgosaurus",
+    "url": "https://en.wikipedia.org/wiki/Gorgosaurus",
+    "revid": 1364134172
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "GOR-guh-SOR-us",
+    "nameMeaning": "\"Dreadful lizard\"",
+    "oneLiner": "A large tyrannosaurid predator of Late Cretaceous Alberta.",
+    "description": "Gorgosaurus was a large bipedal tyrannosaurid predator of western North America, 8–9 m long, with dozens of sharp teeth and small two-fingered arms. It was a close relative of Albertosaurus and a more distant cousin of Tyrannosaurus.",
+    "bodyLength": {
+      "value": 9,
+      "unit": "m",
+      "low": 8,
+      "high": 9,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 3,
+      "unit": "t",
+      "low": 2,
+      "high": 3,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Campanian), ~76.5–73 Ma",
+    "discovery": {
+      "year": 1914,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "relative",
+        "text": "A close relative of Albertosaurus, and among the best-known tyrannosaurids."
+      },
+      {
+        "tag": "arms",
+        "text": "Like other tyrannosaurids, it had tiny two-fingered forelimbs."
+      }
+    ]
+  }
+}

@@ -28,6 +28,14 @@ import { partitionReadModel } from "../src/pipeline/partition.js";
 import { FixtureSourceClient } from "../src/pipeline/fixture-client.js";
 import { HttpSourceClient } from "../src/pipeline/http-client.js";
 import { bundleImages } from "./bundle_images.js";
+import {
+  applyEnrichment,
+  loadEnrichmentCache,
+} from "../src/pipeline/enrichment.js";
+import {
+  applySilhouettes,
+  loadSilhouetteIndex,
+} from "../src/pipeline/silhouettes.js";
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -39,10 +47,35 @@ async function main(): Promise<void> {
       "Ingesting live full-Mesozoic (Triassic/Jurassic/Cretaceous) from PBDB + Wikidata + Wikipedia/Commons…",
     );
 
-  const model = await buildReadModel(client);
+  const baseModel = await buildReadModel(client);
+
+  // SPEC-014 REQ-002: attach the committed enrichment cache (agent-authored by
+  // default). Read-only and offline — no LLM call here; a build with an empty
+  // cache simply ships no enrichment. A malformed cache file fails the build.
+  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const enrichmentDir = join(repoRoot, "enrichment");
+  const cache = await loadEnrichmentCache(enrichmentDir);
+  const enrichedModel = applyEnrichment(baseModel, cache);
+  const enriched = enrichedModel.profiles.filter(
+    (p) => p.enrichment !== null,
+  ).length;
+  console.log(
+    `Enrichment: ${cache.size} cached record(s) → ${enriched} profile(s) enriched`,
+  );
+
+  // SPEC-014 REQ-004: attach the committed PhyloPic silhouette index (bundled
+  // SVGs under public/data/silhouettes/). Offline — no PhyloPic calls here.
+  const silhouettes = await loadSilhouetteIndex(
+    join(repoRoot, "silhouettes", "index.json"),
+  );
+  const model = applySilhouettes(enrichedModel, silhouettes);
+  const withSil = model.profiles.filter((p) => p.silhouette !== null).length;
+  console.log(
+    `Silhouettes: ${Object.keys(silhouettes.taxa).length} indexed → ${withSil} profile(s) with a PhyloPic silhouette`,
+  );
+
   const partition = partitionReadModel(model);
 
-  const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
   const outDir = join(repoRoot, "public", "data");
   await mkdir(outDir, { recursive: true });
 
@@ -54,9 +87,12 @@ async function main(): Promise<void> {
     }
   }
 
-  // SPEC-012 REQ-002: bundle profile lead images into data/images/ and rewrite
-  // their imageUrl to local paths, so pictures are served offline with no
-  // runtime egress. Only in live mode — the committed fixture URLs are not real.
+  // SPEC-012 REQ-002 / SPEC-014 REQ-003: bundle profile images into data/images/
+  // and rewrite their imageUrl to local paths, so pictures are served offline
+  // with no runtime egress. Only in live mode — the committed fixture URLs are
+  // not real. A total-bytes cap keeps the gallery from ballooning the repo: every
+  // taxon's lead image is always bundled, gallery extras only until the cap.
+  const IMAGES_TOTAL_CAP_BYTES = 90 * 1024 * 1024;
   if (live) {
     // Wikimedia throttles rapid *bursts* of downloads (the images succeed in
     // isolation), so pace requests ~4/sec and retry the occasional throttle with
@@ -69,8 +105,11 @@ async function main(): Promise<void> {
       partition.reference,
       outDir,
       async (url) => {
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          await sleep(attempt === 1 ? 250 : 1500 * (attempt - 1));
+        // Wikimedia burst-throttles (429) even when every file is available, so
+        // be patient: a steady ~3/sec base pace, then exponential backoff on a
+        // throttle/5xx across several attempts. Only a real 4xx (404/403) gives up.
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          await sleep(attempt === 1 ? 350 : 2000 * 2 ** (attempt - 2));
           try {
             const res = await fetch(url, { headers: { "User-Agent": UA } });
             if (res.ok) return new Uint8Array(await res.arrayBuffer());
@@ -83,6 +122,7 @@ async function main(): Promise<void> {
         return null;
       },
       (msg) => console.log(msg),
+      IMAGES_TOTAL_CAP_BYTES,
     );
     console.log(
       `Bundled ${bundled} profile image(s) → ${join(outDir, "images")}`,
@@ -99,6 +139,13 @@ async function main(): Promise<void> {
     serializeCompact(partition.reference),
     "utf-8",
   );
+  // SPEC-014 AMEND-004: enrichment ships as its own artifact so the reference
+  // budget stays fixed while enrichment scales to every genus.
+  await writeFile(
+    join(outDir, "enrichment.json"),
+    serializeCompact(partition.enrichment),
+    "utf-8",
+  );
   for (const stage of partition.stages) {
     await writeFile(
       join(outDir, `stage-${stage.slug}.json`),
@@ -110,7 +157,7 @@ async function main(): Promise<void> {
   const withData = partition.index.stages.filter((s) => s.occurrenceCount > 0);
   console.log(
     `Wrote partitioned web data → ${outDir}\n` +
-      `  index.json + reference.json (${model.taxa.length} taxa, ${model.profiles.length} profiles)\n` +
+      `  index.json + reference.json + enrichment.json (${model.taxa.length} taxa, ${model.profiles.length} profiles, ${Object.keys(partition.enrichment).length} enriched)\n` +
       `  ${withData.length}/${partition.index.stages.length} stages with occurrences, ` +
       `${model.occurrences.length} occurrences total (retrievedOn ${model.metadata.retrievedOn})`,
   );

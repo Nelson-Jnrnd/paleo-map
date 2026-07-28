@@ -1,0 +1,64 @@
+{
+  "taxonId": "txn:38613",
+  "taxonName": "Tyrannosaurus",
+  "source": {
+    "article": "Tyrannosaurus",
+    "url": "https://en.wikipedia.org/wiki/Tyrannosaurus",
+    "revid": 1366019623
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Tyrant lizard\"; the species name rex means 'king' in Latin",
+    "oneLiner": "A giant bipedal carnivorous theropod, among the largest land predators known.",
+    "description": "Tyrannosaurus was a large bipedal carnivore with a massive skull balanced by a long, heavy tail and short but powerful two-clawed forelimbs. It ranged across western North America — then the island continent of Laramidia — at the very end of the Cretaceous, as the apex predator of its environment. Known from several nearly complete skeletons, it is one of the best-represented of all theropods.",
+    "bodyLength": {
+      "value": 12.4,
+      "unit": "m",
+      "low": 12.3,
+      "high": 13,
+      "confidence": "estimated"
+    },
+    "height": {
+      "value": 4,
+      "unit": "m",
+      "low": 3.7,
+      "high": 4,
+      "confidence": "estimated"
+    },
+    "mass": {
+      "value": 8.8,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (late Maastrichtian), ~69–66 Ma",
+    "discovery": {
+      "year": 1905,
+      "who": "Henry Fairfield Osborn",
+      "where": null
+    },
+    "notableFacts": [
+      {
+        "tag": "bite",
+        "text": "Its estimated bite force is the largest of any known land animal."
+      },
+      {
+        "tag": "range",
+        "text": "Ranged more widely than any other tyrannosaurid."
+      },
+      {
+        "tag": "preservation",
+        "text": "Soft tissue and proteins have been reported from at least one specimen."
+      },
+      {
+        "tag": "ecology",
+        "text": "Most likely both an apex predator and a scavenger."
+      }
+    ]
+  }
+}

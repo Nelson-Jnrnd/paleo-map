@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38608",
+  "taxonName": "Daspletosaurus",
+  "source": {
+    "article": "Daspletosaurus",
+    "url": "https://en.wikipedia.org/wiki/Daspletosaurus",
+    "revid": 1362884932
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "das-PLEET-uh-SOR-us",
+    "nameMeaning": "\"Frightful lizard\"",
+    "oneLiner": "A robust tyrannosaurid predator of Laramidia.",
+    "description": "Daspletosaurus was a large bipedal tyrannosaurid from Late Cretaceous Laramidia (western North America), closely related to the later, larger Tyrannosaurus. Several species are known from Alberta and Montana.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Campanian), ~79–74 Ma",
+    "discovery": {
+      "year": 1970,
+      "who": "Dale Russell",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "relative",
+        "text": "One of the closest known relatives of Tyrannosaurus."
+      },
+      {
+        "tag": "build",
+        "text": "More robustly built than the contemporary Gorgosaurus."
+      }
+    ]
+  }
+}

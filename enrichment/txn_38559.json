@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38559",
+  "taxonName": "Oviraptor",
+  "source": {
+    "article": "Oviraptor",
+    "url": "https://en.wikipedia.org/wiki/Oviraptor",
+    "revid": 1357658525
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Egg thief\"",
+    "oneLiner": "A small feathered oviraptorid, famously misjudged as an egg-thief.",
+    "description": "Oviraptor was a small, feathered oviraptorid from the Late Cretaceous of Mongolia, 1.6–2 m long, with a toothless beak and probably a head crest. It was named 'egg thief' because its first skeleton was found atop a nest of eggs — later shown to be its own nest, which it was brooding, not raiding.",
+    "bodyLength": {
+      "value": 2,
+      "unit": "m",
+      "low": 1.6,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 40,
+      "unit": "kg",
+      "low": 33,
+      "high": 40,
+      "confidence": "estimated"
+    },
+    "diet": "Omnivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1924,
+      "who": "Henry Fairfield Osborn",
+      "where": "Djadokhta Formation, Mongolia"
+    },
+    "notableFacts": [
+      {
+        "tag": "name",
+        "text": "'Egg thief' is a misnomer — the eggs it was found with were its own."
+      },
+      {
+        "tag": "brooding",
+        "text": "Later oviraptorid finds show these dinosaurs brooded their nests like birds."
+      },
+      {
+        "tag": "beak",
+        "text": "Had a toothless beak and probably a head crest."
+      }
+    ]
+  }
+}

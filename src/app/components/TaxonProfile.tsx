@@ -1,22 +1,24 @@
 /**
- * Taxon profile (SPEC-003 REQ-007). Reached in ≤2 actions from a visible
- * occurrence (occurrence row → Open taxon profile), and offers a single "Back to
- * map" action that preserves the selected age and filters (FONC-990/1000/1010/
- * 1020/1070/1080, CONS-460/470). Shows name, rank, validity (flagging non-valid
- * status with its citation — FONC-720), time range, a summary + biology block,
- * and the taxon's occurrences with modern and paleogeographic positions and
- * sources. Minimal profiles are labeled (FONC-1300) and missing fields read "Not
- * available" (PERF-180). SPEC-007 moved the summary/biology above the occurrence
- * list and retired the reconstructed and interpretative cues.
+ * Taxon profile (SPEC-003 REQ-007; SPEC-014 REQ-005 / AMEND-002 layout). Reached
+ * in ≤2 actions from a visible occurrence, with a single "Back to map" that
+ * preserves the selected age and filters. Laid out as the "spec sheet": a top bar
+ * (back + taxonomy breadcrumb navigation), an identity header (name · one-liner ·
+ * period · rank · validity), a two-column hero (large image gallery + a ruled
+ * at-a-glance spec table with the size-vs-human silhouette), the About block, the
+ * collapsed fossil-occurrence list, and a single sources footer.
  */
 
 import type { ReactElement } from "react";
 import type { ReadOccurrence, TimeRange } from "../../domain/index.js";
+import { MESOZOIC_STAGES } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange, NOT_AVAILABLE } from "../format.js";
 import { sourceReference } from "../sources.js";
 import { AttentionNote, MissingValue } from "./Cues.js";
 import { Illustration } from "./Illustration.js";
+import { TaxonEnrichment } from "./TaxonEnrichment.js";
+import { TaxonSpecTable } from "./TaxonSpecTable.js";
+import { TaxonomyTree } from "./TaxonomyTree.js";
 import { silhouetteForTaxon } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
 
@@ -24,120 +26,166 @@ interface TaxonProfileProps {
   api: ReadApi;
   taxonId: string;
   onBack: () => void;
+  /** Open another taxon's profile (SPEC-014 REQ-006: navigable ancestor links). */
+  onOpenTaxon: (taxonId: string) => void;
 }
 
-function taxonTimeRange(occurrences: readonly ReadOccurrence[]): {
-  range: TimeRange | null;
-  approximate: boolean;
-} {
+const PERIOD_TOKEN: Readonly<Record<string, string>> = {
+  Triassic: "var(--color-period-triassic)",
+  Jurassic: "var(--color-period-jurassic)",
+  Cretaceous: "var(--color-period-cretaceous)",
+};
+
+/** ICS period + colour token for the midpoint of a recorded span (AMEND-002). */
+function periodForRange(
+  range: TimeRange | null,
+): { name: string; colour: string } | null {
+  if (!range) return null;
+  const mid = (range.minMa + range.maxMa) / 2;
+  const stage = MESOZOIC_STAGES.find((s) => mid <= s.startMa && mid >= s.endMa);
+  if (!stage) return null;
+  return {
+    name: stage.period,
+    colour: PERIOD_TOKEN[stage.period] ?? "var(--color-text-muted)",
+  };
+}
+
+function taxonTimeRange(
+  occurrences: readonly ReadOccurrence[],
+): TimeRange | null {
   let minMa = Infinity;
   let maxMa = -Infinity;
-  let approximate = false;
   for (const o of occurrences) {
     const r = o.timeRange.value;
     if (!r) continue;
     minMa = Math.min(minMa, r.minMa);
     maxMa = Math.max(maxMa, r.maxMa);
-    if (o.timeRange.provenance.approximate) approximate = true;
   }
-  if (!Number.isFinite(minMa)) return { range: null, approximate };
-  return { range: { minMa, maxMa }, approximate };
+  return Number.isFinite(minMa) ? { minMa, maxMa } : null;
 }
 
 export function TaxonProfile({
   api,
   taxonId,
   onBack,
+  onOpenTaxon,
 }: TaxonProfileProps): ReactElement {
   const taxon = api.getTaxon(taxonId);
   const profile = api.getProfile(taxonId);
   const occurrences = api.listOccurrences({ taxonId });
-  // Taxon lineage index, for resolving the taxon's major-group silhouette
-  // (SPEC-012 REQ-004).
   const taxaById = new Map(api.listTaxa().map((t) => [t.id, t]));
-  // Prefer the whole-snapshot aggregates (SPEC-008 AMEND-001) so the time span
-  // and count reflect the taxon's full record even when only one stage is
-  // loaded; fall back to the loaded occurrences when no profile is present.
-  const windowed = taxonTimeRange(occurrences);
-  const range = profile?.timeSpan ?? windowed.range;
+  // Whole-snapshot aggregates (SPEC-008 AMEND-001) so span + count reflect the
+  // taxon's full record even when only one stage is loaded.
+  const range = profile?.timeSpan ?? taxonTimeRange(occurrences);
   const totalCount = profile?.occurrenceCount ?? occurrences.length;
+  const formationCount = new Set(
+    occurrences.map((o) => o.formation).filter((f): f is string => Boolean(f)),
+  ).size;
 
   if (!taxon) {
-    // Real data holds occurrences identified only to an indeterminate or higher
-    // rank (e.g. "Theropoda indet.") with no genus-level taxon record. Show an
-    // honest, navigable profile rather than a dead end (charter §2/§7).
     const fallbackName = occurrences[0]?.taxonName ?? "Unavailable";
     return (
       <section
         className={styles.profile}
         aria-label={`Taxon profile: ${fallbackName}`}
       >
-        <button type="button" className={styles.back} onClick={onBack}>
-          ← Back to map
-        </button>
-        <header className={styles.profileHeader}>
-          <h1 className="sciName">{fallbackName}</h1>
-          <div className={styles.profileMeta}>
-            <AttentionNote>
-              Indeterminate identification — no genus-level taxon record
-            </AttentionNote>
-          </div>
+        <div className={styles.topbar}>
+          <button type="button" className={styles.back} onClick={onBack}>
+            ← Back to map
+          </button>
+        </div>
+        <header className={styles.idHeader}>
+          <h1 className={`sciName ${styles.idName}`}>{fallbackName}</h1>
+          <AttentionNote>
+            Indeterminate identification — no genus-level taxon record
+          </AttentionNote>
         </header>
         <Illustration
           taxonName={fallbackName}
-          image={undefined}
-          imageSource={null}
+          images={[]}
           silhouette={silhouetteForTaxon(
             occurrences[0]?.taxonId ?? "",
             taxaById,
           )}
-          bodyLengthM={null}
+          phylopicSilhouette={null}
         />
-        <div className={styles.section}>
-          <span className={styles.statLabel}>Occurrences</span>
-          <p className={styles.fieldValue}>
-            <span className="mono">{occurrences.length}</span> occurrence(s)
-            recorded under this identification.
-          </p>
-        </div>
+        <p className={styles.block}>
+          <span className="mono">{occurrences.length}</span> occurrence(s)
+          recorded under this identification.
+        </p>
       </section>
     );
   }
 
   const validity = taxon.validity.value;
   const isMinimal = profile?.contentLevel === "OccurrenceOnly";
-
-  // Illustration inputs (SPEC-012): the lead showable image (licence + credit
-  // already guaranteed by DATA-007), the group silhouette fallback, and the body
-  // length for the size scale (metres; omitted when unknown).
-  const leadImage = profile?.images[0];
+  const enrichment = profile?.enrichment ?? null;
+  const galleryImages = profile?.images ?? [];
   const silhouette = silhouetteForTaxon(taxonId, taxaById);
-  const bodyLength = profile?.measurements.find((m) => m.kind === "BodyLength");
+  const phylopicSilhouette = profile?.silhouette ?? null;
+  const period = periodForRange(range);
+
+  const pbdbLength = profile?.measurements.find((m) => m.kind === "BodyLength");
   const bodyLengthM =
-    bodyLength && bodyLength.value.value !== null
-      ? bodyLength.value.value
-      : null;
+    enrichment?.bodyLength?.value ??
+    (pbdbLength && pbdbLength.value.value !== null
+      ? pbdbLength.value.value
+      : null);
+  const pbdbDiet =
+    profile?.attributes.find((a) => a.kind === "Diet")?.value.value ?? null;
 
   return (
     <section
       className={styles.profile}
       aria-label={`Taxon profile: ${taxon.scientificName}`}
     >
-      <button type="button" className={styles.back} onClick={onBack}>
-        ← Back to map
-      </button>
+      <div className={styles.topbar}>
+        <button type="button" className={styles.back} onClick={onBack}>
+          ← Back to map
+        </button>
+        <TaxonomyTree
+          taxonId={taxonId}
+          taxaById={taxaById}
+          onOpenTaxon={onOpenTaxon}
+        />
+      </div>
 
-      <header className={styles.profileHeader}>
-        <h1 className="sciName">{taxon.scientificName}</h1>
-        <div className={styles.profileMeta}>
+      <header className={styles.idHeader}>
+        <h1 className={`sciName ${styles.idName}`}>
+          {taxon.scientificName}
+          {enrichment?.commonName && (
+            <span className={styles.idCommon}>{enrichment.commonName}</span>
+          )}
+        </h1>
+        {enrichment?.oneLiner && (
+          <p className={styles.idOneLiner}>{enrichment.oneLiner}</p>
+        )}
+        <div className={styles.idMeta}>
+          {period && (
+            <span className={styles.periodTag}>
+              <span
+                className={styles.periodDot}
+                style={{ background: period.colour }}
+              />
+              {period.name}
+            </span>
+          )}
+          {range && (
+            <>
+              <span className={styles.metaSep}>·</span>
+              <span className="mono">{formatMaRange(range)}</span>
+            </>
+          )}
+          <span className={styles.metaSep}>·</span>
           <span>{taxon.rank}</span>
+          <span className={styles.metaSep}>·</span>
           {validity && validity !== "Valid" ? (
             <AttentionNote>
               {validity}
-              {taxon.acceptedPer ? ` — accepted per ${taxon.acceptedPer}` : ""}
+              {taxon.acceptedPer ? ` — per ${taxon.acceptedPer}` : ""}
             </AttentionNote>
           ) : (
-            <span className={styles.source}>
+            <span className={styles.valid}>
               Valid{taxon.acceptedPer ? ` · per ${taxon.acceptedPer}` : ""}
             </span>
           )}
@@ -147,79 +195,44 @@ export function TaxonProfile({
         )}
       </header>
 
-      <Illustration
-        taxonName={taxon.scientificName}
-        image={leadImage}
-        imageSource={
-          leadImage ? (
-            <a
-              className={styles.sourceLink}
-              href={leadImage.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Commons
-            </a>
-          ) : null
-        }
-        silhouette={silhouette}
-        bodyLengthM={bodyLengthM}
-      />
-
-      <div className={styles.section}>
-        {/* The taxon's full recorded span across all occurrences (SPEC-008
-            AMEND-001), labelled so it is not mistaken for a contradiction with
-            the per-age occurrence rows below (SPEC-011 REQ-005). */}
-        <span className={styles.statLabel}>
-          Recorded span · all occurrences
-        </span>
-        <p className={styles.fieldValue}>
-          <span className="mono">{formatMaRange(range)}</span>
-        </p>
+      <div className={styles.heroGrid}>
+        <Illustration
+          taxonName={taxon.scientificName}
+          images={galleryImages}
+          silhouette={silhouette}
+          phylopicSilhouette={phylopicSilhouette}
+        />
+        <TaxonSpecTable
+          taxonName={taxon.scientificName}
+          enrichment={enrichment}
+          pbdbDiet={pbdbDiet}
+          range={range}
+          occurrenceCount={totalCount}
+          bodyLengthM={bodyLengthM}
+          silhouette={phylopicSilhouette}
+        />
       </div>
 
-      <div className={styles.section}>
-        <span className={styles.statLabel}>Summary &amp; biology</span>
+      {enrichment ? (
+        <TaxonEnrichment enrichment={enrichment} />
+      ) : profile?.summary?.value ? (
+        <div className={styles.block}>
+          <h3 className={styles.sectionH}>About</h3>
+          <p className={styles.blurb}>{profile.summary.value}</p>
+        </div>
+      ) : null}
 
-        {profile?.summary?.value ? (
-          <p className={styles.fieldValue}>{profile.summary.value}</p>
-        ) : (
-          <p className={styles.fieldValue}>
-            Summary: <MissingValue />
-          </p>
-        )}
-
-        <dl className={styles.fieldGrid}>
-          {(profile?.attributes ?? []).map((attr) => (
-            <div key={attr.kind} style={{ display: "contents" }}>
-              <dt className={styles.fieldLabel}>{attr.kind}</dt>
-              <dd className={styles.fieldValue}>
-                {attr.value.value ?? NOT_AVAILABLE}
-              </dd>
-            </div>
-          ))}
-          {(profile?.measurements ?? []).map((m) => (
-            <div key={m.kind} style={{ display: "contents" }}>
-              <dt className={styles.fieldLabel}>{m.kind}</dt>
-              <dd className={styles.fieldValue}>
-                {m.value.value !== null ? (
-                  <span className="mono">
-                    {m.value.value} {m.unit}
-                    {m.lowerBound !== null && m.upperBound !== null
-                      ? ` (${m.lowerBound}–${m.upperBound} ${m.unit})`
-                      : ""}
-                  </span>
-                ) : (
-                  <MissingValue />
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className={styles.section}>
-        <span className={styles.statLabel}>Occurrences ({totalCount})</span>
+      {/* SPEC-014 REQ-007: occurrences collapsed behind a summary. */}
+      <details className={styles.block}>
+        <summary className={styles.collapsibleHead}>
+          <span>Fossil occurrences ({totalCount})</span>
+          <span className={styles.occSummary}>
+            {" "}
+            · {formationCount} formation{formationCount === 1 ? "" : "s"} ·
+            recorded span <span className="mono">{formatMaRange(range)}</span> —
+            expand
+          </span>
+        </summary>
         {occurrences.length < totalCount && (
           <p className={styles.source}>
             Showing {occurrences.length} at the selected age; step the timeline
@@ -262,7 +275,7 @@ export function TaxonProfile({
             );
           })}
         </ul>
-      </div>
+      </details>
     </section>
   );
 }

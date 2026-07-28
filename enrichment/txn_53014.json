@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:53014",
+  "taxonName": "Gryposaurus",
+  "source": {
+    "article": "Gryposaurus",
+    "url": "https://en.wikipedia.org/wiki/Gryposaurus",
+    "revid": 1357652182
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Hook-nosed lizard\"",
+    "oneLiner": "A duck-billed hadrosaur with a distinctive arched nose.",
+    "description": "Gryposaurus was a duck-billed hadrosaur of Late Cretaceous North America, easily recognised by its narrow, arching 'Roman nose' nasal hump. It is known from many skulls, skeletons and even skin impressions showing pyramidal scales along the back.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~80–75 Ma",
+    "discovery": {
+      "year": 1914,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "nose",
+        "text": "Named for its distinctive narrow, arched 'Roman nose' nasal hump."
+      },
+      {
+        "tag": "skin",
+        "text": "Skin impressions show pyramidal scales along its back."
+      }
+    ]
+  }
+}

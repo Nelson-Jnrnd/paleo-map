@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38787",
+  "taxonName": "Stegoceras",
+  "source": {
+    "article": "Stegoceras",
+    "url": "https://en.wikipedia.org/wiki/Stegoceras",
+    "revid": 1362368020
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Horn roof\"",
+    "oneLiner": "A small, dome-headed pachycephalosaur.",
+    "description": "Stegoceras was a small bipedal pachycephalosaur ('dome-headed' dinosaur) of Late Cretaceous North America, 2–2.5 m long, with a thick, broad dome on top of its skull. It is one of the better-known pachycephalosaurs.",
+    "bodyLength": {
+      "value": 2.5,
+      "unit": "m",
+      "low": 2,
+      "high": 2.5,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 40,
+      "unit": "kg",
+      "low": 10,
+      "high": 40,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~77.5–74 Ma",
+    "discovery": {
+      "year": 1902,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "dome",
+        "text": "Had a thick bony dome on its skull, likely used in display or combat."
+      },
+      {
+        "tag": "known",
+        "text": "One of the best-known dome-headed dinosaurs."
+      }
+    ]
+  }
+}

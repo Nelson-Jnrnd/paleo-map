@@ -132,6 +132,9 @@ export const DINOSAURIA_MAASTRICHTIAN: SourceSubset = {
     // No licence → cannot be honoured → dropped to the image-fallback state.
     { taxonId: 'txn:tyrannosaurus', type: 'FossilPhoto', credit: 'Unknown', licence: null, imageUrl: 'https://upload.wikimedia.org/thumb/Trex-skull.jpg/320px-Trex-skull.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Trex-skull.jpg' },
     { taxonId: 'txn:triceratops', type: 'SkeletalMount', credit: 'Natural History Museum', licence: 'CC BY 2.0', imageUrl: 'https://upload.wikimedia.org/thumb/Triceratops-mount.jpg/320px-Triceratops-mount.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Triceratops-mount.jpg' },
+    // A restoration whose sourceUrl sorts *after* the mount, so the gallery order
+    // (SPEC-014 AMEND-001: restoration leads) must come from the role, not the URL.
+    { taxonId: 'txn:triceratops', type: 'ArtisticReconstruction', credit: 'Zoe Artist', licence: 'CC BY-SA 4.0', imageUrl: 'https://upload.wikimedia.org/thumb/Zzz-triceratops-life.jpg/320px-Zzz-triceratops-life.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Zzz-triceratops-life.jpg' },
   ],
 
   editorial: [

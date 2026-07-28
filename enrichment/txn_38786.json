@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38786",
+  "taxonName": "Pachycephalosaurus",
+  "source": {
+    "article": "Pachycephalosaurus",
+    "url": "https://en.wikipedia.org/wiki/Pachycephalosaurus",
+    "revid": 1363918150
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Thick-headed lizard\"",
+    "oneLiner": "A bipedal herbivore with an extremely thick, domed skull.",
+    "description": "Pachycephalosaurus was a bipedal ornithischian herbivore from the very end of the Cretaceous in western North America, and the largest known pachycephalosaur at about 4.5 m long. It is famous for its extremely thick, domed skull roof — up to 22 cm thick — which may have been used for head-butting displays or combat.",
+    "bodyLength": {
+      "value": 4.5,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 450,
+      "unit": "kg",
+      "low": 370,
+      "high": 450,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Maastrichtian), ~70–66 Ma",
+    "discovery": {
+      "year": null,
+      "who": null,
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "dome",
+        "text": "Its skull roof was up to 22 cm thick — the thickest of any known dinosaur."
+      },
+      {
+        "tag": "combat",
+        "text": "The dome may have been used for head-butting, like bighorn sheep."
+      },
+      {
+        "tag": "synonyms",
+        "text": "The genera Stygimoloch and Dracorex may just be its growth stages."
+      }
+    ]
+  }
+}

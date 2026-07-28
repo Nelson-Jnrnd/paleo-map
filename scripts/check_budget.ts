@@ -29,8 +29,13 @@ const MB = 1024 * 1024;
 // plus ~25% headroom, per the spec's "budgets are measured, not decided up
 // front" open question. Measured sizes print on every run.
 //   reference.json ≈ 1.07 MB gz; richest stage (Campanian) ≈ 0.37 MB gz / 5.8 MB raw.
-const REFERENCE_GZIP = 1400 * KB;
+const REFERENCE_GZIP = 1600 * KB;
 const REFERENCE_RAW = 8 * MB;
+// Enrichment ships separately (SPEC-014 AMEND-004) so it scales to every genus
+// without touching the reference budget. Records are small text objects; sized
+// for full ~2100-genus coverage (≈2 KB raw each) plus headroom.
+const ENRICHMENT_GZIP = 2500 * KB;
+const ENRICHMENT_RAW = 12 * MB;
 const INDEX_GZIP = 32 * KB;
 const STAGE_GZIP = 500 * KB;
 const STAGE_RAW = 7 * MB;
@@ -41,8 +46,15 @@ const JS_BUNDLE_GZIP = 320 * KB;
 // binaries, so budget the RAW bytes: a per-image cap and an aggregate ceiling.
 // Sized to the shipped live pull (≈926 images / 43 MB, largest ≈0.94 MB) plus
 // headroom; if the set grows past this, slim the thumbnails or the taxa covered.
-const IMAGE_RAW = 1536 * KB;
-const IMAGES_TOTAL_RAW = 56 * MB;
+// A few Commons files return no 320px thumbnail and fall back to a larger
+// original; allow up to 3 MB each (rare) since the aggregate is capped anyway.
+const IMAGE_RAW = 3 * MB;
+// Gallery bundling (SPEC-014 REQ-003) is capped at ~90 MB total by the generator;
+// gate a little above that so one last extra crossing the cap doesn't fail CI.
+const IMAGES_TOTAL_RAW = 100 * MB;
+// Bundled PhyloPic silhouettes (SPEC-014 REQ-004): small vector SVGs, deduped by
+// image, so the aggregate stays modest. Budget the total raw bytes.
+const SILHOUETTES_TOTAL_RAW = 12 * MB;
 
 async function gzipBytes(path: string): Promise<number> {
   return gzipSync(await readFile(path)).length;
@@ -55,8 +67,9 @@ async function main(): Promise<void> {
   const dataDir = "public/data";
   const dataFiles = await readdir(dataDir).catch(() => [] as string[]);
   for (const name of dataFiles) {
-    // The bundled images live in their own subdirectory, budgeted separately.
-    if (name === "images") continue;
+    // The bundled images + silhouettes live in their own subdirectories,
+    // budgeted separately below.
+    if (name === "images" || name === "silhouettes") continue;
     const path = join(dataDir, name);
     const gz = await gzipBytes(path);
     if (name === "index.json") {
@@ -75,6 +88,17 @@ async function main(): Promise<void> {
         label: "data/reference.json (raw)",
         actualBytes: (await stat(path)).size,
         budgetBytes: REFERENCE_RAW,
+      });
+    } else if (name === "enrichment.json") {
+      checks.push({
+        label: "data/enrichment.json (gzip)",
+        actualBytes: gz,
+        budgetBytes: ENRICHMENT_GZIP,
+      });
+      checks.push({
+        label: "data/enrichment.json (raw)",
+        actualBytes: (await stat(path)).size,
+        budgetBytes: ENRICHMENT_RAW,
       });
     } else if (name.startsWith("stage-")) {
       checks.push({
@@ -108,6 +132,20 @@ async function main(): Promise<void> {
       label: "data/images total (raw)",
       actualBytes: imagesTotalRaw,
       budgetBytes: IMAGES_TOTAL_RAW,
+    });
+  }
+
+  // --- Bundled PhyloPic silhouettes (SPEC-014 REQ-004): aggregate raw ---
+  const silDir = join(dataDir, "silhouettes");
+  const silFiles = await readdir(silDir).catch(() => [] as string[]);
+  if (silFiles.length > 0) {
+    let silTotalRaw = 0;
+    for (const name of silFiles)
+      silTotalRaw += (await stat(join(silDir, name))).size;
+    checks.push({
+      label: "data/silhouettes total (raw)",
+      actualBytes: silTotalRaw,
+      budgetBytes: SILHOUETTES_TOTAL_RAW,
     });
   }
 

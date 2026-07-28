@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:54533",
+  "taxonName": "Carnotaurus",
+  "source": {
+    "article": "Carnotaurus",
+    "url": "https://en.wikipedia.org/wiki/Carnotaurus",
+    "revid": 1364654235
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Meat-eating bull\", for its bull-like brow horns",
+    "oneLiner": "A horned, tiny-armed abelisaurid predator of Cretaceous South America.",
+    "description": "Carnotaurus was a lightly built bipedal predator from the Late Cretaceous of Argentina, 7.5–8 m long. It is unique among carnivorous dinosaurs in having two thick horns above its eyes, on a deep skull and muscular neck. It had extremely small, vestigial forelimbs and long, slender legs, and its skin is preserved as a mosaic of small scales.",
+    "bodyLength": {
+      "value": 8,
+      "unit": "m",
+      "low": 7.5,
+      "high": 8,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2.1,
+      "unit": "t",
+      "low": 1.3,
+      "high": 2.1,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Maastrichtian), ~69–66 Ma",
+    "discovery": {
+      "year": 1984,
+      "who": "José Bonaparte",
+      "where": "Chubut Province, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "horns",
+        "text": "The only carnivorous dinosaur with two thick brow horns."
+      },
+      {
+        "tag": "arms",
+        "text": "Had extremely small, vestigial forelimbs — even shorter than T. rex's."
+      },
+      {
+        "tag": "skin",
+        "text": "Known from extensive skin impressions of small, non-overlapping scales."
+      }
+    ]
+  }
+}

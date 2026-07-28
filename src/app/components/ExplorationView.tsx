@@ -279,6 +279,7 @@ export function ExplorationView({
           api={stageApi}
           taxonId={state.profileTaxonId}
           onBack={() => dispatch({ type: "backToMap" })}
+          onOpenTaxon={(taxonId) => dispatch({ type: "openProfile", taxonId })}
         />
       </div>
     );

@@ -1,19 +1,15 @@
 /**
- * Taxon-profile illustration (SPEC-012 REQ-003/004/005). Shows the licensed
- * Wikipedia/Commons lead image with its type, credit, licence and a source link
- * — provenance always visible, never behind a hover (charter §4/§5, FONC-1190/
- * 1200). When no showable image exists (or it fails to load) it falls back to a
- * generic, clearly-labelled clade silhouette (FONC-1240). An optional
- * human-relative size scale makes a body length tangible.
+ * Taxon-profile illustration (SPEC-012 → SPEC-014 REQ-003/004/005, AMEND-002). A
+ * large lead image with a thumbnail strip to switch it; the image's type, credit,
+ * licence and Commons link are revealed on hover/focus (a persistent ⓘ marks that
+ * provenance is there — AMEND-002). When no showable image exists it falls back
+ * to the taxon's bundled PhyloPic silhouette, else a generic clade silhouette.
  */
 
-import { useState, type ReactElement, type ReactNode } from "react";
+import { useState, type ReactElement } from "react";
 import type { ImageType, ReadImage } from "../../domain/index.js";
 import type { CladeSilhouette } from "./cladeSilhouette.js";
 import styles from "./exploration.module.css";
-
-/** Rough reference stature for the size comparison (metres). */
-const HUMAN_HEIGHT_M = 1.7;
 
 const IMAGE_TYPE_LABEL: Readonly<Record<ImageType, string>> = {
   FossilPhoto: "Fossil photo",
@@ -24,102 +20,112 @@ const IMAGE_TYPE_LABEL: Readonly<Record<ImageType, string>> = {
 
 interface IllustrationProps {
   taxonName: string;
-  /** The lead showable image, if any (licence + credit already guaranteed). */
-  image: ReadImage | undefined;
-  /** The Commons source-page link node for the image's source. */
-  imageSource: ReactNode;
-  /** Generic group silhouette used when there is no showable image. */
+  /** The showable images for this taxon (licence + credit already guaranteed). */
+  images: readonly ReadImage[];
+  /** Generic group silhouette used when there is no taxon silhouette or image. */
   silhouette: CladeSilhouette;
-  /** Body length in metres, or null when unknown (no invented number). */
-  bodyLengthM: number | null;
+  /** Bundled PhyloPic silhouette path for this taxon, or null (SPEC-014 REQ-004). */
+  phylopicSilhouette: string | null;
 }
 
-function SizeScale({
-  taxonName,
-  lengthM,
+function SilhouetteFallback({
+  src,
+  alt,
+  note,
 }: {
-  taxonName: string;
-  lengthM: number;
+  src: string;
+  alt: string;
+  note: string;
 }): ReactElement {
-  const maxM = Math.max(lengthM, HUMAN_HEIGHT_M);
-  const dinoPct = (lengthM / maxM) * 100;
-  const humanPct = (HUMAN_HEIGHT_M / maxM) * 100;
   return (
-    <div className={styles.sizeScale}>
-      <span className={styles.statLabel}>Size vs human</span>
-      <div
-        className={styles.sizeBars}
-        role="img"
-        aria-label={`${taxonName} is about ${lengthM} metres long, compared with a ${HUMAN_HEIGHT_M} metre human.`}
-      >
-        <span className={styles.sizeRow}>
-          <span
-            className={styles.sizeBarDino}
-            style={{ width: `${dinoPct}%` }}
-          />
-          <span className={`${styles.sizeBarValue} mono`}>{lengthM} m</span>
-        </span>
-        <span className={styles.sizeRow}>
-          <span
-            className={styles.sizeBarHuman}
-            style={{ width: `${humanPct}%` }}
-          />
-          <span className={`${styles.sizeBarValue} mono`}>
-            {HUMAN_HEIGHT_M} m human
-          </span>
-        </span>
+    <figure className={styles.leadFigure}>
+      <div className={styles.silhouetteBox}>
+        <img
+          className={styles.silhouetteImg}
+          src={src}
+          alt={alt}
+          loading="lazy"
+        />
       </div>
-    </div>
+      <figcaption className={styles.source}>{note}</figcaption>
+    </figure>
   );
 }
 
 export function Illustration({
   taxonName,
-  image,
-  imageSource,
+  images,
   silhouette,
-  bodyLengthM,
+  phylopicSilhouette,
 }: IllustrationProps): ReactElement {
-  const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(image?.imageUrl) && !imageFailed;
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
+  const [leadIdx, setLeadIdx] = useState(0);
+  const shown = images.filter(
+    (img) => img.imageUrl && !failed.has(img.imageUrl),
+  );
+
+  if (shown.length === 0) {
+    return phylopicSilhouette ? (
+      <SilhouetteFallback
+        src={phylopicSilhouette}
+        alt={`Silhouette of ${taxonName}`}
+        note="Silhouette (PhyloPic) — not a photograph of this taxon"
+      />
+    ) : (
+      <SilhouetteFallback
+        src={silhouette.src}
+        alt={`Generic ${silhouette.group} silhouette`}
+        note={`Generic ${silhouette.group} silhouette — not a photograph of this taxon`}
+      />
+    );
+  }
+
+  const lead = shown[Math.min(leadIdx, shown.length - 1)]!;
 
   return (
-    <div className={styles.section}>
-      <span className={styles.statLabel}>Illustration</span>
-      {showImage && image ? (
-        <figure className={styles.illustration}>
+    <div className={styles.galleryWrap}>
+      <figure className={styles.leadFigure}>
+        <div className={styles.leadFrame}>
           <img
-            className={styles.illustrationImg}
-            src={image.imageUrl}
-            alt={`${IMAGE_TYPE_LABEL[image.type]} of ${taxonName}`}
+            className={styles.leadImg}
+            src={lead.imageUrl}
+            alt={`${IMAGE_TYPE_LABEL[lead.type]} of ${taxonName}`}
             loading="lazy"
-            onError={() => setImageFailed(true)}
+            onError={() =>
+              setFailed((prev) => new Set(prev).add(lead.imageUrl))
+            }
           />
-          <figcaption className={styles.illustrationCaption}>
-            <span>{IMAGE_TYPE_LABEL[image.type]}</span>
-            <span className={styles.source}>
-              {image.credit} · {image.licence} · {imageSource}
-            </span>
+          <span className={styles.credInfo} aria-hidden="true">
+            i
+          </span>
+          <figcaption className={styles.credReveal}>
+            {IMAGE_TYPE_LABEL[lead.type]} · {lead.credit} · {lead.licence} ·{" "}
+            <a
+              className={styles.credLink}
+              href={lead.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Commons
+            </a>
           </figcaption>
-        </figure>
-      ) : (
-        <figure className={styles.illustration}>
-          <img
-            className={styles.silhouetteImg}
-            src={silhouette.src}
-            alt={`Generic ${silhouette.group} silhouette`}
-            loading="lazy"
-          />
-          <figcaption className={styles.illustrationCaption}>
-            <span className={styles.source}>
-              Generic {silhouette.group} silhouette — not a photograph of this
-              taxon
-            </span>
-          </figcaption>
-        </figure>
-      )}
-      {bodyLengthM !== null && bodyLengthM > 0 && (
-        <SizeScale taxonName={taxonName} lengthM={bodyLengthM} />
+        </div>
+      </figure>
+      {shown.length > 1 && (
+        <div className={styles.thumbStrip}>
+          {shown.map((img, i) => (
+            <button
+              key={img.imageUrl}
+              type="button"
+              className={`${styles.thumb} ${i === Math.min(leadIdx, shown.length - 1) ? styles.thumbOn : ""}`}
+              onClick={() => setLeadIdx(i)}
+              aria-label={`Show ${IMAGE_TYPE_LABEL[img.type]}`}
+              aria-pressed={i === leadIdx}
+            >
+              <img src={img.imageUrl} alt="" loading="lazy" />
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

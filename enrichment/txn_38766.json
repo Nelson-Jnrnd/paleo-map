@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38766",
+  "taxonName": "Parasaurolophus",
+  "source": {
+    "article": "Parasaurolophus",
+    "url": "https://en.wikipedia.org/wiki/Parasaurolophus",
+    "revid": 1365892867
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Beside crested lizard\" (after Saurolophus)",
+    "oneLiner": "A duck-billed hadrosaur famous for its long, curved head crest.",
+    "description": "Parasaurolophus was a large hadrosaurid ('duck-billed' dinosaur) from the Late Cretaceous of western North America, over 9 m long. It is known for its long, curved, tube-like cranial crest, likely used for visual display and to produce resonating calls. It could move on two legs or four.",
+    "bodyLength": {
+      "value": 9,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 5,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~76.5–73 Ma",
+    "discovery": {
+      "year": 1922,
+      "who": "William Parks",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "crest",
+        "text": "Its long, curved, hollow crest may have resonated like a trumpet."
+      },
+      {
+        "tag": "function",
+        "text": "The crest likely served for species and sex recognition and acoustic signalling."
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38854",
+  "taxonName": "Centrosaurus",
+  "source": {
+    "article": "Centrosaurus",
+    "url": "https://en.wikipedia.org/wiki/Centrosaurus",
+    "revid": 1341159086
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "SEN-troh-SOR-us",
+    "nameMeaning": "\"Pointed lizard\", for the hornlets on its frill",
+    "oneLiner": "A horned ceratopsian known from immense Alberta bonebeds.",
+    "description": "Centrosaurus was a centrosaurine horned dinosaur from the Late Cretaceous of Alberta, Canada, with a single nasal horn and small hornlets along the margin of its frill. It is known from vast bonebeds containing thousands of individuals — possibly herds that drowned crossing flooded rivers.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~76.5–75.5 Ma",
+    "discovery": {
+      "year": null,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "bonebeds",
+        "text": "Known from vast bonebeds with thousands of individuals — likely mass-drowned herds."
+      },
+      {
+        "tag": "frill",
+        "text": "Named for the small hornlets along the margin of its frill."
+      }
+    ]
+  }
+}

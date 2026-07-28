@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38598",
+  "taxonName": "Spinosaurus",
+  "source": {
+    "article": "Spinosaurus",
+    "url": "https://en.wikipedia.org/wiki/Spinosaurus",
+    "revid": 1366016288
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Spine lizard\"",
+    "oneLiner": "A giant sail-backed, semiaquatic fish-eating theropod.",
+    "description": "Spinosaurus was among the largest known terrestrial carnivores, with a long, low, narrow crocodile-like skull bearing straight conical teeth, robust clawed forelimbs, short legs, and a paddle-like tail. Its trademark neural spines, over 1.65 m long, likely supported a skin sail. It lived in Cretaceous North Africa and ate both aquatic and terrestrial prey.",
+    "bodyLength": {
+      "value": 14,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 7.4,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Cenomanian), ~100–94 Ma",
+    "discovery": {
+      "year": 1912,
+      "who": "Ernst Stromer (described 1915)",
+      "where": "Egypt"
+    },
+    "notableFacts": [
+      {
+        "tag": "sail",
+        "text": "Its tall neural spines (over 1.65 m) likely supported a skin sail."
+      },
+      {
+        "tag": "diet",
+        "text": "Ate both aquatic and terrestrial prey, with a crocodile-like snout."
+      },
+      {
+        "tag": "history",
+        "text": "The original 1912 remains were destroyed in World War II; new material emerged in the 21st century."
+      }
+    ]
+  }
+}

@@ -46,6 +46,7 @@ function atlasFetchMock(partition: AtlasPartition): {
     calls.push(url);
     if (url.endsWith("data/index.json")) return ok(partition.index);
     if (url.endsWith("data/reference.json")) return ok(partition.reference);
+    if (url.endsWith("data/enrichment.json")) return ok(partition.enrichment);
     const m = url.match(/stage-([a-z0-9-]+)\.json$/);
     if (m) return ok({ occurrences: bySlug.get(m[1]!)?.occurrences ?? [] });
     return { ok: false, headers: { get: noHeader }, json: async () => ({}) };
@@ -65,6 +66,7 @@ test("boot fetches only the index and reference", async () => {
   expect(calls.filter((u) => u.includes("data/"))).toEqual([
     "data/index.json",
     "data/reference.json",
+    "data/enrichment.json",
   ]);
 
   const entry = boot.index.stages.find((s) => s.name === "Maastrichtian")!;

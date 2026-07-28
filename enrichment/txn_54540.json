@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:54540",
+  "taxonName": "Giganotosaurus",
+  "source": {
+    "article": "Giganotosaurus",
+    "url": "https://en.wikipedia.org/wiki/Giganotosaurus",
+    "revid": 1363165155
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "GIG-uh-NOH-tuh-SOR-us",
+    "nameMeaning": "\"Giant southern lizard\"",
+    "oneLiner": "One of the largest carnivorous dinosaurs, from Patagonia.",
+    "description": "Giganotosaurus was a giant carcharodontosaurid theropod of Late Cretaceous Argentina and one of the largest known land carnivores, roughly 12–13 m long. Its holotype is about 70% complete, making it one of the better-known giant predators of the Southern Hemisphere.",
+    "bodyLength": {
+      "value": 13,
+      "unit": "m",
+      "low": 12,
+      "high": 13,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 8,
+      "unit": "t",
+      "low": 4.2,
+      "high": 13.8,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Cenomanian), ~100–95 Ma",
+    "discovery": {
+      "year": 1993,
+      "who": "Rubén Carolini",
+      "where": "Patagonia, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "Among the largest known land carnivores — rivalling or exceeding T. rex in length."
+      },
+      {
+        "tag": "skull",
+        "text": "Its skull alone measured over 1.5 m long."
+      }
+    ]
+  }
+}

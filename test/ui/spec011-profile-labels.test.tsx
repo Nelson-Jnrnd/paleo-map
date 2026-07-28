@@ -17,7 +17,12 @@ afterEach(cleanup);
 test("profile header drops the stray label and names the full recorded span (REQ-002/005)", async () => {
   const api = await fixtureApi();
   render(
-    <TaxonProfile api={api} taxonId="txn:tyrannosaurus" onBack={() => {}} />,
+    <TaxonProfile
+      api={api}
+      taxonId="txn:tyrannosaurus"
+      onBack={() => {}}
+      onOpenTaxon={() => {}}
+    />,
   );
 
   // The leftover "Main content" scaffolding label is gone (REQ-002).

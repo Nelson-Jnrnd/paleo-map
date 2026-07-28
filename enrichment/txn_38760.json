@@ -1,0 +1,44 @@
+{
+  "taxonId": "txn:38760",
+  "taxonName": "Corythosaurus",
+  "source": {
+    "article": "Corythosaurus",
+    "url": "https://en.wikipedia.org/wiki/Corythosaurus",
+    "revid": 1360547550
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Helmeted lizard\"",
+    "oneLiner": "A crested duck-billed hadrosaur of Late Cretaceous Alberta.",
+    "description": "Corythosaurus was a lambeosaurine 'duck-billed' hadrosaur about 8–9 m long, famous for its tall, hollow, helmet-like head crest. The crest most likely amplified calls, working like a resonating trombone. It is known from many complete specimens, some with preserved skin.",
+    "bodyLength": {
+      "value": 9,
+      "unit": "m",
+      "low": 7.7,
+      "high": 9,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian), ~77–76 Ma",
+    "discovery": {
+      "year": 1914,
+      "who": "Barnum Brown",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "crest",
+        "text": "Its hollow crest likely resonated to produce calls, like a trombone."
+      },
+      {
+        "tag": "skin",
+        "text": "Some specimens preserve impressions of its polygonal scales."
+      }
+    ]
+  }
+}

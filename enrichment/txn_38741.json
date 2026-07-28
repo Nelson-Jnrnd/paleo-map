@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38741",
+  "taxonName": "Tenontosaurus",
+  "source": {
+    "article": "Tenontosaurus",
+    "url": "https://en.wikipedia.org/wiki/Tenontosaurus",
+    "revid": 1360947029
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "ti-NON-tuh-SOR-us",
+    "nameMeaning": "\"Sinew lizard\", for its tendon-stiffened back and tail",
+    "oneLiner": "A medium-sized ornithopod with an unusually long, stiffened tail.",
+    "description": "Tenontosaurus was a medium-sized iguanodontian ornithopod with an unusually long, broad tail stiffened by a network of bony tendons. It lived in Early Cretaceous western North America and is often found associated with the predator Deinonychus.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Early Cretaceous (Aptian–Albian), ~115–108 Ma",
+    "discovery": {
+      "year": 1970,
+      "who": "John Ostrom",
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "tail",
+        "text": "Its long tail and back were stiffened by a network of bony tendons."
+      },
+      {
+        "tag": "ecology",
+        "text": "Frequently found alongside the predator Deinonychus."
+      }
+    ]
+  }
+}

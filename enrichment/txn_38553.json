@@ -1,0 +1,56 @@
+{
+  "taxonId": "txn:38553",
+  "taxonName": "Therizinosaurus",
+  "source": {
+    "article": "Therizinosaurus",
+    "url": "https://en.wikipedia.org/wiki/Therizinosaurus",
+    "revid": 1361774998
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Scythe lizard\"",
+    "oneLiner": "A giant, long-clawed, plant-eating therizinosaur.",
+    "description": "Therizinosaurus was a colossal therizinosaurid of Late Cretaceous Mongolia, 9–10 m long and up to 5 m tall, famous for its gigantic scythe-like hand claws. Despite being a theropod, it was a slow, long-necked, high-browsing herbivore with a horny beak and a wide gut.",
+    "bodyLength": {
+      "value": 10,
+      "unit": "m",
+      "low": 9,
+      "high": 10,
+      "confidence": "estimated"
+    },
+    "height": {
+      "value": 5,
+      "unit": "m",
+      "low": 4,
+      "high": 5,
+      "confidence": "estimated"
+    },
+    "mass": {
+      "value": 5,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1954,
+      "who": "Evgeny Maleev",
+      "where": "Gobi Desert, Mongolia"
+    },
+    "notableFacts": [
+      {
+        "tag": "claws",
+        "text": "Its scythe-like hand claws were among the largest of any known animal."
+      },
+      {
+        "tag": "diet",
+        "text": "A theropod that became a slow-moving, long-necked herbivore."
+      }
+    ]
+  }
+}

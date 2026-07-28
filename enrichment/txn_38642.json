@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:38642",
+  "taxonName": "Massospondylus",
+  "source": {
+    "article": "Massospondylus",
+    "url": "https://en.wikipedia.org/wiki/Massospondylus",
+    "revid": 1361209134
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "MASS-oh-SPON-di-lus",
+    "nameMeaning": "\"Longer vertebra\"",
+    "oneLiner": "An Early Jurassic sauropodomorph, one of the first dinosaurs named.",
+    "description": "Massospondylus was an early sauropodomorph from the Early Jurassic of southern Africa and one of the best-known of its group. Described by Richard Owen in 1854, it was among the first dinosaurs ever named. It is known from abundant specimens, including embryos preserved in eggs.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Early Jurassic (Hettangian–Pliensbachian), ~201–184 Ma",
+    "discovery": {
+      "year": 1854,
+      "who": "Richard Owen",
+      "where": "South Africa"
+    },
+    "notableFacts": [
+      {
+        "tag": "history",
+        "text": "One of the first dinosaurs ever named (Owen, 1854)."
+      },
+      {
+        "tag": "embryos",
+        "text": "Known from abundant specimens, including embryos inside eggs."
+      },
+      {
+        "tag": "name",
+        "text": "Owen named it 'longer vertebra' from bones he thought were from the tail — now known to be from the neck."
+      }
+    ]
+  }
+}

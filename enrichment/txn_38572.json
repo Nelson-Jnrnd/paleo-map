@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:38572",
+  "taxonName": "Troodon",
+  "source": {
+    "article": "Troodon",
+    "url": "https://en.wikipedia.org/wiki/Troodon",
+    "revid": 1366276587
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "TROH-uh-don",
+    "nameMeaning": "\"Wounding tooth\", for its serrated teeth",
+    "oneLiner": "A small, bird-like theropod named for its distinctive serrated teeth.",
+    "description": "Troodon is a small, bird-like theropod from the Late Cretaceous of North America, named for its serrated 'wounding' teeth. Those teeth actually resemble those of herbivorous reptiles, hinting at a possibly omnivorous diet. Its taxonomy is controversial — the genus is based on a single tooth.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Omnivore",
+    "era": "Late Cretaceous (Campanian), ~77 Ma",
+    "discovery": {
+      "year": 1856,
+      "who": "Joseph Leidy",
+      "where": "Montana, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "teeth",
+        "text": "Named for its serrated 'wounding' teeth."
+      },
+      {
+        "tag": "diet",
+        "text": "Its tooth shape hints at a possibly omnivorous diet."
+      },
+      {
+        "tag": "taxonomy",
+        "text": "Controversial — the genus rests on a single tooth."
+      }
+    ]
+  }
+}

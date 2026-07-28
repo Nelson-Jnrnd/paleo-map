@@ -1,0 +1,42 @@
+{
+  "taxonId": "txn:68238",
+  "taxonName": "Microraptor",
+  "source": {
+    "article": "Microraptor",
+    "url": "https://en.wikipedia.org/wiki/Microraptor",
+    "revid": 1358502239
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Small thief\"",
+    "oneLiner": "A tiny, four-winged, gliding feathered dinosaur.",
+    "description": "Microraptor was a small four-winged dromaeosaurid from Early Cretaceous China, known from many superb feathered fossils. Long flight feathers on both its arms and legs formed four aerodynamic surfaces, and it may have glided between trees.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Early Cretaceous (Aptian), ~125–120 Ma",
+    "discovery": {
+      "year": 2000,
+      "who": "Xu Xing",
+      "where": "Liaoning, China"
+    },
+    "notableFacts": [
+      {
+        "tag": "fourwings",
+        "text": "Had flight feathers on both arms and legs — a 'four-winged' dinosaur."
+      },
+      {
+        "tag": "gliding",
+        "text": "May have glided between trees; its fossils inform the origin of bird flight."
+      },
+      {
+        "tag": "colour",
+        "text": "Preserved melanosomes suggest an iridescent black plumage."
+      }
+    ]
+  }
+}

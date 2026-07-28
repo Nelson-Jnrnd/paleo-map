@@ -1,0 +1,48 @@
+{
+  "taxonId": "txn:38590",
+  "taxonName": "Allosaurus",
+  "source": {
+    "article": "Allosaurus",
+    "url": "https://en.wikipedia.org/wiki/Allosaurus",
+    "revid": 1364035607
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": "AL-oh-SAWR-us",
+    "nameMeaning": "\"Different lizard\", for its unusually lightweight vertebrae",
+    "oneLiner": "The apex predatory theropod of the Late Jurassic Morrison Formation.",
+    "description": "Allosaurus was a large bipedal predator with a light but robust skull bearing dozens of sharp, serrated teeth, small three-fingered hands, and a long muscular tail. It averaged about 8.5 m long, with the largest specimens near 9.7 m. As the most abundant large predator of the Morrison Formation, it was the apex predator, likely hunting ornithopods, stegosaurids and sauropods.",
+    "bodyLength": {
+      "value": 8.5,
+      "unit": "m",
+      "low": 8.5,
+      "high": 9.7,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Jurassic (Oxfordian–Tithonian), ~155–143 Ma",
+    "discovery": {
+      "year": 1877,
+      "who": "Othniel Charles Marsh",
+      "where": null
+    },
+    "notableFacts": [
+      {
+        "tag": "teeth",
+        "text": "Its light skull bore dozens of sharp, serrated teeth."
+      },
+      {
+        "tag": "abundance",
+        "text": "The most abundant large predator of the Morrison Formation."
+      },
+      {
+        "tag": "behaviour",
+        "text": "Whether it hunted in packs or was solitary remains debated."
+      }
+    ]
+  }
+}

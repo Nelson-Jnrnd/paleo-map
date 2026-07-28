@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38742",
+  "taxonName": "Thescelosaurus",
+  "source": {
+    "article": "Thescelosaurus",
+    "url": "https://en.wikipedia.org/wiki/Thescelosaurus",
+    "revid": 1358403706
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "THESS-el-oh-SOR-us",
+    "nameMeaning": "\"Wonderful lizard\"",
+    "oneLiner": "A sturdy small ornithischian of the very end of the Cretaceous.",
+    "description": "Thescelosaurus was a small, heavily built ornithischian herbivore of Late Cretaceous western North America, 3–4 m long, with a long low snout ending in a beak and a stiffened tail. It was among the last non-avian dinosaurs.",
+    "bodyLength": {
+      "value": 4,
+      "unit": "m",
+      "low": 3,
+      "high": 4,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 300,
+      "unit": "kg",
+      "low": 200,
+      "high": 300,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Maastrichtian), ~66 Ma",
+    "discovery": {
+      "year": 1913,
+      "who": "Charles W. Gilmore",
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "late",
+        "text": "One of the last non-avian dinosaurs before the extinction."
+      },
+      {
+        "tag": "tail",
+        "text": "Its long tail was stiffened by rod-like ossified tendons."
+      }
+    ]
+  }
+}

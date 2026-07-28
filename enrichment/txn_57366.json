@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:57366",
+  "taxonName": "Nigersaurus",
+  "source": {
+    "article": "Nigersaurus",
+    "url": "https://en.wikipedia.org/wiki/Nigersaurus",
+    "revid": 1347358006
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Niger reptile\"",
+    "oneLiner": "A wide-mouthed sauropod with over 500 teeth.",
+    "description": "Nigersaurus was a small rebbachisaurid sauropod of mid-Cretaceous Niger, about 9 m long with a short neck and a bizarre, highly specialised skull. Its wide, straight-edged muzzle held more than 500 teeth, replaced roughly every two weeks, for cropping ground-level plants.",
+    "bodyLength": {
+      "value": 14.1,
+      "unit": "m",
+      "low": 9,
+      "high": 14.1,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 4,
+      "unit": "t",
+      "low": 1.9,
+      "high": 4,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Middle Cretaceous, ~115–105 Ma",
+    "discovery": {
+      "year": 1999,
+      "who": "Paul Sereno",
+      "where": "Gadoufaoua, Niger"
+    },
+    "notableFacts": [
+      {
+        "tag": "teeth",
+        "text": "Its wide muzzle held over 500 teeth, replaced about every 14 days."
+      },
+      {
+        "tag": "skull",
+        "text": "Had an extremely lightweight, specialised skull for ground-level grazing."
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38811",
+  "taxonName": "Kentrosaurus",
+  "source": {
+    "article": "Kentrosaurus",
+    "url": "https://en.wikipedia.org/wiki/Kentrosaurus",
+    "revid": 1364541269
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "KEN-troh-SOR-us",
+    "nameMeaning": "\"Prickle lizard\"",
+    "oneLiner": "An African stegosaur bristling with plates and spikes.",
+    "description": "Kentrosaurus was a stegosaur of the Late Jurassic of Tanzania, a close relative of Stegosaurus, with plates on its neck and shoulders giving way to paired spikes along its back and tail. Hundreds of its bones were unearthed by German expeditions to Tendaguru.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian–Tithonian), ~152 Ma",
+    "discovery": {
+      "year": 1915,
+      "who": "Edwin Hennig",
+      "where": "Tanzania"
+    },
+    "notableFacts": [
+      {
+        "tag": "armour",
+        "text": "Wore plates over the neck and shoulders and paired spikes along the back and tail."
+      },
+      {
+        "tag": "relative",
+        "text": "A close African relative of the North American Stegosaurus."
+      }
+    ]
+  }
+}

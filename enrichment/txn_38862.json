@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38862",
+  "taxonName": "Triceratops",
+  "source": {
+    "article": "Triceratops",
+    "url": "https://en.wikipedia.org/wiki/Triceratops",
+    "revid": 1365862454
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-26",
+  "record": {
+    "commonName": null,
+    "pronunciation": "try-SERR-uh-tops",
+    "nameMeaning": "\"Three-horned face\"",
+    "oneLiner": "A large horned, frilled herbivorous ceratopsian.",
+    "description": "Triceratops was a large four-legged herbivore bearing a bony frill and three facial horns, showing convergent evolution with rhinoceroses. It lived on Laramidia (western North America) at the very end of the Cretaceous and shared its landscape with — and was most likely preyed on by — Tyrannosaurus. The best-known ceratopsian, it is documented from many specimens spanning hatchling to adult.",
+    "bodyLength": {
+      "value": 9,
+      "unit": "m",
+      "low": 8,
+      "high": 9,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 10,
+      "unit": "t",
+      "low": 6,
+      "high": 10,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (late Maastrichtian), ~68–66 Ma",
+    "discovery": {
+      "year": 1889,
+      "who": "Othniel Charles Marsh",
+      "where": null
+    },
+    "notableFacts": [
+      {
+        "tag": "horns",
+        "text": "Bore three facial horns and a large bony frill, likely used in display and species recognition."
+      },
+      {
+        "tag": "taxonomy",
+        "text": "Some research argues Torosaurus is just the mature form of Triceratops — still disputed."
+      },
+      {
+        "tag": "ecology",
+        "text": "Shared its world with Tyrannosaurus and was most likely preyed upon by it."
+      }
+    ]
+  }
+}

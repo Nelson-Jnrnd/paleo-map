@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38600",
+  "taxonName": "Ceratosaurus",
+  "source": {
+    "article": "Ceratosaurus",
+    "url": "https://en.wikipedia.org/wiki/Ceratosaurus",
+    "revid": 1365469642
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Horned lizard\"",
+    "oneLiner": "A horn-nosed theropod predator of the Late Jurassic.",
+    "description": "Ceratosaurus was a carnivorous theropod of the Late Jurassic of North America and Europe, distinguished by a prominent horn on its snout and small hornlets over its eyes. It shared the Morrison Formation with the larger predator Allosaurus.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Jurassic, ~155 Ma",
+    "discovery": {
+      "year": 1884,
+      "who": "Othniel Charles Marsh",
+      "where": "Garden Park, Colorado, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "horn",
+        "text": "Bore a distinctive blade-like horn on its snout."
+      },
+      {
+        "tag": "armour",
+        "text": "Had a row of small bony osteoderms down its back."
+      }
+    ]
+  }
+}
