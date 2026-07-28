@@ -388,7 +388,7 @@ This is a deliberate softening; requirements still live only in specs.
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
 | REQ-001 | domain enrichment record | `src/domain/enrichment.ts`; attached via `applyEnrichment` | `test/spec014-enrichment.test.ts` | Done (data); UI display in REQ-005 |
-| REQ-002 | cache-as-contract + engines | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts` | `test/spec014-enrichment.test.ts` | Done (Engine A seeded 8 flagship records; Engine B optional) |
+| REQ-002 | cache-as-contract + engines; split delivery (AMEND-004) | `src/pipeline/enrichment.ts` (validator/loader/apply); `scripts/enrich_fetch.ts` (Engine A helper); `scripts/validate_enrichment.ts`; `partitionReadModel` splits + `bootAtlas`/`mergeEnrichment` reassemble `data/enrichment.json` | `test/spec014-enrichment.test.ts`, `test/ui/atlas-loader.test.tsx` | Done (Engine A seeded 77 records; AMEND-004 ships enrichment as its own artifact so coverage scales without touching the reference budget) |
 | REQ-003 | image sourcing + gallery | TBD | TBD | Pending |
 | REQ-004 | PhyloPic + size hero | `scripts/fetch_silhouettes.ts` (resolve + fallback + bundle), `src/pipeline/silhouettes.ts` (index apply), `Illustration.tsx` (base visual + size-vs-human hero) | `test/spec014-silhouettes.test.ts` | Done — 2555/2555 taxa resolved to 450 unique silhouettes; hero scales to the enriched body length |
 | REQ-005 | TaxonProfile redesign (AMEND-002 "spec sheet") | `TaxonProfile.tsx` (topbar+identity+hero grid+footer), `TaxonomyTree.tsx` (breadcrumb nav), `Illustration.tsx` (lead+thumbs, hover credit), `TaxonSpecTable.tsx` + `SizeHero.tsx` (ruled table + size hero), `TaxonEnrichment.tsx` (About: blurb+notable facts+discovery) | `test/ui/spec014-enrichment.test.tsx`, `spec014-gallery.test.tsx`, `spec014-taxonomy.test.tsx`, `spec011-profile-labels.test.tsx` | Done (Option A spec-sheet layout) |
@@ -403,6 +403,35 @@ layer (schema + batch + cache + fields); (C) page redesign (hero, tree,
 collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ## Spec amendments
+
+### AMEND-004: Enrichment shipped as its own artifact (refines REQ-002 delivery)
+
+- **Date / owner:** 2026-07-28, owner-approved (chose "(a) partition enrichment
+  into a lazily-loaded artifact so it scales, then wire up the batch engine for
+  the tail").
+- **Trigger:** Enrichment records were inlined onto profiles inside the shared
+  `reference.json`. At 77 records the reference was already ~89% of its raw
+  budget; scaling enrichment toward full ~2100-genus coverage (~2 MB of records)
+  would breach the reference ceiling and couple every coverage increase to the
+  boot download's budget.
+- **Behavioural change to REQ-002 (delivery, not content):** enrichment ships as
+  a **separate build artifact**, `data/enrichment.json` — a `taxonId → record`
+  map — referenced by a new `enrichmentUrl` on the boot index. The partitioner
+  (`partitionReadModel`) strips the record off each served profile (leaving the
+  slot `null`) and collects it into this map; the generator writes the third
+  file alongside `index.json`/`reference.json`. At boot the app fetches the map
+  after the reference and folds each record back onto its profile
+  (`mergeEnrichment`), so every downstream consumer still sees one complete
+  `ReferenceModel` — the split is invisible above the loader. This keeps the
+  reference budget **fixed** regardless of enrichment coverage.
+- **Budget:** `data/enrichment.json` gets its own ceilings (gzip 2500 KB / raw
+  12 MB), sized for full-genus coverage with headroom; the reference budget is
+  unchanged.
+- **Unchanged:** the enrichment **record schema and semantics** (REQ-001), the
+  cache-as-contract engine and freshness rules (REQ-002), silhouettes (REQ-004),
+  and all page layout (REQ-005/AMEND-002) — only where the records travel on the
+  wire changes. No runtime egress is added (DATA-005): the app still fetches only
+  its own bundled artifacts.
 
 ### AMEND-003: Owner-directed presentation changes (relaxes NFR-002; charter font)
 

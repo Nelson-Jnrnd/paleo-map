@@ -139,6 +139,13 @@ async function main(): Promise<void> {
     serializeCompact(partition.reference),
     "utf-8",
   );
+  // SPEC-014 AMEND-004: enrichment ships as its own artifact so the reference
+  // budget stays fixed while enrichment scales to every genus.
+  await writeFile(
+    join(outDir, "enrichment.json"),
+    serializeCompact(partition.enrichment),
+    "utf-8",
+  );
   for (const stage of partition.stages) {
     await writeFile(
       join(outDir, `stage-${stage.slug}.json`),
@@ -150,7 +157,7 @@ async function main(): Promise<void> {
   const withData = partition.index.stages.filter((s) => s.occurrenceCount > 0);
   console.log(
     `Wrote partitioned web data → ${outDir}\n` +
-      `  index.json + reference.json (${model.taxa.length} taxa, ${model.profiles.length} profiles)\n` +
+      `  index.json + reference.json + enrichment.json (${model.taxa.length} taxa, ${model.profiles.length} profiles, ${Object.keys(partition.enrichment).length} enriched)\n` +
       `  ${withData.length}/${partition.index.stages.length} stages with occurrences, ` +
       `${model.occurrences.length} occurrences total (retrievedOn ${model.metadata.retrievedOn})`,
   );

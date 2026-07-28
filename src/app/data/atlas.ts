@@ -21,6 +21,7 @@ import type {
 import type {
   AtlasIndex,
   AtlasStageEntry,
+  EnrichmentMap,
   ReferenceModel,
 } from "../../pipeline/partition.js";
 import { progressRatio } from "./snapshot.js";
@@ -102,8 +103,14 @@ async function fetchJsonStreamed<T>(
 }
 
 /**
- * Boot the atlas: fetch the index, then the shared reference (streamed). Both
- * are required before the exploration view can render.
+ * Boot the atlas: fetch the index, the shared reference (streamed), and the
+ * enrichment map (SPEC-014 AMEND-004), then fold enrichment back onto the
+ * profiles so every downstream consumer sees a single, complete reference.
+ * All three are required before the exploration view can render.
+ *
+ * Enrichment is split into its own artifact so the reference budget stays fixed
+ * as coverage scales to every genus; merging it here keeps `ReferenceModel` the
+ * one shape the read API and components already depend on.
  */
 export async function bootAtlas(
   onProgress?: ProgressCallback,
@@ -114,7 +121,26 @@ export async function bootAtlas(
     index.referenceUrl,
     onProgress,
   );
-  return { index, reference };
+  const enrichment = await fetchJson<EnrichmentMap>(index.enrichmentUrl);
+  return { index, reference: mergeEnrichment(reference, enrichment) };
+}
+
+/**
+ * Fold the enrichment map back onto the reference profiles. Profiles carry a
+ * nulled `enrichment` slot when served; here we restore the record for every
+ * profile the map covers, leaving the rest null (extract, don't invent).
+ */
+export function mergeEnrichment(
+  reference: ReferenceModel,
+  enrichment: EnrichmentMap,
+): ReferenceModel {
+  return {
+    ...reference,
+    profiles: reference.profiles.map((p) => {
+      const record = enrichment[p.taxonId];
+      return record ? { ...p, enrichment: record } : p;
+    }),
+  };
 }
 
 /** The reference as a full read model with an empty occurrence set. */

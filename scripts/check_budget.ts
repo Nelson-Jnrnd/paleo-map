@@ -31,6 +31,11 @@ const MB = 1024 * 1024;
 //   reference.json ≈ 1.07 MB gz; richest stage (Campanian) ≈ 0.37 MB gz / 5.8 MB raw.
 const REFERENCE_GZIP = 1600 * KB;
 const REFERENCE_RAW = 8 * MB;
+// Enrichment ships separately (SPEC-014 AMEND-004) so it scales to every genus
+// without touching the reference budget. Records are small text objects; sized
+// for full ~2100-genus coverage (≈2 KB raw each) plus headroom.
+const ENRICHMENT_GZIP = 2500 * KB;
+const ENRICHMENT_RAW = 12 * MB;
 const INDEX_GZIP = 32 * KB;
 const STAGE_GZIP = 500 * KB;
 const STAGE_RAW = 7 * MB;
@@ -83,6 +88,17 @@ async function main(): Promise<void> {
         label: "data/reference.json (raw)",
         actualBytes: (await stat(path)).size,
         budgetBytes: REFERENCE_RAW,
+      });
+    } else if (name === "enrichment.json") {
+      checks.push({
+        label: "data/enrichment.json (gzip)",
+        actualBytes: gz,
+        budgetBytes: ENRICHMENT_GZIP,
+      });
+      checks.push({
+        label: "data/enrichment.json (raw)",
+        actualBytes: (await stat(path)).size,
+        budgetBytes: ENRICHMENT_RAW,
       });
     } else if (name.startsWith("stage-")) {
       checks.push({
