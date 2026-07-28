@@ -9,10 +9,7 @@
  */
 
 import type { ReactElement } from "react";
-import type {
-  ReadOccurrence,
-  TimeRange,
-} from "../../domain/index.js";
+import type { ReadOccurrence, TimeRange } from "../../domain/index.js";
 import { MESOZOIC_STAGES } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange, NOT_AVAILABLE } from "../format.js";
@@ -45,9 +42,7 @@ function periodForRange(
 ): { name: string; colour: string } | null {
   if (!range) return null;
   const mid = (range.minMa + range.maxMa) / 2;
-  const stage = MESOZOIC_STAGES.find(
-    (s) => mid <= s.startMa && mid >= s.endMa,
-  );
+  const stage = MESOZOIC_STAGES.find((s) => mid <= s.startMa && mid >= s.endMa);
   if (!stage) return null;
   return {
     name: stage.period,
@@ -55,7 +50,9 @@ function periodForRange(
   };
 }
 
-function taxonTimeRange(occurrences: readonly ReadOccurrence[]): TimeRange | null {
+function taxonTimeRange(
+  occurrences: readonly ReadOccurrence[],
+): TimeRange | null {
   let minMa = Infinity;
   let maxMa = -Infinity;
   for (const o of occurrences) {
@@ -106,7 +103,10 @@ export function TaxonProfile({
         <Illustration
           taxonName={fallbackName}
           images={[]}
-          silhouette={silhouetteForTaxon(occurrences[0]?.taxonId ?? "", taxaById)}
+          silhouette={silhouetteForTaxon(
+            occurrences[0]?.taxonId ?? "",
+            taxaById,
+          )}
           phylopicSilhouette={null}
         />
         <p className={styles.block}>
@@ -258,8 +258,8 @@ export function TaxonProfile({
                     <span>
                       Paleo:{" "}
                       <span className="mono">
-                        {paleo.palaeoLat.toFixed(1)}°, {paleo.palaeoLng.toFixed(1)}
-                        °
+                        {paleo.palaeoLat.toFixed(1)}°,{" "}
+                        {paleo.palaeoLng.toFixed(1)}°
                       </span>
                     </span>
                   ) : (

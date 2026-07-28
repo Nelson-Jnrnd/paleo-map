@@ -26,7 +26,15 @@ test("boots from the static bundle and renders the paleogeographic map", async (
   });
 
   // The basemap attributes its source and confirms the shared reconstruction
-  // frame with the occurrences (SPEC-004 REQ-002/003).
+  // frame with the occurrences (SPEC-004 REQ-002/003). The source/licence detail
+  // lives behind the labelled attribution toggle (SPEC-011 collapsible
+  // attribution); the map-level "Paleogeographic reconstruction" label above is
+  // the always-visible provenance cue. Open the toggle, then assert the detail.
+  await page
+    .getByRole("button", {
+      name: /Basemap source and reconstruction details/i,
+    })
+    .click();
   await expect(page.getByText(/GPlates/i)).toBeVisible();
   await expect(page.getByText(/same reconstruction/i)).toBeVisible();
 

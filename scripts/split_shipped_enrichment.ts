@@ -47,8 +47,16 @@ async function main(): Promise<void> {
   });
   index.enrichmentUrl = "data/enrichment.json";
 
-  await writeFile(join(dir, "reference.json"), serializeCompact(reference), "utf-8");
-  await writeFile(join(dir, "enrichment.json"), serializeCompact(enrichment), "utf-8");
+  await writeFile(
+    join(dir, "reference.json"),
+    serializeCompact(reference),
+    "utf-8",
+  );
+  await writeFile(
+    join(dir, "enrichment.json"),
+    serializeCompact(enrichment),
+    "utf-8",
+  );
   await writeFile(join(dir, "index.json"), serializeCompact(index), "utf-8");
 
   console.log(

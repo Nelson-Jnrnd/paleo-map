@@ -40,7 +40,12 @@ function SilhouetteFallback({
   return (
     <figure className={styles.leadFigure}>
       <div className={styles.silhouetteBox}>
-        <img className={styles.silhouetteImg} src={src} alt={alt} loading="lazy" />
+        <img
+          className={styles.silhouetteImg}
+          src={src}
+          alt={alt}
+          loading="lazy"
+        />
       </div>
       <figcaption className={styles.source}>{note}</figcaption>
     </figure>
