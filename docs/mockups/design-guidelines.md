@@ -115,7 +115,12 @@ Everything else is cool neutral. Two additional colour systems exist, both
 > only the luminance moved, not the hue family). The live source of truth is
 > `src/app/styles/tokens.css`.
 
-**Typography.** Three roles, chosen to avoid the generic system-sans default:
+**Typography.** _Owner override (2026-07-27, SPEC-014 AMEND-003): the shipped app
+uses a single standard monospace — `'Courier New',Courier,monospace` — across all
+roles, superseding the three faces below. The `tokens.css` values are the source
+of truth. The role guidance below is retained for context._
+
+Three roles, chosen to avoid the generic system-sans default:
 
 - **Serif** — `'Spectral','Source Serif 4','Charter','Georgia',serif` for
   headings and *scientific names* (italic). Gives the atlas a natural-history,

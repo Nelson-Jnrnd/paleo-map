@@ -32,9 +32,6 @@ function Measure({ m }: { m: EnrichedMeasurement }): ReactElement {
   return (
     <>
       {m.value} {m.unit}
-      {m.confidence === "estimated" && (
-        <span className={styles.est}> est.</span>
-      )}
     </>
   );
 }

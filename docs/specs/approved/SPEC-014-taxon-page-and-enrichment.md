@@ -404,6 +404,24 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ## Spec amendments
 
+### AMEND-003: Owner-directed presentation changes (relaxes NFR-002; charter font)
+
+- **Date / owner:** 2026-07-27, owner-directed.
+- **Changes:**
+  1. **Estimate cue dropped** — measurement values in the spec table show the
+     value + unit only; the `est.` suffix is removed.
+  2. **Page disclosure/sources footer removed** — the taxon page no longer shows
+     the "AI-assisted …" line or the sources footer. This **relaxes NFR-002**: no
+     visible per-page AI/source disclosure remains. (The enrichment content is
+     still extract-don't-invent, and image credits remain on hover; the
+     provenance was owner-relaxed for this personal project, consistent with the
+     earlier charter amendment.)
+  3. **Typography** — the whole app uses a single standard monospace,
+     **Courier New** (`--font-serif/-sans/-mono` in `tokens.css`), superseding the
+     Spectral/IBM Plex faces. This is a deliberate owner-directed deviation from
+     the design charter's typography section (a design convention, not a
+     functional requirement); the charter note is updated to match.
+
 ### AMEND-002: Taxon page layout — "spec sheet" (refines REQ-005/006)
 
 - **Date / owner:** 2026-07-27, owner-approved (chose "Option A — Spec sheet"

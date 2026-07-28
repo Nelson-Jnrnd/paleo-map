@@ -276,14 +276,6 @@ export function TaxonProfile({
           })}
         </ul>
       </details>
-
-      <p className={styles.foot}>
-        {enrichment &&
-          "AI-assisted — text distilled from this taxon’s Wikipedia article. "}
-        Sources: occurrences &amp; taxonomy — Paleobiology Database
-        {galleryImages.length > 0 && "; images — Wikimedia Commons"}
-        {phylopicSilhouette && "; silhouette — PhyloPic"}.
-      </p>
     </section>
   );
 }
