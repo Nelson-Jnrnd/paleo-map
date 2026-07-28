@@ -23,6 +23,7 @@
     "snapshot:app": "tsx scripts/gen_web_data.ts --live",
     "check:budget": "tsx scripts/check_budget.ts",
     "enrich:fetch": "tsx scripts/enrich_fetch.ts",
+    "enrich:batch": "tsx scripts/enrich_batch.ts",
     "fetch:silhouettes": "tsx scripts/fetch_silhouettes.ts",
     "validate:enrichment": "tsx scripts/validate_enrichment.ts",
     "lint": "eslint .",

@@ -9,3 +9,4 @@ coverage/
 scratch-*.png
 gallery-*.png
 enriched-*.png
+enrich-batch-preview.json
