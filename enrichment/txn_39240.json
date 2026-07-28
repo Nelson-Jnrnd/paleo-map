@@ -1,0 +1,48 @@
+{
+  "taxonId": "txn:39240",
+  "taxonName": "Archaeopteryx",
+  "source": {
+    "article": "Archaeopteryx",
+    "url": "https://en.wikipedia.org/wiki/Archaeopteryx",
+    "revid": 1363848357
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Ancient wing\"",
+    "oneLiner": "The famous feathered 'first bird', a transitional Jurassic dinosaur.",
+    "description": "Archaeopteryx is a famous bird-like dinosaur from the Late Jurassic of southern Germany, long regarded as the earliest known bird. About the size of a magpie (up to ~50 cm long), it combined feathers and wings with reptilian features — toothed jaws, clawed fingers and a long bony tail — a classic transitional fossil between non-avian dinosaurs and birds.",
+    "bodyLength": {
+      "value": 0.5,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Jurassic (Tithonian), ~150 Ma",
+    "discovery": {
+      "year": null,
+      "who": null,
+      "where": "Bavaria, Germany"
+    },
+    "notableFacts": [
+      {
+        "tag": "transitional",
+        "text": "A classic transitional fossil between non-avian dinosaurs and birds."
+      },
+      {
+        "tag": "feathers",
+        "text": "Its preserved feathers were among the first evidence linking birds to dinosaurs."
+      },
+      {
+        "tag": "mix",
+        "text": "Combined bird-like feathers and wings with dinosaur teeth, clawed fingers and a bony tail."
+      }
+    ]
+  }
+}

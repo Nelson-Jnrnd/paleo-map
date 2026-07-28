@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:58891",
+  "taxonName": "Baryonyx",
+  "source": {
+    "article": "Baryonyx",
+    "url": "https://en.wikipedia.org/wiki/Baryonyx",
+    "revid": 1365966515
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Heavy claw\", for its large thumb claw",
+    "oneLiner": "A fish-eating spinosaur with a crocodile-like snout and huge claw.",
+    "description": "Baryonyx was a spinosaurid theropod from the Early Cretaceous of England, 7.5–10 m long, with a long, low, narrow crocodile-like snout and a very large claw on each first finger. Its numerous conical teeth and gharial-like jaws suited a fish-eating (and partly predatory) diet.",
+    "bodyLength": {
+      "value": 10,
+      "unit": "m",
+      "low": 7.5,
+      "high": 10,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2,
+      "unit": "t",
+      "low": 1.2,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Early Cretaceous (Barremian), ~130–125 Ma",
+    "discovery": {
+      "year": 1983,
+      "who": "William Walker",
+      "where": "Surrey, England"
+    },
+    "notableFacts": [
+      {
+        "tag": "claw",
+        "text": "Named for the very large claw on each hand."
+      },
+      {
+        "tag": "snout",
+        "text": "Its long, narrow, crocodile-like snout suited catching fish."
+      },
+      {
+        "tag": "completeness",
+        "text": "One of the most complete theropod skeletons found in the UK."
+      }
+    ]
+  }
+}

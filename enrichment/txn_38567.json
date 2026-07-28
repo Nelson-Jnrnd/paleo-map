@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38567",
+  "taxonName": "Saurornitholestes",
+  "source": {
+    "article": "Saurornitholestes",
+    "url": "https://en.wikipedia.org/wiki/Saurornitholestes",
+    "revid": 1358773243
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Lizard-bird thief\"",
+    "oneLiner": "A small, sickle-clawed dromaeosaur of Late Cretaceous North America.",
+    "description": "Saurornitholestes was a small, bipedal, meat-eating dromaeosaurid from the Late Cretaceous of Canada and the United States, equipped with a sickle-shaped claw on each foot. It is one of the more common small theropods of the Dinosaur Park Formation.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1978,
+      "who": "Hans-Dieter Sues",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "claw",
+        "text": "Bore a sickle-shaped killing claw on each foot."
+      },
+      {
+        "tag": "discovery",
+        "text": "First specimen found by amateur paleontologist Irene Vanderloh in 1974."
+      }
+    ]
+  }
+}

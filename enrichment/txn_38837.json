@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38837",
+  "taxonName": "Ankylosaurus",
+  "source": {
+    "article": "Ankylosaurus",
+    "url": "https://en.wikipedia.org/wiki/Ankylosaurus",
+    "revid": 1365012156
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Fused lizard\"",
+    "oneLiner": "The archetypal armoured dinosaur, with a bony tail club.",
+    "description": "Ankylosaurus was a heavily armoured dinosaur from the very end of the Cretaceous in western North America, and the largest known ankylosaurid at 6–8 m long. Its broad, low body was covered in bony plates (osteoderms), and its tail ended in a large bony club. It was among the last non-avian dinosaurs.",
+    "bodyLength": {
+      "value": 8,
+      "unit": "m",
+      "low": 6,
+      "high": 8,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 8,
+      "unit": "t",
+      "low": 4.8,
+      "high": 8,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Maastrichtian), ~70–66 Ma",
+    "discovery": {
+      "year": 1908,
+      "who": "Barnum Brown",
+      "where": "western North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "club",
+        "text": "Its tail ended in a large bony club, likely used in defence."
+      },
+      {
+        "tag": "armour",
+        "text": "Covered in bony plates (osteoderms), even over the eyelids."
+      },
+      {
+        "tag": "name",
+        "text": "'Fused lizard' — many of its bones were fused together for strength."
+      }
+    ]
+  }
+}

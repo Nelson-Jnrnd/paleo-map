@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:36620",
+  "taxonName": "Hesperornis",
+  "source": {
+    "article": "Hesperornis",
+    "url": "https://en.wikipedia.org/wiki/Hesperornis",
+    "revid": 1354542412
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Western bird\"",
+    "oneLiner": "A large, flightless, toothed diving bird of the Cretaceous seas.",
+    "description": "Hesperornis was a large, cormorant-like toothed seabird from the Late Cretaceous. Virtually wingless, it swam with powerful hind legs, diving for fish in the shallow seas that then covered North America. Like some other Mesozoic birds it kept teeth, set in a groove along the jaw.",
+    "bodyLength": {
+      "value": 2,
+      "unit": "m",
+      "low": 1.5,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 10.6,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Piscivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": null,
+      "who": "O. C. Marsh",
+      "where": "Kansas, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "flightless",
+        "text": "Virtually wingless — it swam with powerful hind legs and could barely move on land."
+      },
+      {
+        "tag": "teeth",
+        "text": "Kept teeth set in a groove along the jaw, unlike modern birds."
+      },
+      {
+        "tag": "diving",
+        "text": "A specialised foot-propelled diver of the Cretaceous seaways."
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38749",
+  "taxonName": "Iguanodon",
+  "source": {
+    "article": "Iguanodon",
+    "url": "https://en.wikipedia.org/wiki/Iguanodon",
+    "revid": 1366263628
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "ig-WAH-nuh-don",
+    "nameMeaning": "\"Iguana tooth\"",
+    "oneLiner": "A large, bulky iguanodontian herbivore with a spiked thumb.",
+    "description": "Iguanodon was a large, bulky herbivore up to 9–11 m long from the Early Cretaceous of Europe, distinguished by large thumb spikes — possibly for defence — and long prehensile fifth fingers for foraging. One of the first dinosaurs ever named, it was among the three genera originally used to define Dinosauria.",
+    "bodyLength": {
+      "value": 11,
+      "unit": "m",
+      "low": 9,
+      "high": 11,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 4.5,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Early Cretaceous (Barremian–Aptian), ~126–122 Ma",
+    "discovery": {
+      "year": 1825,
+      "who": "Gideon Mantell",
+      "where": "England"
+    },
+    "notableFacts": [
+      {
+        "tag": "thumb",
+        "text": "Had large thumb spikes, possibly used for defence."
+      },
+      {
+        "tag": "history",
+        "text": "The second dinosaur ever formally named, and one of three used to define Dinosauria."
+      },
+      {
+        "tag": "discovery",
+        "text": "Superb complete skeletons were found in a Belgian coal mine in 1878."
+      }
+    ]
+  }
+}

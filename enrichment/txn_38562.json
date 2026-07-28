@@ -1,0 +1,48 @@
+{
+  "taxonId": "txn:38562",
+  "taxonName": "Deinonychus",
+  "source": {
+    "article": "Deinonychus",
+    "url": "https://en.wikipedia.org/wiki/Deinonychus",
+    "revid": 1365206538
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "die-NON-ih-kus",
+    "nameMeaning": "\"Terrible claw\", for the sickle claw on its foot",
+    "oneLiner": "The sickle-clawed raptor that sparked the 'dinosaur renaissance'.",
+    "description": "Deinonychus was a dromaeosaurid theropod up to about 3.4 m long from the Cretaceous of North America, bearing an enlarged, sickle-shaped killing claw on each foot. John Ostrom's study of it in the 1960s revolutionised views of dinosaurs as active, agile, possibly warm-blooded animals — igniting the 'dinosaur renaissance'.",
+    "bodyLength": {
+      "value": 3.4,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Early–Late Cretaceous (Aptian–Cenomanian), ~115–98 Ma",
+    "discovery": {
+      "year": 1969,
+      "who": "John Ostrom",
+      "where": "Montana, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "claw",
+        "text": "Its enlarged sickle-shaped foot claw gives it its name, 'terrible claw'."
+      },
+      {
+        "tag": "renaissance",
+        "text": "Ostrom's 1960s study of it sparked the 'dinosaur renaissance'."
+      },
+      {
+        "tag": "film",
+        "text": "The real-life basis for the 'raptors' of Jurassic Park, which used the name Velociraptor."
+      }
+    ]
+  }
+}

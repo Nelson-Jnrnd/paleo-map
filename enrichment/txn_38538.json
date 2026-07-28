@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38538",
+  "taxonName": "Compsognathus",
+  "source": {
+    "article": "Compsognathus",
+    "url": "https://en.wikipedia.org/wiki/Compsognathus",
+    "revid": 1357253837
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Elegant jaw\"",
+    "oneLiner": "A tiny, chicken-sized carnivorous theropod of the Late Jurassic.",
+    "description": "Compsognathus was a small, bipedal carnivore about the size of a chicken from the Late Jurassic of Europe. It is one of the few dinosaurs whose diet is known for certain — the remains of small, agile lizards are preserved in the bellies of both known specimens. It was long the smallest known non-avian dinosaur.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Jurassic (Tithonian), ~150 Ma",
+    "discovery": {
+      "year": null,
+      "who": null,
+      "where": "Bavaria, Germany"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "About the size of a chicken — long the smallest known non-avian dinosaur."
+      },
+      {
+        "tag": "diet",
+        "text": "Its last meals — small lizards — are preserved in its stomach."
+      }
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "taxonId": "txn:38547",
+  "taxonName": "Gallimimus",
+  "source": {
+    "article": "Gallimimus",
+    "url": "https://en.wikipedia.org/wiki/Gallimimus",
+    "revid": 1362114896
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "GAL-ih-MY-mus",
+    "nameMeaning": "\"Chicken mimic\"",
+    "oneLiner": "The largest 'ostrich dinosaur', a long-legged, toothless runner.",
+    "description": "Gallimimus was the largest known ornithomimid ('ostrich dinosaur'), from the Late Cretaceous of Mongolia — about 6 m long with long legs, a small head, large side-facing eyes and a toothless horny beak. Like its relatives it was likely feathered and built for speed.",
+    "bodyLength": {
+      "value": 6,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": {
+      "value": 1.9,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "mass": {
+      "value": 490,
+      "unit": "kg",
+      "low": 400,
+      "high": 490,
+      "confidence": "estimated"
+    },
+    "diet": "Omnivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1972,
+      "who": null,
+      "where": "Gobi Desert, Mongolia"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "The largest known ornithomimid ('ostrich dinosaur')."
+      },
+      {
+        "tag": "beak",
+        "text": "Toothless, with a horny beak; likely feathered and fast-running."
+      },
+      {
+        "tag": "eyes",
+        "text": "Had large, side-facing eyes on a small, light head."
+      }
+    ]
+  }
+}

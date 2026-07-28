@@ -1,0 +1,44 @@
+{
+  "taxonId": "txn:38520",
+  "taxonName": "Coelophysis",
+  "source": {
+    "article": "Coelophysis",
+    "url": "https://en.wikipedia.org/wiki/Coelophysis",
+    "revid": 1363295985
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": null,
+    "oneLiner": "A small, slender, early carnivorous dinosaur of the Late Triassic.",
+    "description": "Coelophysis was a small, slenderly built, bipedal carnivore from the Late Triassic of the southwestern United States, up to about 3 m long. One of the earliest known dinosaur genera, it is among the most specimen-rich — famous mass-death assemblages at Ghost Ranch preserve hundreds of individuals.",
+    "bodyLength": {
+      "value": 3,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Triassic (Norian–Rhaetian), ~215–201 Ma",
+    "discovery": {
+      "year": 1889,
+      "who": "Edward Drinker Cope",
+      "where": "New Mexico, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "early",
+        "text": "One of the earliest known dinosaurs."
+      },
+      {
+        "tag": "abundance",
+        "text": "Known from hundreds of individuals, including the famous Ghost Ranch death assemblages."
+      }
+    ]
+  }
+}

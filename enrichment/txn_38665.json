@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38665",
+  "taxonName": "Apatosaurus",
+  "source": {
+    "article": "Apatosaurus",
+    "url": "https://en.wikipedia.org/wiki/Apatosaurus",
+    "revid": 1363938182
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Deceptive lizard\"",
+    "oneLiner": "A massive, robust diplodocid sauropod of the Morrison Formation.",
+    "description": "Apatosaurus was a large, robustly built diplodocid sauropod from the Late Jurassic Morrison Formation of North America. It had a long neck, a whip-like tail held above the ground, and stockier, heavier bones than its relative Diplodocus. It was a browser that likely held its head elevated.",
+    "bodyLength": {
+      "value": 23,
+      "unit": "m",
+      "low": 21,
+      "high": 23,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 22.4,
+      "unit": "t",
+      "low": 16.4,
+      "high": 22.4,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Kimmeridgian–Tithonian), ~152–151 Ma",
+    "discovery": {
+      "year": 1877,
+      "who": "Othniel Charles Marsh",
+      "where": "North America"
+    },
+    "notableFacts": [
+      {
+        "tag": "build",
+        "text": "Stockier and more robustly built than its relative Diplodocus."
+      },
+      {
+        "tag": "tail",
+        "text": "Its whip-like tail may have been cracked to make loud sounds."
+      },
+      {
+        "tag": "size",
+        "text": "Averaged 21–23 m; some individuals may have exceeded 30 m."
+      }
+    ]
+  }
+}

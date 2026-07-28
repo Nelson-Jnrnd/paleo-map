@@ -1,0 +1,54 @@
+{
+  "taxonId": "txn:38761",
+  "taxonName": "Edmontosaurus",
+  "source": {
+    "article": "Edmontosaurus",
+    "url": "https://en.wikipedia.org/wiki/Edmontosaurus",
+    "revid": 1366016089
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "ed-MON-tuh-SOR-us",
+    "nameMeaning": "\"Lizard from Edmonton\"",
+    "oneLiner": "A giant duck-billed hadrosaur, among the last non-avian dinosaurs.",
+    "description": "Edmontosaurus was one of the largest hadrosaurids (duck-billed dinosaurs), reaching about 12 m long, with exceptional individuals near 15 m. It lived in Late Cretaceous western North America alongside Triceratops and Tyrannosaurus and was one of the last non-avian dinosaurs. Several specimens preserve extensive skin impressions and possible gut contents.",
+    "bodyLength": {
+      "value": 12,
+      "unit": "m",
+      "low": 12,
+      "high": 15,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 5.6,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian–Maastrichtian), ~73–66 Ma",
+    "discovery": {
+      "year": null,
+      "who": null,
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "One of the largest hadrosaurs — up to ~12 m, exceptional individuals ~15 m."
+      },
+      {
+        "tag": "preservation",
+        "text": "Known from specimens with extensive skin impressions and possible gut contents."
+      },
+      {
+        "tag": "ecology",
+        "text": "One of the last non-avian dinosaurs, living alongside T. rex and Triceratops."
+      }
+    ]
+  }
+}
