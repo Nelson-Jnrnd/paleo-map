@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38693",
+  "taxonName": "Saltasaurus",
+  "source": {
+    "article": "Saltasaurus",
+    "url": "https://en.wikipedia.org/wiki/Saltasaurus",
+    "revid": 1343197999
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Salta lizard\"",
+    "oneLiner": "An armoured titanosaur sauropod of Late Cretaceous Argentina.",
+    "description": "Saltasaurus was a small, stocky titanosaurian sauropod of Late Cretaceous Argentina with a short neck and stubby limbs. It was the first sauropod known to bear bony armour — small plates (osteoderms) embedded in its skin.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1980,
+      "who": "José Bonaparte & Jaime Powell",
+      "where": "Salta, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "armour",
+        "text": "The first sauropod known to have bony armour plates in its skin."
+      },
+      {
+        "tag": "build",
+        "text": "Small and stocky, with a short neck and stubby limbs."
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38838",
+  "taxonName": "Euoplocephalus",
+  "source": {
+    "article": "Euoplocephalus",
+    "url": "https://en.wikipedia.org/wiki/Euoplocephalus",
+    "revid": 1351205129
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "yoo-OP-loh-SEF-uh-lus",
+    "nameMeaning": "\"Well-armoured head\"",
+    "oneLiner": "A club-tailed, heavily armoured ankylosaur.",
+    "description": "Euoplocephalus was a large ankylosaurid of Late Cretaceous Canada, 5.3 m long and about 2 tonnes, with a low, flat, wide body covered in bony armour — even over the eyelids — and a heavy bony tail club. It is one of the best-known armoured dinosaurs.",
+    "bodyLength": {
+      "value": 5.3,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1910,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "club",
+        "text": "Had a heavy bony club on the end of its tail."
+      },
+      {
+        "tag": "armour",
+        "text": "Armoured even over the eyelids."
+      }
+    ]
+  }
+}

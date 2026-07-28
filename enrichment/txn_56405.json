@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:56405",
+  "taxonName": "Hypacrosaurus",
+  "source": {
+    "article": "Hypacrosaurus",
+    "url": "https://en.wikipedia.org/wiki/Hypacrosaurus",
+    "revid": 1366266602
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Near the highest lizard\"",
+    "oneLiner": "A hollow-crested hadrosaur known from nests and hatchlings.",
+    "description": "Hypacrosaurus was a lambeosaurine 'duck-billed' hadrosaur of Late Cretaceous Alberta and Montana, similar to Corythosaurus but with a lower rounded crest. It is well known from nests, eggs and hatchlings — the latest good hollow-crested hadrosaur in North America.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian–Maastrichtian), ~75–69.5 Ma",
+    "discovery": {
+      "year": 1913,
+      "who": "Barnum Brown",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "nests",
+        "text": "Known from nests, eggs and hatchlings, illuminating hadrosaur growth."
+      },
+      {
+        "tag": "crest",
+        "text": "Had a tall, hollow, rounded head crest."
+      }
+    ]
+  }
+}

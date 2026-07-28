@@ -1,0 +1,44 @@
+{
+  "taxonId": "txn:53960",
+  "taxonName": "Amargasaurus",
+  "source": {
+    "article": "Amargasaurus",
+    "url": "https://en.wikipedia.org/wiki/Amargasaurus",
+    "revid": 1363384052
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"La Amarga lizard\"",
+    "oneLiner": "A small sauropod sporting a double row of tall neck spines.",
+    "description": "Amargasaurus was a small dicraeosaurid sauropod of Early Cretaceous Argentina, 9–13 m long, known from a nearly complete skeleton. It is unique for two parallel rows of tall spines running down its neck and back — taller than in any other sauropod.",
+    "bodyLength": {
+      "value": 13,
+      "unit": "m",
+      "low": 9,
+      "high": 13,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Early Cretaceous, ~130–120 Ma",
+    "discovery": {
+      "year": 1991,
+      "who": "Leonardo Salgado & José Bonaparte",
+      "where": "Neuquén, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "spines",
+        "text": "Bore two parallel rows of tall neck spines, possibly supporting sails or a horn sheath."
+      },
+      {
+        "tag": "completeness",
+        "text": "Known from a nearly complete skeleton — rare for a sauropod."
+      }
+    ]
+  }
+}

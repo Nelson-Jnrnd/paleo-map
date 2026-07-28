@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38736",
+  "taxonName": "Hypsilophodon",
+  "source": {
+    "article": "Hypsilophodon",
+    "url": "https://en.wikipedia.org/wiki/Hypsilophodon",
+    "revid": 1363223499
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Hypsilophus tooth\"",
+    "oneLiner": "A small, agile herbivore famous from the Isle of Wight.",
+    "description": "Hypsilophodon was a small, agile, bipedal herbivore of the Early Cretaceous of England, 1.5–2 m long, with a beaked, pointed head. Abundant finds on the Isle of Wight give a clear picture of its build.",
+    "bodyLength": {
+      "value": 2,
+      "unit": "m",
+      "low": 1.5,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 20,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Early Cretaceous",
+    "discovery": {
+      "year": 1869,
+      "who": "Thomas Henry Huxley",
+      "where": "Isle of Wight, England"
+    },
+    "notableFacts": [
+      {
+        "tag": "agile",
+        "text": "A small, fleet-footed bipedal herbivore."
+      },
+      {
+        "tag": "myths",
+        "text": "Older ideas that it was tree-climbing and armoured have since been disproven."
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:57453",
+  "taxonName": "Eoraptor",
+  "source": {
+    "article": "Eoraptor",
+    "url": "https://en.wikipedia.org/wiki/Eoraptor",
+    "revid": 1355645201
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Dawn thief\"",
+    "oneLiner": "A tiny, early omnivorous dinosaur near the dawn of the group.",
+    "description": "Eoraptor was a small, lightly built early sauropodomorph of the Late Triassic of Argentina and one of the earliest known dinosaurs. Its varied tooth shapes suggest it was omnivorous.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Omnivore",
+    "era": "Late Triassic (Carnian), ~231–228 Ma",
+    "discovery": {
+      "year": 1993,
+      "who": "Paul Sereno & Ricardo Martínez",
+      "where": "Ischigualasto, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "early",
+        "text": "One of the earliest known dinosaurs."
+      },
+      {
+        "tag": "diet",
+        "text": "Its mix of tooth shapes points to an omnivorous diet."
+      }
+    ]
+  }
+}

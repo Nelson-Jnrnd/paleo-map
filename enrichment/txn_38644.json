@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38644",
+  "taxonName": "Plateosaurus",
+  "source": {
+    "article": "Plateosaurus",
+    "url": "https://en.wikipedia.org/wiki/Plateosaurus",
+    "revid": 1366348440
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Broad lizard\"",
+    "oneLiner": "A common Late Triassic 'prosauropod' of Europe.",
+    "description": "Plateosaurus was an early sauropodomorph ('prosauropod') herbivore of Late Triassic Europe, known from abundant, well-preserved skeletons. It was one of the first dinosaurs to become well understood, and the fifth valid dinosaur genus ever named.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Triassic (Norian–Rhaetian), ~214–204 Ma",
+    "discovery": {
+      "year": 1837,
+      "who": "Hermann von Meyer",
+      "where": "Germany"
+    },
+    "notableFacts": [
+      {
+        "tag": "abundance",
+        "text": "Known from abundant, well-preserved skeletons across central Europe."
+      },
+      {
+        "tag": "history",
+        "text": "The fifth still-valid dinosaur genus ever named."
+      }
+    ]
+  }
+}

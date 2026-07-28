@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38582",
+  "taxonName": "Majungasaurus",
+  "source": {
+    "article": "Majungasaurus",
+    "url": "https://en.wikipedia.org/wiki/Majungasaurus",
+    "revid": 1362852065
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Mahajanga lizard\"",
+    "oneLiner": "A short-snouted, single-horned predator of Cretaceous Madagascar.",
+    "description": "Majungasaurus was an abelisaurid theropod of latest-Cretaceous Madagascar, about 7 m long, with a short, deep snout, tiny arms, and a single rounded horn on top of its skull. It was one of the last non-avian dinosaurs, and bite-marked bones show it practised cannibalism.",
+    "bodyLength": {
+      "value": 7,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 1,
+      "unit": "t",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Late Cretaceous (Maastrichtian), ~70–66 Ma",
+    "discovery": {
+      "year": null,
+      "who": null,
+      "where": "Madagascar"
+    },
+    "notableFacts": [
+      {
+        "tag": "horn",
+        "text": "Had a single rounded horn on the roof of its skull."
+      },
+      {
+        "tag": "cannibalism",
+        "text": "Bite-marked bones show it fed on others of its own kind."
+      }
+    ]
+  }
+}

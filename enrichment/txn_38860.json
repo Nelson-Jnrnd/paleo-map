@@ -1,0 +1,56 @@
+{
+  "taxonId": "txn:38860",
+  "taxonName": "Styracosaurus",
+  "source": {
+    "article": "Styracosaurus",
+    "url": "https://en.wikipedia.org/wiki/Styracosaurus",
+    "revid": 1354238610
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "sti-RAK-uh-SOR-us",
+    "nameMeaning": "\"Spiked lizard\"",
+    "oneLiner": "A horned ceratopsian with a spectacular spiked frill.",
+    "description": "Styracosaurus was a large horned dinosaur of Late Cretaceous North America, bearing four to six long spikes on its neck frill and a single long nose horn. A bulky quadrupedal herbivore, it sliced plants with shearing cheek-teeth and may have lived in herds.",
+    "bodyLength": {
+      "value": 5.5,
+      "unit": "m",
+      "low": 5,
+      "high": 5.5,
+      "confidence": "estimated"
+    },
+    "height": {
+      "value": 1.8,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "mass": {
+      "value": 2.7,
+      "unit": "t",
+      "low": 1.8,
+      "high": 2.7,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1913,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "frill",
+        "text": "Bore four to six long spikes on its neck frill plus a long nose horn."
+      },
+      {
+        "tag": "nosehorn",
+        "text": "Its nose horn may have reached 60 cm long."
+      }
+    ]
+  }
+}

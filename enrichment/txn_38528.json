@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38528",
+  "taxonName": "Coelurus",
+  "source": {
+    "article": "Coelurus",
+    "url": "https://en.wikipedia.org/wiki/Coelurus",
+    "revid": 1362750852
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Hollow tail\", for its hollow tail vertebrae",
+    "oneLiner": "A small, lightly built theropod of the Morrison Formation.",
+    "description": "Coelurus was a small, lightly built bipedal carnivore of the Late Jurassic Morrison Formation of Wyoming, with elongate legs and hollow tail bones. Though it gave its name to the Coelurosauria, it has long been poorly understood.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Carnivore",
+    "era": "Late Jurassic (Kimmeridgian), ~155–152 Ma",
+    "discovery": {
+      "year": 1879,
+      "who": "Othniel Charles Marsh",
+      "where": "Wyoming, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "name",
+        "text": "Gave its name to the Coelurosauria, though it remains poorly known."
+      },
+      {
+        "tag": "build",
+        "text": "A small, slender, long-legged predator."
+      }
+    ]
+  }
+}

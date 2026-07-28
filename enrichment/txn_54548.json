@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:54548",
+  "taxonName": "Sinosauropteryx",
+  "source": {
+    "article": "Sinosauropteryx",
+    "url": "https://en.wikipedia.org/wiki/Sinosauropteryx",
+    "revid": 1354729394
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Chinese reptilian wing\"",
+    "oneLiner": "The first non-bird dinosaur found with feathers — and known colours.",
+    "description": "Sinosauropteryx was a small coelurosaurian theropod of Early Cretaceous China with a long tail and short arms, about 1 m long. Described in 1996, it was the first dinosaur outside the bird lineage found with feathers — simple filaments — and preserved pigment shows it had a countershaded body and a banded tail.",
+    "bodyLength": {
+      "value": 1.07,
+      "unit": "m",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 0.55,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Early Cretaceous",
+    "discovery": {
+      "year": 1996,
+      "who": null,
+      "where": "Liaoning, China"
+    },
+    "notableFacts": [
+      {
+        "tag": "feathers",
+        "text": "The first non-avian dinosaur found with evidence of feathers."
+      },
+      {
+        "tag": "colour",
+        "text": "Preserved pigment reveals a countershaded body and a banded 'raccoon' tail."
+      }
+    ]
+  }
+}

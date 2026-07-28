@@ -1,0 +1,38 @@
+{
+  "taxonId": "txn:38763",
+  "taxonName": "Lambeosaurus",
+  "source": {
+    "article": "Lambeosaurus",
+    "url": "https://en.wikipedia.org/wiki/Lambeosaurus",
+    "revid": 1361922070
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "LAM-bee-uh-SOR-us",
+    "nameMeaning": "\"Lambe's lizard\"",
+    "oneLiner": "A hollow-crested duck-billed hadrosaur of western North America.",
+    "description": "Lambeosaurus was a lambeosaurine 'duck-billed' hadrosaur of Late Cretaceous western North America, with a distinctive hollow head crest. It is the namesake of the lambeosaurine hadrosaurs.",
+    "bodyLength": null,
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1923,
+      "who": "William Parks",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "crest",
+        "text": "Named for the hollow, often hatchet-shaped head crest characteristic of its group."
+      },
+      {
+        "tag": "name",
+        "text": "Named to honour paleontologist Lawrence Lambe."
+      }
+    ]
+  }
+}

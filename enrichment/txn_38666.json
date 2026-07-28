@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:38666",
+  "taxonName": "Barosaurus",
+  "source": {
+    "article": "Barosaurus",
+    "url": "https://en.wikipedia.org/wiki/Barosaurus",
+    "revid": 1363285286
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "BARR-oh-SOR-us",
+    "nameMeaning": "\"Heavy lizard\"",
+    "oneLiner": "A giant, long-necked diplodocid of the Morrison Formation.",
+    "description": "Barosaurus was an enormous diplodocid sauropod of the Late Jurassic Morrison Formation, closely related to Diplodocus, about 25–27 m long with a very long neck and whip-like tail.",
+    "bodyLength": {
+      "value": 27,
+      "unit": "m",
+      "low": 25,
+      "high": 27,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 20,
+      "unit": "t",
+      "low": 12,
+      "high": 20,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Jurassic",
+    "discovery": {
+      "year": 1890,
+      "who": "Othniel Charles Marsh",
+      "where": "South Dakota, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "neck",
+        "text": "Had an exceptionally long neck; a rearing mount towers in the American Museum of Natural History."
+      },
+      {
+        "tag": "relative",
+        "text": "A close relative of Diplodocus."
+      }
+    ]
+  }
+}

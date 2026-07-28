@@ -1,0 +1,44 @@
+{
+  "taxonId": "txn:38670",
+  "taxonName": "Mamenchisaurus",
+  "source": {
+    "article": "Mamenchisaurus",
+    "url": "https://en.wikipedia.org/wiki/Mamenchisaurus",
+    "revid": 1363525068
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "mah-MUN-chee-SOR-us",
+    "nameMeaning": "\"Mamenchi lizard\"",
+    "oneLiner": "A Chinese sauropod with an extraordinarily long neck.",
+    "description": "Mamenchisaurus was a sauropod of Jurassic China famous for its extraordinarily long neck — nearly half its total body length. Species ranged from roughly 15 to 26 m long, possibly up to 35 m.",
+    "bodyLength": {
+      "value": 26,
+      "unit": "m",
+      "low": 15,
+      "high": 26,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": null,
+    "diet": "Herbivore",
+    "era": "Late Jurassic (Oxfordian), ~162–159 Ma",
+    "discovery": {
+      "year": 1954,
+      "who": "Yang Zhongjian (C. C. Young)",
+      "where": "Sichuan, China"
+    },
+    "notableFacts": [
+      {
+        "tag": "neck",
+        "text": "Its neck made up nearly half its total body length — among the longest of any animal."
+      },
+      {
+        "tag": "discovery",
+        "text": "First found in 1952 at a Chinese highway construction site."
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:54557",
+  "taxonName": "Utahraptor",
+  "source": {
+    "article": "Utahraptor",
+    "url": "https://en.wikipedia.org/wiki/Utahraptor",
+    "revid": 1366046191
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Utah's predator\"",
+    "oneLiner": "The largest known raptor, a heavy Early Cretaceous dromaeosaur.",
+    "description": "Utahraptor was the largest known dromaeosaurid ('raptor'), a heavily built, ground-dwelling carnivore of Early Cretaceous Utah, about 6–7 m long and ~500 kg. Its feet bore an enlarged sickle-shaped killing claw.",
+    "bodyLength": {
+      "value": 7,
+      "unit": "m",
+      "low": 6,
+      "high": 7,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 500,
+      "unit": "kg",
+      "low": null,
+      "high": null,
+      "confidence": "estimated"
+    },
+    "diet": "Carnivore",
+    "era": "Early Cretaceous, ~139–135 Ma",
+    "discovery": {
+      "year": 1993,
+      "who": "James Kirkland",
+      "where": "Utah, USA"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "The largest known member of the dromaeosaurid ('raptor') family."
+      },
+      {
+        "tag": "claw",
+        "text": "Bore a large sickle-shaped killing claw on each foot."
+      }
+    ]
+  }
+}

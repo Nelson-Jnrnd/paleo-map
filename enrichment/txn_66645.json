@@ -1,0 +1,50 @@
+{
+  "taxonId": "txn:66645",
+  "taxonName": "Argentinosaurus",
+  "source": {
+    "article": "Argentinosaurus",
+    "url": "https://en.wikipedia.org/wiki/Argentinosaurus",
+    "revid": 1354821206
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": null,
+    "nameMeaning": "\"Argentina lizard\"",
+    "oneLiner": "A titanosaur among the largest land animals of all time.",
+    "description": "Argentinosaurus was a giant titanosaurian sauropod of Late Cretaceous Argentina and one of the largest land animals ever, estimated at 30–35 m long and 65–80 tonnes — though it is known only from fragmentary remains.",
+    "bodyLength": {
+      "value": 35,
+      "unit": "m",
+      "low": 30,
+      "high": 35,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 80,
+      "unit": "t",
+      "low": 65,
+      "high": 80,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous",
+    "discovery": {
+      "year": 1993,
+      "who": "José Bonaparte & Rodolfo Coria",
+      "where": "Neuquén, Argentina"
+    },
+    "notableFacts": [
+      {
+        "tag": "size",
+        "text": "Among the largest land animals ever to have lived."
+      },
+      {
+        "tag": "fragmentary",
+        "text": "Its size is estimated from only a few giant vertebrae and limb bones."
+      }
+    ]
+  }
+}

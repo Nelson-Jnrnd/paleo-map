@@ -1,0 +1,46 @@
+{
+  "taxonId": "txn:38855",
+  "taxonName": "Chasmosaurus",
+  "source": {
+    "article": "Chasmosaurus",
+    "url": "https://en.wikipedia.org/wiki/Chasmosaurus",
+    "revid": 1358500685
+  },
+  "engine": "agent",
+  "assertedOn": "2026-07-28",
+  "record": {
+    "commonName": null,
+    "pronunciation": "KAZ-moh-SOR-us",
+    "nameMeaning": "\"Opening lizard\", for the openings in its frill",
+    "oneLiner": "A ceratopsian with a large, fenestrated neck frill.",
+    "description": "Chasmosaurus was a mid-sized chasmosaurine horned dinosaur of Late Cretaceous Alberta, 4.3–4.8 m long, named for the large openings (fenestrae) in its neck frill. Many specimens come from Dinosaur Provincial Park.",
+    "bodyLength": {
+      "value": 4.8,
+      "unit": "m",
+      "low": 4.3,
+      "high": 4.8,
+      "confidence": "estimated"
+    },
+    "height": null,
+    "mass": {
+      "value": 2,
+      "unit": "t",
+      "low": 1.5,
+      "high": 2,
+      "confidence": "estimated"
+    },
+    "diet": "Herbivore",
+    "era": "Late Cretaceous (Campanian)",
+    "discovery": {
+      "year": 1914,
+      "who": "Lawrence Lambe",
+      "where": "Alberta, Canada"
+    },
+    "notableFacts": [
+      {
+        "tag": "frill",
+        "text": "Its large neck frill was lightened by big openings (fenestrae)."
+      }
+    ]
+  }
+}
