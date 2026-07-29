@@ -10,12 +10,33 @@ import { buildReadModel } from "../../src/pipeline/build.js";
 import { FixtureSourceClient } from "../../src/pipeline/fixture-client.js";
 import { partitionReadModel } from "../../src/pipeline/partition.js";
 import type { AtlasPartition } from "../../src/pipeline/partition.js";
+import { applyWikipedia } from "../../src/pipeline/wikipedia.js";
 import { ReadApi } from "../../src/read/api.js";
 import type { ReadModel } from "../../src/domain/index.js";
 import { DINOSAURIA_MESOZOIC } from "../../src/fixtures/dinosauria-mesozoic.js";
 
+/**
+ * SPEC-014 AMEND-005: give every fixture taxon a (synthetic) Wikipedia article so
+ * the default Wikipedia gate hides nothing and the standard exploration loop is
+ * unchanged. Tests that exercise the gate itself build their own mixed models.
+ */
+export function withFixtureWikipedia(model: ReadModel): ReadModel {
+  return applyWikipedia(model, {
+    resolvedOn: "2026-07-29",
+    entries: Object.fromEntries(
+      model.taxa.map((t) => [
+        t.id,
+        {
+          title: t.scientificName,
+          url: `https://en.wikipedia.org/wiki/${encodeURIComponent(t.scientificName)}`,
+        },
+      ]),
+    ),
+  });
+}
+
 export async function fixtureModel(): Promise<ReadModel> {
-  return buildReadModel(new FixtureSourceClient());
+  return withFixtureWikipedia(await buildReadModel(new FixtureSourceClient()));
 }
 
 export async function fixtureApi(): Promise<ReadApi> {
@@ -24,7 +45,9 @@ export async function fixtureApi(): Promise<ReadApi> {
 
 /** A full-Mesozoic (multi-period) model + API for SPEC-008 tests. */
 export async function mesozoicModel(): Promise<ReadModel> {
-  return buildReadModel(new FixtureSourceClient(DINOSAURIA_MESOZOIC));
+  return withFixtureWikipedia(
+    await buildReadModel(new FixtureSourceClient(DINOSAURIA_MESOZOIC)),
+  );
 }
 
 export async function mesozoicApi(): Promise<ReadApi> {

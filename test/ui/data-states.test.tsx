@@ -47,7 +47,7 @@ test("shows an error with Retry that recovers (FONC-1310/1330)", async () => {
   ).toBeInTheDocument();
 });
 
-test("labels a minimal (occurrence-only) profile (FONC-1300)", async () => {
+test("taxon page embeds the taxon's Wikipedia article (AMEND-005)", async () => {
   const api = await fixtureApi();
   render(
     <TaxonProfile
@@ -58,15 +58,16 @@ test("labels a minimal (occurrence-only) profile (FONC-1300)", async () => {
     />,
   );
 
-  expect(
-    screen.getByText(/Occurrence only — minimal profile/i),
-  ).toBeInTheDocument();
+  // The page is the inline Wikipedia article (mobile domain), under Back to map.
+  const frame = screen.getByTitle(/Wikipedia article: Nanotyrannus/i);
+  expect(frame.tagName).toBe("IFRAME");
+  expect(frame.getAttribute("src")).toContain("en.m.wikipedia.org/wiki/");
   expect(
     screen.getByRole("button", { name: /Back to map/i }),
   ).toBeInTheDocument();
 });
 
-test("taxon profile for an indeterminate/unknown taxon is an honest, navigable screen", async () => {
+test("taxon page for a taxon with no article is an honest, navigable screen (AMEND-005)", async () => {
   const api = await fixtureApi();
   render(
     <TaxonProfile
@@ -77,9 +78,11 @@ test("taxon profile for an indeterminate/unknown taxon is an honest, navigable s
     />,
   );
   expect(
-    screen.getByRole("region", { name: /Taxon profile:/i }),
+    screen.getByRole("region", { name: /Taxon page:/i }),
   ).toBeInTheDocument();
-  expect(screen.getByText(/Indeterminate identification/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/No Wikipedia article for this taxon/i),
+  ).toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: /Back to map/i }),
   ).toBeInTheDocument();

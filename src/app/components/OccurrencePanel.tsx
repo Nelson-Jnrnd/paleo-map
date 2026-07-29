@@ -30,6 +30,8 @@ export function OccurrencePanel({
 }: OccurrencePanelProps): ReactElement {
   const modern = occurrence.modernPosition.value;
   const paleo = occurrence.paleoPosition.value;
+  // SPEC-014 AMEND-005: only taxa with a resolved Wikipedia article have a page.
+  const hasArticle = Boolean(api.getTaxon(occurrence.taxonId)?.wikipedia);
 
   return (
     <section
@@ -87,13 +89,24 @@ export function OccurrencePanel({
         </dd>
       </dl>
 
-      <button
-        type="button"
-        className={styles.primary}
-        onClick={() => onOpenProfile(occurrence.taxonId)}
-      >
-        Open taxon profile →
-      </button>
+      {hasArticle ? (
+        <button
+          type="button"
+          className={styles.primary}
+          onClick={() => onOpenProfile(occurrence.taxonId)}
+        >
+          Open taxon profile →
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={styles.primary}
+          disabled
+          title="No Wikipedia article for this taxon"
+        >
+          Open taxon profile →
+        </button>
+      )}
     </section>
   );
 }

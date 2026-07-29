@@ -469,6 +469,28 @@
   color: var(--color-text-muted);
 }
 
+/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. */
+.wikiGateToggle {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.wikiGateCount {
+  color: var(--color-accent-deep);
+}
+
 .sidebar {
   width: 360px;
   max-width: 42vw;
@@ -665,6 +687,19 @@
 
 .occurrenceRow:hover {
   background: var(--color-ground);
+}
+
+/* SPEC-014 AMEND-005: article-less taxon row — greyed, non-interactive. */
+.rowDisabled {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-text-faint);
+  cursor: default;
+}
+.rowDisabled:hover {
+  background: transparent;
 }
 
 /* Transient cross-highlight (hover/focus on either surface) — weaker than the
@@ -1247,6 +1282,12 @@
   font-size: 13px;
   color: var(--color-text-hi);
   font-weight: 600;
+}
+/* SPEC-014 AMEND-005: article-less ancestor — shown for context, not navigable. */
+.crumbMuted {
+  font-size: 13px;
+  color: var(--color-text-faint);
+  cursor: default;
 }
 .crumbSep {
   color: var(--color-border);

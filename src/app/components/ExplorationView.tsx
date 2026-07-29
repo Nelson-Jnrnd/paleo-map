@@ -34,6 +34,7 @@ import {
 } from "../state/exploration.js";
 import { occurrencesInView } from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
+import { gateOccurrences } from "../state/wikipediaGate.js";
 import { stageForTaxon, tierForRank } from "../state/search.js";
 import type { SearchableTaxon } from "../state/search.js";
 import {
@@ -124,16 +125,34 @@ export function ExplorationView({
   // transiently highlighted occurrence shared with the map (SPEC-009 REQ-003/004).
   const [viewport, setViewport] = useState<Bounds | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
+  // indeterminate occurrences). The toggle below reveals them.
+  const [showAll, setShowAll] = useState(false);
   const stage = stageByName(state.stageName);
   const stageStatus = useStageOccurrences(stageSource, stage, stageAttempt);
 
   // The occurrences visible at the selected age: the fetched stage set in
   // partitioned mode, or the in-memory filter over the injected model.
-  const occurrences = useMemo(() => {
+  const rawOccurrences = useMemo(() => {
     if (stageStatus.kind === "ready") return stageStatus.occurrences;
     if (stageStatus.kind === "inMemory") return visibleOccurrences(api, state);
     return [];
   }, [stageStatus, api, state]);
+
+  // SPEC-014 AMEND-005: the Wikipedia gate. By default only occurrences tied to a
+  // Wikipedia-documented genus are shown — on the map and in every list; toggling
+  // "show all" reveals the article-less and indeterminate ones. Keyed off the
+  // reference taxa (which carry `wikipedia`), not the per-stage occurrence set.
+  const gateTaxaById = useMemo(() => indexTaxaById(api.listTaxa()), [api]);
+  const occurrences = useMemo(
+    () => gateOccurrences(rawOccurrences, gateTaxaById, showAll),
+    [rawOccurrences, gateTaxaById, showAll],
+  );
+  const hiddenCount = rawOccurrences.length - occurrences.length;
+  // SPEC-014 AMEND-005: a taxon has a page iff it has a resolved Wikipedia article
+  // (any rank). Drives the greyed "Open profile" affordances and the breadcrumb.
+  const hasArticle = (id: string): boolean =>
+    Boolean(gateTaxaById.get(id)?.wikipedia);
 
   // A per-stage API joins the shared reference to the active occurrences, so the
   // panel/profile resolve taxa, sources and this stage's occurrences (REQ-005).
@@ -330,6 +349,22 @@ export function ExplorationView({
           <span className={styles.reconstructionBanner}>
             <span aria-hidden="true">▲</span> Paleogeographic reconstruction
           </span>
+          <label className={styles.wikiGateToggle}>
+            <input
+              type="checkbox"
+              checked={showAll}
+              onChange={(e) => setShowAll(e.target.checked)}
+            />
+            <span>
+              Show taxa without a Wikipedia article
+              {!showAll && hiddenCount > 0 && (
+                <span className={styles.wikiGateCount}>
+                  {" "}
+                  · {hiddenCount} hidden
+                </span>
+              )}
+            </span>
+          </label>
           {state.mode !== "taxon" && (
             <p className={styles.mapLegend} role="note">
               {state.mode === "locality"
@@ -419,6 +454,7 @@ export function ExplorationView({
                       onOpenProfile={(taxonId) =>
                         dispatch({ type: "openProfile", taxonId })
                       }
+                      hasArticle={hasArticle}
                       onClose={() => dispatch({ type: "clearSelection" })}
                     />
                   )}
@@ -442,6 +478,7 @@ export function ExplorationView({
                       onOpenProfile={(taxonId) =>
                         dispatch({ type: "openProfile", taxonId })
                       }
+                      hasArticle={hasArticle}
                       onClose={() => dispatch({ type: "clearSelection" })}
                     />
                   )}
