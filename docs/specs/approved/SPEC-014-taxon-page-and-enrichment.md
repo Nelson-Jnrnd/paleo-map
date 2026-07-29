@@ -466,8 +466,9 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
      default hide state, article-less taxa's occurrence points are removed from
      the map as well as from the panels/lists. Occurrences with an *indeterminate*
      identification (no genus taxon at all, hence no possible article) are treated
-     as article-less and hidden by default under this rule — confirm this is
-     intended.
+     as article-less and are **hidden by default** under this rule (owner-directed,
+     2026-07-29): the default map shows only fossils tied to a Wikipedia-documented
+     genus. They reappear only when the parameter is set to "show all".
   2. The parameter is surfaced as a **visible toggle** (charter legibility), exact
      placement TBD in the plan; its default is "hide article-less taxa".
   3. Embed target is **mobile** Wikipedia (`en.m.wikipedia.org`) for a cleaner
