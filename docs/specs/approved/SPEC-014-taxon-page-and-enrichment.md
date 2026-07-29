@@ -406,8 +406,8 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ### AMEND-005: Inline Wikipedia profile + Wikipedia-gated taxa (supersedes REQ-005 layout; scopes DATA-005)
 
-- **Date / owner:** 2026-07-29, owner-directed (conversation with owner
-  nelsonjeanrenaud@gmail.com). **Status: proposed — pending owner approval.**
+- **Date / owner:** 2026-07-29, owner-directed and **owner-approved** (conversation
+  with owner nelsonjeanrenaud@gmail.com). **Status: approved.**
 - **Trigger:** The owner is not satisfied with the curated "spec sheet" taxon
   profile (AMEND-002). Decision: replace it with an **inline view of the taxon's
   Wikipedia article** and accept a Wikipedia-native look, rather than distilling
@@ -416,11 +416,20 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
   1. **The taxon profile becomes an inline `<iframe>` of the taxon's Wikipedia
      article.** The AMEND-002 layout (identity header, size hero, ruled spec
      table, "About" enrichment block, collapsed occurrences) is **retired from
-     the profile view**. The profile shows: "← Back to map" and the embedded
+     the profile view**. The profile shows: "← Back to map", the **taxonomy
+     breadcrumb** (see 1a, retained from AMEND-002/REQ-006), and the embedded
      article (mobile Wikipedia, `en.m.wikipedia.org`). Enrichment records
      (REQ-001/002) and images (REQ-003) are no longer presented on the profile;
      the enrichment build layer may remain for other uses but no longer drives
      the page.
+  1a. **Taxonomy breadcrumb retained and filtered.** The `TaxonomyTree` breadcrumb
+     (`Dinosauria › … › Genus`) stays at the top of the taxon page for lineage
+     context and ancestor navigation. It is **filtered by the same Wikipedia
+     gate**: only ancestors that have a Wikipedia article are navigable links;
+     ancestors with `wikipedia == null` are rendered **non-navigable/greyed** (no
+     link — they have no taxon page), consistent with the greyed "Open profile →"
+     treatment. The chain is kept intact for context rather than collapsed, so the
+     lineage stays legible (design charter); only clickability is gated.
   2. **New build-time Wikipedia resolution.** Each taxon gains
      `wikipedia: { title, url } | null` on the read model, resolved **once at
      build time** via the MediaWiki API (existence + canonical title, following
@@ -473,7 +482,11 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
      placement TBD in the plan; its default is "hide article-less taxa".
   3. Embed target is **mobile** Wikipedia (`en.m.wikipedia.org`) for a cleaner
      inline read.
-- **Human approval reference:** _pending_ — owner conversation 2026-07-29.
+- **Human approval reference:** owner-approved in conversation 2026-07-29
+  (nelsonjeanrenaud@gmail.com): inline iframe profile, default-hide parameter over
+  map + panels + lists, indeterminate occurrences hidden by default, greyed
+  "Open profile" with tooltip under "show all", and the retained filtered taxonomy
+  breadcrumb on the taxon page.
 
 ### AMEND-004: Enrichment shipped as its own artifact (refines REQ-002 delivery)
 
