@@ -428,13 +428,17 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
      guesses a title at runtime (fixes the disambiguation/redirect mis-hit risk
      of the spike).
   3. **Wikipedia-gated taxa, via a parameter (default = hide).** A configuration
-     parameter governs taxa with `wikipedia == null`. **Default: hidden** from the
-     taxon-facing exploration surfaces (the grouped taxon panels / taxon lists).
-     When the parameter is set to show them, article-less taxa appear but their
-     **"Open profile →" affordance is rendered disabled/greyed with a tooltip**
-     (e.g. "No Wikipedia article for this taxon"). There is **no fallback profile
-     page** — an article-less taxon simply has no taxon page. Entry point:
-     `GroupedPanels.tsx` "Open profile →" button (`onOpenProfile`).
+     parameter governs taxa with `wikipedia == null`. **Default: hidden across
+     all exploration surfaces — including the map.** In the default (hide) state
+     an article-less taxon is fully removed: its **occurrence points do not render
+     on the map**, and it does not appear in the grouped taxon panels / taxon
+     lists. When the parameter is set to show them, article-less taxa reappear on
+     the map and in the lists, but their **"Open profile →" affordance is rendered
+     disabled/greyed with a tooltip** (e.g. "No Wikipedia article for this
+     taxon"). There is **no fallback profile page** — an article-less taxon simply
+     has no taxon page. Entry point for the greyed affordance: `GroupedPanels.tsx`
+     "Open profile →" button (`onOpenProfile`); map filtering happens where
+     occurrences are selected for rendering (read query / map layer).
 - **Relationship to DATA-005 (no runtime egress) — scoped exception:** the read
   API and all data artifacts (occurrences, taxa, profiles, enrichment) remain
   fully offline; DATA-005 **as tested still holds** — the read API issues no
@@ -458,8 +462,12 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
     "Open profile →" button + tooltip when the parameter shows them; the profile
     renders an iframe pointed at the stored canonical URL.
 - **Assumptions (to confirm in the implementation plan):**
-  1. The parameter governs the **taxon panels / lists**; raw occurrence points on
-     the map are **not** removed (only their path to a taxon page is gated).
+  1. The parameter governs **all taxon-facing surfaces including the map**: in the
+     default hide state, article-less taxa's occurrence points are removed from
+     the map as well as from the panels/lists. Occurrences with an *indeterminate*
+     identification (no genus taxon at all, hence no possible article) are treated
+     as article-less and hidden by default under this rule — confirm this is
+     intended.
   2. The parameter is surfaced as a **visible toggle** (charter legibility), exact
      placement TBD in the plan; its default is "hide article-less taxa".
   3. Embed target is **mobile** Wikipedia (`en.m.wikipedia.org`) for a cleaner
