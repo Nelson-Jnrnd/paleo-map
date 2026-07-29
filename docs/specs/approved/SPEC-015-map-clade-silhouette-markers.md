@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-015
 title: Legible occurrence map — clade silhouette markers, zoom-scaled labels, hover preview
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -73,32 +73,43 @@ read the map's composition, without probing each point one click at a time.
 
 ## Functional requirements
 
-### REQ-001: Clade silhouette markers
+### REQ-001: Clade silhouette markers, shape + subtle tint
 
 - **Statement:** In Occurrence and Taxon modes, each unclustered occurrence
   renders as its **clade silhouette icon** (from the bundled clade set, chosen by
-  the occurrence's major group via `silhouetteForTaxon`), not a plain circle. The
-  generic fallback icon is used when the group is unresolved.
-- **Rationale:** Shape encodes clade identity at a glance (charter: not colour
-  alone).
+  the occurrence's major group via `silhouetteForTaxon`), not a plain circle.
+  Each clade icon also carries a **subtle, muted clade tint** as a second cue
+  (owner decision 2026-07-29): a small categorical, meaning-only palette keyed to
+  the major group, quiet enough to preserve restraint. The generic fallback icon
+  + neutral tint is used when the group is unresolved. Because identity is carried
+  by **shape first** (the silhouette), the tint is a reinforcement, never the sole
+  channel (PERF-250).
+- **Rationale:** Shape encodes clade identity at a glance; a muted tint makes the
+  map faster to scan without relying on colour alone.
 - **Acceptance criteria:** each visible point's `icon-image` corresponds to its
-  taxon's resolved clade group; a theropod occurrence shows the theropod
-  silhouette, a sauropod the sauropod silhouette; unresolved → fallback.
-- **Verification method:** automated (unit test on the occurrence→clade-icon
-  mapping) + manual visual check.
+  taxon's resolved clade group and its tint matches the same group; a theropod
+  occurrence shows the theropod silhouette in the theropod tint, a sauropod the
+  sauropod silhouette/tint; unresolved → fallback icon + neutral tint. A legend
+  names the clade icons/tints.
+- **Verification method:** automated (unit test on the occurrence→clade
+  icon+tint mapping) + manual visual check.
 - **Evidence location:** _pending_.
 
 ### REQ-002: Zoom-scaled taxon labels
 
 - **Statement:** Each marker carries a **taxon-name label** rendered in a symbol
   layer, whose text size **scales with zoom** (a zoom interpolation) and which
-  **declutters via collision** so labels never overlap illegibly. Scientific
-  names are italic per the charter (CONS-350) where the renderer allows.
-- **Rationale:** Names are the primary reference; they must be readable and must
-  resize correctly rather than stay pinned at one size.
-- **Acceptance criteria:** labels grow/shrink smoothly across zoom within a
-  bounded min/max; overlapping labels are dropped by collision, not stacked; at
-  low zoom labels thin out and the icons still read.
+  **declutters via collision** so labels never overlap illegibly. Labels appear
+  **only above a zoom threshold** (owner decision 2026-07-29): at low zoom the map
+  shows icons alone (clean far view), and names fade in once the user zooms in
+  past the threshold. Scientific names are italic per the charter (CONS-350)
+  where the renderer allows.
+- **Rationale:** Names are the primary reference and must resize correctly rather
+  than stay pinned at one size; gating them by zoom keeps the far view uncluttered
+  while still delivering names on approach.
+- **Acceptance criteria:** below the threshold no labels render (icons only);
+  above it, labels appear, grow/shrink smoothly within a bounded min/max, and
+  overlapping labels are dropped by collision, not stacked.
 - **Verification method:** manual visual check at multiple zooms + unit test on
   the label field/paint expression.
 - **Evidence location:** _pending_.
@@ -212,17 +223,21 @@ a hover-card component); no data or schema migration is involved.
 
 ## Open questions
 
-- [ ] Should the clade icon also carry a subtle clade **tint** (shape + colour),
-      or shape only? (Charter leans shape-only; tint optional.)
-- [ ] Label density policy: show labels for all unclustered points (collision-
-      managed) or only above a zoom threshold / only the selected taxon?
-- [ ] Hover card fields beyond name · age · formation (e.g. source, silhouette
-      size)? Keep minimal for restraint?
+- [x] Clade **tint**: shape + subtle tint. *Owner 2026-07-29: shape + subtle
+      clade tint (REQ-001).*
+- [x] Label density policy. *Owner 2026-07-29: labels only above a zoom threshold
+      (REQ-002).*
+- [ ] Hover card fields beyond name · age · formation (e.g. source)? Keep minimal
+      for restraint unless the owner asks otherwise.
+- [ ] Exact zoom threshold for labels and the clade tint palette values — to be
+      tuned during implementation (visual, not behavioural).
 
 ## Human decisions required
 
-- [ ] Approve the clade-icon-only marker approach (vs. per-taxon silhouettes).
-- [ ] Confirm label density policy (open question above).
+- [x] Clade-icon marker approach (vs. per-taxon silhouettes) — approved
+      (owner 2026-07-29).
+- [x] Marker colour: shape + subtle tint — approved (owner 2026-07-29).
+- [x] Label density: only above a zoom threshold — approved (owner 2026-07-29).
 
 ## Conflict check
 
