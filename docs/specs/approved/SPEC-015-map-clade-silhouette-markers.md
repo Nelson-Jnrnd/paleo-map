@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-015
 title: Legible occurrence map — clade silhouette markers, zoom-scaled labels, hover preview
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -259,11 +259,21 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | OccurrenceMap symbol layer | _pending_ | _pending_ | Draft |
-| REQ-002 | OccurrenceMap label layer | _pending_ | _pending_ | Draft |
-| REQ-003 | Hover preview card | _pending_ | _pending_ | Draft |
-| REQ-004 | OccurrenceMap clustering/focus | _pending_ | _pending_ | Draft |
+| REQ-001 | Clade coin + silhouette layers | `mapCladeMarkers.ts` (`cladeMarkerForTaxon`, `CLADE_MARKERS`), `OccurrenceMap.tsx` (`points-bg` tinted coin + `points-icon` silhouette), legend | `test/ui/map-clade-markers.test.ts` | Done |
+| REQ-002 | Zoom-gated DOM labels | `mapLabels.ts` (`computeMapLabels`), `OccurrenceMap.tsx` (`recomputeLabels`, `LABEL_MIN_ZOOM`, `.mapLabel`) | `test/ui/map-labels.test.ts` | Done |
+| REQ-003 | Hover preview card | `MapHoverCard.tsx` (`hoverCardContent`, `MapHoverCard`), `OccurrenceMap.tsx` (pointer handler) | `test/ui/map-clade-markers.test.ts` (content) | Done |
+| REQ-004 | Clustering/focus/locality | `OccurrenceMap.tsx` (`clusters` layer retained, `points-icon`/`points-bg` focus opacity, locality discs) | existing mode tests | Done |
 
 ## Implementation notes
 
-_pending._
+- Labels are DOM overlays (`.mapLabel`), not MapLibre symbol text, because the
+  self-contained style bundles no glyphs (SEC-001). Projection + zoom gating live
+  in `OccurrenceMap`; collision culling is the pure `computeMapLabels`.
+- Marker = a pale, clade-tinted circle "coin" (`points-bg`, `circle-color` from
+  the feature `tint`) with the raster clade silhouette on top (`points-icon`).
+  The tint is deliberately muted so the dark silhouette stays legible (shape
+  first). Exact tint saturation, `LABEL_MIN_ZOOM`, and marker sizes are visual
+  tunables.
+- Verified offline in a real browser (self-contained map, no network): icons,
+  tinted coins, collision labels, and the clade legend all render; no console
+  errors.

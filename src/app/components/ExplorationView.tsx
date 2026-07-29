@@ -396,6 +396,7 @@ export function ExplorationView({
               mode={state.mode}
               localities={mapLocalities}
               focusIds={focusIds}
+              taxaById={taxaById}
             />
           )}
         </div>

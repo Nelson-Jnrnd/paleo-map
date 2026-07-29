@@ -25,7 +25,7 @@ import type {
   GeoJSONSource,
   MapMouseEvent,
 } from "maplibre-gl";
-import type { ReadOccurrence } from "../../domain/index.js";
+import type { ReadOccurrence, ReadTaxon } from "../../domain/index.js";
 import {
   describeFrame,
   loadBasemap,
@@ -35,7 +35,14 @@ import {
 import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
 import type { Bounds } from "../state/viewport.js";
 import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
+import { CLADE_MARKERS, cladeMarkerForTaxon } from "./mapCladeMarkers.js";
+import { MapHoverCard, hoverCardContent } from "./MapHoverCard.js";
+import { computeMapLabels } from "./mapLabels.js";
+import type { LabelCandidate, MapLabel } from "./mapLabels.js";
 import styles from "./exploration.module.css";
+
+/** SPEC-015 REQ-002: name labels appear only once zoomed past this level. */
+const LABEL_MIN_ZOOM = 4;
 
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
@@ -60,12 +67,16 @@ interface OccurrenceMapProps {
    * non-empty the map emphasises these points and dims the rest — no hue identity.
    */
   focusIds?: readonly string[] | null;
+  /**
+   * Reference taxa (SPEC-015): used to resolve each occurrence's clade marker
+   * (icon + tint) and label. Occurrence/taxon modes render clade silhouettes.
+   */
+  taxaById?: ReadonlyMap<string, ReadTaxon>;
 }
 
 const OCEAN_OUTER = "#d7e4ec";
 const LAND = "#edf1f1";
 const COAST = "#a9b9c3";
-const ACCENT = "#0f9d83";
 const ACCENT_DEEP = "#0a7f66";
 const ACCENT_CLUSTER = "#17a98c";
 
@@ -74,20 +85,6 @@ const ACCENT_CLUSTER = "#17a98c";
  * highlight (SPEC-009 REQ-004). Selection is the strongest emphasis, highlight a
  * weaker one; both darken the ring so they read without colour alone (PERF-250).
  */
-function pointRadius(
-  selectedId: string | null,
-  highlightedId: string | null,
-): unknown {
-  return [
-    "case",
-    ["==", ["get", "id"], selectedId ?? ""],
-    9,
-    ["==", ["get", "id"], highlightedId ?? ""],
-    8,
-    6,
-  ];
-}
-
 function pointStrokeWidth(
   selectedId: string | null,
   highlightedId: string | null,
@@ -131,18 +128,26 @@ const BASE_STYLE = {
 
 function toFeatureCollection(
   occurrences: readonly ReadOccurrence[],
+  taxaById: ReadonlyMap<string, ReadTaxon>,
 ): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
   for (const o of occurrences) {
     const paleo = o.paleoPosition.value;
     if (!paleo) continue; // no paleocoordinate → not placeable on the paleo map
+    // SPEC-015: resolve the clade marker (icon + tint) for data-driven paint.
+    const marker = cladeMarkerForTaxon(o.taxonId, taxaById);
     features.push({
       type: "Feature",
       geometry: {
         type: "Point",
         coordinates: [paleo.palaeoLng, paleo.palaeoLat],
       },
-      properties: { id: o.id, taxon: o.taxonName },
+      properties: {
+        id: o.id,
+        taxon: o.taxonName,
+        iconKey: marker.id,
+        tint: marker.tint,
+      },
     });
   }
   return { type: "FeatureCollection", features };
@@ -172,10 +177,11 @@ function featuresForMode(
   mode: GroupingMode,
   occurrences: readonly ReadOccurrence[],
   localities: readonly LocalityGroup[],
+  taxaById: ReadonlyMap<string, ReadTaxon>,
 ): GeoJSON.FeatureCollection {
   return mode === "locality"
     ? toLocalityFeatureCollection(localities)
-    : toFeatureCollection(occurrences);
+    : toFeatureCollection(occurrences, taxaById);
 }
 
 /**
@@ -200,6 +206,7 @@ export function OccurrenceMap({
   mode = "occurrence",
   localities = [],
   focusIds = null,
+  taxaById = new Map(),
 }: OccurrenceMapProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -210,6 +217,44 @@ export function OccurrenceMap({
   onViewportChangeRef.current = onViewportChange;
   const onHoverRef = useRef(onHover);
   onHoverRef.current = onHover;
+  // SPEC-015: latest occurrences/taxa/mode for the map's own event handlers
+  // (hover card + label projection), which close over the initial render.
+  const occurrencesRef = useRef(occurrences);
+  occurrencesRef.current = occurrences;
+  const taxaByIdRef = useRef(taxaById);
+  taxaByIdRef.current = taxaById;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  // Hovered occurrence for the preview card, and the culled label set.
+  const [hover, setHover] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [labels, setLabels] = useState<MapLabel[]>([]);
+
+  // SPEC-015 REQ-002: project in-view occurrence points and cull colliding
+  // labels; only above the zoom threshold and only in occurrence/taxon modes.
+  const recomputeLabels = (): void => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current) return;
+    if (modeRef.current === "locality" || map.getZoom() < LABEL_MIN_ZOOM) {
+      setLabels([]);
+      return;
+    }
+    const bounds = map.getBounds();
+    const candidates: LabelCandidate[] = [];
+    for (const o of occurrencesRef.current) {
+      const paleo = o.paleoPosition.value;
+      if (!paleo) continue;
+      if (!bounds.contains([paleo.palaeoLng, paleo.palaeoLat])) continue;
+      const p = map.project([paleo.palaeoLng, paleo.palaeoLat]);
+      candidates.push({ id: o.id, taxon: o.taxonName, x: p.x, y: p.y });
+    }
+    setLabels(computeMapLabels(candidates));
+  };
+  const recomputeLabelsRef = useRef(recomputeLabels);
+  recomputeLabelsRef.current = recomputeLabels;
   const [available, setAvailable] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [basemap, setBasemap] = useState<Basemap | null>(null);
@@ -299,113 +344,174 @@ export function OccurrenceMap({
           map.remove();
         };
         map.on("load", () => {
-          map.addSource("occurrences", {
-            type: "geojson",
-            data: featuresForMode(mode, occurrences, localities),
-            cluster: true,
-            clusterRadius: 40,
-          });
-          // Group (cluster) — larger disc.
-          map.addLayer({
-            id: "clusters",
-            type: "circle",
-            source: "occurrences",
-            filter: ["has", "point_count"],
-            paint: {
-              // Deepen + enlarge with magnitude so a big cluster reads as big
-              // (not colour alone — radius carries it too; PERF-250).
-              "circle-color": [
-                "step",
-                ["get", "point_count"],
-                ACCENT_CLUSTER,
-                25,
-                "#0f9d83",
-                100,
-                "#0c8f76",
-              ],
-              "circle-radius": [
-                "step",
-                ["get", "point_count"],
-                12,
-                10,
-                16,
-                50,
-                22,
-                200,
-                30,
-              ],
-              "circle-stroke-color": "#ffffff",
-              "circle-stroke-width": 2,
-            },
-          });
-          // Individual occurrence — smaller ring; selected gets a halo.
-          map.addLayer({
-            id: "points",
-            type: "circle",
-            source: "occurrences",
-            filter: ["!", ["has", "point_count"]],
-            paint: {
-              "circle-color": ACCENT,
-              "circle-radius": pointRadius(selectedId, highlightedId) as never,
-              "circle-stroke-color": pointStrokeColor(
-                selectedId,
-                highlightedId,
-              ) as never,
-              "circle-stroke-width": pointStrokeWidth(
-                selectedId,
-                highlightedId,
-              ) as never,
-              "circle-opacity": pointOpacity(focusIds) as never,
-              "circle-stroke-opacity": pointOpacity(focusIds) as never,
-            },
-          });
-          loadedRef.current = true;
-          setMapLoaded(true);
+          void (async () => {
+            // SPEC-015 REQ-001/NFR-001: register the bounded clade icon set once
+            // (bundled assets — no egress). Guarded so a re-init never double-adds.
+            await Promise.all(
+              CLADE_MARKERS.map(async (m) => {
+                if (map.hasImage(m.id)) return;
+                try {
+                  const img = await map.loadImage(m.src);
+                  if (!map.hasImage(m.id)) map.addImage(m.id, img.data);
+                } catch {
+                  /* a missing icon just falls back to the tinted disc */
+                }
+              }),
+            );
+            if (cancelled || !mapRef.current) return;
 
-          const reportBounds = (): void => {
-            const b = map.getBounds();
-            onViewportChangeRef.current?.({
-              west: b.getWest(),
-              south: b.getSouth(),
-              east: b.getEast(),
-              north: b.getNorth(),
+            map.addSource("occurrences", {
+              type: "geojson",
+              data: featuresForMode(mode, occurrences, localities, taxaById),
+              cluster: true,
+              clusterRadius: 40,
             });
-          };
-          reportBounds(); // initial extent
-          map.on("moveend", reportBounds); // pan/zoom (SPEC-005 REQ-002)
+            // Group (cluster) — larger disc.
+            map.addLayer({
+              id: "clusters",
+              type: "circle",
+              source: "occurrences",
+              filter: ["has", "point_count"],
+              paint: {
+                "circle-color": [
+                  "step",
+                  ["get", "point_count"],
+                  ACCENT_CLUSTER,
+                  25,
+                  "#0f9d83",
+                  100,
+                  "#0c8f76",
+                ],
+                "circle-radius": [
+                  "step",
+                  ["get", "point_count"],
+                  12,
+                  10,
+                  16,
+                  50,
+                  22,
+                  200,
+                  30,
+                ],
+                "circle-stroke-color": "#ffffff",
+                "circle-stroke-width": 2,
+              },
+            });
+            // SPEC-015 REQ-001: a tinted clade "coin" (the meaning-only tint)
+            // that frames the silhouette; also the selection/highlight ring
+            // (SPEC-009 REQ-004, carried by the stroke).
+            const coinRadius = [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              2,
+              12,
+              6,
+              20,
+            ];
+            map.addLayer({
+              id: "points-bg",
+              type: "circle",
+              source: "occurrences",
+              filter: ["!", ["has", "point_count"]],
+              paint: {
+                "circle-color": ["get", "tint"] as never,
+                "circle-radius": coinRadius as never,
+                "circle-stroke-color": pointStrokeColor(
+                  selectedId,
+                  highlightedId,
+                ) as never,
+                "circle-stroke-width": pointStrokeWidth(
+                  selectedId,
+                  highlightedId,
+                ) as never,
+                "circle-opacity": pointOpacity(focusIds) as never,
+                "circle-stroke-opacity": pointOpacity(focusIds) as never,
+              },
+            });
+            // SPEC-015 REQ-001: the clade silhouette (raster), sitting on the
+            // tinted coin so shape + tint read together.
+            map.addLayer({
+              id: "points-icon",
+              type: "symbol",
+              source: "occurrences",
+              filter: ["!", ["has", "point_count"]],
+              layout: {
+                "icon-image": ["get", "iconKey"] as never,
+                "icon-size": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  2,
+                  0.016,
+                  6,
+                  0.03,
+                ] as never,
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+              },
+              paint: { "icon-opacity": pointOpacity(focusIds) as never },
+            });
+            loadedRef.current = true;
+            setMapLoaded(true);
 
-          map.on(
-            "click",
-            "points",
-            (e: MapMouseEvent & { features?: GeoJSON.Feature[] }) => {
+            const reportBounds = (): void => {
+              const b = map.getBounds();
+              onViewportChangeRef.current?.({
+                west: b.getWest(),
+                south: b.getSouth(),
+                east: b.getEast(),
+                north: b.getNorth(),
+              });
+            };
+            reportBounds(); // initial extent
+            map.on("moveend", () => {
+              reportBounds(); // pan/zoom (SPEC-005 REQ-002)
+              recomputeLabelsRef.current();
+            });
+            map.on("zoom", () => recomputeLabelsRef.current());
+
+            const clickPoint = (
+              e: MapMouseEvent & { features?: GeoJSON.Feature[] },
+            ): void => {
               const id = e.features?.[0]?.properties?.["id"];
               if (typeof id === "string") onSelectRef.current(id);
-            },
-          );
-          map.on("click", "clusters", (e: MapMouseEvent) => {
-            map.easeTo({ center: e.lngLat, zoom: map.getZoom() + 2 });
-          });
-          for (const layer of ["points", "clusters"]) {
-            map.on("mouseenter", layer, () => {
+            };
+            map.on("click", "points-bg", clickPoint);
+            map.on("click", "points-icon", clickPoint);
+            map.on("click", "clusters", (e: MapMouseEvent) => {
+              map.easeTo({ center: e.lngLat, zoom: map.getZoom() + 2 });
+            });
+            map.on("mouseenter", "clusters", () => {
               map.getCanvas().style.cursor = "pointer";
             });
-            map.on("mouseleave", layer, () => {
+            map.on("mouseleave", "clusters", () => {
               map.getCanvas().style.cursor = "";
             });
-          }
-          // Report the point under the pointer so the list highlights in lock-step
-          // (SPEC-009 REQ-004). Only individual points hover; clusters do not.
-          map.on(
-            "mousemove",
-            "points",
-            (e: MapMouseEvent & { features?: GeoJSON.Feature[] }) => {
-              const id = e.features?.[0]?.properties?.["id"];
-              onHoverRef.current?.(typeof id === "string" ? id : null);
-            },
-          );
-          map.on("mouseleave", "points", () => {
-            onHoverRef.current?.(null);
-          });
+
+            // SPEC-015 REQ-003 + SPEC-009 REQ-004: a single pointer handler drives
+            // both the hover preview card and the list cross-highlight, querying
+            // the point layers under the cursor.
+            map.on("mousemove", (e: MapMouseEvent) => {
+              const feats = map.queryRenderedFeatures(e.point, {
+                layers: ["points-bg", "points-icon"],
+              });
+              const id = feats[0]?.properties?.["id"];
+              if (typeof id === "string") {
+                setHover({ id, x: e.point.x, y: e.point.y });
+                onHoverRef.current?.(id);
+                map.getCanvas().style.cursor = "pointer";
+              } else {
+                setHover(null);
+                onHoverRef.current?.(null);
+              }
+            });
+            map.on("mouseout", () => {
+              setHover(null);
+              onHoverRef.current?.(null);
+            });
+            recomputeLabelsRef.current();
+          })();
         });
       } catch {
         setAvailable(false);
@@ -459,41 +565,46 @@ export function OccurrenceMap({
     const map = mapRef.current;
     if (!map || !loadedRef.current) return;
     const source = map.getSource("occurrences") as GeoJSONSource | undefined;
-    source?.setData(featuresForMode(mode, occurrences, localities));
-  }, [occurrences, localities, mode]);
+    source?.setData(featuresForMode(mode, occurrences, localities, taxaById));
+    recomputeLabelsRef.current();
+  }, [occurrences, localities, mode, taxaById]);
 
-  // Sync the taxon focus emphasis (SPEC-010 REQ-004).
+  // Sync the taxon focus emphasis (SPEC-010 REQ-004): dim the tinted disc + icon.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !loadedRef.current || !map.getLayer("points")) return;
+    if (!map || !loadedRef.current || !map.getLayer("points-bg")) return;
     map.setPaintProperty(
-      "points",
+      "points-bg",
       "circle-opacity",
       pointOpacity(focusIds) as never,
     );
     map.setPaintProperty(
-      "points",
+      "points-bg",
       "circle-stroke-opacity",
       pointOpacity(focusIds) as never,
     );
+    if (map.getLayer("points-icon")) {
+      map.setPaintProperty(
+        "points-icon",
+        "icon-opacity",
+        pointOpacity(focusIds) as never,
+      );
+    }
   }, [focusIds]);
 
   // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !loadedRef.current || !map.getLayer("points")) return;
+    if (!map || !loadedRef.current || !map.getLayer("points-bg")) return;
+    // The coin radius is fixed (by zoom); selection/highlight is shown by the
+    // ring stroke only, so the marker size stays stable (SPEC-009 REQ-004).
     map.setPaintProperty(
-      "points",
-      "circle-radius",
-      pointRadius(selectedId, highlightedId) as never,
-    );
-    map.setPaintProperty(
-      "points",
+      "points-bg",
       "circle-stroke-width",
       pointStrokeWidth(selectedId, highlightedId) as never,
     );
     map.setPaintProperty(
-      "points",
+      "points-bg",
       "circle-stroke-color",
       pointStrokeColor(selectedId, highlightedId) as never,
     );
@@ -502,6 +613,15 @@ export function OccurrenceMap({
   const frame = basemap
     ? describeFrame(basemap.meta, occurrenceRotationModel)
     : null;
+
+  // SPEC-015 REQ-003: resolve the hovered occurrence + its clade marker for the
+  // preview card. SPEC-015 REQ-001: the legend is shown in point (non-locality)
+  // modes so the clade icons/tints are named.
+  const hovered = hover ? occurrences.find((o) => o.id === hover.id) : null;
+  const hoveredMarker = hovered
+    ? cladeMarkerForTaxon(hovered.taxonId, taxaById)
+    : null;
+  const showCladeUi = mode !== "locality";
 
   return (
     <>
@@ -520,6 +640,42 @@ export function OccurrenceMap({
             sources and uncertainty.
           </p>
         </div>
+      )}
+      {available && mapLoaded && showCladeUi && (
+        <>
+          {/* Name labels + hover card share the map's pixel coordinate space. */}
+          <div className={styles.mapOverlay} aria-hidden="true">
+            {labels.map((l) => (
+              <span
+                key={l.id}
+                className={`sciName ${styles.mapLabel}`}
+                style={{ left: l.x, top: l.y }}
+              >
+                {l.taxon}
+              </span>
+            ))}
+            {hover && hovered && hoveredMarker && (
+              <MapHoverCard
+                content={hoverCardContent(hovered, hoveredMarker.label)}
+                x={hover.x}
+                y={hover.y}
+                iconSrc={hoveredMarker.src}
+              />
+            )}
+          </div>
+          <div className={styles.mapLegend2} role="note" aria-label="Clade key">
+            {CLADE_MARKERS.map((m) => (
+              <span key={m.id} className={styles.legendItem}>
+                <span
+                  className={styles.legendSwatch}
+                  style={{ background: m.tint }}
+                />
+                <img className={styles.legendIcon} src={m.src} alt="" />
+                {m.label}
+              </span>
+            ))}
+          </div>
+        </>
       )}
       {basemap && frame && (
         <div className={styles.basemapAttribution}>
