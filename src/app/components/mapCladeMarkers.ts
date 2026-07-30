@@ -85,6 +85,11 @@ const GROUP_TO_ID: Readonly<Record<string, string>> = {
 /** The neutral fallback marker (unresolved / unclassifiable group). */
 export const FALLBACK_MARKER: CladeMarker = BY_ID["other"]!;
 
+/** Look up a marker by its icon id (e.g. from a rendered feature's `iconKey`). */
+export function cladeMarkerById(id: string): CladeMarker {
+  return BY_ID[id] ?? FALLBACK_MARKER;
+}
+
 /**
  * Pick the clade marker for a taxon by resolving up its parent chain to the
  * nearest major-group clade (SPEC-010 `resolveTierTaxon`). Falls back to the

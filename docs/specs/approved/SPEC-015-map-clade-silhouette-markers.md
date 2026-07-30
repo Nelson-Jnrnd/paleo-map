@@ -307,3 +307,27 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
   content, label collision remain valid); map interaction verified in-browser.
 - **Human approval reference:** owner conversation 2026-07-30 (issues 1–5, with
   "generic clade icon + count" chosen for aggregates).
+
+### AMEND-002: Count badge placement, sparse labels, multi-species aggregate card
+
+- **Date / owner:** 2026-07-30, owner-directed after further testing.
+- **Changes:**
+  1. **Count badge (refines AMEND-001 #1).** The cluster count is a small pill at
+     the disc's **top-right**, not centred over the silhouette.
+  2. **Sparse labels (refines REQ-002).** Labels feel Google-Maps-natural: the
+     zoom threshold rose (`LABEL_MIN_ZOOM` 4→5) and the on-screen count is capped
+     (`MAX_LABELS` = 10), so names read instead of swarming.
+  3. **Multi-species aggregate (refines AMEND-001 #1 / #3).** Occurrences at the
+     **same place stay one aggregate** (`clusterMaxZoom` raised to 14 so distinct
+     points separate on zoom but co-located ones never do). Clicking a small or
+     coincident aggregate opens a **species-list card** (`MapSpeciesCard`) naming
+     every distinct taxon there (clade icon + name + clade), each row opening that
+     taxon's page; big dense clusters still zoom in. Leaves are read via the
+     GeoJSON source's `getClusterLeaves`.
+  4. **Dev-only map hook.** `window.__paleoMap` is exposed under
+     `import.meta.env.DEV` (stripped from production) for deterministic UI testing.
+- **Test impact:** existing SPEC-015 unit tests unchanged; map interaction and the
+  `getClusterLeaves` species path verified in-browser (a 7-point cluster → "4
+  species here": Edmontosaurus, Tyrannosaurus, Leptoceratops, Saurexallopus).
+- **Human approval reference:** owner conversation 2026-07-30 (count off-centre;
+  fewer labels; keep the multidot aggregate and list its species on click).

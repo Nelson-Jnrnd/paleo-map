@@ -577,18 +577,108 @@
   flex: none;
 }
 
-/* Cluster count badge (DOM overlay, since the style bundles no glyphs). */
+/* Cluster count badge — a small pill at the disc's top-right (DOM overlay, since
+   the style bundles no glyphs). */
 .clusterCount {
   position: absolute;
   transform: translate(-50%, -50%);
+  padding: 0 5px;
+  min-width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent-deep);
+  color: #fff;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  color: var(--color-text-hi);
+  line-height: 1;
   pointer-events: none;
-  text-shadow:
-    0 0 2px #fff,
-    0 0 3px #fff;
+}
+
+/* Multi-species aggregate card (AMEND-002 #3). */
+.speciesCard {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 16px));
+  z-index: 5;
+  width: 240px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-panel);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.speciesHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.speciesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.speciesRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-divider);
+  cursor: pointer;
+  text-align: left;
+}
+
+.speciesRow:hover {
+  background: var(--color-ground);
+}
+
+.speciesRowDisabled {
+  cursor: default;
+  color: var(--color-text-faint);
+}
+
+.speciesRowDisabled:hover {
+  background: transparent;
+}
+
+.speciesIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex: none;
+}
+
+.speciesName {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text-hi);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.speciesClade {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  flex: none;
 }
 
 .mapHoverBody {

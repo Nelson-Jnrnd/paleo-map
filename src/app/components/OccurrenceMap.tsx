@@ -38,15 +38,28 @@ import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
 import {
   CLADE_MARKERS,
   FALLBACK_MARKER,
+  cladeMarkerById,
   cladeMarkerForTaxon,
 } from "./mapCladeMarkers.js";
 import { MapHoverCard, hoverCardContent } from "./MapHoverCard.js";
+import { MapSpeciesCard } from "./MapSpeciesCard.js";
+import type { SpeciesRow } from "./MapSpeciesCard.js";
 import { computeMapLabels } from "./mapLabels.js";
 import type { LabelCandidate, MapLabel } from "./mapLabels.js";
 import styles from "./exploration.module.css";
 
 /** SPEC-015 REQ-002: name labels appear only once zoomed past this level. */
-const LABEL_MIN_ZOOM = 4;
+const LABEL_MIN_ZOOM = 5;
+/** SPEC-015 AMEND-002 (#2): keep labels sparse/legible, Google-Maps-style. */
+const MAX_LABELS = 10;
+
+/** Cluster disc radius for a given count (mirrors the map's `circle-radius` step). */
+function clusterDiscRadius(count: number): number {
+  if (count >= 200) return 28;
+  if (count >= 50) return 22;
+  if (count >= 10) return 17;
+  return 13;
+}
 
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
@@ -182,6 +195,7 @@ function toFeatureCollection(
       },
       properties: {
         id: o.id,
+        taxonId: o.taxonId,
         taxon: o.taxonName,
         iconKey: marker.id,
         tint: marker.tint,
@@ -279,6 +293,17 @@ export function OccurrenceMap({
   } | null>(null);
   const pinnedRef = useRef(pinned);
   pinnedRef.current = pinned;
+  // The multi-species aggregate card (AMEND-002 #3): raw leaf rows + a geographic
+  // anchor so it can follow the map; presentational fields are resolved in render.
+  const [multi, setMulti] = useState<{
+    lng: number;
+    lat: number;
+    x: number;
+    y: number;
+    rows: Array<{ taxonId: string; taxon: string; iconKey: string }>;
+  } | null>(null);
+  const multiRef = useRef(multi);
+  multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
@@ -322,6 +347,12 @@ export function OccurrenceMap({
         }
       }
     }
+    // Keep the multi-species card anchored to its aggregate as the map moves.
+    const m = multiRef.current;
+    if (m) {
+      const p = map.project([m.lng, m.lat]);
+      if (p.x !== m.x || p.y !== m.y) setMulti({ ...m, x: p.x, y: p.y });
+    }
 
     // Name labels — unclustered markers only, zoom-gated, collision-culled.
     if (modeRef.current === "locality" || map.getZoom() < LABEL_MIN_ZOOM) {
@@ -342,7 +373,7 @@ export function OccurrenceMap({
       const p = map.project([lng, lat]);
       candidates.push({ id, taxon, x: p.x, y: p.y });
     }
-    setLabels(computeMapLabels(candidates));
+    setLabels(computeMapLabels(candidates, { maxLabels: MAX_LABELS }));
   };
   const updateOverlaysRef = useRef(updateOverlays);
   updateOverlaysRef.current = updateOverlays;
@@ -439,6 +470,12 @@ export function OccurrenceMap({
           "top-right",
         );
         mapRef.current = map;
+        // Dev-only debug hook (stripped from production builds) — lets tooling
+        // drive the map deterministically.
+        const meta = import.meta as unknown as { env?: { DEV?: boolean } };
+        if (meta.env?.DEV) {
+          (window as unknown as { __paleoMap?: MapLibreMap }).__paleoMap = map;
+        }
         cleanup = (): void => {
           loadedRef.current = false;
           mapRef.current = null;
@@ -472,7 +509,10 @@ export function OccurrenceMap({
               // surface individual clade icons earlier and stop clustering once
               // zoomed in, so labels sit on real markers, not clusters.
               clusterRadius: 28,
-              clusterMaxZoom: 7,
+              // Distinct points separate as you zoom; occurrences at the *same*
+              // place never do — so co-located ones stay one aggregate marker
+              // (AMEND-002 #3) rather than an illegible overlapping pile.
+              clusterMaxZoom: 14,
             });
             // SPEC-015 AMEND-001 (#1): a cluster is a pale disc (sized by count)
             // carrying the generic dinosaur silhouette + a DOM count badge — so an
@@ -608,6 +648,7 @@ export function OccurrenceMap({
               });
               const pid = pf[0]?.properties?.["id"];
               if (typeof pid === "string") {
+                setMulti(null);
                 setPinned({ id: pid, x: e.point.x, y: e.point.y });
                 onSelectRef.current(pid);
                 return;
@@ -615,15 +656,76 @@ export function OccurrenceMap({
               const cf = map.queryRenderedFeatures(e.point, {
                 layers: ["clusters"],
               });
+              const cprops = cf[0]?.properties;
               const cg = cf[0]?.geometry;
-              if (cg && cg.type === "Point") {
-                map.easeTo({
-                  center: cg.coordinates as [number, number],
-                  zoom: map.getZoom() + 2,
-                });
+              if (!cprops || !cg || cg.type !== "Point") {
+                setPinned(null);
+                setMulti(null);
                 return;
               }
-              setPinned(null);
+              const center = cg.coordinates as [number, number];
+              const clusterId = cprops["cluster_id"];
+              const count = (cprops["point_count"] as number) ?? 0;
+              const source = map.getSource("occurrences") as GeoJSONSource;
+              const zoomIn = (): void => {
+                map.easeTo({ center, zoom: map.getZoom() + 2 });
+              };
+              // AMEND-002 #3: if zooming can't separate the leaves (they're at the
+              // same place) or we're deep in, list every species here; else zoom.
+              if (typeof clusterId !== "number" || !source.getClusterLeaves) {
+                zoomIn();
+                return;
+              }
+              void source
+                .getClusterLeaves(clusterId, Math.min(count, 60), 0)
+                .then((leaves) => {
+                  let minLng = Infinity,
+                    maxLng = -Infinity,
+                    minLat = Infinity,
+                    maxLat = -Infinity;
+                  const byTaxon = new Map<
+                    string,
+                    { taxonId: string; taxon: string; iconKey: string }
+                  >();
+                  for (const l of leaves) {
+                    if (l.geometry.type !== "Point") continue;
+                    const [lng, lat] = l.geometry.coordinates as [
+                      number,
+                      number,
+                    ];
+                    minLng = Math.min(minLng, lng);
+                    maxLng = Math.max(maxLng, lng);
+                    minLat = Math.min(minLat, lat);
+                    maxLat = Math.max(maxLat, lat);
+                    const tid = l.properties?.["taxonId"];
+                    if (typeof tid === "string" && !byTaxon.has(tid)) {
+                      byTaxon.set(tid, {
+                        taxonId: tid,
+                        taxon: String(l.properties?.["taxon"] ?? tid),
+                        iconKey: String(l.properties?.["iconKey"] ?? "other"),
+                      });
+                    }
+                  }
+                  // Show the species list for a small "multidot" aggregate, or
+                  // when zooming can't separate the leaves (coincident / deep in);
+                  // otherwise a big dense cluster zooms in (AMEND-002 #3).
+                  const spread = Math.max(maxLng - minLng, maxLat - minLat);
+                  const small = byTaxon.size <= 15;
+                  if (small || spread < 1e-3 || map.getZoom() >= 13) {
+                    const p = map.project(center);
+                    setPinned(null);
+                    setMulti({
+                      lng: center[0],
+                      lat: center[1],
+                      x: p.x,
+                      y: p.y,
+                      rows: [...byTaxon.values()],
+                    });
+                  } else {
+                    zoomIn();
+                  }
+                })
+                .catch(() => zoomIn());
             });
 
             // SPEC-015 REQ-003 + SPEC-009 REQ-004: hover drives the transient
@@ -637,7 +739,7 @@ export function OccurrenceMap({
               const id = top?.properties?.["id"];
               const isCluster = top?.properties?.["point_count"] != null;
               map.getCanvas().style.cursor = top ? "pointer" : "";
-              if (pinnedRef.current) return;
+              if (pinnedRef.current || multiRef.current) return;
               if (typeof id === "string" && !isCluster) {
                 setHover({ id, x: e.point.x, y: e.point.y });
                 onHoverRef.current?.(id);
@@ -750,11 +852,13 @@ export function OccurrenceMap({
     );
   }, [selectedId, highlightedId]);
 
-  // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step).
+  // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step);
+  // the multi card is dismissed on any occurrence change (its leaves may be stale).
   useEffect(() => {
     const ids = new Set(occurrences.map((o) => o.id));
     if (pinned && !ids.has(pinned.id)) setPinned(null);
     if (hover && !ids.has(hover.id)) setHover(null);
+    setMulti(null);
   }, [occurrences, pinned, hover]);
 
   const frame = basemap
@@ -795,16 +899,19 @@ export function OccurrenceMap({
           {/* Labels + cluster counts share the map's pixel coordinate space; the
               overlay is non-interactive except the pinned card (which opts in). */}
           <div className={styles.mapOverlay}>
-            {clusterCounts.map((c) => (
-              <span
-                key={c.key}
-                className={styles.clusterCount}
-                style={{ left: c.x, top: c.y }}
-                aria-hidden="true"
-              >
-                {c.count}
-              </span>
-            ))}
+            {clusterCounts.map((c) => {
+              const r = clusterDiscRadius(c.count);
+              return (
+                <span
+                  key={c.key}
+                  className={styles.clusterCount}
+                  style={{ left: c.x + r * 0.62, top: c.y - r * 0.62 }}
+                  aria-hidden="true"
+                >
+                  {c.count}
+                </span>
+              );
+            })}
             {labels.map((l) => (
               <span
                 key={l.id}
@@ -815,7 +922,7 @@ export function OccurrenceMap({
                 {l.taxon}
               </span>
             ))}
-            {cardAnchor && carded && cardedMarker && (
+            {!multi && cardAnchor && carded && cardedMarker && (
               <MapHoverCard
                 content={hoverCardContent(carded, cardedMarker.label)}
                 x={cardAnchor.x}
@@ -828,6 +935,27 @@ export function OccurrenceMap({
                     : undefined
                 }
                 onClose={() => setPinned(null)}
+              />
+            )}
+            {multi && (
+              <MapSpeciesCard
+                x={multi.x}
+                y={multi.y}
+                species={multi.rows.map((r): SpeciesRow => {
+                  const mk = cladeMarkerById(r.iconKey);
+                  return {
+                    taxonId: r.taxonId,
+                    taxon: r.taxon,
+                    clade: mk.label,
+                    iconSrc: mk.src,
+                    hasPage: Boolean(taxaById.get(r.taxonId)?.wikipedia),
+                  };
+                })}
+                onOpenProfile={(tid) => {
+                  setMulti(null);
+                  onOpenProfileRef.current?.(tid);
+                }}
+                onClose={() => setMulti(null)}
               />
             )}
           </div>
