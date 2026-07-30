@@ -277,3 +277,33 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 - Verified offline in a real browser (self-contained map, no network): icons,
   tinted coins, collision labels, and the clade legend all render; no console
   errors.
+
+## Spec amendments
+
+### AMEND-001: Aggregate identity, interactive pinned card, live labels, transparent icons, Thyreophora
+
+- **Date / owner:** 2026-07-30, owner-directed after on-device testing.
+- **Trigger:** Owner testing surfaced five issues in the first cut.
+- **Changes:**
+  1. **Aggregate identity (refines REQ-004).** Clusters now render the **generic
+     dinosaur silhouette + a count** (owner choice), on a pale disc sized by
+     count. Labels are built only from the **rendered, unclustered** markers
+     (`queryRenderedFeatures` on `points-icon`), so a taxon name can never float
+     next to a cluster that has no clade icon. Clustering also declusters sooner
+     (`clusterRadius` 28, `clusterMaxZoom` 7).
+  2. **Interactive pinned card (extends REQ-003).** Clicking a marker **pins** the
+     card open; it becomes interactive with an **"Open taxon profile →"** button
+     (new `onOpenProfile`) and a ✕ close, and follows its marker as the map moves.
+     Hover remains the passive preview and is suppressed while a card is pinned.
+  3. **Live overlays (refines REQ-002).** Labels, cluster counts, and the pinned
+     card recompute on the continuous `move` event (rAF-throttled), not just
+     `moveend`, so they track the map instead of lagging until it stops.
+  4. **Transparent icons (refines REQ-001).** The bundled clade PNGs are opaque
+     (white background); they are masked to transparency in the browser at load
+     (canvas), so the silhouette sits cleanly on the round coin. Still offline.
+  5. **Clade naming fix.** The Stegosauria + Ankylosauria group is labelled
+     **Thyreophoran** (was the incorrect "Armoured").
+- **Test impact:** existing SPEC-015 unit tests unchanged (clade mapping, hover
+  content, label collision remain valid); map interaction verified in-browser.
+- **Human approval reference:** owner conversation 2026-07-30 (issues 1–5, with
+  "generic clade icon + count" chosen for aggregates).

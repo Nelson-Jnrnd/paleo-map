@@ -519,8 +519,8 @@
   transform: translate(14px, -50%);
   z-index: 3;
   display: flex;
+  flex-direction: column;
   gap: var(--space-2);
-  align-items: center;
   max-width: 240px;
   padding: var(--space-2) var(--space-3);
   background: var(--color-surface);
@@ -530,11 +530,65 @@
   pointer-events: none;
 }
 
+/* Pinned (clicked) card is interactive and anchored just above the marker. */
+.mapHoverPinned {
+  transform: translate(-50%, calc(-100% - 16px));
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.mapHoverTop {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.mapHoverClose {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  padding: 2px 4px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mapHoverAction {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--text-min);
+}
+
+.mapHoverAction:hover {
+  background: var(--color-accent-deep);
+}
+
 .mapHoverIcon {
   width: 30px;
   height: 30px;
   object-fit: contain;
   flex: none;
+}
+
+/* Cluster count badge (DOM overlay, since the style bundles no glyphs). */
+.clusterCount {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-hi);
+  pointer-events: none;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 3px #fff;
 }
 
 .mapHoverBody {

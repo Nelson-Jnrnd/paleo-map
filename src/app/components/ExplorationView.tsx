@@ -397,6 +397,9 @@ export function ExplorationView({
               localities={mapLocalities}
               focusIds={focusIds}
               taxaById={taxaById}
+              onOpenProfile={(taxonId) =>
+                dispatch({ type: "openProfile", taxonId })
+              }
             />
           )}
         </div>

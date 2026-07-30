@@ -35,7 +35,11 @@ import {
 import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
 import type { Bounds } from "../state/viewport.js";
 import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
-import { CLADE_MARKERS, cladeMarkerForTaxon } from "./mapCladeMarkers.js";
+import {
+  CLADE_MARKERS,
+  FALLBACK_MARKER,
+  cladeMarkerForTaxon,
+} from "./mapCladeMarkers.js";
 import { MapHoverCard, hoverCardContent } from "./MapHoverCard.js";
 import { computeMapLabels } from "./mapLabels.js";
 import type { LabelCandidate, MapLabel } from "./mapLabels.js";
@@ -72,13 +76,17 @@ interface OccurrenceMapProps {
    * (icon + tint) and label. Occurrence/taxon modes render clade silhouettes.
    */
   taxaById?: ReadonlyMap<string, ReadTaxon>;
+  /**
+   * Open a taxon's page (SPEC-015 AMEND-001): the pinned marker card's primary
+   * action. When omitted, the card shows no "Open taxon profile" button.
+   */
+  onOpenProfile?: (taxonId: string) => void;
 }
 
 const OCEAN_OUTER = "#d7e4ec";
 const LAND = "#edf1f1";
 const COAST = "#a9b9c3";
 const ACCENT_DEEP = "#0a7f66";
-const ACCENT_CLUSTER = "#17a98c";
 
 /**
  * Paint expressions for the individual-point layer given the current selection and
@@ -125,6 +133,36 @@ const BASE_STYLE = {
     },
   ],
 };
+
+/**
+ * SPEC-015 REQ-001 (#4): load a bundled clade PNG and strip its opaque near-white
+ * background to transparency, in the browser via a canvas — so the silhouette
+ * sits cleanly on the round coin instead of a white square. Self-contained (the
+ * asset is bundled; no egress). Returns a MapLibre-addable RGBA image.
+ */
+async function loadMaskedImage(
+  src: string,
+): Promise<{ width: number; height: number; data: Uint8ClampedArray }> {
+  const img = new Image();
+  img.decoding = "async";
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error(`image load failed: ${src}`));
+    img.src = src;
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("no 2d context");
+  ctx.drawImage(img, 0, 0);
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = image.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i]! > 238 && d[i + 1]! > 238 && d[i + 2]! > 238) d[i + 3] = 0;
+  }
+  return { width: canvas.width, height: canvas.height, data: d };
+}
 
 function toFeatureCollection(
   occurrences: readonly ReadOccurrence[],
@@ -207,7 +245,10 @@ export function OccurrenceMap({
   localities = [],
   focusIds = null,
   taxaById = new Map(),
+  onOpenProfile,
 }: OccurrenceMapProps): ReactElement {
+  const onOpenProfileRef = useRef(onOpenProfile);
+  onOpenProfileRef.current = onOpenProfile;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const loadedRef = useRef(false);
@@ -217,44 +258,105 @@ export function OccurrenceMap({
   onViewportChangeRef.current = onViewportChange;
   const onHoverRef = useRef(onHover);
   onHoverRef.current = onHover;
-  // SPEC-015: latest occurrences/taxa/mode for the map's own event handlers
-  // (hover card + label projection), which close over the initial render.
+  // SPEC-015: latest occurrences + mode for the map's own event handlers, which
+  // close over the initial render (overlay reprojection + mode gating).
   const occurrencesRef = useRef(occurrences);
   occurrencesRef.current = occurrences;
-  const taxaByIdRef = useRef(taxaById);
-  taxaByIdRef.current = taxaById;
   const modeRef = useRef(mode);
   modeRef.current = mode;
-  // Hovered occurrence for the preview card, and the culled label set.
+
+  // Transient hover preview, the pinned (clicked) interactive card, the culled
+  // labels, and the cluster count badges.
   const [hover, setHover] = useState<{
     id: string;
     x: number;
     y: number;
   } | null>(null);
+  const [pinned, setPinned] = useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const pinnedRef = useRef(pinned);
+  pinnedRef.current = pinned;
   const [labels, setLabels] = useState<MapLabel[]>([]);
+  const [clusterCounts, setClusterCounts] = useState<
+    Array<{ key: string; x: number; y: number; count: number }>
+  >([]);
 
-  // SPEC-015 REQ-002: project in-view occurrence points and cull colliding
-  // labels; only above the zoom threshold and only in occurrence/taxon modes.
-  const recomputeLabels = (): void => {
+  // SPEC-015 REQ-002/REQ-004: recompute every DOM overlay from what the map is
+  // actually rendering — labels sit only on unclustered markers, cluster counts
+  // track clusters, and the pinned card follows its marker. Cheap enough to run
+  // continuously during pan/zoom (the caller rAF-throttles it, #2).
+  const updateOverlays = (): void => {
     const map = mapRef.current;
-    if (!map || !loadedRef.current) return;
+    if (!map || !loadedRef.current || !map.getLayer("points-icon")) return;
+
+    // Cluster count badges (from the rendered cluster circles).
+    const counts: Array<{ key: string; x: number; y: number; count: number }> =
+      [];
+    if (map.getLayer("clusters")) {
+      const seenC = new Set<string>();
+      for (const f of map.queryRenderedFeatures({ layers: ["clusters"] })) {
+        const n = f.properties?.["point_count"];
+        if (typeof n !== "number" || f.geometry.type !== "Point") continue;
+        const [lng, lat] = f.geometry.coordinates as [number, number];
+        const key = String(f.properties?.["cluster_id"] ?? `${lng},${lat}`);
+        if (seenC.has(key)) continue;
+        seenC.add(key);
+        const p = map.project([lng, lat]);
+        counts.push({ key, x: p.x, y: p.y, count: n });
+      }
+    }
+    setClusterCounts(counts);
+
+    // Keep the pinned card anchored to its marker as the map moves.
+    const pin = pinnedRef.current;
+    if (pin) {
+      const o = occurrencesRef.current.find((x) => x.id === pin.id);
+      const paleo = o?.paleoPosition.value;
+      if (paleo) {
+        const p = map.project([paleo.palaeoLng, paleo.palaeoLat]);
+        if (p.x !== pin.x || p.y !== pin.y) {
+          setPinned({ id: pin.id, x: p.x, y: p.y });
+        }
+      }
+    }
+
+    // Name labels — unclustered markers only, zoom-gated, collision-culled.
     if (modeRef.current === "locality" || map.getZoom() < LABEL_MIN_ZOOM) {
       setLabels([]);
       return;
     }
-    const bounds = map.getBounds();
+    const seen = new Set<string>();
     const candidates: LabelCandidate[] = [];
-    for (const o of occurrencesRef.current) {
-      const paleo = o.paleoPosition.value;
-      if (!paleo) continue;
-      if (!bounds.contains([paleo.palaeoLng, paleo.palaeoLat])) continue;
-      const p = map.project([paleo.palaeoLng, paleo.palaeoLat]);
-      candidates.push({ id: o.id, taxon: o.taxonName, x: p.x, y: p.y });
+    for (const f of map.queryRenderedFeatures({ layers: ["points-icon"] })) {
+      const id = f.properties?.["id"];
+      const taxon = f.properties?.["taxon"];
+      if (typeof id !== "string" || typeof taxon !== "string" || seen.has(id)) {
+        continue;
+      }
+      if (f.geometry.type !== "Point") continue;
+      seen.add(id);
+      const [lng, lat] = f.geometry.coordinates as [number, number];
+      const p = map.project([lng, lat]);
+      candidates.push({ id, taxon, x: p.x, y: p.y });
     }
     setLabels(computeMapLabels(candidates));
   };
-  const recomputeLabelsRef = useRef(recomputeLabels);
-  recomputeLabelsRef.current = recomputeLabels;
+  const updateOverlaysRef = useRef(updateOverlays);
+  updateOverlaysRef.current = updateOverlays;
+  // rAF-throttled scheduler for the continuous `move` handler (#2: no lag).
+  const rafRef = useRef<number | null>(null);
+  const scheduleOverlayUpdate = (): void => {
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      updateOverlaysRef.current();
+    });
+  };
+  const scheduleOverlayUpdateRef = useRef(scheduleOverlayUpdate);
+  scheduleOverlayUpdateRef.current = scheduleOverlayUpdate;
   const [available, setAvailable] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [basemap, setBasemap] = useState<Basemap | null>(null);
@@ -341,18 +443,20 @@ export function OccurrenceMap({
           loadedRef.current = false;
           mapRef.current = null;
           setMapLoaded(false);
+          if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
           map.remove();
         };
         map.on("load", () => {
           void (async () => {
-            // SPEC-015 REQ-001/NFR-001: register the bounded clade icon set once
-            // (bundled assets — no egress). Guarded so a re-init never double-adds.
+            // SPEC-015 REQ-001 (#4): register the bounded clade icon set once,
+            // with the opaque white background stripped to transparency (bundled
+            // assets — no egress). Guarded so a re-init never double-adds.
             await Promise.all(
               CLADE_MARKERS.map(async (m) => {
                 if (map.hasImage(m.id)) return;
                 try {
-                  const img = await map.loadImage(m.src);
-                  if (!map.hasImage(m.id)) map.addImage(m.id, img.data);
+                  const masked = await loadMaskedImage(m.src);
+                  if (!map.hasImage(m.id)) map.addImage(m.id, masked);
                 } catch {
                   /* a missing icon just falls back to the tinted disc */
                 }
@@ -364,37 +468,55 @@ export function OccurrenceMap({
               type: "geojson",
               data: featuresForMode(mode, occurrences, localities, taxaById),
               cluster: true,
-              clusterRadius: 40,
+              // Decluster sooner (SPEC-015): a smaller radius + a max-zoom cap
+              // surface individual clade icons earlier and stop clustering once
+              // zoomed in, so labels sit on real markers, not clusters.
+              clusterRadius: 28,
+              clusterMaxZoom: 7,
             });
-            // Group (cluster) — larger disc.
+            // SPEC-015 AMEND-001 (#1): a cluster is a pale disc (sized by count)
+            // carrying the generic dinosaur silhouette + a DOM count badge — so an
+            // aggregate reads as "many dinosaurs here (N)", not an anonymous dot.
             map.addLayer({
               id: "clusters",
               type: "circle",
               source: "occurrences",
               filter: ["has", "point_count"],
               paint: {
-                "circle-color": [
-                  "step",
-                  ["get", "point_count"],
-                  ACCENT_CLUSTER,
-                  25,
-                  "#0f9d83",
-                  100,
-                  "#0c8f76",
-                ],
+                "circle-color": "#dbe3e7",
                 "circle-radius": [
                   "step",
                   ["get", "point_count"],
-                  12,
+                  13,
                   10,
-                  16,
+                  17,
                   50,
                   22,
                   200,
-                  30,
+                  28,
                 ],
                 "circle-stroke-color": "#ffffff",
-                "circle-stroke-width": 2,
+                "circle-stroke-width": 1.5,
+              },
+            });
+            map.addLayer({
+              id: "clusters-icon",
+              type: "symbol",
+              source: "occurrences",
+              filter: ["has", "point_count"],
+              layout: {
+                "icon-image": FALLBACK_MARKER.id,
+                "icon-size": [
+                  "step",
+                  ["get", "point_count"],
+                  0.014,
+                  50,
+                  0.02,
+                  200,
+                  0.026,
+                ] as never,
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
               },
             });
             // SPEC-015 REQ-001: a tinted clade "coin" (the meaning-only tint)
@@ -429,7 +551,7 @@ export function OccurrenceMap({
                 "circle-stroke-opacity": pointOpacity(focusIds) as never,
               },
             });
-            // SPEC-015 REQ-001: the clade silhouette (raster), sitting on the
+            // SPEC-015 REQ-001: the clade silhouette (transparent), sitting on the
             // tinted coin so shape + tint read together.
             map.addLayer({
               id: "points-icon",
@@ -443,9 +565,9 @@ export function OccurrenceMap({
                   ["linear"],
                   ["zoom"],
                   2,
-                  0.016,
+                  0.018,
                   6,
-                  0.03,
+                  0.032,
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
@@ -465,42 +587,60 @@ export function OccurrenceMap({
               });
             };
             reportBounds(); // initial extent
+            // #2: overlays follow the map continuously (rAF-throttled), and settle
+            // on moveend (which also reports the viewport, SPEC-005 REQ-002).
+            map.on("move", () => scheduleOverlayUpdateRef.current());
             map.on("moveend", () => {
-              reportBounds(); // pan/zoom (SPEC-005 REQ-002)
-              recomputeLabelsRef.current();
+              reportBounds();
+              updateOverlaysRef.current();
             });
-            map.on("zoom", () => recomputeLabelsRef.current());
-
-            const clickPoint = (
-              e: MapMouseEvent & { features?: GeoJSON.Feature[] },
-            ): void => {
-              const id = e.features?.[0]?.properties?.["id"];
-              if (typeof id === "string") onSelectRef.current(id);
-            };
-            map.on("click", "points-bg", clickPoint);
-            map.on("click", "points-icon", clickPoint);
-            map.on("click", "clusters", (e: MapMouseEvent) => {
-              map.easeTo({ center: e.lngLat, zoom: map.getZoom() + 2 });
-            });
-            map.on("mouseenter", "clusters", () => {
-              map.getCanvas().style.cursor = "pointer";
-            });
-            map.on("mouseleave", "clusters", () => {
-              map.getCanvas().style.cursor = "";
+            map.on("movestart", () => {
+              setHover(null);
+              onHoverRef.current?.(null);
             });
 
-            // SPEC-015 REQ-003 + SPEC-009 REQ-004: a single pointer handler drives
-            // both the hover preview card and the list cross-highlight, querying
-            // the point layers under the cursor.
-            map.on("mousemove", (e: MapMouseEvent) => {
-              const feats = map.queryRenderedFeatures(e.point, {
+            // SPEC-015 AMEND-001 (#3): one click handler. On a marker → pin the
+            // interactive card (and sync the list). On a cluster → zoom in. On
+            // empty map → dismiss the pinned card.
+            map.on("click", (e: MapMouseEvent) => {
+              const pf = map.queryRenderedFeatures(e.point, {
                 layers: ["points-bg", "points-icon"],
               });
-              const id = feats[0]?.properties?.["id"];
-              if (typeof id === "string") {
+              const pid = pf[0]?.properties?.["id"];
+              if (typeof pid === "string") {
+                setPinned({ id: pid, x: e.point.x, y: e.point.y });
+                onSelectRef.current(pid);
+                return;
+              }
+              const cf = map.queryRenderedFeatures(e.point, {
+                layers: ["clusters"],
+              });
+              const cg = cf[0]?.geometry;
+              if (cg && cg.type === "Point") {
+                map.easeTo({
+                  center: cg.coordinates as [number, number],
+                  zoom: map.getZoom() + 2,
+                });
+                return;
+              }
+              setPinned(null);
+            });
+
+            // SPEC-015 REQ-003 + SPEC-009 REQ-004: hover drives the transient
+            // preview card + the list cross-highlight. Suppressed while a card is
+            // pinned so the two don't fight.
+            map.on("mousemove", (e: MapMouseEvent) => {
+              const feats = map.queryRenderedFeatures(e.point, {
+                layers: ["points-bg", "points-icon", "clusters"],
+              });
+              const top = feats[0];
+              const id = top?.properties?.["id"];
+              const isCluster = top?.properties?.["point_count"] != null;
+              map.getCanvas().style.cursor = top ? "pointer" : "";
+              if (pinnedRef.current) return;
+              if (typeof id === "string" && !isCluster) {
                 setHover({ id, x: e.point.x, y: e.point.y });
                 onHoverRef.current?.(id);
-                map.getCanvas().style.cursor = "pointer";
               } else {
                 setHover(null);
                 onHoverRef.current?.(null);
@@ -510,7 +650,7 @@ export function OccurrenceMap({
               setHover(null);
               onHoverRef.current?.(null);
             });
-            recomputeLabelsRef.current();
+            updateOverlaysRef.current();
           })();
         });
       } catch {
@@ -566,7 +706,7 @@ export function OccurrenceMap({
     if (!map || !loadedRef.current) return;
     const source = map.getSource("occurrences") as GeoJSONSource | undefined;
     source?.setData(featuresForMode(mode, occurrences, localities, taxaById));
-    recomputeLabelsRef.current();
+    updateOverlaysRef.current();
   }, [occurrences, localities, mode, taxaById]);
 
   // Sync the taxon focus emphasis (SPEC-010 REQ-004): dim the tinted disc + icon.
@@ -610,16 +750,25 @@ export function OccurrenceMap({
     );
   }, [selectedId, highlightedId]);
 
+  // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step).
+  useEffect(() => {
+    const ids = new Set(occurrences.map((o) => o.id));
+    if (pinned && !ids.has(pinned.id)) setPinned(null);
+    if (hover && !ids.has(hover.id)) setHover(null);
+  }, [occurrences, pinned, hover]);
+
   const frame = basemap
     ? describeFrame(basemap.meta, occurrenceRotationModel)
     : null;
 
-  // SPEC-015 REQ-003: resolve the hovered occurrence + its clade marker for the
-  // preview card. SPEC-015 REQ-001: the legend is shown in point (non-locality)
-  // modes so the clade icons/tints are named.
-  const hovered = hover ? occurrences.find((o) => o.id === hover.id) : null;
-  const hoveredMarker = hovered
-    ? cladeMarkerForTaxon(hovered.taxonId, taxaById)
+  // SPEC-015 REQ-003 / AMEND-001: the card shows the pinned occurrence if any,
+  // else the hovered one. SPEC-015 REQ-001: the legend shows in point modes.
+  const cardAnchor = pinned ?? hover;
+  const carded = cardAnchor
+    ? occurrences.find((o) => o.id === cardAnchor.id)
+    : null;
+  const cardedMarker = carded
+    ? cladeMarkerForTaxon(carded.taxonId, taxaById)
     : null;
   const showCladeUi = mode !== "locality";
 
@@ -643,23 +792,42 @@ export function OccurrenceMap({
       )}
       {available && mapLoaded && showCladeUi && (
         <>
-          {/* Name labels + hover card share the map's pixel coordinate space. */}
-          <div className={styles.mapOverlay} aria-hidden="true">
+          {/* Labels + cluster counts share the map's pixel coordinate space; the
+              overlay is non-interactive except the pinned card (which opts in). */}
+          <div className={styles.mapOverlay}>
+            {clusterCounts.map((c) => (
+              <span
+                key={c.key}
+                className={styles.clusterCount}
+                style={{ left: c.x, top: c.y }}
+                aria-hidden="true"
+              >
+                {c.count}
+              </span>
+            ))}
             {labels.map((l) => (
               <span
                 key={l.id}
                 className={`sciName ${styles.mapLabel}`}
                 style={{ left: l.x, top: l.y }}
+                aria-hidden="true"
               >
                 {l.taxon}
               </span>
             ))}
-            {hover && hovered && hoveredMarker && (
+            {cardAnchor && carded && cardedMarker && (
               <MapHoverCard
-                content={hoverCardContent(hovered, hoveredMarker.label)}
-                x={hover.x}
-                y={hover.y}
-                iconSrc={hoveredMarker.src}
+                content={hoverCardContent(carded, cardedMarker.label)}
+                x={cardAnchor.x}
+                y={cardAnchor.y}
+                iconSrc={cardedMarker.src}
+                pinned={Boolean(pinned)}
+                onOpenProfile={
+                  onOpenProfileRef.current
+                    ? () => onOpenProfileRef.current?.(carded.taxonId)
+                    : undefined
+                }
+                onClose={() => setPinned(null)}
               />
             )}
           </div>
