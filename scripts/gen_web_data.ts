@@ -36,6 +36,10 @@ import {
   applySilhouettes,
   loadSilhouetteIndex,
 } from "../src/pipeline/silhouettes.js";
+import {
+  applyWikipedia,
+  loadWikipediaResolution,
+} from "../src/pipeline/wikipedia.js";
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -68,10 +72,25 @@ async function main(): Promise<void> {
   const silhouettes = await loadSilhouetteIndex(
     join(repoRoot, "silhouettes", "index.json"),
   );
-  const model = applySilhouettes(enrichedModel, silhouettes);
-  const withSil = model.profiles.filter((p) => p.silhouette !== null).length;
+  const silhouettedModel = applySilhouettes(enrichedModel, silhouettes);
+  const withSil = silhouettedModel.profiles.filter(
+    (p) => p.silhouette !== null,
+  ).length;
   console.log(
     `Silhouettes: ${Object.keys(silhouettes.taxa).length} indexed → ${withSil} profile(s) with a PhyloPic silhouette`,
+  );
+
+  // SPEC-014 AMEND-005: attach the committed Wikipedia resolution
+  // (wikipedia/resolution.json, produced by scripts/resolve_wikipedia.ts).
+  // Read-only and offline — no MediaWiki call here; taxa without an entry are
+  // article-less and hidden by default in the app.
+  const resolution = await loadWikipediaResolution(
+    join(repoRoot, "wikipedia", "resolution.json"),
+  );
+  const model = applyWikipedia(silhouettedModel, resolution);
+  const withWiki = model.taxa.filter((t) => t.wikipedia != null).length;
+  console.log(
+    `Wikipedia: ${Object.keys(resolution.entries).length} resolved entr(ies) → ${withWiki} taxon(a) with an article`,
   );
 
   const partition = partitionReadModel(model);

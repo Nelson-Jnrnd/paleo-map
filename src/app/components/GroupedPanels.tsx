@@ -13,11 +13,16 @@ import { formatMaRange } from "../format.js";
 import type { LocalityGroup, TaxonGroup } from "../state/grouping.js";
 import styles from "./exploration.module.css";
 
+/** No-article tooltip shared by the greyed profile affordances (AMEND-005). */
+const NO_ARTICLE = "No Wikipedia article for this taxon";
+
 interface LocalityPanelProps {
   group: LocalityGroup;
   /** The occurrences recorded at this locality (for the taxa list). */
   occurrences: readonly ReadOccurrence[];
   onOpenProfile: (taxonId: string) => void;
+  /** SPEC-014 AMEND-005: whether a taxon has a Wikipedia article (→ a page). */
+  hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
 }
 
@@ -25,6 +30,7 @@ export function LocalityPanel({
   group,
   occurrences,
   onOpenProfile,
+  hasArticle,
   onClose,
 }: LocalityPanelProps): ReactElement {
   // Distinct taxa recorded here, in stable name order.
@@ -67,20 +73,35 @@ export function LocalityPanel({
       </dl>
 
       <ul className={styles.list} aria-label="Taxa recorded at this locality">
-        {taxa.map(([taxonId, taxonName]) => (
-          <li key={taxonId}>
-            <button
-              type="button"
-              className={styles.occurrenceRow}
-              onClick={() => onOpenProfile(taxonId)}
-            >
-              <span className={`${styles.occurrenceTaxon} sciName`}>
-                {taxonName}
+        {taxa.map(([taxonId, taxonName]) =>
+          hasArticle(taxonId) ? (
+            <li key={taxonId}>
+              <button
+                type="button"
+                className={styles.occurrenceRow}
+                onClick={() => onOpenProfile(taxonId)}
+              >
+                <span className={`${styles.occurrenceTaxon} sciName`}>
+                  {taxonName}
+                </span>
+                <span className={styles.occurrenceMeta}>Open profile →</span>
+              </button>
+            </li>
+          ) : (
+            <li key={taxonId}>
+              <span
+                className={`${styles.occurrenceRow} ${styles.rowDisabled}`}
+                aria-disabled="true"
+                title={NO_ARTICLE}
+              >
+                <span className={`${styles.occurrenceTaxon} sciName`}>
+                  {taxonName}
+                </span>
+                <span className={styles.occurrenceMeta}>No article</span>
               </span>
-              <span className={styles.occurrenceMeta}>Open profile →</span>
-            </button>
-          </li>
-        ))}
+            </li>
+          ),
+        )}
       </ul>
     </section>
   );
@@ -89,12 +110,15 @@ export function LocalityPanel({
 interface TaxonPanelProps {
   group: TaxonGroup;
   onOpenProfile: (taxonId: string) => void;
+  /** SPEC-014 AMEND-005: whether this taxon has a Wikipedia article (→ a page). */
+  hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
 }
 
 export function TaxonPanel({
   group,
   onOpenProfile,
+  hasArticle,
   onClose,
 }: TaxonPanelProps): ReactElement {
   return (
@@ -131,13 +155,24 @@ export function TaxonPanel({
       </dl>
 
       {group.taxonId ? (
-        <button
-          type="button"
-          className={styles.primary}
-          onClick={() => onOpenProfile(group.taxonId!)}
-        >
-          Open taxon profile →
-        </button>
+        hasArticle(group.taxonId) ? (
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={() => onOpenProfile(group.taxonId!)}
+          >
+            Open taxon profile →
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={styles.primary}
+            disabled
+            title={NO_ARTICLE}
+          >
+            Open taxon profile →
+          </button>
+        )
       ) : (
         <p className={styles.source}>
           These records are identified only above this rank, so they have no

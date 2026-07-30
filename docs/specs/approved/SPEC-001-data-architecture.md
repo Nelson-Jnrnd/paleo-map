@@ -146,6 +146,16 @@ atlas application (reads L2+L3). End users see only sourced, dated content.
 - **Evidence location:** `src/read/api.ts` (reads the snapshot only),
   `test/data-005-no-runtime-egress.test.ts` (fetch spy asserts no egress;
   `retrievedOn` + rotation model asserted).
+- **Scoped exception (SPEC-014 AMEND-005, owner-approved 2026-07-29):** the taxon
+  page embeds the taxon's Wikipedia article in an `<iframe>`, so the user's
+  browser reaches `en.m.wikipedia.org` at runtime for **article display only**.
+  The **data plane is unchanged** — the read API and all L2+L3 data
+  (occurrences, taxa, profiles) are still served entirely from our own snapshot
+  with no `fetch` to PBDB/Wikipedia, and `data-005-no-runtime-egress` still holds.
+  The only datum leaving the app is the article title in the iframe URL, which is
+  itself resolved and pinned **at build time** (`wikipedia/resolution.json`, via
+  `scripts/resolve_wikipedia.ts`). This exception is isolated to the taxon page's
+  presentation and does not relax DATA-005 for any data path.
 
 ### DATA-006: Taxon-profile biology is typed, nullable, sourced
 

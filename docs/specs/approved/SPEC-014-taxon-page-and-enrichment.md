@@ -404,6 +404,90 @@ collapsibles); (D) charter amendment recorded. A/C are independently demoable.
 
 ## Spec amendments
 
+### AMEND-005: Inline Wikipedia profile + Wikipedia-gated taxa (supersedes REQ-005 layout; scopes DATA-005)
+
+- **Date / owner:** 2026-07-29, owner-directed and **owner-approved** (conversation
+  with owner nelsonjeanrenaud@gmail.com). **Status: approved.**
+- **Trigger:** The owner is not satisfied with the curated "spec sheet" taxon
+  profile (AMEND-002). Decision: replace it with an **inline view of the taxon's
+  Wikipedia article** and accept a Wikipedia-native look, rather than distilling
+  the article into our own layout.
+- **Behavioural change to REQ-005 (retires the spec-sheet profile):**
+  1. **The taxon profile becomes an inline `<iframe>` of the taxon's Wikipedia
+     article.** The AMEND-002 layout (identity header, size hero, ruled spec
+     table, "About" enrichment block, collapsed occurrences) is **retired from
+     the profile view**. The profile shows: "← Back to map", the **taxonomy
+     breadcrumb** (see 1a, retained from AMEND-002/REQ-006), and the embedded
+     article (mobile Wikipedia, `en.m.wikipedia.org`). Enrichment records
+     (REQ-001/002) and images (REQ-003) are no longer presented on the profile;
+     the enrichment build layer may remain for other uses but no longer drives
+     the page.
+  1a. **Taxonomy breadcrumb retained and filtered.** The `TaxonomyTree` breadcrumb
+     (`Dinosauria › … › Genus`) stays at the top of the taxon page for lineage
+     context and ancestor navigation. It is **filtered by the same Wikipedia
+     gate**: only ancestors that have a Wikipedia article are navigable links;
+     ancestors with `wikipedia == null` are rendered **non-navigable/greyed** (no
+     link — they have no taxon page), consistent with the greyed "Open profile →"
+     treatment. The chain is kept intact for context rather than collapsed, so the
+     lineage stays legible (design charter); only clickability is gated.
+  2. **New build-time Wikipedia resolution.** Each taxon gains
+     `wikipedia: { title, url } | null` on the read model, resolved **once at
+     build time** via the MediaWiki API (existence + canonical title, following
+     redirects). The iframe loads this **stored canonical URL** — it never
+     guesses a title at runtime (fixes the disambiguation/redirect mis-hit risk
+     of the spike).
+  3. **Wikipedia-gated taxa, via a parameter (default = hide).** A configuration
+     parameter governs taxa with `wikipedia == null`. **Default: hidden across
+     all exploration surfaces — including the map.** In the default (hide) state
+     an article-less taxon is fully removed: its **occurrence points do not render
+     on the map**, and it does not appear in the grouped taxon panels / taxon
+     lists. When the parameter is set to show them, article-less taxa reappear on
+     the map and in the lists, but their **"Open profile →" affordance is rendered
+     disabled/greyed with a tooltip** (e.g. "No Wikipedia article for this
+     taxon"). There is **no fallback profile page** — an article-less taxon simply
+     has no taxon page. Entry point for the greyed affordance: `GroupedPanels.tsx`
+     "Open profile →" button (`onOpenProfile`); map filtering happens where
+     occurrences are selected for rendering (read query / map layer).
+- **Relationship to DATA-005 (no runtime egress) — scoped exception:** the read
+  API and all data artifacts (occurrences, taxa, profiles, enrichment) remain
+  fully offline; DATA-005 **as tested still holds** — the read API issues no
+  `fetch` (`test/data-005-no-runtime-egress.test.ts` is a `fetch` spy on the read
+  API, and an `<iframe src>` is browser sub-navigation, not a `fetch`). However,
+  the profile iframe **does** cause the user's browser to reach
+  `en.m.wikipedia.org` at runtime for **article display only**; the sole datum
+  leaving the app is the article title in the URL. This is an **owner-accepted
+  deviation from the *spirit* of DATA-005**, isolated to the profile view. A
+  cross-referenced note should be added to SPEC-001 DATA-005 recording this
+  scoped exception (companion amendment to SPEC-001).
+- **Test impact:**
+  - *Retired / rewritten:* profile UI tests asserting the spec-sheet
+    (`test/ui/spec011-profile-labels.test.tsx`,
+    `test/ui/taxon-profile-aggregate.test.tsx`,
+    `test/ui/spec012-illustration.test.tsx`, and the profile portions of
+    `test/ui/spec014-gallery.test.tsx` / `spec014-enrichment.test.tsx` /
+    `spec014-taxonomy.test.tsx`).
+  - *New:* build-time `wikipedia` resolution (existence/redirect → `{title,url}|
+    null`); the default-hide filter over article-less taxa; the disabled/greyed
+    "Open profile →" button + tooltip when the parameter shows them; the profile
+    renders an iframe pointed at the stored canonical URL.
+- **Assumptions (to confirm in the implementation plan):**
+  1. The parameter governs **all taxon-facing surfaces including the map**: in the
+     default hide state, article-less taxa's occurrence points are removed from
+     the map as well as from the panels/lists. Occurrences with an *indeterminate*
+     identification (no genus taxon at all, hence no possible article) are treated
+     as article-less and are **hidden by default** under this rule (owner-directed,
+     2026-07-29): the default map shows only fossils tied to a Wikipedia-documented
+     genus. They reappear only when the parameter is set to "show all".
+  2. The parameter is surfaced as a **visible toggle** (charter legibility), exact
+     placement TBD in the plan; its default is "hide article-less taxa".
+  3. Embed target is **mobile** Wikipedia (`en.m.wikipedia.org`) for a cleaner
+     inline read.
+- **Human approval reference:** owner-approved in conversation 2026-07-29
+  (nelsonjeanrenaud@gmail.com): inline iframe profile, default-hide parameter over
+  map + panels + lists, indeterminate occurrences hidden by default, greyed
+  "Open profile" with tooltip under "show all", and the retained filtered taxonomy
+  breadcrumb on the taxon page.
+
 ### AMEND-004: Enrichment shipped as its own artifact (refines REQ-002 delivery)
 
 - **Date / owner:** 2026-07-28, owner-approved (chose "(a) partition enrichment

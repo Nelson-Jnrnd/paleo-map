@@ -469,6 +469,276 @@
   color: var(--color-text-muted);
 }
 
+/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. */
+.wikiGateToggle {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.wikiGateCount {
+  color: var(--color-accent-deep);
+}
+
+/* SPEC-015: map marker overlays (labels + hover card) in the map's pixel space. */
+.mapOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mapLabel {
+  position: absolute;
+  transform: translate(11px, -50%);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--color-text-hi);
+  white-space: nowrap;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 2px #fff,
+    0 0 3px #fff;
+  pointer-events: none;
+}
+
+.mapHoverCard {
+  position: absolute;
+  transform: translate(14px, -50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 240px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-panel);
+  pointer-events: none;
+}
+
+/* Pinned (clicked) card is interactive and anchored just above the marker. */
+.mapHoverPinned {
+  transform: translate(-50%, calc(-100% - 16px));
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.mapHoverTop {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.mapHoverClose {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  padding: 2px 4px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mapHoverAction {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--text-min);
+}
+
+.mapHoverAction:hover {
+  background: var(--color-accent-deep);
+}
+
+.mapHoverIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex: none;
+}
+
+/* Cluster count badge — a small pill at the disc's top-right (DOM overlay, since
+   the style bundles no glyphs). */
+.clusterCount {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0 5px;
+  min-width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent-deep);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Multi-species aggregate card (AMEND-002 #3). */
+.speciesCard {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 16px));
+  z-index: 5;
+  width: 240px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-panel);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.speciesHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.speciesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.speciesRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-divider);
+  cursor: pointer;
+  text-align: left;
+}
+
+.speciesRow:hover {
+  background: var(--color-ground);
+}
+
+.speciesRowDisabled {
+  cursor: default;
+  color: var(--color-text-faint);
+}
+
+.speciesRowDisabled:hover {
+  background: transparent;
+}
+
+.speciesIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex: none;
+}
+
+.speciesName {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text-hi);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.speciesClade {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  flex: none;
+}
+
+.mapHoverBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.mapHoverTaxon {
+  font-size: 13px;
+  color: var(--color-text-hi);
+  font-weight: 600;
+}
+
+.mapHoverMeta {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.mapLegend2 {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  max-height: 45%;
+  overflow-y: auto;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex: none;
+}
+
+.legendIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex: none;
+}
+
 .sidebar {
   width: 360px;
   max-width: 42vw;
@@ -665,6 +935,19 @@
 
 .occurrenceRow:hover {
   background: var(--color-ground);
+}
+
+/* SPEC-014 AMEND-005: article-less taxon row — greyed, non-interactive. */
+.rowDisabled {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-text-faint);
+  cursor: default;
+}
+.rowDisabled:hover {
+  background: transparent;
 }
 
 /* Transient cross-highlight (hover/focus on either surface) — weaker than the
@@ -919,6 +1202,15 @@
     width: 100%;
     animation: none;
   }
+}
+
+/* --- Experimental inline Wikipedia embed (off-spec spike) --- */
+.wikiFrame {
+  width: 100%;
+  height: 78vh;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
 }
 
 /* --- Taxon profile --- */
@@ -1238,6 +1530,12 @@
   font-size: 13px;
   color: var(--color-text-hi);
   font-weight: 600;
+}
+/* SPEC-014 AMEND-005: article-less ancestor — shown for context, not navigable. */
+.crumbMuted {
+  font-size: 13px;
+  color: var(--color-text-faint);
+  cursor: default;
 }
 .crumbSep {
   color: var(--color-border);

@@ -20,7 +20,33 @@ function taxon(
   parentId: string | null,
   rank = "genus",
 ): ReadTaxon {
-  return { id, scientificName, parentId, rank } as unknown as ReadTaxon;
+  // SPEC-014 AMEND-005: a taxon is navigable in the breadcrumb only when it has a
+  // Wikipedia article, so give the default fixtures one.
+  return {
+    id,
+    scientificName,
+    parentId,
+    rank,
+    wikipedia: {
+      title: scientificName,
+      url: `https://en.wikipedia.org/wiki/${scientificName}`,
+    },
+  } as unknown as ReadTaxon;
+}
+
+/** Same taxon but with no Wikipedia article (AMEND-005: non-navigable crumb). */
+function taxonNoArticle(
+  id: string,
+  scientificName: string,
+  parentId: string | null,
+): ReadTaxon {
+  return {
+    id,
+    scientificName,
+    parentId,
+    rank: "clade",
+    wikipedia: null,
+  } as unknown as ReadTaxon;
 }
 
 const TAXA = new Map<string, ReadTaxon>([
@@ -58,6 +84,25 @@ test("renders the lineage and navigates on an ancestor click", async () => {
   const ancestor = screen.getByText("Theropoda");
   await userEvent.setup().click(ancestor);
   expect(onOpen).toHaveBeenCalledWith("t:thero");
+});
+
+test("an ancestor without a Wikipedia article is shown but not navigable (AMEND-005)", async () => {
+  const onOpen = vi.fn();
+  const { default: userEvent } = await import("@testing-library/user-event");
+  const taxa = new Map<string, ReadTaxon>([
+    ["t:dino", taxon("t:dino", "Dinosauria", null, "clade")],
+    ["t:thero", taxonNoArticle("t:thero", "Theropoda", "t:dino")],
+    ["t:trex", taxon("t:trex", "Tyrannosaurus", "t:thero", "genus")],
+  ]);
+  render(
+    <TaxonomyTree taxonId="t:trex" taxaById={taxa} onOpenTaxon={onOpen} />,
+  );
+
+  const ancestor = screen.getByText("Theropoda");
+  // It is not a button, and clicking it does nothing.
+  expect(ancestor.closest("button")).toBeNull();
+  await userEvent.setup().click(ancestor);
+  expect(onOpen).not.toHaveBeenCalled();
 });
 
 test("a taxon with no ancestry renders no tree", () => {

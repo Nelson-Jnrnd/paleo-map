@@ -42,11 +42,27 @@ export function TaxonomyTree({
 
   const crumb = (t: ReadTaxon): ReactElement => {
     const isCurrent = t.id === taxonId;
-    return isCurrent ? (
-      <span key={t.id} className={`sciName ${styles.crumbCurrent}`}>
-        {t.scientificName}
-      </span>
-    ) : (
+    if (isCurrent) {
+      return (
+        <span key={t.id} className={`sciName ${styles.crumbCurrent}`}>
+          {t.scientificName}
+        </span>
+      );
+    }
+    // SPEC-014 AMEND-005: an ancestor without a Wikipedia article has no page, so
+    // it is shown for lineage context but is non-navigable (greyed).
+    if (!t.wikipedia) {
+      return (
+        <span
+          key={t.id}
+          className={`sciName ${styles.crumbMuted}`}
+          title="No Wikipedia article for this taxon"
+        >
+          {t.scientificName}
+        </span>
+      );
+    }
+    return (
       <button
         key={t.id}
         type="button"

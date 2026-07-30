@@ -6,20 +6,20 @@
  * model (AMEND-001) so paleocoordinates stay attributable and reproducible.
  */
 
-import type { Provenanced, Source } from './provenance.js';
-import type { NomenclaturalStatus, TaxonomicRank } from './taxonomy.js';
+import type { Provenanced, Source } from "./provenance.js";
+import type { NomenclaturalStatus, TaxonomicRank } from "./taxonomy.js";
 import type {
   ModernPosition,
   PaleogeographicPosition,
   TimeRange,
-} from './occurrence.js';
+} from "./occurrence.js";
 import type {
   AttributeKind,
   ContentLevel,
   ImageType,
   MeasurementKind,
-} from './profile.js';
-import type { EnrichmentRecord } from './enrichment.js';
+} from "./profile.js";
+import type { EnrichmentRecord } from "./enrichment.js";
 
 export interface SnapshotMetadata {
   /** Immutable import date (ISO 8601) — surfaced in the UI (FONC-1170). */
@@ -30,6 +30,20 @@ export interface SnapshotMetadata {
   /** Human description of the PBDB subset captured. */
   pbdbSubset: string;
   timeWindow: { name: string; maxMa: number; minMa: number };
+}
+
+/**
+ * A resolved Wikipedia article for a taxon (SPEC-014 AMEND-005). Resolved once at
+ * build time against the MediaWiki API (existence + canonical title, redirects
+ * followed) and committed, so runtime stays offline (DATA-005). The taxon page
+ * embeds `url`; `null` on the taxon means "no article" — it is hidden by default
+ * and never navigable.
+ */
+export interface WikipediaRef {
+  /** Canonical article title (redirects resolved), e.g. "Tyrannosaurus". */
+  title: string;
+  /** Full article URL used by the inline profile iframe. */
+  url: string;
 }
 
 export interface ReadTaxon {
@@ -46,6 +60,13 @@ export interface ReadTaxon {
   validity: Provenanced<NomenclaturalStatus>;
   /** "per <source reference>" — the opinion/reference that won. */
   acceptedPer: string | null;
+  /**
+   * Resolved Wikipedia article (SPEC-014 AMEND-005), or `null` when the taxon has
+   * no article. Build-time resolved and committed; the inline taxon page embeds
+   * it. Optional in the type so pre-AMEND-005 fixtures/snapshots stay valid — a
+   * missing field is treated as `null` (no article).
+   */
+  wikipedia?: WikipediaRef | null;
 }
 
 export interface ReadOccurrence {
