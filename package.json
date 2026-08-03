@@ -26,6 +26,7 @@
     "enrich:fetch": "tsx scripts/enrich_fetch.ts",
     "enrich:batch": "tsx scripts/enrich_batch.ts",
     "fetch:silhouettes": "tsx scripts/fetch_silhouettes.ts",
+    "shrink:clade-icons": "tsx scripts/shrink_clade_icons.ts",
     "validate:enrichment": "tsx scripts/validate_enrichment.ts",
     "lint": "eslint .",
     "format": "prettier --check \"src/app/**/*.{ts,tsx,css}\" \"test/ui/**/*.{ts,tsx}\" \"test/e2e/**/*.ts\" \"scripts/**/*.ts\" \"*.{js,ts}\""

@@ -148,25 +148,34 @@ const BASE_STYLE = {
 };
 
 /**
- * SPEC-015 NFR-002: the bundled clade PNGs are ~1254 px square, but the map draws
- * them at 22–40 CSS px. MapLibre packs every registered image into a **per-tile**
- * icon atlas at the image's *native* size, so full-resolution rasters cost ~35 MB
- * of atlas texture per tile — rebuilt and re-uploaded as tiles load while panning.
- * Registering the icons downscaled by this divisor keeps the atlas ~100x smaller;
- * every `icon-size` below is multiplied by the same divisor, so markers render at
- * the size they always did. 1254/10 ≈ 125 px still supersamples a 40 px marker on
- * a 2x display, so the silhouettes stay crisp.
+ * SPEC-015 NFR-002. The clade artwork is ~1254 px square, but the app never draws
+ * it larger than the taxon profile's 220 px panel — the map draws it at 22–40 px.
+ * The size is split across two stages, and their product is what every `icon-size`
+ * below is multiplied by, so markers render at exactly the size SPEC-015 tuned:
+ *
+ * - `ICON_ASSET_DOWNSCALE` is already baked into the committed PNGs
+ *   (`scripts/shrink_clade_icons.ts`, which also pre-strips the white background),
+ *   cutting 5.7 MB of shipped assets to 0.37 MB.
+ * - `ICON_ATLAS_DOWNSCALE` is applied here, when registering the icons. MapLibre
+ *   packs registered images into a **per-tile** atlas at the image's *native*
+ *   size, so a full-resolution raster costs ~35 MB of atlas texture per tile,
+ *   re-uploaded as tiles load while panning. ~125 px still supersamples a 40 px
+ *   marker on a 2x display, so the silhouettes stay crisp.
+ *
+ * Both stages divide every asset by the same factor, so the icons keep their
+ * relative proportions.
  */
-const ICON_DOWNSCALE = 10;
+const ICON_ASSET_DOWNSCALE = 3;
+const ICON_SIZE_SCALE = 10;
+const ICON_ATLAS_DOWNSCALE = ICON_SIZE_SCALE / ICON_ASSET_DOWNSCALE;
 
 /**
- * SPEC-015 REQ-001 (#4): load a bundled clade PNG and strip its opaque near-white
- * background to transparency, in the browser via a canvas — so the silhouette
- * sits cleanly on the round coin instead of a white square. Self-contained (the
- * asset is bundled; no egress). Returns a MapLibre-addable RGBA image, downscaled
- * by `downscale` for the icon atlas (NFR-002).
+ * SPEC-015 REQ-001 (#4): load a bundled clade silhouette for the map's icon atlas.
+ * The committed PNG is already background-stripped, so this only has to downscale
+ * it to its atlas size (NFR-002). Self-contained — the asset is bundled, so there
+ * is no egress. Returns a MapLibre-addable RGBA image.
  */
-async function loadMaskedImage(
+async function loadIconImage(
   src: string,
   downscale: number,
 ): Promise<{ width: number; height: number; data: Uint8ClampedArray }> {
@@ -177,38 +186,22 @@ async function loadMaskedImage(
     img.onerror = () => reject(new Error(`image load failed: ${src}`));
     img.src = src;
   });
+  const width = Math.max(
+    1,
+    Math.round((img.naturalWidth || img.width) / downscale),
+  );
+  const height = Math.max(
+    1,
+    Math.round((img.naturalHeight || img.height) / downscale),
+  );
   const canvas = document.createElement("canvas");
-  canvas.width = img.naturalWidth || img.width;
-  canvas.height = img.naturalHeight || img.height;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("no 2d context");
-  ctx.drawImage(img, 0, 0);
-  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const d = image.data;
-  for (let i = 0; i < d.length; i += 4) {
-    if (d[i]! > 238 && d[i + 1]! > 238 && d[i + 2]! > 238) d[i + 3] = 0;
-  }
-  if (downscale <= 1) {
-    return { width: canvas.width, height: canvas.height, data: d };
-  }
-  // Mask first, then downscale: `drawImage` filters premultiplied alpha, so the
-  // now-transparent background contributes nothing and the silhouette keeps clean
-  // edges — a threshold applied *after* downscaling would leave a grey halo.
-  ctx.putImageData(image, 0, 0);
-  const width = Math.max(1, Math.round(canvas.width / downscale));
-  const height = Math.max(1, Math.round(canvas.height / downscale));
-  const small = document.createElement("canvas");
-  small.width = width;
-  small.height = height;
-  const smallCtx = small.getContext("2d");
-  if (!smallCtx) throw new Error("no 2d context");
-  smallCtx.imageSmoothingQuality = "high";
-  smallCtx.drawImage(canvas, 0, 0, width, height);
-  return {
-    width,
-    height,
-    data: smallCtx.getImageData(0, 0, width, height).data,
-  };
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, width, height);
+  return { width, height, data: ctx.getImageData(0, 0, width, height).data };
 }
 
 function toFeatureCollection(
@@ -528,8 +521,8 @@ export function OccurrenceMap({
               CLADE_MARKERS.map(async (m) => {
                 if (map.hasImage(m.id)) return;
                 try {
-                  const masked = await loadMaskedImage(m.src, ICON_DOWNSCALE);
-                  if (!map.hasImage(m.id)) map.addImage(m.id, masked);
+                  const icon = await loadIconImage(m.src, ICON_ATLAS_DOWNSCALE);
+                  if (!map.hasImage(m.id)) map.addImage(m.id, icon);
                 } catch {
                   /* a missing icon just falls back to the tinted disc */
                 }
@@ -582,16 +575,16 @@ export function OccurrenceMap({
               filter: ["has", "point_count"],
               layout: {
                 "icon-image": FALLBACK_MARKER.id,
-                // Sizes are the design values scaled by ICON_DOWNSCALE, because
-                // the registered raster is that much smaller (NFR-002).
+                // Design values scaled by ICON_SIZE_SCALE, because the
+                // registered raster is that much smaller (NFR-002).
                 "icon-size": [
                   "step",
                   ["get", "point_count"],
-                  0.014 * ICON_DOWNSCALE,
+                  0.014 * ICON_SIZE_SCALE,
                   50,
-                  0.02 * ICON_DOWNSCALE,
+                  0.02 * ICON_SIZE_SCALE,
                   200,
-                  0.026 * ICON_DOWNSCALE,
+                  0.026 * ICON_SIZE_SCALE,
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
@@ -643,9 +636,9 @@ export function OccurrenceMap({
                   ["linear"],
                   ["zoom"],
                   2,
-                  0.018 * ICON_DOWNSCALE,
+                  0.018 * ICON_SIZE_SCALE,
                   6,
-                  0.032 * ICON_DOWNSCALE,
+                  0.032 * ICON_SIZE_SCALE,
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,

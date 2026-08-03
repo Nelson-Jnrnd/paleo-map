@@ -254,7 +254,7 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 | REQ-003 | Hover shows name·age·formation | automated (jsdom) | hover-card test | _pending_ | |
 | REQ-004 | Clustering/focus/locality preserved | manual + existing tests | mode tests | _pending_ | |
 | NFR-001 | No new egress | automated | data-005 | _pending_ | |
-| NFR-002 | No perceptible stall panning/zooming a large stage | manual profiling | instrumented `texImage2D`/`texSubImage2D` byte counts + MapLibre per-tile `imageAtlas` dimensions, Maastrichtian, headless Chromium 1400x900 | Icon atlas 108.2 MB → 1.11 MB; texture upload during a 40-step pan 47.3 MB → 0.5 MB (largest single upload 33.9 MB → none >1 MB) | |
+| NFR-002 | No perceptible stall panning/zooming a large stage | manual profiling | instrumented `texImage2D`/`texSubImage2D` byte counts + MapLibre per-tile `imageAtlas` dimensions, Maastrichtian, headless Chromium 1400x900 | Icon atlas 108.2 MB → 1.11 MB; texture upload during a 40-step pan 47.3 MB → 0.83 MB (largest single upload 33.9 MB → none >1 MB); shipped clade PNGs 5.67 MB → 0.37 MB | |
 
 ## Traceability table
 
@@ -264,7 +264,7 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 | REQ-002 | Zoom-gated DOM labels | `mapLabels.ts` (`computeMapLabels`), `OccurrenceMap.tsx` (`recomputeLabels`, `LABEL_MIN_ZOOM`, `.mapLabel`) | `test/ui/map-labels.test.ts` | Done |
 | REQ-003 | Hover preview card | `MapHoverCard.tsx` (`hoverCardContent`, `MapHoverCard`), `OccurrenceMap.tsx` (pointer handler) | `test/ui/map-clade-markers.test.ts` (content) | Done |
 | REQ-004 | Clustering/focus/locality | `OccurrenceMap.tsx` (`clusters` layer retained, `points-icon`/`points-bg` focus opacity, locality discs) | existing mode tests | Done |
-| NFR-002 | Bounded icon-atlas footprint | `OccurrenceMap.tsx` (`ICON_DOWNSCALE`, `loadMaskedImage` downscale, compensated `icon-size`) | manual profiling (see verification matrix) | Done |
+| NFR-002 | Bounded icon-atlas + asset footprint | `scripts/shrink_clade_icons.ts` (committed assets), `OccurrenceMap.tsx` (`ICON_ASSET_DOWNSCALE`/`ICON_ATLAS_DOWNSCALE`/`ICON_SIZE_SCALE`, `loadIconImage`, compensated `icon-size`) | manual profiling (see verification matrix) | Done |
 
 ## Implementation notes
 
@@ -279,23 +279,35 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 - Verified offline in a real browser (self-contained map, no network): icons,
   tinted coins, collision labels, and the clade legend all render; no console
   errors.
-- **Icon raster size (NFR-002).** The bundled clade PNGs are ~1254 px square but
-  the map draws them at 22–40 CSS px. MapLibre packs registered images into a
-  **per-tile** `imageAtlas` at each image's *native* size, so the first cut
-  registered them full-resolution and paid ~35 MB of atlas texture per tile —
-  108 MB across the initially loaded tiles, with a 33.9 MB `texImage2D` upload
-  landing mid-pan as new tiles arrived. `loadMaskedImage` now downscales each
-  icon by `ICON_DOWNSCALE` after masking (mask first, then downscale, so
-  premultiplied-alpha filtering leaves clean edges rather than a grey halo), and
-  every `icon-size` is multiplied by the same divisor, so markers render at
-  unchanged size. 1254/10 ≈ 125 px still supersamples a 40 px marker at 2x DPR.
-  A screenshot diff at a fixed view shows 0.16% of subpixels changed, confined to
-  silhouette antialiasing edges.
-- Note for a future spec (not folded in here): the same PNGs are also *shipped*
-  at full resolution (~5.8 MB total) and displayed at 16–22 px in the legend,
-  hover card and species card. Shrinking the committed assets would cut the
-  download, but it touches SPEC-012's profile silhouettes and is out of scope for
-  this fix.
+- **Icon raster size (NFR-002).** The clade artwork arrived as ~1254 px
+  opaque-white-backed PNGs, but the map draws it at 22–40 CSS px. MapLibre packs
+  registered images into a **per-tile** `imageAtlas` at each image's *native*
+  size, so the first cut registered them full-resolution and paid ~35 MB of atlas
+  texture per tile — 108 MB across the initially loaded tiles, with a 33.9 MB
+  `texImage2D` upload landing mid-pan as new tiles arrived. The shipped assets
+  additionally cost 5.67 MB of download and were background-stripped in the
+  browser on every load. The size is now split across two stages whose product,
+  `ICON_SIZE_SCALE`, every `icon-size` is multiplied by, so markers render at the
+  size this spec tuned:
+  - `scripts/shrink_clade_icons.ts` (`pnpm run shrink:clade-icons`) bakes the
+    alpha mask into the committed PNGs and divides each by
+    `ICON_ASSET_DOWNSCALE`, giving 418 px (512×341 for the fallback) and
+    5.67 MB → 0.37 MB. Build-time only; the app ships the committed output, so
+    DATA-005 is untouched. Idempotent — an asset already at target is skipped.
+  - `OccurrenceMap.loadIconImage` applies `ICON_ATLAS_DOWNSCALE` when
+    registering, giving the ~125 px atlas rasters. That still supersamples a
+    40 px marker at 2x DPR.
+
+  Both stages divide every asset by the same factor, so the icons keep their
+  relative proportions and the marker geometry is unchanged: a screenshot diff at
+  a fixed view shows 0.45% of subpixels changed, confined to silhouette
+  antialiasing edges. Because the PNGs are pre-masked, the runtime near-white
+  threshold was removed — re-applying it would eat the antialiased edges.
+- Observation, not addressed here: `Illustration.tsx` (the 220 px clade
+  silhouette fallback, SPEC-012/SPEC-014 REQ-003) is no longer imported anywhere
+  since AMEND-005 made the taxon page an inline Wikipedia article. The 418 px
+  assets keep headroom for it if it returns; whether it should is a question for
+  a future spec.
 
 ## Spec amendments
 
