@@ -148,13 +148,27 @@ const BASE_STYLE = {
 };
 
 /**
+ * SPEC-015 NFR-002: the bundled clade PNGs are ~1254 px square, but the map draws
+ * them at 22–40 CSS px. MapLibre packs every registered image into a **per-tile**
+ * icon atlas at the image's *native* size, so full-resolution rasters cost ~35 MB
+ * of atlas texture per tile — rebuilt and re-uploaded as tiles load while panning.
+ * Registering the icons downscaled by this divisor keeps the atlas ~100x smaller;
+ * every `icon-size` below is multiplied by the same divisor, so markers render at
+ * the size they always did. 1254/10 ≈ 125 px still supersamples a 40 px marker on
+ * a 2x display, so the silhouettes stay crisp.
+ */
+const ICON_DOWNSCALE = 10;
+
+/**
  * SPEC-015 REQ-001 (#4): load a bundled clade PNG and strip its opaque near-white
  * background to transparency, in the browser via a canvas — so the silhouette
  * sits cleanly on the round coin instead of a white square. Self-contained (the
- * asset is bundled; no egress). Returns a MapLibre-addable RGBA image.
+ * asset is bundled; no egress). Returns a MapLibre-addable RGBA image, downscaled
+ * by `downscale` for the icon atlas (NFR-002).
  */
 async function loadMaskedImage(
   src: string,
+  downscale: number,
 ): Promise<{ width: number; height: number; data: Uint8ClampedArray }> {
   const img = new Image();
   img.decoding = "async";
@@ -174,7 +188,27 @@ async function loadMaskedImage(
   for (let i = 0; i < d.length; i += 4) {
     if (d[i]! > 238 && d[i + 1]! > 238 && d[i + 2]! > 238) d[i + 3] = 0;
   }
-  return { width: canvas.width, height: canvas.height, data: d };
+  if (downscale <= 1) {
+    return { width: canvas.width, height: canvas.height, data: d };
+  }
+  // Mask first, then downscale: `drawImage` filters premultiplied alpha, so the
+  // now-transparent background contributes nothing and the silhouette keeps clean
+  // edges — a threshold applied *after* downscaling would leave a grey halo.
+  ctx.putImageData(image, 0, 0);
+  const width = Math.max(1, Math.round(canvas.width / downscale));
+  const height = Math.max(1, Math.round(canvas.height / downscale));
+  const small = document.createElement("canvas");
+  small.width = width;
+  small.height = height;
+  const smallCtx = small.getContext("2d");
+  if (!smallCtx) throw new Error("no 2d context");
+  smallCtx.imageSmoothingQuality = "high";
+  smallCtx.drawImage(canvas, 0, 0, width, height);
+  return {
+    width,
+    height,
+    data: smallCtx.getImageData(0, 0, width, height).data,
+  };
 }
 
 function toFeatureCollection(
@@ -472,8 +506,10 @@ export function OccurrenceMap({
         mapRef.current = map;
         // Dev-only debug hook (stripped from production builds) — lets tooling
         // drive the map deterministically.
-        const meta = import.meta as unknown as { env?: { DEV?: boolean } };
-        if (meta.env?.DEV) {
+        // `import.meta.env.DEV` must be referenced inline: Vite replaces that
+        // exact expression at build time, so binding `import.meta` to a variable
+        // first leaves `meta.env` undefined and the hook never installs.
+        if ((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
           (window as unknown as { __paleoMap?: MapLibreMap }).__paleoMap = map;
         }
         cleanup = (): void => {
@@ -492,7 +528,7 @@ export function OccurrenceMap({
               CLADE_MARKERS.map(async (m) => {
                 if (map.hasImage(m.id)) return;
                 try {
-                  const masked = await loadMaskedImage(m.src);
+                  const masked = await loadMaskedImage(m.src, ICON_DOWNSCALE);
                   if (!map.hasImage(m.id)) map.addImage(m.id, masked);
                 } catch {
                   /* a missing icon just falls back to the tinted disc */
@@ -546,14 +582,16 @@ export function OccurrenceMap({
               filter: ["has", "point_count"],
               layout: {
                 "icon-image": FALLBACK_MARKER.id,
+                // Sizes are the design values scaled by ICON_DOWNSCALE, because
+                // the registered raster is that much smaller (NFR-002).
                 "icon-size": [
                   "step",
                   ["get", "point_count"],
-                  0.014,
+                  0.014 * ICON_DOWNSCALE,
                   50,
-                  0.02,
+                  0.02 * ICON_DOWNSCALE,
                   200,
-                  0.026,
+                  0.026 * ICON_DOWNSCALE,
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
@@ -605,9 +643,9 @@ export function OccurrenceMap({
                   ["linear"],
                   ["zoom"],
                   2,
-                  0.018,
+                  0.018 * ICON_DOWNSCALE,
                   6,
-                  0.032,
+                  0.032 * ICON_DOWNSCALE,
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
