@@ -1028,8 +1028,8 @@ export function OccurrenceMap({
               {reconstructedToFrame && (
                 <>
                   {" "}
-                  Occurrences are reconstructed to this frame’s age, so each point
-                  sits on the coastline shown (SPEC-016).
+                  Occurrences are reconstructed to this frame’s age, so each
+                  point sits on the coastline shown (SPEC-016).
                 </>
               )}
             </div>
