@@ -19,12 +19,13 @@
  * they stay deterministic regardless of the shipped artifacts.
  */
 
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { SourceClient } from "../src/pipeline/sources.js";
 import { buildReadModel, serializeCompact } from "../src/pipeline/build.js";
 import { partitionReadModel } from "../src/pipeline/partition.js";
+import type { ReconstructionCache } from "../src/pipeline/reconstruction.js";
 import { FixtureSourceClient } from "../src/pipeline/fixture-client.js";
 import { HttpSourceClient } from "../src/pipeline/http-client.js";
 import { bundleImages } from "./bundle_images.js";
@@ -40,6 +41,17 @@ import {
   applyWikipedia,
   loadWikipediaResolution,
 } from "../src/pipeline/wikipedia.js";
+
+/** Load the committed reconstruction cache; an absent file yields an empty cache. */
+async function loadReconstructionCache(
+  path: string,
+): Promise<ReconstructionCache> {
+  try {
+    return JSON.parse(await readFile(path, "utf-8")) as ReconstructionCache;
+  } catch {
+    return {};
+  }
+}
 
 async function main(): Promise<void> {
   const live = process.argv.slice(2).includes("--live");
@@ -93,10 +105,21 @@ async function main(): Promise<void> {
     `Wikipedia: ${Object.keys(resolution.entries).length} resolved entr(ies) → ${withWiki} taxon(a) with an article`,
   );
 
-  const partition = partitionReadModel(model);
-
   const outDir = join(repoRoot, "public", "data");
   await mkdir(outDir, { recursive: true });
+
+  // SPEC-016 REQ-001: apply the committed frame-consistent reconstruction cache so
+  // each stage's occurrences are placed at that stage's coastline age. Read-only
+  // and offline — the cache is refreshed separately by scripts/reconstruct_occurrences.ts.
+  // An absent/empty cache leaves occurrences at their source (collection-age) position.
+  const reconstructions = await loadReconstructionCache(
+    join(repoRoot, "reconstructions", "cache.json"),
+  );
+  console.log(
+    `Reconstruction: ${Object.keys(reconstructions).length} cached frame-age point(s)`,
+  );
+
+  const partition = partitionReadModel(model, undefined, reconstructions);
 
   // Clear stale artifacts (the old single snapshot.json and any previous stage
   // files) so the emitted set is exactly the current partitioning.

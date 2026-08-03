@@ -17,6 +17,14 @@ export interface PaleogeographicPosition {
   palaeoLng: number;
   /** Which reconstruction produced it — makes `reconstructed` structural. */
   rotationModel: string;
+  /**
+   * The age (Ma) this position was reconstructed at (SPEC-016 DATA-001). When the
+   * frame-consistent reconstruction is applied it is the displayed frame's age —
+   * the same age as the coastline the point is drawn over — so a dot registers to
+   * its coastline. Absent on positions taken verbatim from the source at the
+   * collection's own age (pre-SPEC-016 / unreconstructed fallback).
+   */
+  reconstructionAgeMa?: number;
 }
 
 export interface TimeRange {

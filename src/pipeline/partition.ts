@@ -15,6 +15,7 @@
 
 import {
   MESOZOIC_STAGES,
+  stageMidpointMa,
   stageSlug,
   stagesInRange,
 } from '../domain/index.js';
@@ -26,6 +27,8 @@ import type {
   Source,
   SnapshotMetadata,
 } from '../domain/index.js';
+import { applyFrameReconstruction } from './reconstruction.js';
+import type { ReconstructionCache } from './reconstruction.js';
 
 /**
  * Enrichment split out of the reference (SPEC-014 AMEND-004): a `taxonId →
@@ -104,10 +107,17 @@ export function occurrencesInStage(
 
 /**
  * Partition a read model by stage. `stages` defaults to the full Mesozoic table.
+ *
+ * SPEC-016 REQ-001: when a `reconstructions` cache is supplied, each stage's
+ * occurrences are reconstructed to that stage's midpoint age (the coastline
+ * frame's age) before being written, so a dot registers to the coastline it is
+ * drawn over. An empty cache (the default) is a no-op — occurrences keep their
+ * source paleocoordinate — so the transform is opt-in and deterministic.
  */
 export function partitionReadModel(
   model: ReadModel,
   stages: readonly GeologicalStage[] = MESOZOIC_STAGES,
+  reconstructions: ReconstructionCache = {},
 ): AtlasPartition {
   // Split enrichment out of the reference (SPEC-014 AMEND-004): collect it into
   // its own map, and null it on the served profiles so the reference stays small.
@@ -127,7 +137,13 @@ export function partitionReadModel(
   const partitions: StagePartition[] = [];
   const counts = new Map<string, number>();
   for (const stage of stages) {
-    const occ = occurrencesInStage(model.occurrences, stage);
+    const inStage = occurrencesInStage(model.occurrences, stage);
+    // SPEC-016 REQ-001: reconstruct to this stage's coastline age (its midpoint).
+    const occ = applyFrameReconstruction(
+      inStage,
+      stageMidpointMa(stage),
+      reconstructions,
+    );
     counts.set(stage.name, occ.length);
     if (occ.length > 0) {
       partitions.push({ slug: stageSlug(stage.name), occurrences: occ });

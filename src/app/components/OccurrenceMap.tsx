@@ -864,6 +864,11 @@ export function OccurrenceMap({
   const frame = basemap
     ? describeFrame(basemap.meta, occurrenceRotationModel)
     : null;
+  // SPEC-016 UX-001: disclose frame-consistent reconstruction only when it is
+  // actually applied — i.e. the occurrences carry a frame reconstruction age.
+  const reconstructedToFrame = occurrences.some(
+    (o) => o.paleoPosition.value?.reconstructionAgeMa != null,
+  );
 
   // SPEC-015 REQ-003 / AMEND-001: the card shows the pinned occurrence if any,
   // else the hovered one. SPEC-015 REQ-001: the legend shows in point modes.
@@ -1020,6 +1025,13 @@ export function OccurrenceMap({
                 </>
               )}
               {frame.note} {basemap.meta.note}
+              {reconstructedToFrame && (
+                <>
+                  {" "}
+                  Occurrences are reconstructed to this frame’s age, so each
+                  point sits on the coastline shown (SPEC-016).
+                </>
+              )}
             </div>
           )}
         </div>

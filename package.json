@@ -20,6 +20,7 @@
     "preview": "vite preview",
     "e2e": "playwright test",
     "fetch:basemap": "tsx scripts/fetch_basemap.ts",
+    "reconstruct:occurrences": "tsx scripts/reconstruct_occurrences.ts",
     "snapshot:app": "tsx scripts/gen_web_data.ts --live",
     "check:budget": "tsx scripts/check_budget.ts",
     "enrich:fetch": "tsx scripts/enrich_fetch.ts",
