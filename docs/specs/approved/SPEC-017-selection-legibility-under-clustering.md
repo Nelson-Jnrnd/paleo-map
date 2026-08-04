@@ -427,6 +427,7 @@ green.
 | REQ-008 | Focused candidates take labels ahead of unfocused | automated | `pnpm test` — 3 cases in `map-labels` | `test/ui/map-labels.test.ts` | — |
 | NFR-001 | No base-source `setData` on focus change; perf scenarios green | automated | `pnpm test` — NFR-001 case + `scenario-perf-360/370` | `test/ui/spec017-map-emphasis.test.tsx` | — |
 | NFR-002 | States present without WebGL; no hue-only encoding | automated + inspection | `pnpm test` (jsdom) + guideline review | `test/ui/spec017-selection.test.tsx` | — |
+| NFR-003 | Map settles with default/unstable props; no-op recompute does not re-render | automated | `pnpm test` — 2 integration + 2 unit cases | `test/ui/spec017-map-emphasis.test.tsx` | — |
 | SEC-001 | No new egress | automated | `pnpm test` | `test/data-005-no-runtime-egress.test.ts` | — |
 | API-001 | New helpers pure and unit-tested | automated | `pnpm test` — no React/MapLibre imports in the unit suites | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | — |
 
@@ -451,6 +452,11 @@ green.
 - **Manual** — Campanian (9,240 occurrences) at zoom 2.2 and zoom 6: search a
   taxon on another continent, confirm the fit and the emphasis; verify locality
   cluster counts; verify hover after a locality cluster click.
+- **Manual (A-2 residual risk)** — Campanian, "show taxa without a Wikipedia
+  article" enabled, Taxon mode at the Genus tier: select the *Not classified at
+  genus level* bucket (5,336 occurrences) and judge whether the unclustered
+  overlay is legible and responsive. This is the measured worst case and the one
+  input the automated tests cannot speak to.
 - No new fixtures or data artifacts required.
 
 ## Rollback plan
@@ -535,6 +541,7 @@ Affected components: `app-frontend`, `exploration-view`, `map-rendering`,
 | REQ-008 | Focus-preferring labels | `mapLabels.ts` — `focused` candidate flag; `OccurrenceMap.tsx` — `focusIdsRef` in the label pass | `test/ui/map-labels.test.ts` | Implemented |
 | NFR-001 | No re-clustering on selection | `OccurrenceMap.tsx` — emphasis effect touches only the `emphasis` source | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
 | NFR-002 | Non-colour-only emphasis | `OccurrenceMap.tsx`, `exploration.module.css` — `.notice`, `.clusterCountDim` | `test/ui/spec017-selection.test.tsx` | Implemented |
+| NFR-003 | Settling: value-equal overlay state + frozen prop defaults | `OccurrenceMap.tsx` — `sameCounts`, `sameLabels`, `NO_LOCALITIES`/`NO_OCCURRENCES`/`NO_TAXA` | `test/ui/spec017-map-emphasis.test.tsx` | Implemented (AMEND-001) |
 | SEC-001 | No new egress | — (no new network calls) | `test/data-005-no-runtime-egress.test.ts` | Implemented |
 | API-001 | Pure helpers | `src/app/state/search.ts`, `src/app/state/grouping.ts`, `src/app/state/viewport.ts` | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | Implemented |
 
@@ -548,6 +555,7 @@ Recorded assumptions at drafting time:
 - **A-2:** An unclustered overlay of one taxon's occurrences is small enough to
   render without its own clustering at any zoom; the largest single genus in the
   shipped stages should be measured during implementation to confirm.
+  **Measured 2026-08-04 — partly falsified; see below.**
 
 Decisions and observations from implementation (2026-08-04):
 
@@ -564,9 +572,34 @@ Decisions and observations from implementation (2026-08-04):
   carrying the emphasised features, the base layers no longer single any feature
   out, so `baseOpacity` returns a plain number. That is also what lets the
   cluster layers — which have no `id` — dim by the same rule.
-- **A-2 was not measured.** The overlay is one taxon-group's occurrences at one
-  stage, which in the shipped data is far below the per-stage totals, but no
-  largest-genus measurement was taken. Recorded as an open risk, not a finding.
+- **A-2 measured (2026-08-04).** Largest selectable group across all 30 shipped
+  stage files, via the real `groupByTaxon` at each tier (worst stage is always the
+  Campanian, 9,240 occurrences):
+
+  | | default view (Wikipedia gate on) | show-all (gate off) |
+  | --- | --- | --- |
+  | largest named genus | *Richardoestesia*, **184** | *Richardoestesia*, **184** |
+  | largest named family | *Dromaeosauridae*, **443** | *Hadrosauridae*, **1,487** |
+  | largest named major group | *Coelurosauria*, **1,100** | *Coelurosauria*, **1,764** |
+  | largest not-classified bucket | **612** (family tier) | **5,336** (genus tier) |
+
+  For **named** taxa the assumption holds comfortably: ≤ 1,100 in the default
+  view, ≤ 1,764 with the gate off. Building the overlay `FeatureCollection` for
+  the worst case measured **0.79 ms**, far inside PERF-030.
+
+  The assumption is **falsified for the not-classified bucket with the Wikipedia
+  gate off**: 5,336 occurrences, 58% of the stage, drawn unclustered. That
+  combination requires the Explorer to tick "show taxa without a Wikipedia
+  article" and then select the indeterminate bucket. It is not capped, because a
+  partial overlay would show some of a group's points and silently omit others —
+  a worse failure than a crowded one, and the spec's edge cases already make the
+  bucket a legitimate focus target. Circle and overlap-allowed symbol layers at
+  that count are well within MapLibre's normal range, but the **legibility** of
+  5,336 emphasised markers is inherently poor. Recorded as a residual risk with a
+  named manual check (see Test plan); it is not a regression, since selecting the
+  bucket previously drew nothing at all. If the manual check finds it
+  unacceptable, the fix is a design decision about whether the bucket should be
+  focusable — a new spec, not a cap bolted on here.
 - **Deferred, not fixed — a latent render loop in `OccurrenceMap`.** Its
   `localities = []` / `taxaById = new Map()` prop defaults are fresh objects each
   render, so the data-sync effect re-runs every pass and calls `updateOverlays`,
@@ -580,7 +613,57 @@ Decisions and observations from implementation (2026-08-04):
 
 ## Spec amendments
 
-_None — spec is Draft._
+> Required for any behavioral change after the spec is Approved.
+
+### AMEND-001: the map must settle — no self-feeding overlay re-render
+
+- **Date:** 2026-08-04
+- **Reason:** Implementing REQ-001 surfaced a latent defect that this spec's own
+  tests are the first to reach. `OccurrenceMap`'s optional collection props
+  default to fresh objects (`localities = []`, `taxaById = new Map()`) evaluated
+  on **every** render, including its own state-driven ones; the data-sync effect
+  depends on them, so it re-runs each pass and calls `updateOverlays`, whose
+  `setClusterCounts` / `setLabels` always receive new array identities — an
+  unbounded render loop. It was previously unreachable from the app (every caller
+  memoises those props) and unreachable from tests (jsdom has no WebGL, so the
+  map's `load` path never ran). The fake-MapLibre harness this spec adds runs
+  that path, and the loop hung the suite. Reported to the owner as a deferral and
+  the owner asked for it to be fixed, so it is folded in here rather than left.
+- **Changed requirements:** Adds NFR-003 (below). No functional requirement's
+  behaviour changes; REQ-001's mechanism is unaffected.
+- **Behavioral impact:** The two DOM-overlay states keep their previous value
+  when nothing changed, so a recompute that yields an identical result no longer
+  re-renders. Visible output is unchanged; the map simply settles, and a settled
+  pan frame costs one fewer render. The prop defaults become frozen
+  module-level constants, so omitting them is now safe for any caller.
+- **Test impact:** Two integration cases (`settles when a caller omits the
+  collection props`, `a map event that changes nothing does not re-render`) and
+  two unit cases over the extracted `sameCounts` / `sameLabels` predicates, all
+  in `test/ui/spec017-map-emphasis.test.tsx`. Verified to be meaningful by
+  reverting each half of the fix: with neither half the settling test hangs;
+  with the equality guards alone it passes, confirming they carry the fix and
+  the frozen defaults are complementary.
+- **Human approval reference:** Owner request, 2026-08-04 ("can you fix those
+  two flags?"), following the deferral flagged in the delivery summary.
+
+### NFR-003: The map component settles
+
+- **Statement:** `OccurrenceMap` must reach a stable render state after any
+  input change or map event, for **any** caller — including one that omits the
+  optional collection props or passes freshly-built ones. A recomputation of the
+  DOM overlays that produces an identical result must not trigger a re-render.
+- **Rationale:** The overlays are recomputed from effects as well as map events,
+  so state churn there can feed the effects that caused it. A component whose
+  correctness depends on its callers memoising props is a trap, and the loop
+  freezes the browser tab rather than degrading.
+- **Acceptance criteria:** Rendering with no `localities` / `taxaById` reaches a
+  loaded map and then performs no further overlay work; repeated `moveend`
+  events with an unchanged camera perform no further overlay work.
+- **Verification method:** automated component test (bounded overlay-write count)
+  + unit tests on the equality predicates.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+  `src/app/components/OccurrenceMap.tsx` (`sameCounts`, `sameLabels`,
+  `NO_LOCALITIES` / `NO_OCCURRENCES` / `NO_TAXA`).
 
 ## Review checklist
 

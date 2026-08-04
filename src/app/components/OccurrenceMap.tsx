@@ -81,6 +81,51 @@ const FIT_DURATION_MS = 700;
  */
 const FIT_SKIP_THRESHOLD = 0.5;
 
+/**
+ * SPEC-017 AMEND-001. Stable identities for the optional collection props, and
+ * value equality for the two DOM-overlay arrays.
+ *
+ * `updateOverlays` is called from effects *and* from map events, and it sets two
+ * array states. Handing React a fresh array every time makes every call a
+ * re-render; if an effect that calls it also depends on a prop whose default is
+ * a fresh object, the two feed each other and the component never settles. The
+ * frozen defaults remove that trigger for callers who omit the props; the
+ * equality checks remove the state churn that powered the cycle, whoever calls.
+ */
+const NO_LOCALITIES: readonly LocalityGroup[] = Object.freeze([]);
+const NO_OCCURRENCES: readonly ReadOccurrence[] = Object.freeze([]);
+const NO_TAXA: ReadonlyMap<string, ReadTaxon> = new Map();
+const EMPTY_LABELS: MapLabel[] = [];
+
+export interface ClusterCount {
+  key: string;
+  x: number;
+  y: number;
+  count: number;
+}
+
+export function sameCounts(
+  a: readonly ClusterCount[],
+  b: readonly ClusterCount[],
+): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((x, i) => {
+    const y = b[i] as ClusterCount;
+    return x.key === y.key && x.count === y.count && x.x === y.x && x.y === y.y;
+  });
+}
+
+export function sameLabels(
+  a: readonly MapLabel[],
+  b: readonly MapLabel[],
+): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((x, i) => {
+    const y = b[i] as MapLabel;
+    return x.id === y.id && x.x === y.x && x.y === y.y && x.taxon === y.taxon;
+  });
+}
+
 /** Cluster disc radius for a given count (mirrors the map's `circle-radius` step). */
 function clusterDiscRadius(count: number): number {
   if (count >= 200) return 28;
@@ -365,11 +410,11 @@ export function OccurrenceMap({
   highlightedId = null,
   onHover,
   mode = "occurrence",
-  localities = [],
+  localities = NO_LOCALITIES,
   focusIds = null,
-  focusOccurrences = [],
+  focusOccurrences = NO_OCCURRENCES,
   fitToken = 0,
-  taxaById = new Map(),
+  taxaById = NO_TAXA,
   onOpenProfile,
   onSelectTaxon,
 }: OccurrenceMapProps): ReactElement {
@@ -450,7 +495,12 @@ export function OccurrenceMap({
         counts.push({ key, x: p.x, y: p.y, count: n });
       }
     }
-    setClusterCounts(counts);
+    // SPEC-017 AMEND-001: keep the previous array when nothing actually moved.
+    // `updateOverlays` runs from effects as well as map events, and a fresh array
+    // identity here forces a re-render — which re-runs those effects, which calls
+    // this again. Bailing on an unchanged value breaks that cycle at its source
+    // and also spares a render per settled pan frame.
+    setClusterCounts((prev) => (sameCounts(prev, counts) ? prev : counts));
 
     // Keep the pinned card anchored to its marker as the map moves.
     const pin = pinnedRef.current;
@@ -473,7 +523,7 @@ export function OccurrenceMap({
 
     // Name labels — unclustered markers only, zoom-gated, collision-culled.
     if (modeRef.current === "locality" || map.getZoom() < LABEL_MIN_ZOOM) {
-      setLabels([]);
+      setLabels((prev) => (prev.length === 0 ? prev : EMPTY_LABELS));
       return;
     }
     const seen = new Set<string>();
@@ -497,7 +547,8 @@ export function OccurrenceMap({
       const p = map.project([lng, lat]);
       candidates.push({ id, taxon, x: p.x, y: p.y, focused: focusSet.has(id) });
     }
-    setLabels(computeMapLabels(candidates, { maxLabels: MAX_LABELS }));
+    const next = computeMapLabels(candidates, { maxLabels: MAX_LABELS });
+    setLabels((prev) => (sameLabels(prev, next) ? prev : next));
   };
   const updateOverlaysRef = useRef(updateOverlays);
   updateOverlaysRef.current = updateOverlays;

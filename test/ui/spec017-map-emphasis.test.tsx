@@ -7,7 +7,11 @@
  */
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { OccurrenceMap } from "../../src/app/components/OccurrenceMap.js";
+import {
+  OccurrenceMap,
+  sameCounts,
+  sameLabels,
+} from "../../src/app/components/OccurrenceMap.js";
 import type { ReadOccurrence } from "../../src/domain/index.js";
 import {
   currentMap,
@@ -76,9 +80,9 @@ const OCCS: ReadOccurrence[] = [
   occurrence("o4", "t:b", 115, -25),
 ];
 
-// Stable identities. `OccurrenceMap`'s `localities`/`taxaById` defaults are fresh
-// objects on every render, which would re-run its data-sync effect each pass;
-// the real caller memoises them, so tests must too.
+// Stable identities, as the real caller (`ExplorationView`) memoises them. Since
+// AMEND-001 the component no longer *needs* this — see the settling test at the
+// bottom — but passing stable props keeps each test's re-render count honest.
 const NO_LOCALITIES: never[] = [];
 const NO_TAXA = new Map();
 
@@ -358,4 +362,83 @@ test("REQ-005: a locality cluster click zooms instead of opening a species card"
 
   // It zooms, and never consults the (taxon-shaped) cluster leaves.
   expect(map.easeToCalls).toHaveLength(1);
+});
+
+test("AMEND-001: the map settles when a caller omits the collection props", async () => {
+  // The regression: `localities`/`taxaById` defaulted to fresh objects each
+  // render, so the data-sync effect re-ran every pass and `updateOverlays` set
+  // two array states with new identities — feeding itself forever. This render
+  // (no `localities`, no `taxaById`) used to hang the suite outright.
+  const view = render(
+    <OccurrenceMap
+      occurrences={OCCS}
+      selectedId={null}
+      onSelect={() => {}}
+      occurrenceRotationModel="SCOTESE"
+      stageName="Maastrichtian"
+    />,
+  );
+  await flushUntil(() => mapCount() > 0);
+  const map = currentMap();
+  await act(async () => {
+    map.fire("load");
+  });
+  await flushUntil(() => map.getLayer("emphasis-bg") !== undefined);
+
+  // One effect run == one overlay setData, so an unsettled component shows up as
+  // an unbounded call count. Give it plenty of slack and still expect a handful.
+  const feeds = () => map.getSource("emphasis")?.setDataCalls.length ?? 0;
+  const afterMount = feeds();
+  await flushUntil(() => false, 5); // pump the loop; nothing should accumulate
+  expect(feeds()).toBe(afterMount);
+  expect(afterMount).toBeLessThan(10);
+
+  view.unmount();
+}, 15_000);
+
+test("AMEND-001: a map event that changes nothing does not re-render", async () => {
+  const { map } = await renderMap();
+  const feeds = () => map.getSource("emphasis")?.setDataCalls.length ?? 0;
+  const before = feeds();
+  // `moveend` recomputes the overlays; with no clusters rendered and no zoom
+  // change the derived values are identical, so state must keep its identity.
+  for (let i = 0; i < 5; i += 1) {
+    await act(async () => {
+      map.fire("moveend");
+    });
+  }
+  expect(feeds()).toBe(before);
+});
+
+/*
+ * The predicates behind the settling behaviour, tested directly. The integration
+ * test above is the real guarantee, but a regression there manifests as a hang
+ * inside React's `act`; these fail fast and say which half broke.
+ */
+
+test("AMEND-001: sameCounts compares by value, not identity", () => {
+  const a = [{ key: "c1", x: 10, y: 20, count: 5 }];
+  expect(sameCounts(a, [{ key: "c1", x: 10, y: 20, count: 5 }])).toBe(true);
+  expect(sameCounts(a, [{ key: "c1", x: 10, y: 21, count: 5 }])).toBe(false);
+  expect(sameCounts(a, [{ key: "c1", x: 10, y: 20, count: 6 }])).toBe(false);
+  expect(sameCounts(a, [{ key: "c2", x: 10, y: 20, count: 5 }])).toBe(false);
+  expect(sameCounts(a, [])).toBe(false);
+  expect(sameCounts([], [])).toBe(true);
+});
+
+test("AMEND-001: sameLabels compares by value, not identity", () => {
+  const a = [{ id: "o1", taxon: "Tyrannosaurus", x: 5, y: 6 }];
+  expect(
+    sameLabels(a, [{ id: "o1", taxon: "Tyrannosaurus", x: 5, y: 6 }]),
+  ).toBe(true);
+  expect(
+    sameLabels(a, [{ id: "o2", taxon: "Tyrannosaurus", x: 5, y: 6 }]),
+  ).toBe(false);
+  expect(sameLabels(a, [{ id: "o1", taxon: "Triceratops", x: 5, y: 6 }])).toBe(
+    false,
+  );
+  expect(
+    sameLabels(a, [{ id: "o1", taxon: "Tyrannosaurus", x: 5, y: 7 }]),
+  ).toBe(false);
+  expect(sameLabels([], [])).toBe(true);
 });
