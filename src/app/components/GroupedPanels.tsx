@@ -113,6 +113,12 @@ interface TaxonPanelProps {
   /** SPEC-014 AMEND-005: whether this taxon has a Wikipedia article (→ a page). */
   hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
+  /**
+   * SPEC-017 REQ-004: the name the Explorer searched for, when it is not this
+   * group — the search landed on the nearest ancestor the map groups by, and
+   * must say so rather than quietly showing a different taxon.
+   */
+  substitutedFrom?: string | null;
 }
 
 export function TaxonPanel({
@@ -120,6 +126,7 @@ export function TaxonPanel({
   onOpenProfile,
   hasArticle,
   onClose,
+  substitutedFrom = null,
 }: TaxonPanelProps): ReactElement {
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
@@ -137,8 +144,18 @@ export function TaxonPanel({
         </button>
       </div>
 
+      {substitutedFrom && (
+        <p className={styles.notice} role="status">
+          Showing <span className="sciName">{group.name}</span>, the nearest
+          group the map plots by that contains{" "}
+          <span className="sciName">{substitutedFrom}</span>.
+        </p>
+      )}
+
       <dl className={styles.fieldGrid}>
-        <dt className={styles.fieldLabel}>Occurrences in view</dt>
+        {/* SPEC-017 REQ-002: the selection is resolved across the whole stage,
+            not the viewport, so this count is "at this age" — not "in view". */}
+        <dt className={styles.fieldLabel}>Occurrences at this age</dt>
         <dd className={styles.fieldValue}>
           <span className="mono">{group.count}</span>
         </dd>

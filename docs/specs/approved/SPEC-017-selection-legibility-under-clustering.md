@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-017
 title: Search & selection legibility under clustering
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,9 @@ supersedes: []
 superseded_by:
 depends_on: [SPEC-009, SPEC-010, SPEC-013, SPEC-015]
 conflicts_with: []
-last_verified_at: 2026-08-03
+approved_by: nelsonjeanrenaud@gmail.com
+approved_at: 2026-08-04
+last_verified_at: 2026-08-04
 ---
 
 # SPEC-017: Search & selection legibility under clustering
@@ -144,7 +146,9 @@ in-memory read model; MapLibre's clustered GeoJSON source.
 - **Verification method:** automated component test asserting the overlay source
   data and the cluster-layer paint properties, plus a manual visual check at zoom
   2.2 and zoom 6.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+  `src/app/components/OccurrenceMap.tsx` (`emphasisFeatures`, `baseOpacity`,
+  the `emphasis` source and `emphasis-bg`/`emphasis-icon` layers).
 
 ### REQ-002: Focus and the selected group are resolved against the stage, not the viewport
 
@@ -163,7 +167,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   in-viewport taxa and its heading count is unchanged.
 - **Verification method:** automated component test driving a viewport that
   excludes the taxon.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
+  `src/app/components/ExplorationView.tsx` (`stageTaxonGroups`).
 
 ### REQ-003: A search result is brought into view
 
@@ -182,7 +187,9 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   away afterwards is not undone.
 - **Verification method:** automated component test with a stubbed map camera
   (counting fit calls) + manual check.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+  `test/ui/viewport.test.ts`, `src/app/state/viewport.ts`
+  (`boundsOfPoints`, `fractionInView`).
 
 ### REQ-004: A search always lands on a reachable group
 
@@ -204,7 +211,9 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   and never a blank panel.
 - **Verification method:** automated unit test on the pure resolution function +
   component test for the disclosure and the empty state.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-search-landing.test.ts`,
+  `test/ui/spec017-selection.test.tsx`, `src/app/state/search.ts`
+  (`landingForTaxon`), `src/app/state/grouping.ts` (`tierOfTaxon`).
 
 ### REQ-005: Cluster interaction respects the grouping mode
 
@@ -222,7 +231,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   taxon selection and the panel/focus follow; in locality mode, a cluster click
   zooms and sets no card state; no cluster click leaves the map unchanged.
 - **Verification method:** automated component test per mode.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+  `src/app/components/MapSpeciesCard.tsx`.
 
 ### REQ-006: Locality-mode cluster rendering and state are correct
 
@@ -241,7 +251,9 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   (non-clade) cluster mark; after a locality cluster click, hover cross-highlight
   still works.
 - **Verification method:** automated component test + manual visual check.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+  `src/app/components/OccurrenceMap.tsx` (cluster badges outside the
+  `showCladeUi` gate; the mode-change card reset).
 
 ### REQ-007: Cluster semantics are disclosed in every mode
 
@@ -255,7 +267,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
 - **Acceptance criteria:** The note is present and mode-appropriate in all three
   modes.
 - **Verification method:** automated component test.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
+  `src/app/components/ExplorationView.tsx` (`mapLegend`).
 
 ### REQ-008: Labels prefer the focused taxon
 
@@ -269,7 +282,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   focused candidates occupy the labels ahead of unfocused ones.
 - **Verification method:** automated unit test on the pure label-selection
   function.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/map-labels.test.ts`,
+  `src/app/components/mapLabels.ts`.
 
 ## Non-functional requirements
 
@@ -287,7 +301,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   `scenario-perf-360` / `scenario-perf-370` scenarios stay green.
 - **Verification method:** automated test asserting the source is not re-fed on
   focus change + existing perf scenarios.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`
+  ("NFR-001: changing the focus never re-feeds the clustered source").
 
 ### NFR-002: Accessible, not colour-only
 
@@ -301,7 +316,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   jsdom (no-WebGL) tests; no new information is carried by hue alone.
 - **Verification method:** component test + inspection against
   `docs/mockups/design-guidelines.md`.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
+  `src/app/components/exploration.module.css` (`.notice`, `.clusterCountDim`).
 
 ## Security and privacy considerations
 
@@ -333,7 +349,8 @@ occurrences already loaded.
 - **Acceptance criteria:** The new helpers are importable and tested without
   rendering a component; no I/O.
 - **Verification method:** unit test.
-- **Evidence location:** _pending_.
+- **Evidence location:** `test/ui/spec017-search-landing.test.ts`,
+  `test/ui/viewport.test.ts`, `test/ui/map-labels.test.ts`.
 
 ## UI or UX impact
 
@@ -400,18 +417,18 @@ green.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Focus overlay populated; cluster layers dimmed; clustered feature count unchanged | automated + manual | component test on source data + paint | _pending_ | — |
-| REQ-002 | Off-viewport taxon still focuses and panels; list stays viewport-linked | automated | component test with excluding viewport | _pending_ | — |
-| REQ-003 | Exactly one camera fit on search landing; none on list select | automated + manual | component test with stubbed camera | _pending_ | — |
-| REQ-004 | Non-major-group clade resolves to disclosed ancestor; no-group state designed | automated | unit + component test | _pending_ | — |
-| REQ-005 | Taxon-mode cluster card selects; locality cluster zooms; no silent click | automated | component test per mode | _pending_ | — |
-| REQ-006 | Locality clusters show counts, no clade icon, hover survives | automated + manual | component test | _pending_ | — |
-| REQ-007 | Cluster note present in all three modes | automated | component test | _pending_ | — |
-| REQ-008 | Focused candidates take labels ahead of unfocused | automated | unit test | _pending_ | — |
-| NFR-001 | No base-source `setData` on focus change; perf scenarios green | automated | component test + existing scenarios | _pending_ | — |
-| NFR-002 | States present without WebGL; no hue-only encoding | automated + inspection | jsdom component tests | _pending_ | — |
-| SEC-001 | No new egress | automated | `test/data-005-no-runtime-egress.test.ts` | `test/data-005-no-runtime-egress.test.ts` | — |
-| API-001 | New helpers pure and unit-tested | automated | unit test | _pending_ | — |
+| REQ-001 | Focus overlay populated; cluster layers dimmed; clustered feature count unchanged | automated + manual | `pnpm test` — 4 cases in `spec017-map-emphasis` | `test/ui/spec017-map-emphasis.test.tsx` | — |
+| REQ-002 | Off-viewport taxon still focuses and panels; list stays viewport-linked | automated | `pnpm test` — 2 cases in `spec017-selection` | `test/ui/spec017-selection.test.tsx` | — |
+| REQ-003 | Exactly one camera fit on search landing; none on list select | automated | `pnpm test` — 3 fit cases + 6 bounds unit cases | `test/ui/spec017-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | — |
+| REQ-004 | Non-major-group clade resolves to disclosed ancestor; no-group state designed | automated | `pnpm test` — 8 unit + 2 component cases | `test/ui/spec017-search-landing.test.ts`, `test/ui/spec017-selection.test.tsx` | — |
+| REQ-005 | Taxon-mode cluster card selects; locality cluster zooms; no silent click | automated | `pnpm test` — 2 cases in `spec017-map-emphasis` | `test/ui/spec017-map-emphasis.test.tsx` | — |
+| REQ-006 | Locality clusters show counts, no clade icon, hover survives | automated + manual | `pnpm test` + visual check | `test/ui/spec017-map-emphasis.test.tsx` | — |
+| REQ-007 | Cluster note present in all three modes | automated | `pnpm test` — 2 cases in `spec017-selection` | `test/ui/spec017-selection.test.tsx` | — |
+| REQ-008 | Focused candidates take labels ahead of unfocused | automated | `pnpm test` — 3 cases in `map-labels` | `test/ui/map-labels.test.ts` | — |
+| NFR-001 | No base-source `setData` on focus change; perf scenarios green | automated | `pnpm test` — NFR-001 case + `scenario-perf-360/370` | `test/ui/spec017-map-emphasis.test.tsx` | — |
+| NFR-002 | States present without WebGL; no hue-only encoding | automated + inspection | `pnpm test` (jsdom) + guideline review | `test/ui/spec017-selection.test.tsx` | — |
+| SEC-001 | No new egress | automated | `pnpm test` | `test/data-005-no-runtime-egress.test.ts` | — |
+| API-001 | New helpers pure and unit-tested | automated | `pnpm test` — no React/MapLibre imports in the unit suites | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | — |
 
 ## Test plan
 
@@ -447,32 +464,35 @@ proves problematic.
 
 ## Open questions
 
-- [ ] **OQ-001 — exact focus counts on clusters.** Should a cluster disclose how
+- [x] **OQ-001 — exact focus counts on clusters.** Should a cluster disclose how
       many of its members are the focused taxon ("3 of 47")? This needs
       supercluster `clusterProperties` plus a per-feature `focus` flag, which means
       re-feeding and re-clustering the 5k–9k-point base source on every selection.
-      Deferred out of this spec (Non-goals) pending a measurement against
-      PERF-030; recommend deciding after REQ-001 ships.
-- [ ] **OQ-002 — fit threshold.** What counts as "already substantially in view"
-      in REQ-003 (fraction of the taxon's occurrences inside the current bounds,
-      or bounds overlap)? Proposed default: fit unless ≥ 50% of the taxon's
-      placeable occurrences are already within the viewport.
-- [ ] **OQ-003 — dim depth.** The unclustered dim is currently 0.2
-      (`pointOpacity`). Should clusters dim to the same value, or less deeply
-      given a disc is a larger, heavier mark? Proposed default: same value, tuned
-      in manual review.
+      **Deferred** out of this spec (see Non-goals) pending a measurement against
+      PERF-030; revisit after REQ-001 ships. Not a blocker: REQ-007 discloses in
+      text that a cluster count still includes de-emphasised records.
+- [x] **OQ-002 — fit threshold.** What counts as "already substantially in view"
+      in REQ-003? **Resolved** (owner approval 2026-08-04, proposed default
+      adopted): fit unless **≥ 50%** of the taxon's placeable occurrences at the
+      landed stage are already within the current viewport.
+- [x] **OQ-003 — dim depth.** How deeply should cluster discs dim? **Resolved**
+      (owner approval 2026-08-04, proposed default adopted): the same 0.2 the
+      unclustered points already use (`pointOpacity`), applied through one shared
+      constant so it can be tuned in one place during manual review.
 
 ## Human decisions required
 
-- [ ] **HD-001 — REQ-004 substitution vs. refusal.** When a searched clade cannot
+- [x] **HD-001 — REQ-004 substitution vs. refusal.** When a searched clade cannot
       key a group, should the app select the nearest eligible ancestor with a
-      disclosure (proposed), or decline and tell the Explorer the clade is not a
-      selectable grouping level? Answer:
-- [ ] **HD-002 — scope.** REQ-001…REQ-004 are the defect; REQ-005…REQ-008 are
-      adjacent cluster-interaction repairs found in the same investigation. Ship
-      all eight together, or split REQ-005…REQ-008 into a follow-up spec? Answer:
-- [ ] **HD-003 — approval** to move this spec to `Approved` and begin
-      implementation. Answer:
+      disclosure, or decline? **Answer (owner, 2026-08-04): substitute** — resolve
+      to the nearest tier-eligible ancestor and disclose the substitution in the
+      side panel. Refusal is reserved for the case where *no* eligible ancestor
+      exists, which keeps the designed explanatory state of REQ-004.
+- [x] **HD-002 — scope.** Ship REQ-001…REQ-008 together, or split the adjacent
+      cluster repairs into a follow-up? **Answer (owner, 2026-08-04): all eight
+      together**, as one change.
+- [x] **HD-003 — approval** to move this spec to `Approved` and begin
+      implementation. **Answer (owner, 2026-08-04): approved.**
 
 ## Conflict check
 
@@ -493,9 +513,10 @@ specs; each is a delivery gap rather than a disagreement about intent:
   parameters and the aggregate species card are preserved; REQ-001 adds a layer
   above them, REQ-005/REQ-006 fix mode-specific behaviour of the card.
 
-No `conflicts_with` entry is needed. If the owner judges REQ-002 or REQ-005 to
-change SPEC-010's or SPEC-013's meaning rather than complete it, those specs need
-Spec Amendments entries instead — flagged here for the approval decision.
+No `conflicts_with` entry is needed. This was flagged for the approval decision:
+whether REQ-002 and REQ-005 *complete* SPEC-010/SPEC-013 or *change* them.
+Resolved at approval (owner, 2026-08-04): they complete them, so no Spec
+Amendments entries are opened against SPEC-010 or SPEC-013.
 
 Affected components: `app-frontend`, `exploration-view`, `map-rendering`,
 `taxon-search`.
@@ -504,22 +525,20 @@ Affected components: `app-frontend`, `exploration-view`, `map-rendering`,
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Focus overlay source + cluster dim | `OccurrenceMap.tsx` | _pending_ | Not started |
-| REQ-002 | Stage-resolved selected group | `ExplorationView.tsx` | _pending_ | Not started |
-| REQ-003 | Search-landing camera fit | `ExplorationView.tsx`, `OccurrenceMap.tsx` | _pending_ | Not started |
-| REQ-004 | Reachable tier/key resolution | `src/app/state/search.ts`, `grouping.ts`, `GroupedPanels.tsx` | _pending_ | Not started |
-| REQ-005 | Mode-aware cluster interaction | `OccurrenceMap.tsx`, `MapSpeciesCard.tsx` | _pending_ | Not started |
-| REQ-006 | Locality cluster rendering/state | `OccurrenceMap.tsx` | _pending_ | Not started |
-| REQ-007 | Cluster semantics note | `ExplorationView.tsx` | _pending_ | Not started |
-| REQ-008 | Focus-preferring labels | `src/app/components/mapLabels.ts` | _pending_ | Not started |
-| NFR-001 | No re-clustering on selection | `OccurrenceMap.tsx` | _pending_ | Not started |
-| NFR-002 | Non-colour-only emphasis | `OccurrenceMap.tsx`, `exploration.module.css` | _pending_ | Not started |
-| SEC-001 | No new egress | — | `test/data-005-no-runtime-egress.test.ts` | Satisfied by construction |
-| API-001 | Pure helpers | `src/app/state/` | _pending_ | Not started |
+| REQ-001 | Focus overlay source + cluster dim | `OccurrenceMap.tsx` — `emphasisFeatures`, `baseOpacity`, `emphasis` source, `emphasis-bg`/`emphasis-icon` layers | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
+| REQ-002 | Stage-resolved selected group | `ExplorationView.tsx` — `stageTaxonGroups`, `selectedTaxonGroup`; `GroupedPanels.tsx` count label | `test/ui/spec017-selection.test.tsx` | Implemented |
+| REQ-003 | Search-landing camera fit | `viewport.ts` — `boundsOfPoints`, `fractionInView`, `paleoPoints`; `OccurrenceMap.tsx` fit effect; `ExplorationView.tsx` `fitToken` | `test/ui/spec017-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | Implemented |
+| REQ-004 | Reachable tier/key resolution | `grouping.ts` — `tierOfTaxon`; `search.ts` — `landingForTaxon`; `ExplorationView.tsx` — `searchOutcome`, `absentTaxonName`; `GroupedPanels.tsx` — `substitutedFrom` | `test/ui/spec017-search-landing.test.ts`, `test/ui/spec017-selection.test.tsx` | Implemented |
+| REQ-005 | Mode-aware cluster interaction | `OccurrenceMap.tsx` — locality short-circuit in the click handler; `MapSpeciesCard.tsx` — `onSelectTaxon`; `ExplorationView.tsx` — `handleSelectTaxonId` | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
+| REQ-006 | Locality cluster rendering/state | `OccurrenceMap.tsx` — badges outside `showCladeUi`, `clusters-icon` visibility, mode-change card reset | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
+| REQ-007 | Cluster semantics note | `ExplorationView.tsx` — `mapLegend` in all modes + focus clause | `test/ui/spec017-selection.test.tsx` | Implemented |
+| REQ-008 | Focus-preferring labels | `mapLabels.ts` — `focused` candidate flag; `OccurrenceMap.tsx` — `focusIdsRef` in the label pass | `test/ui/map-labels.test.ts` | Implemented |
+| NFR-001 | No re-clustering on selection | `OccurrenceMap.tsx` — emphasis effect touches only the `emphasis` source | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
+| NFR-002 | Non-colour-only emphasis | `OccurrenceMap.tsx`, `exploration.module.css` — `.notice`, `.clusterCountDim` | `test/ui/spec017-selection.test.tsx` | Implemented |
+| SEC-001 | No new egress | — (no new network calls) | `test/data-005-no-runtime-egress.test.ts` | Implemented |
+| API-001 | Pure helpers | `src/app/state/search.ts`, `src/app/state/grouping.ts`, `src/app/state/viewport.ts` | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | Implemented |
 
 ## Implementation notes
-
-_Filled during implementation._
 
 Recorded assumptions at drafting time:
 
@@ -529,6 +548,35 @@ Recorded assumptions at drafting time:
 - **A-2:** An unclustered overlay of one taxon's occurrences is small enough to
   render without its own clustering at any zoom; the largest single genus in the
   shipped stages should be measured during implementation to confirm.
+
+Decisions and observations from implementation (2026-08-04):
+
+- **`tierForRank` was removed, not deprecated.** REQ-004 replaces it wholesale:
+  it mapped rank → tier without consulting `MAJOR_GROUP_NAMES`, which is the bug.
+  Its unit test was replaced by `test/ui/spec017-search-landing.test.ts`, which
+  covers the same ground plus the substitution and no-ancestor paths.
+- **`tierOfTaxon` lives in `grouping.ts`, not `search.ts`.** The question "can
+  this taxon key a group?" must have exactly one answer, or the search landing
+  and `groupByTaxon` could disagree again. It sits next to `matchesTier`, which
+  it reuses.
+- **The dim became a flat value, not a per-feature expression.** `pointOpacity`
+  used a `["case", ["in", ["get","id"], …]]` expression; with the overlay
+  carrying the emphasised features, the base layers no longer single any feature
+  out, so `baseOpacity` returns a plain number. That is also what lets the
+  cluster layers — which have no `id` — dim by the same rule.
+- **A-2 was not measured.** The overlay is one taxon-group's occurrences at one
+  stage, which in the shipped data is far below the per-stage totals, but no
+  largest-genus measurement was taken. Recorded as an open risk, not a finding.
+- **Deferred, not fixed — a latent render loop in `OccurrenceMap`.** Its
+  `localities = []` / `taxaById = new Map()` prop defaults are fresh objects each
+  render, so the data-sync effect re-runs every pass and calls `updateOverlays`,
+  whose `setClusterCounts`/`setLabels` always receive new array identities — an
+  unbounded render loop. It is unreachable from the app today because
+  `ExplorationView` memoises both props, and it is pre-existing rather than
+  introduced here, so per the no-opportunistic-refactor rule it was left alone;
+  `test/ui/spec017-map-emphasis.test.tsx` passes stable props and documents why.
+  It surfaced only because this spec's tests are the first to run the map's
+  `load` path in jsdom. Worth its own spec.
 
 ## Spec amendments
 
@@ -540,7 +588,9 @@ _None — spec is Draft._
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred.
+- [x] Open questions are resolved or explicitly deferred (OQ-001 deferred;
+      OQ-002/OQ-003 resolved to the drafted defaults).
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner
+      nelsonjeanrenaud@gmail.com, 2026-08-04, HD-001…HD-003 above).

@@ -8,7 +8,6 @@ import { expect, test } from "vitest";
 import {
   searchTaxa,
   stageForTaxon,
-  tierForRank,
   type SearchableTaxon,
   type StageBound,
 } from "../../src/app/state/search.js";
@@ -65,13 +64,6 @@ test("prefix ranks above substring; notability breaks ties (REQ-003)", () => {
   // A prefix match must outrank a substring match regardless of notability.
   const r2 = searchTaxa("tar", INDEX);
   expect(r2[0]?.taxonId).toBe("t:tarbo"); // prefix, beats none here
-});
-
-test("tierForRank maps a taxon rank to its grouping tier (REQ-004)", () => {
-  expect(tierForRank("Genus")).toBe("genus");
-  expect(tierForRank("Family")).toBe("family");
-  expect(tierForRank("Clade")).toBe("majorGroup");
-  expect(tierForRank("Species")).toBe("genus"); // default
 });
 
 test("stageForTaxon keeps or moves the age into the taxon's range (REQ-004)", () => {

@@ -12,6 +12,13 @@ export interface LabelCandidate {
   /** Pixel position of the marker within the map container. */
   x: number;
   y: number;
+  /**
+   * SPEC-017 REQ-008: this marker belongs to the focused taxon. Focused
+   * candidates are placed first, so the `maxLabels` cap cannot be spent naming
+   * the de-emphasised markers around a selection while the selected taxon itself
+   * goes unlabelled.
+   */
+  focused?: boolean;
 }
 
 export type MapLabel = LabelCandidate;
@@ -47,6 +54,10 @@ export interface LabelLayoutOptions {
  * Greedily place labels in candidate order, skipping any whose estimated box
  * overlaps an already-placed one. Returns the accepted labels (a subset), capped
  * at `maxLabels`.
+ *
+ * Focused candidates (SPEC-017 REQ-008) are considered first; within each of the
+ * two bands the caller's order is preserved, so placement stays deterministic
+ * and unchanged when nothing is focused.
  */
 export function computeMapLabels(
   candidates: readonly LabelCandidate[],
@@ -58,9 +69,15 @@ export function computeMapLabels(
     lineHeight = 16,
     offsetX = 10,
   } = options;
+  const ordered = candidates.some((c) => c.focused)
+    ? [
+        ...candidates.filter((c) => c.focused),
+        ...candidates.filter((c) => !c.focused),
+      ]
+    : candidates;
   const placed: Box[] = [];
   const out: MapLabel[] = [];
-  for (const c of candidates) {
+  for (const c of ordered) {
     if (out.length >= maxLabels) break;
     const width = Math.max(1, c.taxon.length) * charWidth;
     const left = c.x + offsetX;

@@ -598,6 +598,12 @@
   pointer-events: none;
 }
 
+/* SPEC-017 REQ-001: the badge recedes with the disc it labels while a taxon is
+   focused, so the emphasis overlay above is not competing with bright pills. */
+.clusterCountDim {
+  opacity: 0.35;
+}
+
 /* Multi-species aggregate card (AMEND-002 #3). */
 .speciesCard {
   position: absolute;
@@ -646,6 +652,34 @@
 }
 
 .speciesRow:hover {
+  background: var(--color-ground);
+}
+
+/* Taxon mode (SPEC-017 REQ-005): the row selects and a secondary link opens the
+   profile, so the two actions share one bordered line. */
+.speciesItem {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.speciesItem .speciesRow {
+  border-bottom: none;
+}
+
+.speciesProfile {
+  flex: none;
+  padding: 0 var(--space-3);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-divider);
+  font-size: var(--text-min);
+  color: var(--color-accent-deep);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.speciesProfile:hover {
   background: var(--color-ground);
 }
 
@@ -1311,6 +1345,26 @@
   border-radius: var(--radius-sm);
   font-size: var(--text-min);
   color: var(--color-text-muted);
+}
+
+/* Sidebar notice (SPEC-017 REQ-004): tells the Explorer what the app did with
+   their search when it is not what they typed — an ancestor was substituted,
+   the taxon is not a groupable level, or it has no records at this age. A quiet
+   informational note, not an error: the accent rule marks it as the app
+   speaking, and it never replaces the content around it. */
+.notice {
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+/* Inside a detail panel the panel already supplies the gutter. */
+.panel .notice {
+  margin: var(--space-2) 0 0;
 }
 
 /* --- Taxon enrichment (SPEC-014 REQ-005) --- */

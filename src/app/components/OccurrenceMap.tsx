@@ -33,6 +33,11 @@ import {
   selectFrame,
 } from "../data/basemap.js";
 import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
+import {
+  boundsOfPoints,
+  fractionInView,
+  paleoPoints,
+} from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
 import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
 import {
@@ -52,6 +57,29 @@ import styles from "./exploration.module.css";
 const LABEL_MIN_ZOOM = 5;
 /** SPEC-015 AMEND-002 (#2): keep labels sparse/legible, Google-Maps-style. */
 const MAX_LABELS = 10;
+
+/**
+ * SPEC-017 REQ-001 / OQ-003: how far the un-focused map recedes while a taxon is
+ * focused. One constant for the clustered discs and the loose points alike, so
+ * the whole base recedes by the same amount and the value is tunable in one
+ * place.
+ */
+const DIM_OPACITY = 0.2;
+
+/**
+ * SPEC-017 REQ-003: framing a search result. The padding keeps the outermost
+ * markers off the map edge; `maxZoom` stops a taxon known from a single locality
+ * (a zero-area bounds) from diving to full zoom; the ease is short enough to
+ * read as a move rather than a teleport.
+ */
+const FIT_PADDING = 64;
+const FIT_MAX_ZOOM = 5.5;
+const FIT_DURATION_MS = 700;
+/**
+ * SPEC-017 OQ-002: skip the move when the taxon is already substantially framed,
+ * so searching something you are already looking at does not jolt the camera.
+ */
+const FIT_SKIP_THRESHOLD = 0.5;
 
 /** Cluster disc radius for a given count (mirrors the map's `circle-radius` step). */
 function clusterDiscRadius(count: number): number {
@@ -84,6 +112,25 @@ interface OccurrenceMapProps {
    * non-empty the map emphasises these points and dims the rest — no hue identity.
    */
   focusIds?: readonly string[] | null;
+  /**
+   * The focused occurrences themselves (SPEC-017 REQ-003), for framing the
+   * camera on a search landing. Same set as `focusIds`, resolved to records so
+   * the map can read their paleocoordinates without a lookup.
+   */
+  focusOccurrences?: readonly ReadOccurrence[];
+  /**
+   * Frame the focus when this changes (SPEC-017 REQ-003). Bumped **only** by a
+   * search landing, so a list selection or a map click never moves the camera.
+   * The fit is deferred until the focus is actually populated, because the
+   * landed stage's occurrences may still be loading.
+   */
+  fitToken?: number;
+  /**
+   * Select a taxon from the cluster aggregate card (SPEC-017 REQ-005). Provided
+   * only in taxon mode; when present, picking a species selects it on the map
+   * instead of leaving for its profile.
+   */
+  onSelectTaxon?: ((taxonId: string) => void) | undefined;
   /**
    * Reference taxa (SPEC-015): used to resolve each occurrence's clade marker
    * (icon + tint) and label. Occurrence/taxon modes render clade silhouettes.
@@ -264,13 +311,48 @@ function featuresForMode(
 }
 
 /**
- * Point opacity for the taxon focus (SPEC-010 REQ-004): when a taxon is selected
- * its occurrence points stay fully opaque and the rest dim — emphasis, not hue.
- * No focus → everything opaque.
+ * Base-layer opacity while a taxon is focused (SPEC-010 REQ-004, SPEC-017
+ * REQ-001). The whole base recedes — clustered discs included — because the
+ * focused occurrences are re-drawn at full strength by the emphasis overlay
+ * above it. Emphasis, not hue. No focus → everything opaque.
+ *
+ * Note the change from a per-feature `case` to a flat value: the overlay now
+ * carries the focused points, so the base layers no longer need to single any
+ * feature out, and clusters (which have no `id`) dim by exactly the same rule.
  */
-function pointOpacity(focusIds: readonly string[] | null | undefined): unknown {
-  if (!focusIds || focusIds.length === 0) return 1;
-  return ["case", ["in", ["get", "id"], ["literal", [...focusIds]]], 1, 0.2];
+function baseOpacity(focusIds: readonly string[] | null | undefined): number {
+  return !focusIds || focusIds.length === 0 ? 1 : DIM_OPACITY;
+}
+
+/**
+ * The emphasis overlay's features (SPEC-017 REQ-001): the focused taxon's
+ * occurrences, plus the selected and hovered feature, drawn **unclustered**
+ * above everything else.
+ *
+ * This is what makes a selection legible. The base source clusters at
+ * `clusterRadius` 28 from zoom 2.2, so at the zoom the app opens at, the great
+ * majority of a stage's 5k–9k occurrences are inside a disc: painting emphasis
+ * on the unclustered layers alone left the selection invisible. Exempting just
+ * the emphasised features from clustering costs one small source and no
+ * re-clustering of the base (NFR-001).
+ */
+function emphasisFeatures(
+  all: GeoJSON.FeatureCollection,
+  focusIds: readonly string[] | null | undefined,
+  selectedId: string | null,
+  highlightedId: string | null,
+): GeoJSON.FeatureCollection {
+  const ids = new Set<string>(focusIds ?? []);
+  if (selectedId) ids.add(selectedId);
+  if (highlightedId) ids.add(highlightedId);
+  if (ids.size === 0) return { type: "FeatureCollection", features: [] };
+  return {
+    type: "FeatureCollection",
+    features: all.features.filter((f) => {
+      const id = f.properties?.["id"];
+      return typeof id === "string" && ids.has(id);
+    }),
+  };
 }
 
 export function OccurrenceMap({
@@ -285,11 +367,16 @@ export function OccurrenceMap({
   mode = "occurrence",
   localities = [],
   focusIds = null,
+  focusOccurrences = [],
+  fitToken = 0,
   taxaById = new Map(),
   onOpenProfile,
+  onSelectTaxon,
 }: OccurrenceMapProps): ReactElement {
   const onOpenProfileRef = useRef(onOpenProfile);
   onOpenProfileRef.current = onOpenProfile;
+  const onSelectTaxonRef = useRef(onSelectTaxon);
+  onSelectTaxonRef.current = onSelectTaxon;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const loadedRef = useRef(false);
@@ -305,6 +392,9 @@ export function OccurrenceMap({
   occurrencesRef.current = occurrences;
   const modeRef = useRef(mode);
   modeRef.current = mode;
+  // SPEC-017 REQ-008: the focus set, as a Set, for the label pass.
+  const focusIdsRef = useRef<ReadonlySet<string>>(new Set());
+  focusIdsRef.current = new Set(focusIds ?? []);
 
   // Transient hover preview, the pinned (clicked) interactive card, the culled
   // labels, and the cluster count badges.
@@ -388,7 +478,14 @@ export function OccurrenceMap({
     }
     const seen = new Set<string>();
     const candidates: LabelCandidate[] = [];
-    for (const f of map.queryRenderedFeatures({ layers: ["points-icon"] })) {
+    // SPEC-017 REQ-008: read the emphasis overlay too, and mark its markers, so
+    // the focused taxon gets named rather than losing every label to the dimmed
+    // markers around it.
+    const focusSet = focusIdsRef.current;
+    const layers = ["emphasis-icon", "points-icon"].filter((l) =>
+      map.getLayer(l),
+    );
+    for (const f of map.queryRenderedFeatures({ layers })) {
       const id = f.properties?.["id"];
       const taxon = f.properties?.["taxon"];
       if (typeof id !== "string" || typeof taxon !== "string" || seen.has(id)) {
@@ -398,7 +495,7 @@ export function OccurrenceMap({
       seen.add(id);
       const [lng, lat] = f.geometry.coordinates as [number, number];
       const p = map.project([lng, lat]);
-      candidates.push({ id, taxon, x: p.x, y: p.y });
+      candidates.push({ id, taxon, x: p.x, y: p.y, focused: focusSet.has(id) });
     }
     setLabels(computeMapLabels(candidates, { maxLabels: MAX_LABELS }));
   };
@@ -566,6 +663,10 @@ export function OccurrenceMap({
                 ],
                 "circle-stroke-color": "#ffffff",
                 "circle-stroke-width": 1.5,
+                // SPEC-017 REQ-001: the discs recede with the rest of the base
+                // while a taxon is focused, so the overlay above reads clearly.
+                "circle-opacity": baseOpacity(focusIds),
+                "circle-stroke-opacity": baseOpacity(focusIds),
               },
             });
             map.addLayer({
@@ -588,7 +689,11 @@ export function OccurrenceMap({
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
+                // SPEC-017 REQ-006: a locality cluster aggregates collections,
+                // not animals, so it must not wear a clade silhouette.
+                visibility: mode === "locality" ? "none" : "visible",
               },
+              paint: { "icon-opacity": baseOpacity(focusIds) },
             });
             // SPEC-015 REQ-001: a tinted clade "coin" (the meaning-only tint)
             // that frames the silhouette; also the selection/highlight ring
@@ -618,8 +723,8 @@ export function OccurrenceMap({
                   selectedId,
                   highlightedId,
                 ) as never,
-                "circle-opacity": pointOpacity(focusIds) as never,
-                "circle-stroke-opacity": pointOpacity(focusIds) as never,
+                "circle-opacity": baseOpacity(focusIds),
+                "circle-stroke-opacity": baseOpacity(focusIds),
               },
             });
             // SPEC-015 REQ-001: the clade silhouette (transparent), sitting on the
@@ -643,8 +748,69 @@ export function OccurrenceMap({
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
               },
-              paint: { "icon-opacity": pointOpacity(focusIds) as never },
+              paint: { "icon-opacity": baseOpacity(focusIds) },
             });
+
+            // SPEC-017 REQ-001: the emphasis overlay — an **unclustered** source
+            // holding only the focused / selected / highlighted occurrences,
+            // drawn above everything. Clustering can no longer swallow a
+            // selection: whatever is emphasised is always its own marker, at any
+            // zoom, at full strength over the receded base.
+            const emphasis = emphasisFeatures(
+              featuresForMode(mode, occurrences, localities, taxaById),
+              focusIds,
+              selectedId,
+              highlightedId,
+            );
+            map.addSource("emphasis", {
+              type: "geojson",
+              data: emphasis,
+              cluster: false,
+            });
+            map.addLayer({
+              id: "emphasis-bg",
+              type: "circle",
+              source: "emphasis",
+              paint: {
+                // Locality features carry no clade tint; fall back to the accent.
+                "circle-color": [
+                  "coalesce",
+                  ["get", "tint"],
+                  ACCENT_DEEP,
+                ] as never,
+                "circle-radius": coinRadius as never,
+                "circle-stroke-color": pointStrokeColor(
+                  selectedId,
+                  highlightedId,
+                ) as never,
+                "circle-stroke-width": pointStrokeWidth(
+                  selectedId,
+                  highlightedId,
+                ) as never,
+              },
+            });
+            map.addLayer({
+              id: "emphasis-icon",
+              type: "symbol",
+              source: "emphasis",
+              // Locality features have no clade icon — the disc alone carries them.
+              filter: ["has", "iconKey"],
+              layout: {
+                "icon-image": ["get", "iconKey"] as never,
+                "icon-size": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  2,
+                  0.018 * ICON_SIZE_SCALE,
+                  6,
+                  0.032 * ICON_SIZE_SCALE,
+                ] as never,
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+              },
+            });
+
             loadedRef.current = true;
             setMapLoaded(true);
 
@@ -674,8 +840,15 @@ export function OccurrenceMap({
             // interactive card (and sync the list). On a cluster → zoom in. On
             // empty map → dismiss the pinned card.
             map.on("click", (e: MapMouseEvent) => {
+              // The emphasis overlay sits on top, so it is hit-tested first —
+              // a focused marker must stay clickable where it covers the base.
               const pf = map.queryRenderedFeatures(e.point, {
-                layers: ["points-bg", "points-icon"],
+                layers: [
+                  "emphasis-bg",
+                  "emphasis-icon",
+                  "points-bg",
+                  "points-icon",
+                ].filter((l) => map.getLayer(l)),
               });
               const pid = pf[0]?.properties?.["id"];
               if (typeof pid === "string") {
@@ -701,6 +874,15 @@ export function OccurrenceMap({
               const zoomIn = (): void => {
                 map.easeTo({ center, zoom: map.getZoom() + 2 });
               };
+              // SPEC-017 REQ-005/006: the species card is a taxonomic device, so
+              // it has no business in locality mode — those leaves are
+              // collections and carry no taxon at all, which used to strand an
+              // empty, invisible card that suppressed hover. There, a cluster
+              // click simply zooms.
+              if (modeRef.current === "locality") {
+                zoomIn();
+                return;
+              }
               // AMEND-002 #3: if zooming can't separate the leaves (they're at the
               // same place) or we're deep in, list every species here; else zoom.
               if (typeof clusterId !== "number" || !source.getClusterLeaves) {
@@ -842,46 +1024,111 @@ export function OccurrenceMap({
     updateOverlaysRef.current();
   }, [occurrences, localities, mode, taxaById]);
 
-  // Sync the taxon focus emphasis (SPEC-010 REQ-004): dim the tinted disc + icon.
+  // Sync the emphasis overlay + the base dim (SPEC-010 REQ-004, SPEC-017
+  // REQ-001). Note what this effect does *not* do: it never re-feeds the
+  // clustered `occurrences` source, so selecting a taxon costs one small
+  // setData on the overlay rather than re-clustering 5k–9k points (NFR-001).
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !loadedRef.current || !map.getLayer("points-bg")) return;
-    map.setPaintProperty(
-      "points-bg",
-      "circle-opacity",
-      pointOpacity(focusIds) as never,
+    if (!map || !loadedRef.current || !map.getSource("emphasis")) return;
+    const source = map.getSource("emphasis") as GeoJSONSource;
+    source.setData(
+      emphasisFeatures(
+        featuresForMode(mode, occurrences, localities, taxaById),
+        focusIds,
+        selectedId,
+        highlightedId,
+      ),
     );
-    map.setPaintProperty(
-      "points-bg",
-      "circle-stroke-opacity",
-      pointOpacity(focusIds) as never,
-    );
-    if (map.getLayer("points-icon")) {
-      map.setPaintProperty(
-        "points-icon",
-        "icon-opacity",
-        pointOpacity(focusIds) as never,
-      );
-    }
-  }, [focusIds]);
+    const dim = baseOpacity(focusIds);
+    const setIf = (layer: string, prop: string, value: unknown): void => {
+      if (map.getLayer(layer))
+        map.setPaintProperty(layer, prop, value as never);
+    };
+    setIf("clusters", "circle-opacity", dim);
+    setIf("clusters", "circle-stroke-opacity", dim);
+    setIf("clusters-icon", "icon-opacity", dim);
+    setIf("points-bg", "circle-opacity", dim);
+    setIf("points-bg", "circle-stroke-opacity", dim);
+    setIf("points-icon", "icon-opacity", dim);
+  }, [
+    focusIds,
+    selectedId,
+    highlightedId,
+    mode,
+    occurrences,
+    localities,
+    taxaById,
+  ]);
 
-  // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004).
+  // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004). The
+  // ring is carried by both the base points and the overlay, so an emphasised
+  // occurrence reads the same whether or not it is also inside a cluster.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedRef.current || !map.getLayer("points-bg")) return;
     // The coin radius is fixed (by zoom); selection/highlight is shown by the
     // ring stroke only, so the marker size stays stable (SPEC-009 REQ-004).
-    map.setPaintProperty(
-      "points-bg",
-      "circle-stroke-width",
-      pointStrokeWidth(selectedId, highlightedId) as never,
-    );
-    map.setPaintProperty(
-      "points-bg",
-      "circle-stroke-color",
-      pointStrokeColor(selectedId, highlightedId) as never,
-    );
+    for (const layer of ["points-bg", "emphasis-bg"]) {
+      if (!map.getLayer(layer)) continue;
+      map.setPaintProperty(
+        layer,
+        "circle-stroke-width",
+        pointStrokeWidth(selectedId, highlightedId) as never,
+      );
+      map.setPaintProperty(
+        layer,
+        "circle-stroke-color",
+        pointStrokeColor(selectedId, highlightedId) as never,
+      );
+    }
   }, [selectedId, highlightedId]);
+
+  // SPEC-017 REQ-006: a locality cluster must not wear a clade silhouette.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current || !map.getLayer("clusters-icon")) return;
+    map.setLayoutProperty(
+      "clusters-icon",
+      "visibility",
+      mode === "locality" ? "none" : "visible",
+    );
+  }, [mode]);
+
+  // SPEC-017 REQ-003: frame a search landing — once per token, and only once the
+  // focus is populated (the landed stage may still have been loading when the
+  // token was bumped). Skipped when the taxon is already substantially in view,
+  // so searching what you are looking at does not jolt the camera (OQ-002).
+  const fittedTokenRef = useRef(0);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current) return;
+    if (fitToken === fittedTokenRef.current) return;
+    const points = paleoPoints(focusOccurrences);
+    if (points.length === 0) return; // wait for the stage's occurrences
+    fittedTokenRef.current = fitToken;
+    const b = map.getBounds();
+    const current: Bounds = {
+      west: b.getWest(),
+      south: b.getSouth(),
+      east: b.getEast(),
+      north: b.getNorth(),
+    };
+    if (fractionInView(points, current) >= FIT_SKIP_THRESHOLD) return;
+    const target = boundsOfPoints(points);
+    if (!target) return;
+    map.fitBounds(
+      [
+        [target.west, target.south],
+        [target.east, target.north],
+      ],
+      {
+        padding: FIT_PADDING,
+        maxZoom: FIT_MAX_ZOOM,
+        duration: FIT_DURATION_MS,
+      },
+    );
+  }, [fitToken, focusOccurrences]);
 
   // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step);
   // the multi card is dismissed on any occurrence change (its leaves may be stale).
@@ -891,6 +1138,16 @@ export function OccurrenceMap({
     if (hover && !ids.has(hover.id)) setHover(null);
     setMulti(null);
   }, [occurrences, pinned, hover]);
+
+  // SPEC-017 REQ-006: changing mode re-keys every feature, so any card left over
+  // belongs to features that no longer exist. Clearing them here also releases
+  // the hover suppression those cards hold — a locality cluster click used to
+  // strand an invisible card and kill hover until the stage changed.
+  useEffect(() => {
+    setPinned(null);
+    setHover(null);
+    setMulti(null);
+  }, [mode]);
 
   const frame = basemap
     ? describeFrame(basemap.meta, occurrenceRotationModel)
@@ -930,17 +1187,25 @@ export function OccurrenceMap({
           </p>
         </div>
       )}
-      {available && mapLoaded && showCladeUi && (
+      {available && mapLoaded && (
         <>
           {/* Labels + cluster counts share the map's pixel coordinate space; the
               overlay is non-interactive except the pinned card (which opts in). */}
           <div className={styles.mapOverlay}>
+            {/* SPEC-017 REQ-006: the count badge is what makes a cluster mean
+                anything, so it renders in every mode — locality clusters used to
+                show a dinosaur silhouette and no number at all. It dims with the
+                disc it belongs to while a taxon is focused (REQ-001). */}
             {clusterCounts.map((c) => {
               const r = clusterDiscRadius(c.count);
               return (
                 <span
                   key={c.key}
-                  className={styles.clusterCount}
+                  className={`${styles.clusterCount} ${
+                    focusIds && focusIds.length > 0
+                      ? styles.clusterCountDim
+                      : ""
+                  }`}
                   style={{ left: c.x + r * 0.62, top: c.y - r * 0.62 }}
                   aria-hidden="true"
                 >
@@ -948,17 +1213,18 @@ export function OccurrenceMap({
                 </span>
               );
             })}
-            {labels.map((l) => (
-              <span
-                key={l.id}
-                className={`sciName ${styles.mapLabel}`}
-                style={{ left: l.x, top: l.y }}
-                aria-hidden="true"
-              >
-                {l.taxon}
-              </span>
-            ))}
-            {!multi && cardAnchor && carded && cardedMarker && (
+            {showCladeUi &&
+              labels.map((l) => (
+                <span
+                  key={l.id}
+                  className={`sciName ${styles.mapLabel}`}
+                  style={{ left: l.x, top: l.y }}
+                  aria-hidden="true"
+                >
+                  {l.taxon}
+                </span>
+              ))}
+            {showCladeUi && !multi && cardAnchor && carded && cardedMarker && (
               <MapHoverCard
                 content={hoverCardContent(carded, cardedMarker.label)}
                 x={cardAnchor.x}
@@ -973,7 +1239,7 @@ export function OccurrenceMap({
                 onClose={() => setPinned(null)}
               />
             )}
-            {multi && (
+            {showCladeUi && multi && (
               <MapSpeciesCard
                 x={multi.x}
                 y={multi.y}
@@ -991,22 +1257,39 @@ export function OccurrenceMap({
                   setMulti(null);
                   onOpenProfileRef.current?.(tid);
                 }}
+                // SPEC-017 REQ-005: in taxon mode, picking a species out of a
+                // cluster selects it on the map — the mode's own unit — rather
+                // than leaving the map for the profile.
+                onSelectTaxon={
+                  onSelectTaxonRef.current
+                    ? (tid) => {
+                        setMulti(null);
+                        onSelectTaxonRef.current?.(tid);
+                      }
+                    : undefined
+                }
                 onClose={() => setMulti(null)}
               />
             )}
           </div>
-          <div className={styles.mapLegend2} role="note" aria-label="Clade key">
-            {CLADE_MARKERS.map((m) => (
-              <span key={m.id} className={styles.legendItem}>
-                <span
-                  className={styles.legendSwatch}
-                  style={{ background: m.tint }}
-                />
-                <img className={styles.legendIcon} src={m.src} alt="" />
-                {m.label}
-              </span>
-            ))}
-          </div>
+          {showCladeUi && (
+            <div
+              className={styles.mapLegend2}
+              role="note"
+              aria-label="Clade key"
+            >
+              {CLADE_MARKERS.map((m) => (
+                <span key={m.id} className={styles.legendItem}>
+                  <span
+                    className={styles.legendSwatch}
+                    style={{ background: m.tint }}
+                  />
+                  <img className={styles.legendIcon} src={m.src} alt="" />
+                  {m.label}
+                </span>
+              ))}
+            </div>
+          )}
         </>
       )}
       {basemap && frame && (
