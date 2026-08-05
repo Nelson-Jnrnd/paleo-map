@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-018
 title: Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -416,18 +416,17 @@ inconsistent state.
 - [x] **How many ocean zones?** *Resolved:* at least three (REQ-001), now that
       the restraint ceiling is lifted. The upper bound remains governed by
       NFR-002.
-- [ ] **Graticule interval** — 30° is proposed as legible without clutter.
-      Deferred to implementation; the value becomes a charter entry under UX-001.
-- [ ] **How far does land relief go?** REQ-002 permits texture and tonal
-      variation but does not prescribe a technique. Procedural shading, a tiled
-      texture, and coastline-distance-derived tonal falloff are all admissible;
-      the choice is an implementation decision bounded by NFR-002 and by the
-      cool-neutral constraint.
-- [ ] **Projection and world copies** — deliberately deferred. Web Mercator
-      distorts the high-latitude occurrences this dataset contains, and world
-      copies let the user scroll to a repeated reconstruction. Both are real, and
-      both need a MapLibre capability check first. Candidate follow-up spec; **not**
-      an implied requirement here.
+- [x] **Graticule interval** — *explicitly deferred to implementation*; 30° is
+      the proposed starting value and whatever ships becomes a charter entry
+      under UX-001.
+- [x] **How far does land relief go?** *Explicitly deferred to implementation.*
+      REQ-002 permits texture and tonal variation without prescribing a
+      technique; procedural shading, a tiled texture and coastline-distance tonal
+      falloff are all admissible, bounded by NFR-002 and the cool-neutral
+      constraint.
+- [x] **Projection and world copies** — *deferred out of scope* (already a
+      non-goal). Needs a MapLibre capability check first; candidate follow-up
+      spec, not an implied requirement here.
 
 ## Human decisions required
 
@@ -435,13 +434,13 @@ inconsistent state.
       2026-08-05:* confirmed, and the restraint rule was lifted for the basemap.
       Recorded in `docs/mockups/design-guidelines.md` §4 and encoded in REQ-001,
       REQ-002 and UX-001.
-- [ ] **Confirm the override's boundary.** This spec reads "restraint no longer
-      applies" as scoped to the **basemap**, leaving panels, cards and controls
-      under the original rule, and leaving §2 honesty, AA contrast and accent
-      semantics untouched. If the owner intended a wider relaxation, say so and
-      the scope in the charter and UX-001 widens. Answer:
-- [ ] **Approve the spec** (status → Approved, move to `docs/specs/approved/`).
-      Answer:
+- [x] **Confirm the override's boundary.** *Confirmed as written, owner,
+      2026-08-05:* the restraint relaxation is scoped to the **basemap**. Panels,
+      cards and controls stay under the original rule; §2 honesty, AA contrast and
+      accent semantics are unaffected. Recorded in
+      `docs/mockups/design-guidelines.md` §4.
+- [x] **Approve the spec.** *Approved by owner, 2026-08-05* ("I approve").
+      Status set to `Approved`; moved to `docs/specs/approved/`.
 
 ## Conflict check
 
@@ -496,7 +495,7 @@ None yet.
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred.
+- [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner, 2026-08-05).

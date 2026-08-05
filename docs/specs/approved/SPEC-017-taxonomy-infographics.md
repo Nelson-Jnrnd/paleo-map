@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-017
 title: Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria)
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -452,14 +452,17 @@ regeneration is involved in a revert.
 
 ## Open questions
 
-- [ ] **Where does each surface live?** Taxon page, exploration side panel, or a
-      dedicated taxonomy screen. Deferred to the implementation plan; it changes
-      no requirement above.
-- [ ] **How is a comparison (REQ-003) initiated?** Likely a second taxon picker
-      reusing SPEC-013 search; the entry point is unspecified here.
-- [ ] **Should a taxonomy surface filter the map?** Deliberately deferred — it
-      would couple this spec to the exploration reducer. Candidate follow-up spec,
-      not an implied requirement.
+All three are **explicitly deferred** and none blocks implementation: each is a
+placement or entry-point choice that changes no requirement above. Recorded here
+so the deferral is deliberate rather than forgotten (Definition of Ready).
+
+- [x] **Where does each surface live?** *Deferred to the implementation plan* —
+      taxon page, exploration side panel, or a dedicated taxonomy screen.
+- [x] **How is a comparison (REQ-003) initiated?** *Deferred to the implementation
+      plan* — expected to reuse SPEC-013 search as a second taxon picker.
+- [x] **Should a taxonomy surface filter the map?** *Deferred out of scope* — it
+      would couple this spec to the exploration reducer. Candidate follow-up
+      spec, not an implied requirement here.
 
 ## Human decisions required
 
@@ -469,14 +472,15 @@ regeneration is involved in a revert.
 - [x] **Avian branches.** *Decided by agent under the owner's scope direction:*
       shown and marked (REQ-006), because birds are structurally inside
       Dinosauria and removing them would misrepresent Theropoda, while leaving
-      them unmarked would imply coverage the atlas does not claim. **Flag for
-      review — this is the one call here the owner did not make directly.**
-- [ ] **Approve the milestone list for REQ-004.** Now that the chain is rooted at
-      Dinosauria, proposed: `Dinosauria`, the ordinal branch
-      (`Saurischia`/`Ornithischia`), the major clade (`Theropoda`/
-      `Sauropodomorpha`/ etc.), the family, and the terminal genus. Answer:
-- [ ] **Approve the spec** (status → Approved, move to `docs/specs/approved/`).
-      Answer:
+      them unmarked would imply coverage the atlas does not claim. *Ratified by
+      the owner's approval of 2026-08-05.*
+- [x] **Approve the milestone list for REQ-004.** *Approved as proposed, owner,
+      2026-08-05:* `Dinosauria`, the ordinal branch (`Saurischia`/
+      `Ornithischia`), the major clade (`Theropoda`/`Sauropodomorpha`/ etc.), the
+      family, and the terminal genus. This is the declared constant REQ-004
+      requires.
+- [x] **Approve the spec.** *Approved by owner, 2026-08-05* ("I approve").
+      Status set to `Approved`; moved to `docs/specs/approved/`.
 
 ## Conflict check
 
@@ -536,7 +540,7 @@ needs no amendment entry.
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred.
+- [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner, 2026-08-05).
