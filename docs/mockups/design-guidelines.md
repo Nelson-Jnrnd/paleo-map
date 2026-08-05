@@ -140,6 +140,26 @@ Shadows, gradients, rounded corners, and animation are used sparingly and only
 when they aid comprehension (a marker's selected halo, a cluster expanding).
 Respect `prefers-reduced-motion`.
 
+> **Owner override (2026-08-05, SPEC-018).** The restraint rule above **no longer
+> constrains the paleogeographic basemap.** The map may be as visually rich as it
+> needs to be to read as a real cartographic object: multiple tonal bands,
+> gradients, depth gradation, relief and texture on land and sea are all
+> permitted, and the "single subtle radial" ceiling is lifted. The rule still
+> governs panels, cards, controls and every other surface — the override is
+> scoped to the basemap.
+>
+> Three things this override explicitly does **not** relax, because they are not
+> matters of taste:
+> - **§2 (uncertainty is first-class).** Richer rendering must never read as data
+>   the atlas does not have. Depth gradation is a cartographic device derived from
+>   distance to the coastline, not measured bathymetry, and must never be labelled
+>   or legended as depth (SPEC-018 UX-002).
+> - **Accessibility.** WCAG 2 AA contrast and the axe gate still win over any
+>   aesthetic choice (SPEC-003 AMEND-002).
+> - **Accent semantics.** Teal still belongs to the data and interaction layer,
+>   and ICS period hues still belong to the timeline. The basemap gets richer in
+>   the cool-neutral family; it does not acquire a second accent.
+
 ## 5. Hierarchy and actions
 
 - **One obvious primary action per surface.** On the map it is *select an

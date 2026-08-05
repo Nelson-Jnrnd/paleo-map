@@ -24,9 +24,12 @@ background, a flat land fill, and a one-pixel coastline — over coastline polyg
 that carry no attributes at all. The design charter specifies the ocean as a
 **pale bathymetric chart** with a two-stop gradient, and defines the token for
 it, but the map never uses that token. This spec gives the map depth-graded
-water, land with a defined edge, a graticule, and a marker pass retuned for the
-new background. It adds **no new data source and no new payload**: every change
-is a style-layer change over geometry that already ships.
+water, land with relief, a graticule, and a marker pass retuned for the new
+background. Per the owner's decision of 2026-08-05 the charter's **restraint rule
+no longer constrains the basemap**, so the map may be as visually rich as it needs
+to be to read as a real cartographic object. It still adds **no new data source
+and no new payload**: every change is a style-layer change over geometry that
+already ships.
 
 ## Context
 
@@ -50,6 +53,26 @@ Verified from the shipped code and basemap frames on 2026-08-05:
 The charter (§4) specifies: *"the map is a pale bathymetric chart so the map and
 its data read as the primary object"*, with `Ocean | radial #d7e4ec→#eef4f7`.
 
+**Owner decisions, 2026-08-05 — both recorded in the charter:**
+
+1. **The radial ocean token means shallow-near-land → deep-offshore.**
+   `--color-ocean-inner` (`#eef4f7`) is the near-shore value and
+   `--color-ocean-outer` (`#d7e4ec`) the open-water value. This is the
+   bathymetric reading, not a view-centred vignette. The earlier draft carried
+   this as an assumption; it is now settled.
+2. **The charter's restraint rule no longer constrains the basemap.** Multiple
+   tonal bands, gradients, depth gradation, relief and texture are permitted, and
+   the "single subtle radial" ceiling is lifted. The override is recorded in
+   `docs/mockups/design-guidelines.md` §4 and is **scoped to the basemap** —
+   panels, cards and controls remain under the original rule.
+
+The override deliberately does **not** relax three things, because they are not
+matters of taste, and this spec continues to enforce all three: charter §2
+(uncertainty is first-class — see UX-002), WCAG 2 AA contrast and the axe gate
+(NFR-003), and accent semantics (teal belongs to the data and interaction layer;
+the basemap gets richer within the cool-neutral family and acquires no second
+accent).
+
 The direction was explored in
 [`../../reports/taxonomy-infographic-and-map-craft.md`](../../reports/taxonomy-infographic-and-map-craft.md)
 (Direction B) and approved for specification by the owner on 2026-08-05.
@@ -67,7 +90,8 @@ committed to that look without it ever being built.
 
 - Render the pale bathymetric ocean the charter specifies, using the token that
   already exists for it.
-- Give landmasses a defined edge so they read as bodies rather than cut-outs.
+- Give landmasses a defined edge and real relief so they read as bodies rather
+  than cut-outs.
 - Provide a latitude/longitude reference so the reconstruction is readable as
   world geography and change between stages is perceptible.
 - Keep occurrence markers legible over the new background.
@@ -104,37 +128,46 @@ for their own spec.
 
 ### REQ-001: Depth-graded ocean
 
-- **Statement:** The sea must be rendered with at least two visually distinct
-  zones — a lighter near-shore zone adjacent to coastlines and a darker open-water
-  zone away from them — derived from the coastline geometry already loaded, using
-  `--color-ocean-inner` and `--color-ocean-outer`. The gradation must be
-  continuous or banded without visible seams, and must follow the coastline of
-  whichever frame is displayed, at every stage.
+- **Statement:** The sea must be rendered with **at least three** visually
+  distinct depth zones grading from a light near-shore value at the coastline to a
+  deep open-water value away from it, derived from the coastline geometry already
+  loaded, anchored on `--color-ocean-inner` (near-shore) and
+  `--color-ocean-outer` (open water). The gradation must be continuous or banded
+  without visible seams, and must follow the coastline of whichever frame is
+  displayed, at every stage.
 - **Rationale:** Realises the charter's specified bathymetric chart; the flat
-  single-value sea is the largest contributor to the map's flatness.
+  single-value sea is the largest contributor to the map's flatness. Three zones
+  rather than two is now the floor because the restraint ceiling is lifted — a
+  shelf/slope/deep reading is what makes it legible as bathymetry rather than as a
+  halo.
 - **Acceptance criteria:**
   - Both ocean tokens are referenced by the rendered style; neither is unused.
+  - At least three distinct depth zones are present, ordered light-to-dark with
+    distance from the coastline.
   - The near-shore zone is present around every landmass in the frame, not only
     around some.
   - Changing stage re-derives the gradation against the new frame's coastlines.
-  - No banding artefact is visible at the default zoom (manual check against the
-    charter).
+  - No banding artefact is visible at the default zoom (manual check).
   - No new source, layer data, or network request is introduced.
 - **Verification method:** automated test (style-layer composition asserted from
   the constructed style object) + manual visual check
 - **Evidence location:** `test/ui/spec018-ocean.test.ts`
 
-### REQ-002: Land edge definition
+### REQ-002: Land relief
 
-- **Statement:** Landmasses must be rendered with a defined edge that
-  distinguishes the interior from the coastline, such that continents read as
-  solid bodies rather than flat holes in the sea. The treatment must use the
-  existing land and coast tokens and must not introduce a new hue.
+- **Statement:** Landmasses must be rendered with a defined edge and interior
+  treatment that distinguishes the interior from the coastline, such that
+  continents read as solid bodies rather than flat holes in the sea. Texture,
+  tonal variation and shading are permitted under the 2026-08-05 override. The
+  treatment must stay within the charter's cool-neutral family and must not
+  introduce a new accent or a new hue family.
 - **Rationale:** A single flat fill with a 1px stroke makes continents read as
-  paper cut-outs; a defined edge is the smallest change that gives them volume.
+  paper cut-outs. With restraint lifted, land can carry real relief rather than
+  only an edge — Pangaea is 40 million km² of one hex today.
 - **Acceptance criteria:**
   - The land treatment is present on every land polygon in the frame.
-  - Only existing charter tokens are used; no new hue family appears.
+  - Continental interiors are not a single uniform flat value at the default zoom.
+  - Only cool-neutral values are used; no new accent or hue family appears.
   - Small polygons (islands) remain legible and are not swallowed by the edge
     treatment (Edge cases).
 - **Verification method:** automated test + manual visual check
@@ -252,21 +285,26 @@ part of the snapshot.
 
 ## UI or UX impact
 
-### UX-001: Charter realisation, not reinterpretation
+### UX-001: Charter alignment under the 2026-08-05 override
 
-- **Statement:** The restyled map must match the charter's stated visual system:
-  cool blue-grey neutrals, the specified ocean tokens, teal as the only accent,
-  ICS hues confined to the timeline, and status cues unchanged. Where this spec
-  makes a visual choice the charter does not specify, that choice must be
-  recorded in the charter after implementation.
-- **Rationale:** The charter is binding on all UI work; this spec is largely the
-  act of implementing a part of it that was written down and never built.
+- **Statement:** The restyled map must match the charter's stated visual system as
+  amended: cool blue-grey neutrals, the specified ocean tokens, teal as the only
+  accent, ICS hues confined to the timeline, and status cues unchanged — with the
+  restraint ceiling lifted for the basemap only. Every visual value this spec
+  introduces (band count and widths, graticule interval, land relief treatment)
+  must be recorded in the charter as part of the same change.
+- **Rationale:** The charter is binding on all UI work. This spec both implements
+  a part of it that was written down and never built, and operates under an
+  explicit owner override to its restraint rule — so the charter must end up
+  describing what actually ships.
 - **Acceptance criteria:**
   - The rendered style references `--color-ocean-inner`, `--color-ocean-outer`
     and `--color-grid`.
-  - No new accent or status colour is introduced.
-  - `docs/mockups/design-guidelines.md` is updated with any newly-specified value
-    (e.g. graticule interval, band count) as part of the same change.
+  - No new accent or status colour is introduced; teal remains confined to the
+    data and interaction layer.
+  - Panels, cards and controls are visually unchanged — the override is scoped to
+    the basemap and must not leak into surrounding UI.
+  - `docs/mockups/design-guidelines.md` records every new value introduced here.
 - **Verification method:** automated test + manual check against the charter
 - **Evidence location:** `test/ui/spec018-tokens.test.ts`,
   `docs/mockups/design-guidelines.md`
@@ -334,8 +372,8 @@ value.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Two ocean zones derived from coastlines; both tokens used; re-derives per stage | automated + manual | `pnpm test`, visual check | `test/ui/spec018-ocean.test.ts` | |
-| REQ-002 | Land edge on every polygon; no new hue; islands survive | automated + manual | `pnpm test`, visual check | `test/ui/spec018-land.test.ts` | |
+| REQ-001 | >=3 depth zones derived from coastlines; both tokens used; re-derives per stage | automated + manual | `pnpm test`, visual check | `test/ui/spec018-ocean.test.ts` | |
+| REQ-002 | Land edge + relief on every polygon; interiors not uniform; cool-neutral only; islands survive | automated + manual | `pnpm test`, visual check | `test/ui/spec018-land.test.ts` | |
 | REQ-003 | Graticule at declared interval, equator distinct, correct layer order | automated test | `pnpm test` | `test/ui/spec018-graticule.test.ts` | |
 | REQ-004 | Markers legible over land and both water zones; SPEC-015 suites green | automated + manual + axe | `pnpm test`, `pnpm run e2e` | `test/ui/spec018-markers.test.ts` | |
 | NFR-001 | `public/basemap/**` unchanged; budget passes; no new fetch | script + inspection | `pnpm run check:budget`, diff | PR diff | |
@@ -372,18 +410,19 @@ inconsistent state.
 
 ## Open questions
 
-- [ ] **What does "radial" mean in the charter's ocean token?** The charter says
-      `Ocean | radial #d7e4ec→#eef4f7`. This spec **assumes** it means
-      *shallow-near-land to deep-offshore*, i.e. `--color-ocean-inner` is the
-      near-shore value — which is what makes it a bathymetric chart. The
-      alternative reading is a view-centred vignette, which would be decoration
-      rather than cartography and would conflict with charter §4's restraint rule.
-      Recorded as an assumption; owner confirmation would settle it.
-- [ ] **How many ocean zones?** REQ-001 requires at least two. Three (shelf,
-      slope, abyss) is more convincingly bathymetric but costs a layer and risks
-      banding. Deferred to implementation, bounded by NFR-002.
+- [x] **What does "radial" mean in the charter's ocean token?** *Resolved by
+      owner, 2026-08-05:* shallow-near-land → deep-offshore.
+      `--color-ocean-inner` is the near-shore value. Encoded in REQ-001.
+- [x] **How many ocean zones?** *Resolved:* at least three (REQ-001), now that
+      the restraint ceiling is lifted. The upper bound remains governed by
+      NFR-002.
 - [ ] **Graticule interval** — 30° is proposed as legible without clutter.
       Deferred to implementation; the value becomes a charter entry under UX-001.
+- [ ] **How far does land relief go?** REQ-002 permits texture and tonal
+      variation but does not prescribe a technique. Procedural shading, a tiled
+      texture, and coastline-distance-derived tonal falloff are all admissible;
+      the choice is an implementation decision bounded by NFR-002 and by the
+      cool-neutral constraint.
 - [ ] **Projection and world copies** — deliberately deferred. Web Mercator
       distorts the high-latitude occurrences this dataset contains, and world
       copies let the user scroll to a repeated reconstruction. Both are real, and
@@ -392,8 +431,15 @@ inconsistent state.
 
 ## Human decisions required
 
-- [ ] **Confirm the bathymetric reading of the ocean token** (first open question
-      above). Answer:
+- [x] **Confirm the bathymetric reading of the ocean token.** *Answered by owner,
+      2026-08-05:* confirmed, and the restraint rule was lifted for the basemap.
+      Recorded in `docs/mockups/design-guidelines.md` §4 and encoded in REQ-001,
+      REQ-002 and UX-001.
+- [ ] **Confirm the override's boundary.** This spec reads "restraint no longer
+      applies" as scoped to the **basemap**, leaving panels, cards and controls
+      under the original rule, and leaving §2 honesty, AA contrast and accent
+      semantics untouched. If the owner intended a wider relaxation, say so and
+      the scope in the charter and UX-001 widens. Answer:
 - [ ] **Approve the spec** (status → Approved, move to `docs/specs/approved/`).
       Answer:
 
@@ -421,7 +467,7 @@ No conflicts identified.
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
 | REQ-001 | Map style — ocean | | | Not started |
-| REQ-002 | Map style — land | | | Not started |
+| REQ-002 | Map style — land relief | | | Not started |
 | REQ-003 | Map style — graticule | | | Not started |
 | REQ-004 | Map style — markers | | | Not started |
 | NFR-001 | Basemap payload | | | Not started |
