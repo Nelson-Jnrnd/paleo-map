@@ -4,7 +4,7 @@ title: Feature wishlist from a dinosaur fan — ranked by interest and effort
 status: For review (pre-spec)
 owner: nelsonjeanrenaud@gmail.com
 author: agent
-date: 2026-08-04
+date: 2026-08-05
 ---
 
 # What I'd love next, as a dinosaur fan using the atlas

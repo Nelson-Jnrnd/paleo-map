@@ -4,7 +4,7 @@ title: New features I'd actually want — a fan's wishlist
 status: For review (pre-spec)
 owner: nelsonjeanrenaud@gmail.com
 author: agent
-date: 2026-08-04
+date: 2026-08-05
 ---
 
 # New features I'd actually want

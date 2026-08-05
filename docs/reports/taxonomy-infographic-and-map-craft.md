@@ -4,7 +4,7 @@ title: Two directions — taxonomy as infographic, and making the map beautiful
 status: For review (pre-spec)
 owner: nelsonjeanrenaud@gmail.com
 author: agent
-date: 2026-08-04
+date: 2026-08-05
 ---
 
 # Two directions
