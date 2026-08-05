@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-018
 title: Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -402,7 +402,9 @@ value.
 
 ## Rollback plan
 
-Every change is confined to the map style construction and its constants. Reverting
+As built, the change is confined to `src/app/components/mapCartography.ts` (new),
+the map style construction in `OccurrenceMap.tsx`, and three token additions.
+Reverting
 the commit restores the previous style exactly; there is no data migration, no
 regenerated artefact, and no persisted state to unwind. Because NFR-001 forbids
 touching `public/basemap/**`, a rollback cannot leave the committed frames in an
@@ -465,25 +467,53 @@ No conflicts identified.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Map style — ocean | | | Not started |
-| REQ-002 | Map style — land relief | | | Not started |
-| REQ-003 | Map style — graticule | | | Not started |
-| REQ-004 | Map style — markers | | | Not started |
-| NFR-001 | Basemap payload | | | Not started |
-| NFR-002 | Map style layers | | | Not started |
-| NFR-003 | Accessibility gate | | | Not started |
-| SEC-001 | Map style | | | Not started |
-| UX-001 | Tokens + charter | | | Not started |
-| UX-002 | Map framing | | | Not started |
+| REQ-001 | Map style — ocean | `mapCartography.ts` `oceanDepthLayers()`; `OccurrenceMap.tsx` basemap effect | `test/ui/spec018-ocean.test.ts` | Implemented |
+| REQ-002 | Map style — land relief | `mapCartography.ts` `landLayers()` (`land-inner`, `land-shade`) | `test/ui/spec018-land.test.ts` | Implemented |
+| REQ-003 | Map style — graticule | `mapCartography.ts` `buildGraticule()`, `buildEquator()`, `graticuleLayers()`; added in the map load handler | `test/ui/spec018-graticule.test.ts` | Implemented |
+| REQ-004 | Map style — markers | `OccurrenceMap.tsx` `pointStrokeWidth()`, `clusters` paint | `test/ui/spec018-markers.test.ts` | Implemented |
+| NFR-001 | Basemap payload | no change to `public/basemap/**` | `pnpm run check:budget`; empty diff | Implemented |
+| NFR-002 | Map style layers | `mapCartography.ts` `CARTOGRAPHY_LAYER_ORDER` | `test/ui/spec018-layers.test.ts` | Implemented |
+| NFR-003 | Accessibility gate | no new UI text | `test/e2e/a11y.e2e.ts` (axe) | Implemented |
+| SEC-001 | Map style | `mapCartography.ts` (no external host) | `test/ui/spec018-offline.test.ts` | Implemented |
+| UX-001 | Tokens + charter | `tokens.css`; `design-guidelines.md` §4 | `test/ui/spec018-tokens.test.ts` | Implemented |
+| UX-002 | Map framing | `mapCartography.ts` (relief derived from coastline only) | `test/ui/spec018-no-depth-claim.test.ts` | Implemented |
 
 ## Implementation notes
 
-Suggested order: REQ-003 graticule (simplest, independent, immediately visible) →
-REQ-001 ocean → REQ-002 land → REQ-004 marker retune (must come last, since it
-responds to whatever the first three produce). The near-shore zone is expected to
-be achievable with additional blurred coastline strokes rendered beneath the land
-fill, which requires no geometry buffering; if that proves visually insufficient,
-the fallback is a computed buffer, which must then be checked against NFR-002.
+Built in the planned order: graticule → ocean → land → marker retune. The
+blurred-stroke approach worked as expected and no geometry buffering was needed,
+so NFR-002 was never at risk.
+
+Three decisions and one abandoned approach, recorded because they are deviations
+from what the spec anticipated:
+
+1. **The tiled procedural stipple was abandoned.** REQ-002's "interiors are not
+   a single uniform flat value" was first implemented as a `fill-pattern` from a
+   deterministic noise image registered with `map.addImage`. It silently did not
+   render — verified by swapping the same layer to a flat `fill-color`, which
+   drew correctly, so the layer was fine and the pattern was not. Replaced with a
+   **two-stage coastline-distance falloff** (`land-inner`, a soft wide casing
+   that grades into the interior, plus `land-shade` at the rim). The spec left
+   the technique open — "procedural shading, a tiled texture, and
+   coastline-distance-derived tonal falloff are all admissible" — so this is a
+   change of technique within the approved scope, not of requirement.
+2. **Band widths were retuned down after the first visual check.** The initial
+   widths (30/13 px at the opening zoom) flooded the map: because the charter's
+   shelf value `#eef4f7` is *lighter* than its land value `#edf1f1`, a wide
+   shelf made continents read as holes rather than bodies — the opposite of
+   REQ-002. Halved to 16/7, and `--color-land-shade` darkened to `#d3dee1`, so
+   the waterline is carried by the coastline stroke and the casing rather than by
+   tone alone.
+3. **`land-line` gained a zoom-interpolated width** (1 → 1.6). Same cause: with
+   shelf and land within a few units of each other, the coastline stroke is what
+   holds the boundary.
+
+**Known limitation.** Deep continental interiors — the centre of Pangaea at high
+zoom, well beyond the falloff — remain a single flat value. REQ-002's criterion is
+scoped to the default zoom, where the falloff covers the visible land, so the
+requirement is met; but "flat inland at high zoom" is a real residual and would
+need either a texture that renders or actual paleotopography (a separate spec,
+and new data, which NFR-001 forbids here).
 
 ## Spec amendments
 

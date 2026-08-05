@@ -12,13 +12,22 @@
   --color-surface: #ffffff;
   --color-land: #edf1f1;
   --color-coast: #a9b9c3;
+  /* Land relief — the coastal casing and the interior stipple (SPEC-018
+     REQ-002). Cool-neutral, no new hue family. */
+  --color-land-shade: #d3dee1;
 
-  /* Ocean (pale bathymetric tint) */
+  /* Ocean — the three depth zones of the bathymetric chart, light at the coast
+     to dark in open water (SPEC-018 REQ-001). `inner` is the near-shore shelf
+     and `outer` the deep water: the charter's radial reads shallow-near-land to
+     deep-offshore (owner, 2026-08-05). `slope` is the band between them. */
   --color-ocean-inner: #eef4f7;
+  --color-ocean-slope: #e3ecf1;
   --color-ocean-outer: #d7e4ec;
 
   /* Grid / lines / borders */
   --color-grid: #cdd9e0;
+  /* The equator, drawn stronger than the rest of the grid (SPEC-018 REQ-003). */
+  --color-equator: #b6c6d1;
   --color-border: #cfd8de;
   --color-divider: #dde5ea;
 
