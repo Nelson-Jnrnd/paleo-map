@@ -53,6 +53,7 @@ import { OccurrencePanel } from "./OccurrencePanel.js";
 import { LocalityList, TaxonList } from "./GroupedList.js";
 import { LocalityPanel, TaxonPanel } from "./GroupedPanels.js";
 import { TaxonProfile } from "./TaxonProfile.js";
+import { TaxonomyScreen } from "./TaxonomyScreen.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
 import styles from "./exploration.module.css";
 
@@ -291,6 +292,29 @@ export function ExplorationView({
     ? (occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null)
     : null;
 
+  // SPEC-017: the dedicated taxonomy screen. Reached from the context bar or
+  // from a selected taxon, and returning to the map in one action (OQ-040).
+  if (state.screen === "taxonomy") {
+    return (
+      <div className={styles.app}>
+        <TaxonomyScreen
+          api={stageApi}
+          taxonId={state.taxonomyTaxonId}
+          onBack={() => dispatch({ type: "backToMap" })}
+          onSelectTaxon={(taxonId) =>
+            dispatch({ type: "openTaxonomy", taxonId })
+          }
+          {...(hasArticle(state.taxonomyTaxonId ?? "")
+            ? {
+                onOpenProfile: (taxonId: string) =>
+                  dispatch({ type: "openProfile", taxonId }),
+              }
+            : {})}
+        />
+      </div>
+    );
+  }
+
   if (state.screen === "profile" && state.profileTaxonId) {
     return (
       <div className={styles.app}>
@@ -335,6 +359,12 @@ export function ExplorationView({
         searchIndex={searchIndex}
         onSearchSelect={onSearchSelect}
         onReset={() => dispatch({ type: "reset" })}
+        onOpenTaxonomy={() =>
+          dispatch({
+            type: "openTaxonomy",
+            taxonId: state.mode === "taxon" ? state.selectedTaxonKey : null,
+          })
+        }
       />
       <TimelineControl
         stages={EXPLORATION_STAGES}

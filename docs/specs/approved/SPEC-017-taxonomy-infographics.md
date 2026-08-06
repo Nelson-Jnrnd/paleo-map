@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-017
 title: Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria)
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -458,8 +458,9 @@ so the deferral is deliberate rather than forgotten (Definition of Ready).
 
 - [x] **Where does each surface live?** *Deferred to the implementation plan* —
       taxon page, exploration side panel, or a dedicated taxonomy screen.
-- [x] **How is a comparison (REQ-003) initiated?** *Deferred to the implementation
-      plan* — expected to reuse SPEC-013 search as a second taxon picker.
+- [x] **How is a comparison (REQ-003) initiated?** *Resolved in implementation:*
+      a second-taxon picker on the taxonomy screen, reusing SPEC-013's
+      `searchTaxa` unchanged over an in-scope-filtered index.
 - [x] **Should a taxonomy surface filter the map?** *Deferred out of scope* — it
       would couple this spec to the exploration reducer. Candidate follow-up
       spec, not an implied requirement here.
@@ -505,28 +506,56 @@ No conflicts identified.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Scope boundary | | | Not started |
-| REQ-002 | Clade sheet | | | Not started |
-| REQ-003 | Common ancestor | | | Not started |
-| REQ-004 | Lineage descent | | | Not started |
-| REQ-005 | Clade fan | | | Not started |
-| REQ-006 | Avian marking | | | Not started |
-| REQ-007 | Neighbour navigation | | | Not started |
-| NFR-001 | All surfaces | | | Not started |
-| NFR-002 | Taxonomy indexes | | | Not started |
-| NFR-003 | All surfaces | | | Not started |
-| DATA-001 | Read layer | | | Not started |
-| UX-001 | All surfaces | | | Not started |
-| UX-002 | All surfaces | | | Not started |
+| REQ-001 | Scope boundary | `state/taxonomy.ts` `buildTaxonomyIndex()` scope set; `TaxonomyScreen` fallback | `spec017-scope.test.ts`, `spec017-indexes.test.ts` | Implemented |
+| REQ-002 | Clade sheet | `TaxonomySurfaces.tsx` `CladeSheet` | `spec017-surfaces.test.tsx` | Implemented |
+| REQ-003 | Common ancestor | `state/taxonomy.ts` `relatedness()`; `TaxonomySurfaces.tsx` `CommonAncestor` | `spec017-indexes.test.ts`, `spec017-screen.test.tsx` | Implemented |
+| REQ-004 | Lineage descent | `TaxonomySurfaces.tsx` `LineageDescent`, `DESCENT_MILESTONES` | `spec017-surfaces.test.tsx`, `spec017-scope.test.ts` | Implemented |
+| REQ-005 | Clade fan | `cladeFan.ts` `buildFan()`; `TaxonomySurfaces.tsx` `CladeFan` | `spec017-fan.test.ts`, `spec017-screen.test.tsx` | Implemented |
+| REQ-006 | Avian marking | `state/taxonomy.ts` `AVIAN_ROOT_NAMES`; `TaxonomySurfaces.tsx` `AvianMark` | `spec017-surfaces.test.tsx`, `spec017-scope.test.ts` | Implemented |
+| REQ-007 | Neighbour navigation | `TaxonomySurfaces.tsx` `TaxonNeighbours` | `spec017-surfaces.test.tsx` | Implemented |
+| NFR-001 | All surfaces | no fetch in any surface | `spec017-screen.test.tsx` | Implemented |
+| NFR-002 | Taxonomy indexes | `state/taxonomy.ts` (`stats.visits`, memoised `genera`) | `spec017-indexes.test.ts` | Implemented |
+| NFR-003 | All surfaces | labelled regions, button entries, fan list equivalent | `spec017-screen.test.tsx`, `test/e2e/a11y.e2e.ts` | Implemented |
+| DATA-001 | Read layer | `state/taxonomy.ts` `buildTaxonomyIndex()` | `spec017-indexes.test.ts` | Implemented |
+| UX-001 | All surfaces | `exploration.module.css` (charter tokens only) | `spec017-surfaces.test.tsx` | Implemented |
+| UX-002 | All surfaces | per-surface defined states | `spec017-surfaces.test.tsx`, `spec017-screen.test.tsx` | Implemented |
 
 ## Implementation notes
 
-Suggested order, cheapest and most independent first: DATA-001 indexes → REQ-002
-clade sheet → REQ-007 neighbours → REQ-003 common ancestor → REQ-004 descent →
-REQ-005 fan (highest layout risk). REQ-006 avian marking is a cross-cutting
-concern implemented once in the shared entry component and asserted per surface.
-The fan is the only surface likely to need design iteration before it is worth
-building; the rest is layout over data already in the browser.
+Built in the planned order: DATA-001 indexes → clade sheet → neighbours →
+common ancestor → descent → fan. The fan was indeed the only surface that needed
+design iteration.
+
+Placement (owner, 2026-08-06): a **dedicated taxonomy screen**, added to the
+exploration reducer as a third `Screen` value alongside `map` and `profile`, with
+`openTaxonomy` mirroring `openProfile`'s navigation contract — age and filters
+survive, one action returns to the map. Entry is a "Taxonomy" button in the
+context bar, which carries the selected taxon when the view is in taxon mode.
+
+Four decisions taken during implementation:
+
+1. **The clade sheet excludes the focus taxon itself.** `index.genera()` counts a
+   genus as its own member — correct for the fan and the neighbour counts, wrong
+   for a sheet, where it would render a page showing only the animal you are
+   already looking at. Caught by the UX-002 empty-state test.
+2. **Only the fan's first ring is labelled.** A chain of nested clades
+   (Theropoda → Neotheropoda → Averostra) shares an angular ray at close radii,
+   so labelling every depth stacked the names on top of each other — visible in
+   the first visual check. The textual list satisfies REQ-005's "identifiable on
+   demand" for the rest.
+3. **Counts are inflected** ("1 genus" / "N genera", and the root's descent reads
+   "The root of the atlas's taxonomy" rather than "1 branchings"). Domain language
+   the charter asks for, and the first render made the defect obvious.
+4. **The comparison surface states its own limitation inline** rather than only
+   in code comments, and the REQ-003 test scans the *claims* while excluding that
+   disclaimer — otherwise the note's own "how long ago" phrasing would trip the
+   no-temporal-language guard.
+
+**Known limitation.** The fan renders every wedge in the same neutral fill, so it
+reads as a shape rather than a coloured chart. That is deliberate under charter
+§4 — teal is the data layer's accent and ICS hues belong to the timeline, so
+there is no colour available for clades — but it does make the fan quieter than
+the "one poster of the whole group" framing in the source report.
 
 ## Spec amendments
 

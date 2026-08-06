@@ -22,6 +22,8 @@ interface ContextBarProps {
   searchIndex: readonly SearchableTaxon[];
   onSearchSelect: (taxonId: string) => void;
   onReset: () => void;
+  /** Open the dedicated taxonomy screen (SPEC-017). */
+  onOpenTaxonomy?: () => void;
 }
 
 export function ContextBar({
@@ -32,6 +34,7 @@ export function ContextBar({
   searchIndex,
   onSearchSelect,
   onReset,
+  onOpenTaxonomy,
 }: ContextBarProps): ReactElement {
   return (
     <header className={styles.header}>
@@ -70,6 +73,16 @@ export function ContextBar({
             {count}
           </span>
         </div>
+
+        {onOpenTaxonomy && (
+          <button
+            type="button"
+            className={styles.reset}
+            onClick={onOpenTaxonomy}
+          >
+            Taxonomy
+          </button>
+        )}
 
         <button type="button" className={styles.reset} onClick={onReset}>
           Reset view
