@@ -41,6 +41,15 @@ import {
   cladeMarkerById,
   cladeMarkerForTaxon,
 } from "./mapCladeMarkers.js";
+import {
+  OCEAN_DEEP,
+  buildEquator,
+  buildGraticule,
+  coastLayer,
+  graticuleLayers,
+  landLayers,
+  oceanDepthLayers,
+} from "./mapCartography.js";
 import { MapHoverCard, hoverCardContent } from "./MapHoverCard.js";
 import { MapSpeciesCard } from "./MapSpeciesCard.js";
 import type { SpeciesRow } from "./MapSpeciesCard.js";
@@ -96,9 +105,6 @@ interface OccurrenceMapProps {
   onOpenProfile?: (taxonId: string) => void;
 }
 
-const OCEAN_OUTER = "#d7e4ec";
-const LAND = "#edf1f1";
-const COAST = "#a9b9c3";
 const ACCENT_DEEP = "#0a7f66";
 
 /**
@@ -116,7 +122,11 @@ function pointStrokeWidth(
     3,
     ["==", ["get", "id"], highlightedId ?? ""],
     2.5,
-    1.5,
+    // SPEC-018 REQ-004: the resting casing widened from 1.5 to 2. The background
+    // is no longer one flat value, so a marker now has to separate itself from
+    // the shelf, the slope, the deep water *and* the land it may sit on. The
+    // selected > highlighted > resting ordering (SPEC-009 REQ-004) is preserved.
+    2,
   ];
 }
 
@@ -134,7 +144,11 @@ function pointStrokeColor(
   ];
 }
 
-/** Self-contained style — background only, no external tiles/glyphs (SEC-001). */
+/**
+ * Self-contained style — background only, no external tiles/glyphs (SEC-001).
+ * The background is the **deep** water value; the shelf and slope bands above it
+ * are derived from the coastline at frame time (SPEC-018 REQ-001).
+ */
 const BASE_STYLE = {
   version: 8 as const,
   sources: {},
@@ -142,7 +156,7 @@ const BASE_STYLE = {
     {
       id: "ocean",
       type: "background" as const,
-      paint: { "background-color": OCEAN_OUTER },
+      paint: { "background-color": OCEAN_DEEP },
     },
   ],
 };
@@ -530,6 +544,21 @@ export function OccurrenceMap({
             );
             if (cancelled || !mapRef.current) return;
 
+            // SPEC-018 REQ-003: the graticule is **frame-independent**, so it is
+            // added at load rather than with the basemap. That is what keeps it
+            // rendering in the no-frame fallback the map already degrades to.
+            // Added before the occurrence layers below, so it can never obscure a
+            // marker; `land-line` is later inserted above it so it can never
+            // obscure a coastline either.
+            map.addSource("graticule", {
+              type: "geojson",
+              data: buildGraticule(),
+            });
+            map.addSource("equator", { type: "geojson", data: buildEquator() });
+            for (const layer of graticuleLayers("graticule", "equator")) {
+              map.addLayer(layer as never);
+            }
+
             map.addSource("occurrences", {
               type: "geojson",
               data: featuresForMode(mode, occurrences, localities, taxaById),
@@ -565,7 +594,10 @@ export function OccurrenceMap({
                   28,
                 ],
                 "circle-stroke-color": "#ffffff",
-                "circle-stroke-width": 1.5,
+                // SPEC-018 REQ-004: widened with the point casing above — the
+                // pale cluster disc sits close in value to the new slope band,
+                // so the white casing is what keeps it legible over water.
+                "circle-stroke-width": 2,
               },
             });
             map.addLayer({
@@ -812,24 +844,21 @@ export function OccurrenceMap({
       return;
     }
     map.addSource("basemap", { type: "geojson", data: basemap.geojson });
-    map.addLayer(
-      {
-        id: "land-fill",
-        type: "fill",
-        source: "basemap",
-        paint: { "fill-color": LAND },
-      },
-      "clusters",
-    );
-    map.addLayer(
-      {
-        id: "land-line",
-        type: "line",
-        source: "basemap",
-        paint: { "line-color": COAST, "line-width": 1 },
-      },
-      "clusters",
-    );
+
+    // SPEC-018 REQ-001/002. Stacking, bottom to top: the two blurred depth bands,
+    // then the land fill painted over their landward halves, then the land
+    // relief. All of these go *below* the graticule; only `land-line` goes above
+    // it, so the coastline always stays crisp (REQ-003).
+    //
+    // Each `addLayer(..., beforeId)` inserts immediately below `beforeId`, so
+    // insertion order here is the stacking order — see CARTOGRAPHY_LAYER_ORDER.
+    for (const layer of [
+      ...oceanDepthLayers("basemap"),
+      ...landLayers("basemap"),
+    ]) {
+      map.addLayer(layer as never, "graticule");
+    }
+    map.addLayer(coastLayer("basemap") as never, "clusters");
   }, [mapLoaded, basemap]);
 
   // Sync source data when the visible occurrences, mode, or localities change
