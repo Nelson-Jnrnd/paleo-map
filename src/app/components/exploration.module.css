@@ -2137,9 +2137,30 @@
   text-decoration: underline;
 }
 
-/* Avian coverage marker (REQ-006) — text, never styling alone (PERF-250). */
+/* Avian coverage marker (REQ-006) — text, never styling alone (PERF-250).
+   Wraps rather than running past its cell: in the clade sheet's 120px grid
+   `nowrap` pushed the label into the neighbouring column. */
 .avianMark {
+  max-width: 100%;
   color: var(--color-attention);
   font-size: 0.72rem;
-  white-space: nowrap;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* SPEC-017: the long tail of small branches, behind a disclosure so it cannot
+   push the rest of the screen down by a screenful. */
+.neighbourMore {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.neighbourMore summary {
+  cursor: pointer;
+}
+
+.neighbourMore ul {
+  margin-top: 0.4rem;
 }

@@ -25,6 +25,19 @@ export function pluralGenera(n: number): string {
 /** Silhouette entries rendered at once, per surface (NFR-002). */
 export const SILHOUETTE_RENDER_CAP = 120;
 
+/**
+ * `count` items spread evenly across `items`, keeping the original order and
+ * always including the first and last. Used when a clade holds more genera than
+ * the render cap.
+ */
+export function sampleEvenly<T>(items: readonly T[], count: number): T[] {
+  if (items.length <= count) return [...items];
+  const step = (items.length - 1) / (count - 1);
+  const out: T[] = [];
+  for (let i = 0; i < count; i++) out.push(items[Math.round(i * step)]!);
+  return out;
+}
+
 export interface TaxonomyDeps {
   index: TaxonomyIndex;
   /** Resolves a taxon's profile, for its silhouette. */
@@ -41,13 +54,25 @@ export interface TaxonomyDeps {
  * The atlas covers non-avian dinosaurs, so they are marked rather than hidden —
  * and the wording says *coverage*, never exclusion from Dinosauria.
  */
-export function AvianMark(): ReactElement {
+export function AvianMark({
+  compact = false,
+}: {
+  /**
+   * Dense grids (the clade sheet) get the short form: the long one is wider than
+   * a 120px cell and overflowed into its neighbours. The meaning still arrives as
+   * *text* either way — never styling alone (PERF-250) — and the full sentence
+   * stays available as the title.
+   */
+  compact?: boolean;
+} = {}): ReactElement {
   return (
     <span
       className={styles.avianMark}
       title="Avian dinosaur — inside Dinosauria, outside this atlas's non-avian coverage"
     >
-      avian — outside this atlas&rsquo;s coverage
+      {compact
+        ? "avian · outside coverage"
+        : "avian — outside this atlas\u2019s coverage"}
     </span>
   );
 }
@@ -99,7 +124,13 @@ export function CladeSheet({
   // right for the fan and the neighbour counts, wrong here, where a sheet
   // showing only the taxon you are already looking at says nothing.
   const all = index.genera(taxonId).filter((g) => g.id !== taxonId);
-  const shown = all.slice(0, SILHOUETTE_RENDER_CAP);
+  const capped = all.length > SILHOUETTE_RENDER_CAP;
+  // When capped, sample evenly across the (name-ordered) clade rather than
+  // taking the first N. A prefix of Dinosauria's 2,123 genera is the letter "A"
+  // — which tells you nothing about the clade's range, and this sheet exists to
+  // show exactly that. An even spread keeps the shape; search finds a specific
+  // genus.
+  const shown = capped ? sampleEvenly(all, SILHOUETTE_RENDER_CAP) : all;
   const taxon = index.byId.get(taxonId);
 
   if (all.length === 0) {
@@ -121,10 +152,8 @@ export function CladeSheet({
     <section className={styles.taxSurface} aria-label="Genera in this clade">
       <h2 className={styles.taxSurfaceTitle}>Genera in this clade</h2>
       <p className={styles.taxCount}>
-        {all.length === 1 ? "1 genus" : `${all.length} genera`}
-        {shown.length < all.length
-          ? ` · showing the first ${shown.length} of ${all.length}`
-          : ""}
+        {pluralGenera(all.length)}
+        {capped ? ` · showing ${shown.length}, spread across the clade` : ""}
       </p>
       <ul className={styles.cladeSheet}>
         {shown.map((genus) => (
@@ -136,7 +165,7 @@ export function CladeSheet({
             >
               <Silhouette taxon={genus} deps={deps} />
               <span className="sciName">{genus.scientificName}</span>
-              {index.isAvian(genus.id) && <AvianMark />}
+              {index.isAvian(genus.id) && <AvianMark compact />}
             </button>
           </li>
         ))}
@@ -237,6 +266,9 @@ export function LineageDescent({
 /* REQ-007 — neighbours                                                        */
 /* -------------------------------------------------------------------------- */
 
+/** Neighbour pills shown before the list collapses behind a disclosure. */
+export const NEIGHBOUR_VISIBLE = 8;
+
 function NeighbourList({
   label,
   taxa,
@@ -248,30 +280,47 @@ function NeighbourList({
   deps: TaxonomyDeps;
   emptyNote: string;
 }): ReactElement {
+  // `index.children` returns largest-branch-first, so the first few pills are
+  // the ones worth seeing; the long tail of one-genus eggshell and footprint
+  // families goes behind a disclosure rather than pushing the rest of the page
+  // down by a screenful.
+  const head = taxa.slice(0, NEIGHBOUR_VISIBLE);
+  const tail = taxa.slice(NEIGHBOUR_VISIBLE, SILHOUETTE_RENDER_CAP);
+
+  const pill = (t: ReadTaxon): ReactElement => (
+    <li key={t.id}>
+      <button
+        type="button"
+        className={styles.neighbourItem}
+        onClick={() => deps.onOpenTaxon(t.id)}
+      >
+        <Silhouette taxon={t} deps={deps} />
+        <span className="sciName">{t.scientificName}</span>
+        <span className={styles.neighbourCount}>
+          {pluralGenera(deps.index.descendantGenera(t.id))}
+        </span>
+        {deps.index.isAvian(t.id) && <AvianMark compact />}
+      </button>
+    </li>
+  );
+
   return (
     <div className={styles.neighbourGroup}>
       <h3 className={styles.neighbourLabel}>{label}</h3>
       {taxa.length === 0 ? (
         <p className={styles.taxEmpty}>{emptyNote}</p>
       ) : (
-        <ul className={styles.neighbourList}>
-          {taxa.slice(0, SILHOUETTE_RENDER_CAP).map((t) => (
-            <li key={t.id}>
-              <button
-                type="button"
-                className={styles.neighbourItem}
-                onClick={() => deps.onOpenTaxon(t.id)}
-              >
-                <Silhouette taxon={t} deps={deps} />
-                <span className="sciName">{t.scientificName}</span>
-                <span className={styles.neighbourCount}>
-                  {pluralGenera(deps.index.descendantGenera(t.id))}
-                </span>
-                {deps.index.isAvian(t.id) && <AvianMark />}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className={styles.neighbourList}>{head.map(pill)}</ul>
+          {tail.length > 0 && (
+            <details className={styles.neighbourMore}>
+              <summary>
+                {tail.length} smaller {label.toLowerCase()}
+              </summary>
+              <ul className={styles.neighbourList}>{tail.map(pill)}</ul>
+            </details>
+          )}
+        </>
       )}
     </div>
   );

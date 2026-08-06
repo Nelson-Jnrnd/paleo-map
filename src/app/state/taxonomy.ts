@@ -120,6 +120,16 @@ export function buildTaxonomyIndex(taxa: readonly ReadTaxon[]): TaxonomyIndex {
   const byNameAsc = (a: ReadTaxon, b: ReadTaxon): number =>
     a.scientificName.localeCompare(b.scientificName);
 
+  /**
+   * Children, **largest branch first**, ties broken by name.
+   *
+   * Alphabetical order buries the answer: `Dinosauria`'s 26 children are mostly
+   * one-genus eggshell and footprint families (Dictyoolithidae, Huanglongpus,
+   * Youngoolithidae…), so sorting by name pushes `Ornithischia` (652 genera) and
+   * `Saurischia` (502) into the middle of a list of oddities. Sizing the order by
+   * what a branch actually holds puts the trunk first, and it also lays the fan
+   * out largest-first, which reads better clockwise from the top.
+   */
   const children = (id: string): readonly ReadTaxon[] => {
     const ids = childIds.get(id) ?? [];
     const out: ReadTaxon[] = [];
@@ -128,12 +138,17 @@ export function buildTaxonomyIndex(taxa: readonly ReadTaxon[]): TaxonomyIndex {
       const taxon = byId.get(childId);
       if (taxon) out.push(taxon);
     }
-    return out.sort(byNameAsc);
+    return out.sort((a, b) => {
+      const diff = genera(b.id).length - genera(a.id).length;
+      return diff !== 0 ? diff : byNameAsc(a, b);
+    });
   };
 
   // Genera per subtree, memoised so a fan or a sheet never recomputes a branch.
+  // Declared with `function` so `children` above can call it — the two are
+  // mutually referential, and hoisting is what keeps that legal.
   const generaCache = new Map<string, ReadTaxon[]>();
-  const genera = (id: string): readonly ReadTaxon[] => {
+  function genera(id: string): readonly ReadTaxon[] {
     const cached = generaCache.get(id);
     if (cached) return cached;
     const out: ReadTaxon[] = [];
@@ -150,7 +165,7 @@ export function buildTaxonomyIndex(taxa: readonly ReadTaxon[]): TaxonomyIndex {
     out.sort(byNameAsc);
     generaCache.set(id, out);
     return out;
-  };
+  }
 
   const ancestors = (id: string): readonly ReadTaxon[] => {
     if (!scope.has(id)) return [];

@@ -551,6 +551,29 @@ Four decisions taken during implementation:
    disclaimer — otherwise the note's own "how long ago" phrasing would trip the
    no-temporal-language guard.
 
+**UI review pass (2026-08-06).** Reviewing the built screen against the real
+snapshot exposed three presentation defects, all fixed within the approved
+requirements — none changed a requirement:
+
+5. **Children were name-ordered, which buried the tree's trunk.** `Dinosauria`'s
+   26 children are mostly one-genus eggshell and footprint families
+   (Dictyoolithidae, Huanglongpus, Youngoolithidae…), so alphabetical order put
+   `Theropoda` (940 genera), `Ornithischia` (652) and `Saurischia` (502) in the
+   middle of a list of oddities. `index.children()` now orders by descendant
+   genus count, ties broken by name — which also lays the fan out largest-first.
+   REQ-007 specifies membership, not order, so this is presentation latitude.
+6. **The clade sheet's cap took an alphabetical prefix.** For `Dinosauria` that
+   meant 120 genera all starting with "A" — useless for a surface whose whole
+   purpose is showing a clade's morphological range. It now samples evenly across
+   the clade and says so ("showing 120, spread across the clade").
+7. **The avian marker overflowed its grid cell** and collided with the
+   neighbouring entry. It now has a compact form for dense grids and wraps rather
+   than running past its cell. The meaning still arrives as text in both forms
+   (PERF-250), with the full sentence in the title.
+
+The neighbour lists also collapse their long tail behind a disclosure, so a taxon
+with 26 children no longer pushes the rest of the screen down by a screenful.
+
 **Known limitation.** The fan renders every wedge in the same neutral fill, so it
 reads as a shape rather than a coloured chart. That is deliberate under charter
 §4 — teal is the data layer's accent and ICS hues belong to the timeline, so

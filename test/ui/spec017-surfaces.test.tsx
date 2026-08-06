@@ -155,13 +155,13 @@ test("avian taxa are shown and marked; non-avian taxa never are", () => {
   // Brodavis (avian) is present rather than hidden…
   expect(screen.getByText("Brodavis")).toBeInTheDocument();
   // …and exactly one entry carries the marker.
-  const marks = screen.getAllByText(/outside this atlas.s coverage/i);
+  const marks = screen.getAllByText(/outside\s.*coverage/i);
   expect(marks).toHaveLength(1);
 });
 
 test("REQ-006: the marker states coverage, not exclusion from Dinosauria", () => {
   render(<CladeSheet taxonId="t:dino" deps={deps()} />);
-  const mark = screen.getByText(/outside this atlas.s coverage/i);
+  const mark = screen.getByText(/outside\s.*coverage/i);
   expect(mark.textContent).toMatch(/coverage/i);
   expect(mark.textContent).not.toMatch(
     /not a dinosaur|excluded from Dinosauria/i,

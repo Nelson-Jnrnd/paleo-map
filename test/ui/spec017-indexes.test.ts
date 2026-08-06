@@ -62,12 +62,29 @@ test("scope is the Dinosauria subtree — the stem above it is excluded", () => 
   expect(index.scope.size).toBe(10);
 });
 
-test("children are in-scope, name-ordered, and exclude the parent", () => {
+test("children are in-scope, largest branch first, and exclude the parent", () => {
+  // Ordering by what a branch holds, not by name: alphabetical order buries
+  // Ornithischia and Saurischia among Dinosauria's one-genus eggshell and
+  // footprint families in the real snapshot.
   expect(index.children("t:dino").map((t) => t.scientificName)).toEqual([
-    "Ornithischia",
-    "Theropoda",
+    "Theropoda", // 3 genera
+    "Ornithischia", // 1
   ]);
   expect(index.children("t:trex")).toEqual([]);
+});
+
+test("children ordering falls back to name when two branches are the same size", () => {
+  const tied = buildTaxonomyIndex([
+    taxon("t:dino", "Dinosauria", "Clade", null),
+    taxon("t:b", "Bravoclade", "Clade", "t:dino"),
+    taxon("t:a", "Alphaclade", "Clade", "t:dino"),
+    taxon("t:bg", "Bravosaurus", "Genus", "t:b"),
+    taxon("t:ag", "Alphasaurus", "Genus", "t:a"),
+  ]);
+  expect(tied.children("t:dino").map((t) => t.scientificName)).toEqual([
+    "Alphaclade",
+    "Bravoclade",
+  ]);
 });
 
 test("ancestor chains start at Dinosauria and never walk above it", () => {
