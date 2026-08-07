@@ -39,6 +39,10 @@ const fixture: ReadTaxon[] = [
   taxon("t:trike", "Triceratops", "Genus", "t:orni"),
   // A branch holding no genera at all.
   taxon("t:empty", "Emptyclade", "Clade", "t:dino"),
+  // An eggshell family hanging directly off Dinosauria: it has a genus, but no
+  // major-group ancestor at all, so nothing can tint it.
+  taxon("t:oo", "Dictyoolithidae", "Family", "t:dino"),
+  taxon("t:oog", "Dictyoolithus", "Genus", "t:oo"),
 ];
 
 const index = buildTaxonomyIndex(fixture);
@@ -154,10 +158,18 @@ test("AMEND-001: each wedge carries its clade's tint and the clade's name", () =
 });
 
 test("AMEND-001: a branch with no resolvable major group takes the neutral fallback", () => {
+  // An eggshell family with no major-group ancestor cannot be tinted, and must
+  // not borrow a neighbouring clade's hue.
+  expect(at("Dictyoolithidae").tint).toBe(FALLBACK_MARKER.tint);
+});
+
+test("SPEC-015 AMEND-003: the two great divisions carry their own tints", () => {
+  // Before they were mapped, everything resolving only to Ornithischia or
+  // Saurischia fell back to the neutral "Dinosaur" tint — 125 of the real fan's
+  // 319 wedges. They are distinct from each other and from the fallback.
   const orni = at("Ornithischia");
-  // Ornithischia itself is not one of the mapped major groups in this fixture,
-  // so it falls back rather than borrowing a neighbouring clade's hue.
-  expect(orni.tint).toBe(FALLBACK_MARKER.tint);
+  expect(orni.cladeLabel).toBe("Ornithischian");
+  expect(orni.tint).not.toBe(FALLBACK_MARKER.tint);
 });
 
 test("AMEND-001: colour is never the only cue — name and clade are text", () => {

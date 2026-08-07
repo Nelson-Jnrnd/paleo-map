@@ -76,6 +76,7 @@ export const CARTOGRAPHY_LAYER_ORDER = [
   "ocean-shelf",
   "land-fill",
   "land-inner",
+  "land-texture",
   "land-shade",
   "graticule",
   "graticule-equator",
@@ -158,6 +159,58 @@ export function buildEquator(): GeoJSON.FeatureCollection {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Land texture (REQ-002, AMEND-001)                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Tile size of the procedural land stipple, in pixels. */
+export const LAND_TEXTURE_SIZE = 64;
+
+/** MapLibre image id the stipple is registered under. */
+export const LAND_TEXTURE_ID = "land-texture-stipple";
+
+/** Peak alpha of a fleck. Perceptible at close zoom, far too weak to compete. */
+export const LAND_TEXTURE_MAX_ALPHA = 56;
+
+/**
+ * A small tileable stipple so continental interiors are not one flat value, all
+ * the way inland — the coastline falloff fades out long before the middle of a
+ * supercontinent (AMEND-001).
+ *
+ * Generated procedurally from a fixed seed: deterministic across builds, no
+ * asset, no network (NFR-001, SEC-001). The flecks are `LAND_SHADE` at a low,
+ * varying alpha, so the texture *modulates* the land fill beneath rather than
+ * replacing it, and it carries no meaning — a fixed-seed noise over a single
+ * colour cannot encode anything (UX-002).
+ *
+ * Returns `Uint8ClampedArray`: MapLibre's `addImage` silently declines to use a
+ * plain `Uint8Array` as a `fill-pattern`, which is what defeated the first
+ * attempt at this.
+ */
+export function buildLandTexture(size: number = LAND_TEXTURE_SIZE): {
+  width: number;
+  height: number;
+  data: Uint8ClampedArray;
+} {
+  const data = new Uint8ClampedArray(size * size * 4);
+  const r = parseInt(LAND_SHADE.slice(1, 3), 16);
+  const g = parseInt(LAND_SHADE.slice(3, 5), 16);
+  const b = parseInt(LAND_SHADE.slice(5, 7), 16);
+  let seed = 0x9e3779b9;
+  const next = (): number => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 0xffffffff;
+  };
+  for (let i = 0; i < size * size; i++) {
+    const o = i * 4;
+    data[o] = r;
+    data[o + 1] = g;
+    data[o + 2] = b;
+    data[o + 3] = Math.round(next() * LAND_TEXTURE_MAX_ALPHA);
+  }
+  return { width: size, height: size, data };
+}
+
+/* -------------------------------------------------------------------------- */
 /* Layer specifications                                                        */
 /* -------------------------------------------------------------------------- */
 
@@ -221,7 +274,7 @@ export function oceanDepthLayers(source: string): unknown[] {
  * still reads as the lightest zone at the waterline — REQ-001's light-to-dark
  * ordering survives.
  */
-export function landLayers(source: string): unknown[] {
+export function landLayers(source: string, texture?: string): unknown[] {
   return [
     {
       id: "land-fill",
@@ -229,6 +282,18 @@ export function landLayers(source: string): unknown[] {
       source,
       paint: { "fill-color": LAND },
     },
+    ...(texture
+      ? [
+          {
+            // AMEND-001: the stipple reaches where the coastline falloff cannot
+            // — the deep interior of a supercontinent.
+            id: "land-texture",
+            type: "fill",
+            source,
+            paint: { "fill-pattern": texture },
+          },
+        ]
+      : []),
     {
       // The interior falloff: a soft, wide casing that grades from the
       // coastline inward, so a landmass is lighter at its centre than at its

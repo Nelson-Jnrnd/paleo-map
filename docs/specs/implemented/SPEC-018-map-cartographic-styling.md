@@ -166,7 +166,9 @@ for their own spec.
   only an edge — Pangaea is 40 million km² of one hex today.
 - **Acceptance criteria:**
   - The land treatment is present on every land polygon in the frame.
-  - Continental interiors are not a single uniform flat value at the default zoom.
+  - Continental interiors are not a single uniform flat value at the default
+    zoom — and, per AMEND-001, at any zoom, since the stipple covers the whole
+    polygon rather than fading with distance from the coast.
   - Only cool-neutral values are used; no new accent or hue family appears.
   - Small polygons (islands) remain legible and are not swallowed by the edge
     treatment (Edge cases).
@@ -508,16 +510,45 @@ from what the spec anticipated:
    shelf and land within a few units of each other, the coastline stroke is what
    holds the boundary.
 
-**Known limitation.** Deep continental interiors — the centre of Pangaea at high
-zoom, well beyond the falloff — remain a single flat value. REQ-002's criterion is
-scoped to the default zoom, where the falloff covers the visible land, so the
-requirement is met; but "flat inland at high zoom" is a real residual and would
-need either a texture that renders or actual paleotopography (a separate spec,
-and new data, which NFR-001 forbids here).
+**Resolved (AMEND-001, 2026-08-06).** Deep interiors were left flat because the
+stipple was abandoned on a mistaken diagnosis. The real cause was an array-type
+mismatch in the image registration; with that fixed the stipple renders and the
+interior is no longer uniform at any zoom. See the amendment.
 
 ## Spec amendments
 
-None yet.
+### AMEND-001 — The interior stipple, and a corrected diagnosis (owner, 2026-08-06)
+
+**What changed.** REQ-002's "interiors are not a single uniform flat value" was
+delivered only as a coastline-distance falloff, which fades out long before the
+middle of a supercontinent. Deep interiors stayed flat at high zoom, and that was
+recorded here as a known limitation. A `land-texture` fill layer now carries a
+procedurally generated stipple across the whole polygon, so the treatment reaches
+where the falloff cannot.
+
+**The original diagnosis was wrong, and this corrects the record.** The first
+attempt at this stipple was abandoned with the conclusion that "MapLibre silently
+declined to render a `fill-pattern` from an image registered via `addImage`". That
+is not what was happening. The image was registered as a **`Uint8Array`**;
+MapLibre accepts it without error but never renders it as a pattern. The clade
+icons, which have always worked, pass a **`Uint8ClampedArray`** (from
+`getImageData().data`). Switching the type made the pattern render immediately.
+The limitation was mine, not MapLibre's.
+
+**Verified.** A 60×60 patch of deep inland at zoom ~7 compresses to 491 bytes
+against 181 for a genuinely flat reference patch — the interior now carries
+detail. `test/ui/spec018-land.test.ts` guards the array type, the variation, the
+determinism, and the subtlety ceiling, so the root cause cannot silently return.
+
+**What is unchanged.** The stipple is one colour with noise-only alpha, so it
+encodes nothing and cannot read as data (UX-002). No new asset, no network, and
+`public/basemap/**` is still untouched (NFR-001).
+
+**Requirement text affected.** REQ-002 gains one acceptance criterion:
+
+- Continental interiors are not a single uniform flat value **at any zoom**, not
+  only at the default zoom — the treatment covers the whole polygon rather than
+  fading with distance from the coastline.
 
 ## Review checklist
 

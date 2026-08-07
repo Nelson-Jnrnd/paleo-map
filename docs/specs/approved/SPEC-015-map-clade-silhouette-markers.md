@@ -339,6 +339,35 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 - **Human approval reference:** owner conversation 2026-07-30 (issues 1–5, with
   "generic clade icon + count" chosen for aggregates).
 
+### AMEND-003: Tints for the two great divisions (owner, 2026-08-06)
+
+**What changed.** `Ornithischia` and `Saurischia` were recognised as major groups
+by `resolveTierTaxon` but had no entry in the marker table, so every taxon that
+resolved no deeper than a great division fell back to the neutral "Dinosaur"
+tint. They now have tints of their own: Ornithischian `#9cc49b`, Saurischian
+`#cbb49b`.
+
+**Why.** SPEC-017's clade fan draws clades rather than occurrences, which exposed
+the gap: **125 of its 319 wedges** were neutral, including Ornithischia (652
+genera), Saurischia (502), Neornithischia (445) and Pyrodontia (417) — over a
+third of the tree rendered as "unclassified" when it was nothing of the sort. The
+owner approved the change knowing it also recolours map markers for occurrences
+that resolve only to a division.
+
+**The trade-off, stated plainly.** Both new entries reuse the generic dinosaur
+silhouette, because no icon meaningfully depicts a whole division. The map legend
+therefore shows three entries sharing one shape, separated by tint and label.
+That is a real cost; it is accepted because the *label* carries the meaning, so
+identity never rests on colour alone (PERF-250), and because the alternative —
+leaving a third of the taxonomy grey — misinforms.
+
+**Colour selection.** Both were chosen against the existing seven for perceptual
+separation (ΔE ≥ 15 from the nearest neighbour, 25.6 between the two) and for
+contrast against the fan's label colour (7.2:1 and 7.4:1, comfortably AA). The
+charter records them, and `test/ui/spec017-fan-contrast.test.ts` recomputes the
+contrast of every tint on every run, so a future retune cannot ship an
+unreadable label.
+
 ### AMEND-002: Count badge placement, sparse labels, multi-species aggregate card
 
 - **Date / owner:** 2026-07-30, owner-directed after further testing.

@@ -23,16 +23,16 @@ interface Layer {
 
 const all = [
   ...(oceanDepthLayers("basemap") as unknown as Layer[]),
-  ...(landLayers("basemap") as unknown as Layer[]),
+  ...(landLayers("basemap", "tex") as unknown as Layer[]),
   ...(graticuleLayers("graticule", "equator") as unknown as Layer[]),
   coastLayer("basemap") as unknown as Layer,
 ];
 
 test("the added layer count is bounded and declared", () => {
-  // Six: two ocean bands, two land relief casings, the grid and the equator.
-  // `land-fill`/`land-line` already shipped with SPEC-004.
-  expect(CARTOGRAPHY_LAYERS_ADDED).toHaveLength(6);
-  expect(CARTOGRAPHY_LAYER_ORDER).toHaveLength(8);
+  // Seven: two ocean bands, two land relief casings, the interior stipple, the
+  // grid and the equator. `land-fill`/`land-line` already shipped with SPEC-004.
+  expect(CARTOGRAPHY_LAYERS_ADDED).toHaveLength(7);
+  expect(CARTOGRAPHY_LAYER_ORDER).toHaveLength(9);
 });
 
 test("every declared layer is actually produced, and nothing extra is", () => {

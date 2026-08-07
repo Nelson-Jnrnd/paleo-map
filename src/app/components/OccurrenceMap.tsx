@@ -42,9 +42,11 @@ import {
   cladeMarkerForTaxon,
 } from "./mapCladeMarkers.js";
 import {
+  LAND_TEXTURE_ID,
   OCEAN_DEEP,
   buildEquator,
   buildGraticule,
+  buildLandTexture,
   coastLayer,
   graticuleLayers,
   landLayers,
@@ -544,6 +546,13 @@ export function OccurrenceMap({
             );
             if (cancelled || !mapRef.current) return;
 
+            // SPEC-018 AMEND-001: the land stipple. Registered before any layer
+            // references it, and as a Uint8ClampedArray — a plain Uint8Array is
+            // accepted by addImage but never renders as a fill-pattern.
+            if (!map.hasImage(LAND_TEXTURE_ID)) {
+              map.addImage(LAND_TEXTURE_ID, buildLandTexture());
+            }
+
             // SPEC-018 REQ-003: the graticule is **frame-independent**, so it is
             // added at load rather than with the basemap. That is what keeps it
             // rendering in the no-frame fallback the map already degrades to.
@@ -854,7 +863,7 @@ export function OccurrenceMap({
     // insertion order here is the stacking order — see CARTOGRAPHY_LAYER_ORDER.
     for (const layer of [
       ...oceanDepthLayers("basemap"),
-      ...landLayers("basemap"),
+      ...landLayers("basemap", LAND_TEXTURE_ID),
     ]) {
       map.addLayer(layer as never, "graticule");
     }
