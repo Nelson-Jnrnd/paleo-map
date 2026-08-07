@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-017
 title: Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria)
-status: In Implementation
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [21]
 affected_components: [app-frontend, taxon-page, exploration-view, read-model, domain, styling]
 affected_interfaces: [ReadTaxon, ReadProfile, taxonomy-index]
 supersedes: []
