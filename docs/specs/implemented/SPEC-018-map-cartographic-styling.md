@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-018
 title: Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune
-status: In Implementation
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [20]
 affected_components: [app-frontend, map-rendering, styling, design-tokens]
 affected_interfaces: [maplibre-style, gplates-basemap, design-tokens]
 supersedes: []

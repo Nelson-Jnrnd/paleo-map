@@ -14,6 +14,10 @@ import {
   ringRadii,
   wedgePath,
 } from "../../src/app/components/cladeFan.js";
+import {
+  CLADE_MARKERS,
+  FALLBACK_MARKER,
+} from "../../src/app/components/mapCladeMarkers.js";
 
 const taxon = (
   id: string,
@@ -131,6 +135,36 @@ test("a wedge path is a closed annulus segment", () => {
   expect(d.endsWith("Z")).toBe(true);
   expect(d.match(/A /g)).toHaveLength(2);
   expect(d).not.toMatch(/NaN/);
+});
+
+test("AMEND-001: each wedge carries its clade's tint and the clade's name", () => {
+  // The tint comes from the same resolver the map's markers use, so a clade is
+  // the same hue on both screens.
+  const thero = at("Theropoda");
+  expect(thero.tint).toBe("#dc9a80");
+  expect(thero.cladeLabel).toBe("Theropod");
+
+  // Every wedge has a tint, and every tint is one of the declared clade tints —
+  // no wedge invents a colour.
+  const allowed = new Set(CLADE_MARKERS.map((m) => m.tint));
+  for (const w of wedges) {
+    expect(w.tint).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(allowed.has(w.tint)).toBe(true);
+  }
+});
+
+test("AMEND-001: a branch with no resolvable major group takes the neutral fallback", () => {
+  const orni = at("Ornithischia");
+  // Ornithischia itself is not one of the mapped major groups in this fixture,
+  // so it falls back rather than borrowing a neighbouring clade's hue.
+  expect(orni.tint).toBe(FALLBACK_MARKER.tint);
+});
+
+test("AMEND-001: colour is never the only cue — name and clade are text", () => {
+  for (const w of wedges) {
+    expect(w.name.length).toBeGreaterThan(0);
+    expect(w.cladeLabel.length).toBeGreaterThan(0);
+  }
 });
 
 test("an out-of-scope or unknown root yields no fan, not a crash", () => {

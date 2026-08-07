@@ -206,6 +206,9 @@ four; the interface exposes none of them.
   - No label renders on a wedge below the legibility threshold.
   - Selecting a wedge navigates to that taxon.
   - An equivalent non-visual representation exists (NFR-003).
+  - **(AMEND-001)** Each wedge is filled with its clade tint, resolved by the
+    same function the map uses, with the neutral fallback when the major group
+    does not resolve — and every wedge stays identifiable without colour.
 - **Verification method:** automated test (geometry as a pure function; UI test
   for navigation and labelling)
 - **Evidence location:** `test/ui/spec017-fan.test.ts`,
@@ -574,17 +577,44 @@ requirements — none changed a requirement:
 The neighbour lists also collapse their long tail behind a disclosure, so a taxon
 with 26 children no longer pushes the rest of the screen down by a screenful.
 
-**Known limitation.** The fan renders every wedge in the same neutral fill, so it
-reads as a shape rather than a coloured chart. That is deliberate under charter
-§4 — teal is the data layer's accent and ICS hues belong to the timeline, so
-there is no colour available for clades — but it does make the fan quieter than
-the "one poster of the whole group" framing in the source report.
+**Resolved (AMEND-001, 2026-08-06).** The fan's monochrome fill was recorded here
+as a known limitation: charter §4 left no colour available for clades. The owner
+relaxed that constraint, and the fan now uses SPEC-015's existing clade tints, so
+a clade is the same hue on the map and in the taxonomy.
 
 ## Spec amendments
 
-None — the spec is Draft. The rewrite of 2026-08-05 (scope root moved from `Life`
-to `Dinosauria`, DATA-002 removed, REQ-006 added) predates approval and therefore
-needs no amendment entry.
+The rewrite of 2026-08-05 (scope root moved from `Life` to `Dinosauria`,
+DATA-002 removed, REQ-006 added) predates approval and therefore needs no
+amendment entry.
+
+### AMEND-001 — Clade tints on the fan (owner, 2026-08-06)
+
+**What changed.** REQ-005's wedges were rendered in a single neutral fill, which
+made the fan read as a shape rather than a chart — recorded as a known limitation
+when the spec was first implemented. The owner has approved relaxing the colour
+constraint. Each wedge now carries the **clade tint** of the major group it
+belongs to.
+
+**Why this is not a new colour system.** The tints are the ones SPEC-015 already
+defined for the map's occurrence markers (`mapCladeMarkers.ts`), so the same
+clade is the same hue on the map and in the taxonomy — learnable across screens
+the way the ICS period colours are. No new palette is invented, and the charter
+has been updated to record clade tints as a meaning-only system alongside the ICS
+hues.
+
+**What is unchanged.** Shape and name still carry identity; the tint reinforces
+and may never be the only cue (NFR-003, PERF-250). Teal remains the accent for
+data and interaction, ICS hues remain the timeline's, and nothing outside the
+clade encoding gains colour.
+
+**Requirement text affected.** REQ-005 gains one acceptance criterion:
+
+- Each wedge is filled with its taxon's clade tint, resolved by the same function
+  the map uses; a taxon whose major group does not resolve takes the neutral
+  fallback.
+- Every wedge remains identifiable without colour — by its label, or by the
+  textual list for unlabelled wedges.
 
 ## Review checklist
 

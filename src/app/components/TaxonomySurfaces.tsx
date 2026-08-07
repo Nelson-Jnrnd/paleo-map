@@ -495,7 +495,8 @@ export function CladeFan({
     <section className={styles.taxSurface} aria-label="The shape of Dinosauria">
       <h2 className={styles.taxSurfaceTitle}>The shape of Dinosauria</h2>
       <p className={styles.taxCount}>
-        Wedge width is the number of genera the branch holds.
+        Wedge width is the number of genera the branch holds; the tint is the
+        clade, matching the map&rsquo;s markers.
       </p>
 
       <svg
@@ -508,9 +509,16 @@ export function CladeFan({
           <path
             key={w.taxonId}
             className={styles.fanWedge}
+            // AMEND-001: the clade's tint, the same hue the map paints it.
+            // Identity is still carried by the label and the list below.
+            fill={w.tint}
             d={wedgePath(w, FAN_RADIUS, FAN_MAX_DEPTH)}
             onClick={() => deps.onOpenTaxon(w.taxonId)}
-          />
+          >
+            <title>
+              {w.name} — {pluralGenera(w.genera)} · {w.cladeLabel}
+            </title>
+          </path>
         ))}
         {wedges
           .filter((w) => w.labelled)
@@ -548,7 +556,14 @@ export function CladeFan({
                 className={styles.fanListItem}
                 onClick={() => deps.onOpenTaxon(w.taxonId)}
               >
+                {/* The colour is named as text too, never carried alone. */}
+                <span
+                  className={styles.fanSwatch}
+                  style={{ background: w.tint }}
+                  aria-hidden="true"
+                />
                 <span className="sciName">{w.name}</span>
+                <span className={styles.neighbourCount}>{w.cladeLabel}</span>
                 <span className={styles.neighbourCount}>
                   {pluralGenera(w.genera)}
                 </span>

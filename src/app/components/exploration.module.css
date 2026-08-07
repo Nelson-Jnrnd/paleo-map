@@ -2092,19 +2092,25 @@
   margin: 0 auto;
 }
 
+/* Fill comes from the clade tint (AMEND-001); the stroke keeps wedges separate. */
 .fanWedge {
-  fill: var(--color-land);
   stroke: var(--color-surface);
   stroke-width: 1;
   cursor: pointer;
 }
 
 .fanWedge:hover {
-  fill: var(--color-ocean-slope);
+  stroke: var(--color-text-hi);
+  stroke-width: 1.5;
 }
 
+/* AMEND-001: labels sit on clade tints now, and four of the seven tints fail AA
+   against --color-text. Accessibility wins over the nominal type colour
+   (charter, SPEC-003 AMEND-002), so labels use the high-contrast token — worst
+   case 5.64:1. axe does not reliably check SVG text, so this is guarded by a
+   unit test instead. */
 .fanLabel {
-  fill: var(--color-text);
+  fill: var(--color-text-hi);
   font-size: 9px;
   pointer-events: none;
 }
@@ -2163,4 +2169,15 @@
 
 .neighbourMore ul {
   margin-top: 0.4rem;
+}
+
+/* SPEC-017 AMEND-001: clade tint swatch in the fan's textual list. The clade is
+   also named in text beside it — colour is never the only cue (PERF-250). */
+.fanSwatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  flex: none;
 }

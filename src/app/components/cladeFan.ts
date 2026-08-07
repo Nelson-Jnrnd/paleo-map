@@ -9,6 +9,8 @@
  * fill the parent's arc regardless of how the parent's own count is composed.
  */
 
+import type { ReadTaxon } from "../../domain/index.js";
+import { cladeMarkerForTaxon } from "./mapCladeMarkers.js";
 import type { TaxonomyIndex } from "../state/taxonomy.js";
 
 /** How deep the fan renders below its root. Bounded for legibility (REQ-005). */
@@ -39,6 +41,14 @@ export interface FanWedge {
   labelled: boolean;
   /** Inside an avian branch, so the renderer can mark it (REQ-006). */
   avian: boolean;
+  /**
+   * The clade tint of the major group this branch belongs to (AMEND-001). The
+   * same hue the map paints this clade's occurrence markers, so the code is
+   * learnable across screens. Reinforces the label — never the only cue.
+   */
+  tint: string;
+  /** The clade the tint stands for, for the legend and the textual list. */
+  cladeLabel: string;
 }
 
 export interface FanOptions {
@@ -63,6 +73,10 @@ export function buildFan(
   const minLabelAngle = options.minLabelAngle ?? FAN_MIN_LABEL_ANGLE;
   if (!index.inScope(rootId) || maxDepth < 1) return [];
 
+  // Resolve a wedge's clade the same way the map resolves a marker's, so the
+  // two never disagree about what colour a clade is (AMEND-001).
+  const taxaById: ReadonlyMap<string, ReadTaxon> = index.byId;
+
   const wedges: FanWedge[] = [];
 
   const layout = (
@@ -86,6 +100,7 @@ export function buildFan(
       const start = cursor;
       const end = cursor + width;
       cursor = end;
+      const marker = cladeMarkerForTaxon(child.id, taxaById);
       wedges.push({
         taxonId: child.id,
         name: child.scientificName,
@@ -95,6 +110,8 @@ export function buildFan(
         genera,
         labelled: depth === 1 && width >= minLabelAngle,
         avian: index.isAvian(child.id),
+        tint: marker.tint,
+        cladeLabel: marker.label,
       });
       layout(child.id, depth + 1, start, end);
     }
