@@ -56,6 +56,19 @@ export const CLADE_MARKERS: readonly CladeMarker[] = [
     src: pachycephalosaurus,
     tint: "#aa9cc8",
   },
+  // SPEC-015 AMEND-003: the two great divisions. Many taxa resolve no deeper
+  // than these — 125 of the taxonomy fan's 319 wedges fell back to the neutral
+  // "Dinosaur" tint before they were added, including Ornithischia (652 genera)
+  // and Saurischia (502). They reuse the generic silhouette because no icon
+  // distinguishes a whole division; the *label* disambiguates them from the
+  // fallback, so meaning never rests on colour alone.
+  {
+    id: "ornithischian",
+    label: "Ornithischian",
+    src: others,
+    tint: "#9cc49b",
+  },
+  { id: "saurischian", label: "Saurischian", src: others, tint: "#cbb49b" },
   { id: "other", label: "Dinosaur", src: others, tint: "#b4bcc6" },
 ];
 
@@ -80,6 +93,9 @@ const GROUP_TO_ID: Readonly<Record<string, string>> = {
   Ceratopsia: "ceratopsian",
   Marginocephalia: "ceratopsian",
   Pachycephalosauria: "pachycephalosaur",
+  // AMEND-003: the two great divisions, for taxa that resolve no deeper.
+  Ornithischia: "ornithischian",
+  Saurischia: "saurischian",
 };
 
 /** The neutral fallback marker (unresolved / unclassifiable group). */

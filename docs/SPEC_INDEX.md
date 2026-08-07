@@ -38,8 +38,8 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-007 | Provenance tag & taxon-profile simplification | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md`](specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md) |
 | SPEC-008 | Full-Mesozoic time window (252–66 Ma) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-008-full-mesozoic-time-window.md`](specs/approved/SPEC-008-full-mesozoic-time-window.md) |
 | SPEC-009 | Ergonomic timeline slider & viewport-linked occurrence list | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-009-timeline-slider-and-viewport-list.md`](specs/active/SPEC-009-timeline-slider-and-viewport-list.md) |
-| SPEC-017 | Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria) | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-taxonomy-infographics.md`](specs/approved/SPEC-017-taxonomy-infographics.md) |
-| SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-018-map-cartographic-styling.md`](specs/approved/SPEC-018-map-cartographic-styling.md) |
+| SPEC-017 | Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-taxonomy-infographics.md`](specs/approved/SPEC-017-taxonomy-infographics.md) |
+| SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | Implemented | nelsonjeanrenaud@gmail.com | — | #20 | [`specs/implemented/SPEC-018-map-cartographic-styling.md`](specs/implemented/SPEC-018-map-cartographic-styling.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in

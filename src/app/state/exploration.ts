@@ -35,7 +35,7 @@ export const DEFAULT_REPRESENTATIVE_STAGE: Readonly<Record<string, string>> = {
 /** MVP is dinosaurs-only (OQ-050); the group is present but vacuously satisfied. */
 export const DEFAULT_GROUP = "Dinosaurs";
 
-export type Screen = "map" | "profile";
+export type Screen = "map" | "profile" | "taxonomy";
 
 export type { GroupingMode, RankTier } from "./grouping.js";
 
@@ -55,6 +55,8 @@ export interface ExplorationState {
   selectedTaxonKey: string | null;
   screen: Screen;
   profileTaxonId: string | null;
+  /** Taxon in focus on the taxonomy screen (SPEC-017). Null → the scope root. */
+  taxonomyTaxonId: string | null;
 }
 
 export const initialExplorationState: ExplorationState = {
@@ -67,6 +69,7 @@ export const initialExplorationState: ExplorationState = {
   selectedTaxonKey: null,
   screen: "map",
   profileTaxonId: null,
+  taxonomyTaxonId: null,
 };
 
 export type ExplorationAction =
@@ -88,6 +91,7 @@ export type ExplorationAction =
     }
   | { type: "clearSelection" }
   | { type: "openProfile"; taxonId: string }
+  | { type: "openTaxonomy"; taxonId: string | null }
   | { type: "backToMap" }
   | { type: "reset" };
 
@@ -149,6 +153,14 @@ export function explorationReducer(
     case "openProfile":
       // Preserve selected age + filters across navigation (FONC-1010/1020).
       return { ...state, screen: "profile", profileTaxonId: action.taxonId };
+    case "openTaxonomy":
+      // SPEC-017: the dedicated taxonomy screen. Same navigation contract as the
+      // profile — age and filters survive, and one action returns to the map.
+      return {
+        ...state,
+        screen: "taxonomy",
+        taxonomyTaxonId: action.taxonId,
+      };
     case "backToMap":
       // Single-action return; age, filters and the selected occurrence persist
       // (FONC-1000/1080, CONS-470).

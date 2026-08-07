@@ -30,3 +30,21 @@ test("exploration view has no serious accessibility violations", async ({
   );
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-017 NFR-003. Unlike the taxon profile, the taxonomy screen *is* drivable
+ * headlessly — it is one button away in the context bar — so its axe pass is
+ * gated here rather than left to the component tests. Without this the gate
+ * never saw the screen at all.
+ */
+test("taxonomy screen has no serious accessibility violations", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: /timeline/i }).waitFor();
+  await page.getByRole("button", { name: "Taxonomy", exact: true }).click();
+  await page.getByRole("region", { name: /shape of dinosauria/i }).waitFor();
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});

@@ -96,6 +96,22 @@ Everything else is cool neutral. Two additional colour systems exist, both
   Chronostratigraphic Chart hues: **Triassic** violet `#8E5AA5`, **Jurassic**
   blue `#3E93C6`, **Cretaceous** green `#5FA96A`. A period filter dot uses the
   same hue so the mapping is learnable. These are domain codes, not styling.
+- **Clade tints** — one muted hue per major dinosaur group, defined in
+  `src/app/components/mapCladeMarkers.ts` and established by SPEC-015 for the map's
+  occurrence markers: Theropod `#dc9a80`, Sauropod `#82b6a7`, Ornithopod
+  `#93a9cc`, Thyreophoran `#cbbd7f`, Ceratopsian `#c893ad`, Pachycephalosaur
+  `#aa9cc8`, plus the two great divisions for taxa that resolve no deeper —
+  Ornithischian `#9cc49b` and Saurischian `#cbb49b` (SPEC-015 AMEND-003) — and a
+  neutral `#b4bcc6` for anything else.
+
+  > **Owner decision (2026-08-06, SPEC-017 AMEND-001).** These tints are the
+  > product's clade code and are **not** confined to the map: the taxonomy fan
+  > uses the same hue for the same clade, so the mapping is learnable across
+  > screens the way the ICS period colours are. The rule that has always applied
+  > still applies — **shape and name carry identity first, the tint reinforces**
+  > (charter §4, PERF-250). A clade tint may never be the only way a clade is
+  > identified, and it is never applied decoratively to something that is not a
+  > clade.
 - **Provenance / status cues** — kept neutral so the accent stays singular:
 
 | Status | Cue | Meaning |
