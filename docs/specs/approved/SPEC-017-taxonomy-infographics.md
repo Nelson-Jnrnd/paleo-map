@@ -577,6 +577,14 @@ requirements — none changed a requirement:
 The neighbour lists also collapse their long tail behind a disclosure, so a taxon
 with 26 children no longer pushes the rest of the screen down by a screenful.
 
+**Phone width — checked, 2026-08-07.** Recorded twice as unverified; now
+measured. At 390×844 the taxonomy screen has **no horizontal overflow**
+(`document.scrollWidth` equals the viewport, with zero elements extending past
+it) and degrades to a single readable column: the surfaces stack, the neighbour
+pills wrap, and the clade sheet's grid reflows. It is not a *designed* phone
+layout — phones remain V2 (CONS-510) — but it is usable, which is more than the
+exploration view manages at that width.
+
 **Resolved (AMEND-001, 2026-08-06).** The fan's monochrome fill was recorded here
 as a known limitation: charter §4 left no colour available for clades. The owner
 relaxed that constraint, and the fan now uses SPEC-015's existing clade tints, so
