@@ -9,8 +9,14 @@
 
 One hidden genus a day, guessed in at most eight tries. Every guess is a genus;
 what comes back is the deepest clade the guess shares with the hidden one, and
-the branch of the tree that guess has ruled out. The tree the player assembles
-from those answers is the screen's primary object.
+the branch of the tree that guess has ruled out.
+
+**The tree is not a component on the screen — it is the screen.** The layout is a
+single rectangular cladogram: the established trunk descends from `Dinosauria`,
+each ruled-out branch leaves the trunk at the node where the guess and the answer
+parted, and the guess that eliminated it labels its terminal. There is no guess
+list, because the guesses *are* the branches. Everything else — the input, the
+countdown, the stratigraphic column — sits at the margins of that diagram.
 
 ## Related requirements
 
@@ -43,15 +49,17 @@ the layout gives weight to.
   (SPEC-019 REQ-007).
 - **Countdown** — time to the next 00:00 UTC, the same reset worldwide
   (REQ-001, REQ-009).
-- **The revealed tree** — confirmed ancestors as a filled spine, ruled-out
-  branches as struck-through chips naming the guess that eliminated them, and a
-  dashed unresolved continuation (REQ-005). Rooted at `Dinosauria` (REQ-014).
+- **The tree, as the screen** — the established trunk with a node dot and name at
+  each step, ruled-out branches struck through at their terminals, and a dashed
+  unresolved continuation (REQ-005). Rooted at `Dinosauria` (REQ-014).
 - **Guess input** — autocomplete over the 1,492 valid non-avian genera; genera
   only (REQ-003).
-- **Guess history** — each guess with its shared clade and rank, and a marker on
-  the guess that advanced the tree (REQ-004).
-- **Time clue** — older / younger / overlapping, with the answer's period
-  disclosed only once a guess overlaps it (REQ-006).
+- **Guess history, on the tree itself** — every guess appears as the terminal it
+  ruled out; the guess that reached the deepest node is named against that node
+  and ringed in teal (REQ-004).
+- **Time clue as a stratigraphic column** — ICS period bands on an Ma axis with
+  each guess's range plotted against them, and the answer's period lit only once
+  a guess overlaps it (REQ-006).
 - **Silhouette hint** — offered from guess 5, optional, marked when shared
   (REQ-008).
 - **Practice entry** — a round that does not touch the daily (REQ-010).
@@ -90,6 +98,17 @@ All nine panels are in `daily-genus-states.svg`, covering SPEC-019 UX-002:
 
 ## Notes on the visual system
 
+- **The diagram is the layout.** No panels, no cards, no bordered containers, no
+  pill-shaped chips. Structure comes from the cladogram's own lines plus a few
+  hairline rules. A verdict that would have been a chip is instead a mark on the
+  tree: a struck-through terminal, a teal ring on the frontier node.
+- **The time clue is an axis, not a badge.** A stratigraphic column carries the
+  ICS period bands, and each guess's range is plotted against it — so the player
+  reads "older / younger / overlapping" off a real Ma scale, and the disclosed
+  period is simply the band that is lit. This is the atlas's own idiom, and it is
+  the same information a chip would have carried.
+- **The input is a line, not a box** — a caret, a rule, and `↵ guess`, which suits
+  the app's monospace and keeps the diagram dominant.
 - **Typography** follows the shipped app, not the earlier mockups: a single
   monospace (`'Courier New'`), per the owner override of 2026-07-27 recorded in
   [design-guidelines.md](design-guidelines.md) §4 and `src/app/styles/tokens.css`.
@@ -97,14 +116,16 @@ All nine panels are in `daily-genus-states.svg`, covering SPEC-019 UX-002:
   means the same clade across screens — theropod `#dc9a80`, sauropod `#82b6a7`,
   neutral `#b4bcc6` for the root. Shape and name carry identity first; the tint
   only reinforces, and is never the sole carrier of a state.
-- **Teal stays the only accent**, on the data and interaction layer: the guess
-  button, the guess that advanced the tree, and the recovery action on the error
-  panel.
-- **Status colours are meaning-only** — the ICS Cretaceous green on the period
-  chip, muted amber for a guess that cannot be taken, red only for the load
+- **Teal stays the only accent**, on the data and interaction layer: the frontier
+  node, the guess that reached it, the actions, and the plotted guess ranges.
+- **Status colours are meaning-only** — ICS period hues on the stratigraphic
+  column, muted amber on a guess that cannot be taken, red only for the load
   failure.
-- **Tree states are shapes, not colours**: filled, struck through, dashed — each
-  also named in words (UX-003).
+- **Tree states are shapes, not colours**: filled node, struck-through terminal,
+  dashed continuation — each also named in words (UX-003).
+- **The states sheet follows the same rules**: nine cells separated by hairlines
+  rather than nine bordered cards, and notices marked by a coloured left rule
+  rather than a tinted box.
 
 ## TODO
 
