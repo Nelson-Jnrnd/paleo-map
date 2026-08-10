@@ -32,6 +32,8 @@ link these images live under [`../../mockups/`](../../mockups/).
 | `occurrence-panel.svg` | [Occurrence panel](../../mockups/occurrence-panel.md) | ✅ Drafted |
 | `filters-panel.svg` | [Filters panel](../../mockups/filters-panel.md) | ✅ Drafted |
 | `empty-error-states.svg` | [Empty & error states](../../mockups/empty-error-states.md) | ✅ Drafted |
+| `daily-genus.svg` | [Daily Genus](../../mockups/daily-genus.md) | ✅ Drafted |
+| `daily-genus-states.svg` | [Daily Genus](../../mockups/daily-genus.md) | ✅ Drafted |
 | `exploration-view-loading.svg` | [Exploration view](../../mockups/exploration-view.md) | ⬜ TODO |
 | `exploration-view-empty.svg` | [Exploration view](../../mockups/exploration-view.md) | ⬜ TODO |
 | `taxon-profile-loading.svg` | [Taxon profile](../../mockups/taxon-profile.md) | ⬜ TODO |
