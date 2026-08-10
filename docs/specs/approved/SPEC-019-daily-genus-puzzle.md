@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-019
 title: Daily Genus — a daily taxonomic deduction puzzle
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: [SPEC-001, SPEC-002, SPEC-003, SPEC-012, SPEC-013, SPEC-017]
 conflicts_with: []
-last_verified_at: 2026-08-08
+last_verified_at: 2026-08-10
 ---
 
 # SPEC-019: Daily Genus — a daily taxonomic deduction puzzle
@@ -677,9 +677,10 @@ several branches fewer to search.
 - No environment variables, no feature flags, no build configuration.
 - The guess limit (8) and the hint threshold (5) are named constants in one
   module, so changing either is a one-line, testable edit under an amendment.
-- The puzzle-numbering epoch (the UTC date that is puzzle #1) is a single
-  constant, fixed before first release because it is baked into every shared
-  result.
+- The puzzle-numbering epoch is a single constant holding **the UTC date of first
+  release**, so the first day the game is live is "Daily Genus No. 1". It is set
+  in the release PR and never changed afterwards — it is baked into every shared
+  result, and moving it renumbers every player's history.
 
 ## Error handling
 
@@ -835,16 +836,26 @@ game reads it.
       Confirm after the first playable build. If the early game proves inert, the
       lever held in reserve is publishing the answer's depth — deliberately
       excluded here (Assumptions 3) and re-addable by amendment.
-- [ ] **Puzzle numbering epoch.** The UTC date used as puzzle #1 must be fixed
-      before first release; it is baked into every shared result.
+
+All other open questions are **explicitly deferred**, not unresolved: the
+trace-fossil rate and the guess budget are accepted for the first build and
+revisited from play; geography is a candidate follow-up spec; synonym guesses
+stay rejected per REQ-003 until the snapshot carries a senior-synonym pointer.
 
 ## Human decisions required
 
-- [ ] **Approve the concept and the mechanic** — comparative feedback only: shared
-      clade plus ruled-out branch, no depth, no distance. Answer: ______
-- [ ] **Puzzle numbering epoch** (Open questions). Answer: ______
-- [ ] **Should the functional specification gain a section for the game**, or does
-      this spec stand alone as the requirement source for it? Answer: ______
+- [x] **Approve the concept and the mechanic** — comparative feedback only: shared
+      clade plus ruled-out branch, no depth, no distance.
+      Answer: **Approved by the owner, 2026-08-10** ("I approve the mechanics"),
+      following the decisions of 2026-08-08 recorded in Assumptions 1.
+- [x] **Puzzle numbering epoch.** Answer: **the UTC date of first release** — day
+      one is No. 1. Set once in the release PR, never moved (Configuration
+      impact).
+- [x] **Does the functional specification need a section for the game?**
+      Answer: **No.** `docs/workflow/DOCUMENTATION_AUTHORITY.md` rule 1 makes
+      specs the only place requirements may be introduced, so SPEC-019 is the
+      requirement source for this surface. No `FONC-` ids are minted for it; the
+      charter rules it must honour are carried here as UX-001 and UX-004.
 
 ## Assumptions
 
@@ -951,7 +962,7 @@ and the current instant injected at the app boundary so NFR-004 holds.
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred.
+- [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner, 2026-08-10).

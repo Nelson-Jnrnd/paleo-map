@@ -40,7 +40,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-009 | Ergonomic timeline slider & viewport-linked occurrence list | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-009-timeline-slider-and-viewport-list.md`](specs/active/SPEC-009-timeline-slider-and-viewport-list.md) |
 | SPEC-017 | Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-taxonomy-infographics.md`](specs/approved/SPEC-017-taxonomy-infographics.md) |
 | SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | Implemented | nelsonjeanrenaud@gmail.com | — | #20 | [`specs/implemented/SPEC-018-map-cartographic-styling.md`](specs/implemented/SPEC-018-map-cartographic-styling.md) |
-| SPEC-019 | Daily Genus — a daily taxonomic deduction puzzle | Draft | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-019-daily-genus-puzzle.md`](specs/active/SPEC-019-daily-genus-puzzle.md) |
+| SPEC-019 | Daily Genus — a daily taxonomic deduction puzzle | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-019-daily-genus-puzzle.md`](specs/approved/SPEC-019-daily-genus-puzzle.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in
