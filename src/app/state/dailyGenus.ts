@@ -29,6 +29,21 @@ export const HINT_AFTER_GUESSES = 5;
 export const MIN_POOL_SIZE = 500;
 
 /**
+ * Which puzzle a player is on (SPEC-020 REQ-003). Two dailies run in parallel:
+ * `full` over every eligible genus, `wellKnown` over the ones people actually
+ * look up. A track is a different *pool*, never a different algorithm — within
+ * either, selection stays SPEC-019's uniform permutation.
+ */
+export type Track = "full" | "wellKnown";
+
+export const TRACKS: readonly Track[] = ["full", "wellKnown"];
+
+/** How many genera the well-known track holds (SPEC-020 REQ-002). */
+export const WELL_KNOWN_POOL_SIZE = 250;
+/** Below this the well-known track is withheld rather than shipped degraded. */
+export const MIN_WELL_KNOWN_POOL = 180;
+
+/**
  * The UTC date that is puzzle No. 1 (Configuration impact). Set once at first
  * release and never moved: it is baked into every shared result, so changing it
  * renumbers every player's history.
@@ -92,6 +107,12 @@ export interface GameData {
   readonly guessableById: ReadonlyMap<string, GameTaxon>;
   /** Ids that may be the answer — the guessable set, further gated (REQ-002). */
   readonly pool: readonly string[];
+  /**
+   * The well-known track's pool: the same genera ranked by encyclopedic
+   * attention and cut at the top N (SPEC-020 REQ-002). Empty when the popularity
+   * cache is absent or too sparse, in which case the track is not offered.
+   */
+  readonly wellKnownPool: readonly string[];
 }
 
 type ProfileLookup = (taxonId: string) => ReadProfile | undefined;
@@ -152,6 +173,44 @@ export function derivePool(
   return out;
 }
 
+/**
+ * The well-known pool (SPEC-020 REQ-002): the answer pool restricted to genera
+ * whose popularity is established, ranked by views descending, cut at the top
+ * `WELL_KNOWN_POOL_SIZE`. Ties break by scientific name so the cut is
+ * deterministic.
+ *
+ * **A rank cut, not a view threshold.** Absolute counts drift with the window
+ * and with public attention, so `views >= N` could yield 200 genera one snapshot
+ * and 400 the next — silently changing how well known the track feels. A rank
+ * keeps the track a stable size.
+ *
+ * A genus with `null` popularity is *excluded*, never ranked last: null means
+ * the figure was never established, not that nobody reads about it (REQ-001).
+ */
+export function deriveWellKnownPool(
+  pool: readonly string[],
+  guessableById: ReadonlyMap<string, GameTaxon>,
+  profileOf: ProfileLookup,
+): string[] {
+  const ranked: { id: string; views: number; name: string }[] = [];
+  for (const id of pool) {
+    const views = profileOf(id)?.popularity;
+    if (typeof views !== "number") continue;
+    ranked.push({
+      id,
+      views,
+      name: guessableById.get(id)?.scientificName ?? id,
+    });
+  }
+  ranked.sort((a, b) =>
+    b.views !== a.views ? b.views - a.views : a.name.localeCompare(b.name),
+  );
+  const cut = ranked.slice(0, WELL_KNOWN_POOL_SIZE).map((r) => r.id);
+  // Below the floor the track is withheld rather than shipped degraded
+  // (REQ-002, REQ-008): a handful of genera is not a daily puzzle.
+  return cut.length >= MIN_WELL_KNOWN_POOL ? cut : [];
+}
+
 /** Resolve every index the game needs from the loaded model, in one pass. */
 export function buildGameData(
   taxa: readonly ReadTaxon[],
@@ -159,12 +218,27 @@ export function buildGameData(
   profileOf: ProfileLookup,
 ): GameData {
   const guessable = deriveGuessable(taxa, index, profileOf);
+  const guessableById = new Map(guessable.map((t) => [t.id, t]));
+  const pool = derivePool(guessable, profileOf);
   return {
     index,
     guessable,
-    guessableById: new Map(guessable.map((t) => [t.id, t])),
-    pool: derivePool(guessable, profileOf),
+    guessableById,
+    pool,
+    wellKnownPool: deriveWellKnownPool(pool, guessableById, profileOf),
   };
+}
+
+/** The pool a track plays over, and whether that track can be offered at all. */
+export function poolForTrack(data: GameData, track: Track): readonly string[] {
+  return track === "wellKnown" ? data.wellKnownPool : data.pool;
+}
+
+/** The well-known track is offered only when its pool cleared the floor. */
+export function trackAvailable(data: GameData, track: Track): boolean {
+  return track === "full"
+    ? data.pool.length >= MIN_POOL_SIZE
+    : data.wellKnownPool.length > 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -187,12 +261,32 @@ function hash32(input: string): number {
  * days would otherwise be *Abelisaurus*, *Achelousaurus*, …) while staying a pure
  * function of the pool itself — no seed to store, no shuffle state to persist.
  */
-function permute(pool: readonly string[]): string[] {
+function permute(pool: readonly string[], salt: string): string[] {
   return [...pool].sort((a, b) => {
-    const ha = hash32(`daily-genus:${a}`);
-    const hb = hash32(`daily-genus:${b}`);
+    const ha = hash32(`${salt}${a}`);
+    const hb = hash32(`${salt}${b}`);
     return ha !== hb ? ha - hb : a.localeCompare(b);
   });
+}
+
+/**
+ * The permutation salt per track (SPEC-020 REQ-003). The full track keeps the
+ * original salt, so its sequence is byte-identical to SPEC-019's (REQ-008).
+ *
+ * The well-known track needs its *own* salt because it is a subset of the full
+ * pool: with a shared salt its order is the full order with non-members removed,
+ * so both tracks open on the same genus and stay in step until the first
+ * non-member appears — measured on the shipped snapshot, the two tracks were
+ * identical on 4 of the first 14 days, including the first four in a row. A
+ * player switching tracks on launch day would have seen the option do nothing.
+ */
+const TRACK_SALT: Readonly<Record<Track, string>> = {
+  full: "daily-genus:",
+  wellKnown: "daily-genus:well-known:",
+};
+
+export function saltForTrack(track: Track): string {
+  return TRACK_SALT[track];
 }
 
 /**
@@ -203,9 +297,10 @@ function permute(pool: readonly string[]): string[] {
 export function selectDailyGenus(
   dateKey: string,
   pool: readonly string[],
+  salt: string = TRACK_SALT.full,
 ): string | null {
   if (pool.length === 0) return null;
-  const order = permute(pool);
+  const order = permute(pool, salt);
   const day = puzzleNumber(dateKey) - 1;
   // JS `%` keeps the sign of the dividend; a clock set before the epoch must
   // still land inside the array (Edge cases).
@@ -429,6 +524,8 @@ export type RoundMode = "daily" | "practice";
 
 export interface Round {
   readonly mode: RoundMode;
+  /** Which of the two parallel puzzles this round belongs to (SPEC-020). */
+  readonly track: Track;
   /** UTC date key for a daily round; null for practice (never persisted). */
   readonly dateKey: string | null;
   readonly answerId: string;
@@ -441,9 +538,11 @@ export function startRound(
   mode: RoundMode,
   answerId: string,
   dateKey: string | null,
+  track: Track = "full",
 ): Round {
   return {
     mode,
+    track,
     dateKey,
     answerId,
     guesses: [],

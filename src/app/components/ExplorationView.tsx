@@ -130,7 +130,11 @@ export function ExplorationView({
     (base) => {
       const intent = parseFragment(globalThis.location?.hash ?? "");
       return intent
-        ? explorationReducer(base, { type: "openDaily", mode: intent.mode })
+        ? explorationReducer(base, {
+            type: "openDaily",
+            mode: intent.mode,
+            track: intent.track,
+          })
         : base;
     },
   );
@@ -151,7 +155,8 @@ export function ExplorationView({
   useEffect(() => {
     const apply = (): void => {
       const intent = parseFragment(globalThis.location?.hash ?? "");
-      if (intent) dispatch({ type: "openDaily", mode: intent.mode });
+      if (intent)
+        dispatch({ type: "openDaily", mode: intent.mode, track: intent.track });
       else if (screenRef.current === "daily") dispatch({ type: "backToMap" });
     };
     // No initial `apply()` — the boot fragment is already in the initial state.
@@ -160,7 +165,7 @@ export function ExplorationView({
   }, []);
 
   useEffect(() => {
-    const wanted = fragmentFor(state.screen, state.dailyMode);
+    const wanted = fragmentFor(state.screen, state.dailyMode, state.dailyTrack);
     const current = globalThis.location?.hash ?? "";
     if (current === wanted || (wanted === "" && current === "#")) return;
     if (wanted) {
@@ -171,7 +176,7 @@ export function ExplorationView({
       const { pathname, search } = globalThis.location;
       globalThis.history.replaceState(null, "", `${pathname}${search}`);
     }
-  }, [state.screen, state.dailyMode]);
+  }, [state.screen, state.dailyMode, state.dailyTrack]);
 
   // Map viewport bounds (null until the map reports them / when no WebGL) and the
   // transiently highlighted occurrence shared with the map (SPEC-009 REQ-003/004).
@@ -375,6 +380,10 @@ export function ExplorationView({
           api={stageApi}
           mode={state.dailyMode}
           onModeChange={(mode) => dispatch({ type: "openDaily", mode })}
+          track={state.dailyTrack}
+          onTrackChange={(track) =>
+            dispatch({ type: "openDaily", mode: state.dailyMode, track })
+          }
           onBack={() => dispatch({ type: "backToMap" })}
           onOpenProfile={(taxonId) =>
             dispatch({ type: "openProfile", taxonId })

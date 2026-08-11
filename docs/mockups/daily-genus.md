@@ -96,6 +96,28 @@ All nine panels are in `daily-genus-states.svg`, covering SPEC-019 UX-002:
 | Storage or clipboard blocked | Plays on, says progress will not be kept | REQ-011, SEC-002 |
 | Puzzle cannot be built | Error with retry; never starts on a degraded pool | Error handling |
 
+## The track choice (SPEC-020)
+
+Two dailies run in parallel — every genus, and the 250 most read about — and one
+option chooses which you play, for the daily and for practice alike. It sits
+directly under the header, above the tree.
+
+It is a **plain radio group in a named fieldset**, not a segmented control and
+not a pair of pill toggles: it is a choice between two puzzles, so it should look
+like a choice, and the anti-slop checklist rules out the toggle chrome that
+would otherwise appear here. A left rule carries it, as the banners do.
+
+Under the choices, one line states what the ranking is and is not — *“ranks
+genera by how often people read their article on English Wikipedia over
+2025-08/2026-08 — a measure of attention, not of scientific importance”*. That
+wording is required by SPEC-020 UX-001 and UX-002 and is asserted in tests: the
+ranking must never read as scientific importance, the language must be named,
+and **no per-taxon view count is ever displayed**.
+
+When the popularity data is absent the whole option disappears and the full
+track plays exactly as before (SPEC-020 REQ-008) — the track is withheld rather
+than shipped half-ranked.
+
 ## Notes on the visual system
 
 - **The diagram is the layout.** No panels, no cards, no bordered containers, no

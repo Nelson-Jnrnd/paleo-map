@@ -7,6 +7,15 @@
 
 .screen {
   min-height: 100vh;
+  /*
+   * Grow with the content, never shrink to the shell's viewport-height box.
+   * As a plain flex child this was capped at 100vh, so anything below the fold
+   * — after SPEC-020's track option, the guess line — rendered *outside* the
+   * painted background and sat on the page ground instead. That is invisible
+   * until it isn't: it dropped teal-on-white to teal-on-grey and failed the axe
+   * contrast gate at 4.23:1.
+   */
+  flex: 1 0 auto;
   padding: var(--space-5) var(--space-6) var(--space-6);
   background: var(--color-surface);
   color: var(--color-text);
@@ -88,6 +97,62 @@
 
 .rollover {
   border-left-color: var(--color-accent);
+}
+
+/* ── the track choice ───────────────────────────────────────────────────── */
+
+/*
+ * A choice between two puzzles, so it is a real radio group: no pill toggle, no
+ * segmented control, no border box (anti-slop checklist). A rule and the labels
+ * carry it.
+ */
+.tracks {
+  border: none;
+  border-left: 2px solid var(--color-divider);
+  margin: 0;
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+}
+
+.tracksLegend {
+  padding: 0;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.trackChoice {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  cursor: pointer;
+  min-height: var(--target-min);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+.trackChoice input {
+  accent-color: var(--color-accent-deep);
+}
+
+.trackName {
+  color: var(--color-text-hi);
+}
+
+.trackNote,
+.trackAbout {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.trackAbout {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 46rem;
 }
 
 /* ── board: the tree, and the stratigraphic column ──────────────────────── */

@@ -70,3 +70,18 @@ test("daily genus screen has no serious accessibility violations", async ({
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-020 UX-004. The second track is a different pool behind the same screen,
+ * but it adds the track option — the one piece of new chrome — so it is gated
+ * too, at its own address.
+ */
+test("daily genus well-known track has no serious accessibility violations", async ({
+  page,
+}) => {
+  await page.goto("/#daily-known");
+  await page.getByLabel("Guess a genus").waitFor();
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});

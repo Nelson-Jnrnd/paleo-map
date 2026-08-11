@@ -23,15 +23,23 @@ import {
 afterEach(cleanup);
 
 test("REQ-012: the fragments address the puzzle, and nothing else does", () => {
+  // SPEC-020 REQ-007 added a track to the intent; the SPEC-019 fragments keep
+  // their meaning and resolve to the full track.
   expect(parseFragment(DAILY_FRAGMENT)).toEqual({
     screen: "daily",
     mode: "daily",
+    track: "full",
   });
   expect(parseFragment(PRACTICE_FRAGMENT)).toEqual({
     screen: "daily",
     mode: "practice",
+    track: "full",
   });
-  expect(parseFragment("#DAILY")).toEqual({ screen: "daily", mode: "daily" });
+  expect(parseFragment("#DAILY")).toEqual({
+    screen: "daily",
+    mode: "daily",
+    track: "full",
+  });
   for (const other of ["", "#", "#map", "#taxonomy", "#daily-genus"]) {
     expect(parseFragment(other)).toBeNull();
   }

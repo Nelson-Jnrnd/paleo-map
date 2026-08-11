@@ -37,13 +37,17 @@ import {
   formatCountdown,
   hintAvailable,
   msUntilNextUtcDay,
+  poolForTrack,
   puzzleNumber,
   resolveGuess,
   revealedTree,
+  saltForTrack,
   selectDailyGenus,
   selectPracticeGenus,
   startRound,
   takeHint,
+  TRACKS,
+  trackAvailable,
   utcDateKey,
 } from "../state/dailyGenus.js";
 import type {
@@ -53,14 +57,17 @@ import type {
   Round,
   RoundMode,
   TimeVerdict,
+  Track,
 } from "../state/dailyGenus.js";
 import {
   browserStore,
   loadRecord,
   loadRound,
+  loadTrack,
   recordRound,
   saveRecord,
   saveRound,
+  saveTrack,
   shareSummary,
 } from "../state/dailyGenusStorage.js";
 import type {
@@ -79,6 +86,9 @@ export interface DailyGenusScreenProps {
   /** Which mode to open in (REQ-012 addressability). */
   mode?: RoundMode;
   onModeChange?: (mode: RoundMode) => void;
+  /** Which of the two parallel puzzles to open (SPEC-020 REQ-004/REQ-007). */
+  track?: Track;
+  onTrackChange?: (track: Track) => void;
   now?: () => Date;
   random?: () => number;
   store?: KeyValueStore | null;
@@ -149,6 +159,8 @@ export function DailyGenusScreen({
   onOpenProfile,
   mode = "daily",
   onModeChange,
+  track: trackProp,
+  onTrackChange,
   now = () => new Date(),
   random = Math.random,
   store,
@@ -167,7 +179,16 @@ export function DailyGenusScreen({
   );
   const [dateKey, setDateKey] = useState(() => utcDateKey(now()));
   const [rolledOver, setRolledOver] = useState(false);
-  const [record, setRecord] = useState<StoredRecord>(() => loadRecord(storage));
+  // The chosen track (SPEC-020 REQ-004): the prop wins when the shell addressed
+  // one, otherwise the player's stored preference, otherwise the full track.
+  const [chosenTrack, setChosenTrack] = useState<Track>(
+    () => trackProp ?? loadTrack(storage),
+  );
+  const track: Track = trackAvailable(data, chosenTrack) ? chosenTrack : "full";
+  const pool = poolForTrack(data, track);
+  const [record, setRecord] = useState<StoredRecord>(() =>
+    loadRecord(storage, trackProp ?? loadTrack(storage)),
+  );
   const [rejection, setRejection] = useState<Rejection | null>(null);
   const [query, setQuery] = useState("");
   const [activeOption, setActiveOption] = useState(0);
@@ -178,40 +199,98 @@ export function DailyGenusScreen({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const dailyAnswerId = useMemo(
-    () => selectDailyGenus(dateKey, data.pool),
-    [dateKey, data.pool],
+    () => selectDailyGenus(dateKey, pool, saltForTrack(track)),
+    [dateKey, pool, track],
+  );
+
+  /**
+   * Rebuild a track's daily round from storage (REQ-011; SPEC-020 REQ-004).
+   * Used both before the first paint and when the player switches track, which
+   * is what makes a switch non-destructive: each track's round lives in its own
+   * storage key, so coming back restores it rather than starting over.
+   */
+  const restoreDaily = useCallback(
+    (
+      forTrack: Track,
+      forDate: string,
+      answerId: string | null,
+    ): Round | null => {
+      if (!answerId) return null;
+      const fresh = startRound("daily", answerId, forDate, forTrack);
+      const stored = loadRound(storage, forDate, forTrack);
+      if (!stored || stored.answerId !== answerId) return fresh;
+      const answer = data.guessableById.get(stored.answerId);
+      if (!answer) return fresh;
+      let restored = startRound("daily", stored.answerId, forDate, forTrack);
+      for (const g of stored.guesses) {
+        const guess = data.guessableById.get(g.taxonId);
+        if (guess)
+          restored = applyGuess(restored, evaluateGuess(guess, answer, data));
+      }
+      return stored.hintUsed ? { ...restored, hintUsed: true } : restored;
+    },
+    [storage, data],
   );
 
   // Restore today's round before the first paint so a reload resumes rather
   // than restarting (REQ-011).
-  const [round, setRound] = useState<Round | null>(() => {
-    if (mode !== "daily" || !dailyAnswerId) return null;
-    const stored = loadRound(storage, dateKey);
-    if (!stored || stored.answerId !== dailyAnswerId) {
-      return startRound("daily", dailyAnswerId, dateKey);
-    }
-    const answer = data.guessableById.get(stored.answerId);
-    if (!answer) return startRound("daily", dailyAnswerId, dateKey);
-    let restored = startRound("daily", stored.answerId, dateKey);
-    for (const g of stored.guesses) {
-      const guess = data.guessableById.get(g.taxonId);
-      if (guess)
-        restored = applyGuess(restored, evaluateGuess(guess, answer, data));
-    }
-    return stored.hintUsed ? { ...restored, hintUsed: true } : restored;
-  });
+  const [round, setRound] = useState<Round | null>(() =>
+    mode === "daily" ? restoreDaily(track, dateKey, dailyAnswerId) : null,
+  );
 
+  // Practice draws from the *chosen track's* pool (SPEC-020 REQ-004): the option
+  // covers practice as well as the daily.
   const startPractice = useCallback(() => {
     const answerId = selectPracticeGenus(
-      data.pool,
+      pool,
       [dailyAnswerId, round?.mode === "practice" ? round.answerId : null],
       random,
     );
-    if (answerId) setRound(startRound("practice", answerId, null));
+    if (answerId) setRound(startRound("practice", answerId, null, track));
     setRejection(null);
     setQuery("");
     onModeChange?.("practice");
-  }, [data.pool, dailyAnswerId, random, round, onModeChange]);
+  }, [pool, track, dailyAnswerId, random, round, onModeChange]);
+
+  /**
+   * Switch track (SPEC-020 REQ-004). Non-destructive: the round being left is
+   * already persisted under its own key, and the one being entered is restored
+   * from its own — so a player can look at the other puzzle and come back.
+   */
+  const chooseTrack = useCallback(
+    (next: Track) => {
+      if (next === track) return;
+      setChosenTrack(next);
+      saveTrack(storage, next);
+      setRecord(loadRecord(storage, next));
+      setRejection(null);
+      setQuery("");
+      setCopied("idle");
+      const nextPool = poolForTrack(data, next);
+      if (mode === "practice") {
+        const answerId = selectPracticeGenus(
+          nextPool,
+          [selectDailyGenus(dateKey, nextPool, saltForTrack(next))],
+          random,
+        );
+        setRound(
+          answerId ? startRound("practice", answerId, null, next) : null,
+        );
+      } else {
+        setRound(
+          restoreDaily(next, dateKey, selectDailyGenus(dateKey, nextPool)),
+        );
+      }
+      onTrackChange?.(next);
+    },
+    [track, storage, data, dateKey, mode, random, restoreDaily, onTrackChange],
+  );
+
+  // The shell addressed a track by fragment: follow it.
+  useEffect(() => {
+    if (trackProp && trackProp !== chosenTrack) chooseTrack(trackProp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trackProp]);
 
   // Opening straight into practice (`#practice`) needs a round on first paint.
   useEffect(() => {
@@ -248,12 +327,12 @@ export function DailyGenusScreen({
   useEffect(() => {
     if (!round || round.mode !== "daily") return;
     saveRound(storage, round);
-    if (round.outcome === "playing" || recordedRef.current === round.dateKey)
-      return;
-    recordedRef.current = round.dateKey;
+    const stamp = `${round.track}:${round.dateKey}`;
+    if (round.outcome === "playing" || recordedRef.current === stamp) return;
+    recordedRef.current = stamp;
     setRecord((current) => {
       const next = recordRound(current, round);
-      saveRecord(storage, next);
+      saveRecord(storage, next, round.track);
       return next;
     });
   }, [round, storage]);
@@ -344,6 +423,7 @@ export function DailyGenusScreen({
   );
   const periodDisclosed = periodDisclosedBy >= 0 || finished;
   const snapshotDate = api.metadata().retrievedOn;
+  const popularityWindow = api.metadata().popularity?.window ?? null;
   const practice = round.mode === "practice";
 
   return (
@@ -354,6 +434,7 @@ export function DailyGenusScreen({
             {practice
               ? "Daily Genus · practice"
               : `Daily Genus · No. ${puzzleNumber(dateKey)}`}
+            {track === "wellKnown" && " · well-known"}
           </p>
           <p className={styles.progress}>
             {finished
@@ -372,6 +453,37 @@ export function DailyGenusScreen({
         </button>
       </header>
 
+      {trackAvailable(data, "wellKnown") && (
+        <fieldset className={styles.tracks}>
+          <legend className={styles.tracksLegend}>Which puzzle</legend>
+          {TRACKS.map((option) => (
+            <label key={option} className={styles.trackChoice}>
+              <input
+                type="radio"
+                name="daily-genus-track"
+                value={option}
+                checked={track === option}
+                onChange={() => chooseTrack(option)}
+              />
+              <span className={styles.trackName}>
+                {option === "full" ? "Every genus" : "Well-known"}
+              </span>
+              <span className={styles.trackNote}>
+                {option === "full"
+                  ? `all ${data.pool.length.toLocaleString("en-GB")} in the snapshot`
+                  : `the ${data.wellKnownPool.length} most read about`}
+              </span>
+            </label>
+          ))}
+          <p className={styles.trackAbout}>
+            “Well-known” ranks genera by how often people read their article on
+            English Wikipedia
+            {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure of
+            attention, not of scientific importance.
+          </p>
+        </fieldset>
+      )}
+
       {practice && (
         <p className={styles.practiceBanner} role="status">
           Practice — not today’s puzzle. Nothing here is recorded, and it never
@@ -388,7 +500,7 @@ export function DailyGenusScreen({
             className={styles.linkAction}
             onClick={() => {
               const key = utcDateKey(now());
-              const next = selectDailyGenus(key, data.pool);
+              const next = selectDailyGenus(key, pool, saltForTrack(track));
               setDateKey(key);
               setRolledOver(false);
               recordedRef.current = null;
