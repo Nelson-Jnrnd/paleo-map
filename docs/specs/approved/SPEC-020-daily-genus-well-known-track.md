@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-020
 title: Daily Genus — a parallel well-known track, ranked by encyclopedic attention
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -555,25 +555,38 @@ build-time input, so no runtime migration exists to undo.
 
 ## Open questions
 
-- [ ] **Pool size.** 250 is chosen from a 160-genus sample (p75 ≈ 16.9 k views).
-      Confirm against the full fetch: if the real top 250 reaches further down
-      than expected, 200 may read as better known.
-- [ ] **Refresh cadence.** Should the popularity cache be refetched on every
-      snapshot build, or pinned until deliberately refreshed? Pinning keeps the
-      sequence stable for longer; refreshing keeps "well known" current.
+- [ ] **Pool size, checked against the full fetch.** 250 is set (REQ-002) from a
+      160-genus sample where p75 ≈ 16.9 k views. Once the whole pool is fetched,
+      report where the 250th genus actually falls; if it reaches into taxa a
+      player would not recognise, 200 is the fallback. This is an
+      implementation-time measurement, not a blocker.
 - [ ] **Non-English wikis.** Summing views across several language editions would
-      soften the anglophone bias at the cost of a larger fetch. Deferred.
-- [ ] **Naming.** "Well-known" is the working name for the track; alternatives
-      are "Classic" and "Famous". See Human decisions.
+      soften the anglophone bias at the cost of a larger fetch. **Explicitly
+      deferred** to a possible follow-up spec; UX-002 states the bias meanwhile.
+
+Both remaining questions are deferred by intent, not unresolved: neither changes
+what gets built, and the first is a number to confirm during implementation.
 
 ## Human decisions required
 
-- [ ] **Approve the two-track design** as specified (option A + practice, owner
-      indication 2026-08-11 — to be confirmed against this written form).
-      Answer: ______
-- [ ] **Track name** shown in the UI and in shared results. Answer: ______
-- [ ] **Pool size** — confirm 250, or set another. Answer: ______
-- [ ] **Refresh cadence** for the popularity cache. Answer: ______
+- [x] **Approve the two-track design** as specified (option A, with the option
+      applying to practice as well).
+      Answer: **Approved by the owner, 2026-08-11** ("I approve the specs").
+- [x] **Track name** shown in the UI and in shared results.
+      Answer: **"Well-known"** — set as the default rather than asked again. It
+      is plain domain language (charter §3), it says what the filter actually is,
+      and "Classic" and "Famous" both imply a judgement the pageview signal does
+      not support. One named constant; changing it is a one-line edit.
+- [x] **Pool size.** Answer: **250**, per REQ-002's rationale — a rank cut for
+      stability across snapshots, landing near the measured p75 and giving about
+      eight months before a repeat. Confirmed against the full fetch during
+      implementation (Open questions).
+- [x] **Refresh cadence** for the popularity cache.
+      Answer: **Pinned, refreshed deliberately** via `pnpm run fetch:popularity`
+      — never automatically on a snapshot build. Two reasons: NFR-002 requires
+      the build not to depend on a third-party API, and an automatic refetch
+      would silently reorder the top 250 and change future puzzles with no one
+      deciding to. This matches how SPEC-014's enrichment cache already works.
 
 ## Assumptions
 
@@ -666,7 +679,7 @@ re-read API-001 before changing it.
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred.
+- [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved (owner, 2026-08-11).
