@@ -103,3 +103,11 @@ formations — never "Insights/Engagement"); a light deep-time cartographic syst
 Read it before designing or implementing any UI. These are design conventions,
 not product requirements — requirements still live only in the functional
 specification.
+
+Read [`docs/mockups/anti-slop-checklist.md`](docs/mockups/anti-slop-checklist.md)
+alongside it. The charter says what this product should look like; the checklist
+says what it must not drift into — the generic, interchangeable "AI-generated"
+look (everything a card, a border on every box, a pill chip per value, symmetric
+panels, copy explaining the interface). It is subordinate to the charter and
+introduces no requirements. **Do not skip the self-check at the bottom of it
+before publishing a mockup or a screen.**

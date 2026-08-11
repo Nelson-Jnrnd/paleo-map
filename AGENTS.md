@@ -32,6 +32,9 @@ truth. The full lifecycle is in `docs/workflow/AGENT_WORKFLOW.md`.
 - Produce short, phone-friendly summaries.
 - Never create a second source of truth. Do not restate requirements outside
   specs.
+- All UI work is binding on `docs/mockups/design-guidelines.md`, read together
+  with `docs/mockups/anti-slop-checklist.md` (what the design must not drift
+  into). Run the checklist's self-check before publishing a mockup or a screen.
 - If documentation conflicts, stop and run the drift check. If a blocking
   conflict exists, ask the human to decide.
 
