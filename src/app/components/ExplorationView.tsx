@@ -13,7 +13,7 @@
  * model), the view falls back to the in-memory filter — same behaviour as before.
  */
 
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import type {
   GeologicalStage,
@@ -52,6 +52,8 @@ import { OccurrenceList } from "./OccurrenceList.js";
 import { OccurrencePanel } from "./OccurrencePanel.js";
 import { LocalityList, TaxonList } from "./GroupedList.js";
 import { LocalityPanel, TaxonPanel } from "./GroupedPanels.js";
+import { DailyGenusScreen } from "./DailyGenusScreen.js";
+import { fragmentFor, parseFragment } from "../state/screenFragment.js";
 import { TaxonProfile } from "./TaxonProfile.js";
 import { TaxonomyScreen } from "./TaxonomyScreen.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
@@ -117,11 +119,60 @@ export function ExplorationView({
   api,
   stageSource,
 }: ExplorationViewProps): ReactElement {
+  // The fragment is read *before* the first render, not dispatched after it
+  // (SPEC-019 REQ-012, NFR-001). Applying it in an effect would let the map
+  // mount for one pass first, and the map fetches its basemap index on mount —
+  // so a cold boot at `#daily` would touch the network before the puzzle even
+  // appeared.
   const [state, dispatch] = useReducer(
     explorationReducer,
     initialExplorationState,
+    (base) => {
+      const intent = parseFragment(globalThis.location?.hash ?? "");
+      return intent
+        ? explorationReducer(base, { type: "openDaily", mode: intent.mode })
+        : base;
+    },
   );
   const [stageAttempt, setStageAttempt] = useState(0);
+
+  // SPEC-019 REQ-012: `#daily` / `#practice` open the puzzle, entering and
+  // leaving keep the fragment in step, and the browser back control works
+  // because entering the puzzle pushes a history entry. No router for this.
+  //
+  // The two effects below are deliberately one-way each. The reader runs on
+  // mount and on real `hashchange` events only (empty deps): re-running it when
+  // the screen changes would make the pair ping-pong — the reader would see the
+  // not-yet-cleared `#daily` and re-open the screen the writer is in the middle
+  // of leaving. The current screen therefore comes from a ref, not the closure.
+  const screenRef = useRef(state.screen);
+  screenRef.current = state.screen;
+
+  useEffect(() => {
+    const apply = (): void => {
+      const intent = parseFragment(globalThis.location?.hash ?? "");
+      if (intent) dispatch({ type: "openDaily", mode: intent.mode });
+      else if (screenRef.current === "daily") dispatch({ type: "backToMap" });
+    };
+    // No initial `apply()` — the boot fragment is already in the initial state.
+    globalThis.addEventListener?.("hashchange", apply);
+    return () => globalThis.removeEventListener?.("hashchange", apply);
+  }, []);
+
+  useEffect(() => {
+    const wanted = fragmentFor(state.screen, state.dailyMode);
+    const current = globalThis.location?.hash ?? "";
+    if (current === wanted || (wanted === "" && current === "#")) return;
+    if (wanted) {
+      // A new entry, so the back control returns to where the player came from.
+      globalThis.location.hash = wanted;
+    } else if (globalThis.history?.replaceState) {
+      // Leaving replaces rather than pushes: the player has already gone back.
+      const { pathname, search } = globalThis.location;
+      globalThis.history.replaceState(null, "", `${pathname}${search}`);
+    }
+  }, [state.screen, state.dailyMode]);
+
   // Map viewport bounds (null until the map reports them / when no WebGL) and the
   // transiently highlighted occurrence shared with the map (SPEC-009 REQ-003/004).
   const [viewport, setViewport] = useState<Bounds | null>(null);
@@ -315,6 +366,24 @@ export function ExplorationView({
     );
   }
 
+  // SPEC-019: the Daily Genus puzzle. Same contract again — a screen in this
+  // shell, addressable by fragment (REQ-012), returning to the map in one action.
+  if (state.screen === "daily") {
+    return (
+      <div className={styles.app}>
+        <DailyGenusScreen
+          api={stageApi}
+          mode={state.dailyMode}
+          onModeChange={(mode) => dispatch({ type: "openDaily", mode })}
+          onBack={() => dispatch({ type: "backToMap" })}
+          onOpenProfile={(taxonId) =>
+            dispatch({ type: "openProfile", taxonId })
+          }
+        />
+      </div>
+    );
+  }
+
   if (state.screen === "profile" && state.profileTaxonId) {
     return (
       <div className={styles.app}>
@@ -365,6 +434,7 @@ export function ExplorationView({
             taxonId: state.mode === "taxon" ? state.selectedTaxonKey : null,
           })
         }
+        onOpenDaily={() => dispatch({ type: "openDaily", mode: "daily" })}
       />
       <TimelineControl
         stages={EXPLORATION_STAGES}

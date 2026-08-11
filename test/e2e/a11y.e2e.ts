@@ -48,3 +48,25 @@ test("taxonomy screen has no serious accessibility violations", async ({
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-019 UX-003. The puzzle is a whole screen of its own and is reachable
+ * headlessly from the context bar, so its axe pass is gated here — and it is
+ * checked mid-round, because most of the board (the established trunk, the
+ * ruled-out branches, the stratigraphic column) only exists after a guess.
+ */
+test("daily genus screen has no serious accessibility violations", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: /timeline/i }).waitFor();
+  await page.getByRole("button", { name: "Daily Genus", exact: true }).click();
+  await page.getByLabel("Guess a genus").waitFor();
+
+  await page.getByLabel("Guess a genus").fill("Triceratops");
+  await page.getByRole("button", { name: /guess/i }).click();
+  await page.getByText("1 of 8 guesses").waitFor();
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});

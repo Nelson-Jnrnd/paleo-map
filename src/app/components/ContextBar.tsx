@@ -24,6 +24,8 @@ interface ContextBarProps {
   onReset: () => void;
   /** Open the dedicated taxonomy screen (SPEC-017). */
   onOpenTaxonomy?: () => void;
+  /** Open the Daily Genus puzzle (SPEC-019 REQ-012). */
+  onOpenDaily?: () => void;
 }
 
 export function ContextBar({
@@ -35,6 +37,7 @@ export function ContextBar({
   onSearchSelect,
   onReset,
   onOpenTaxonomy,
+  onOpenDaily,
 }: ContextBarProps): ReactElement {
   return (
     <header className={styles.header}>
@@ -81,6 +84,12 @@ export function ContextBar({
             onClick={onOpenTaxonomy}
           >
             Taxonomy
+          </button>
+        )}
+
+        {onOpenDaily && (
+          <button type="button" className={styles.reset} onClick={onOpenDaily}>
+            Daily Genus
           </button>
         )}
 

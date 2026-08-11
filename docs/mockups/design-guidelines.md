@@ -269,6 +269,10 @@ glassmorphism; icon soup; fake metrics; and anything that makes a fossil point
 look like a range or hides how sure we are. Boring clarity beats decorative
 complexity.
 
+The specific failure modes, the reasons they happen, and a countable self-check
+are in [`anti-slop-checklist.md`](anti-slop-checklist.md) — read it with this
+charter. It is subordinate to this document and introduces no requirements.
+
 ---
 
 ### Relationship to the mockups

@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" font-family="'Courier New',Courier,monospace" role="img" aria-label="Daily Genus state variants: fresh, solved, not solved, already played, practice, rejected guesses, hint taken, storage blocked, and pool error">
+  <style>
+    .eyebrow{font-size:10.5px;fill:#52606e;letter-spacing:1.8px}
+    .node{font-size:12.5px;fill:#1f2b38}
+    .faint{font-size:10.5px;fill:#5b6773}
+    .cut{font-size:11.5px;fill:#7a848f}
+    .by{font-size:11px;fill:#52606e;font-style:italic}
+    .id{font-size:8.5px;fill:#8a949e;letter-spacing:.6px}
+    .act{font-size:11px;fill:#0a7f66}
+  </style>
+
+  <rect width="1200" height="1000" fill="#ffffff"/>
+
+  <text x="40" y="42" class="eyebrow" font-size="12">DAILY GENUS · STATE VARIANTS</text>
+  <text x="40" y="64" class="faint">Every real state is designed. None is blank, and no verdict is carried by colour alone.</text>
+  <text x="1160" y="64" class="id" text-anchor="end">UX-002 · UX-003</text>
+  <line x1="40" y1="88" x2="1160" y2="88" stroke="#cfd8de"/>
+
+  <!-- grid rules -->
+  <line x1="410" y1="88" x2="410" y2="960" stroke="#e3e9ee"/>
+  <line x1="810" y1="88" x2="810" y2="960" stroke="#e3e9ee"/>
+  <line x1="40" y1="400" x2="1160" y2="400" stroke="#e3e9ee"/>
+  <line x1="40" y1="710" x2="1160" y2="710" stroke="#e3e9ee"/>
+
+  <!-- ════ 1 · FRESH ════ -->
+  <text x="40" y="120" class="eyebrow">FRESH ROUND</text>
+  <text x="380" y="120" class="id" text-anchor="end">REQ-005</text>
+  <circle cx="48" cy="164" r="4.5" fill="#b4bcc6"/>
+  <text x="62" y="169" class="node" font-weight="700">Dinosauria</text>
+  <path d="M48 170 V206" stroke="#33424f" stroke-width="1.6" fill="none" stroke-dasharray="4 5"/>
+  <text x="62" y="212" class="faint">?  everything below is unresolved</text>
+  <text x="40" y="252" class="faint">Nothing is established yet, and how deep the</text>
+  <text x="40" y="268" class="faint">answer sits is never stated.</text>
+  <text x="40" y="316" font-size="13" fill="#0a7f66">▸</text>
+  <text x="60" y="316" font-size="13" fill="#8a949e">type a genus</text>
+  <line x1="40" y1="328" x2="380" y2="328" stroke="#33424f" stroke-width="1.4"/>
+  <text x="40" y="352" class="faint">8 guesses · resets 00:00 UTC</text>
+
+  <!-- ════ 2 · SOLVED ════ -->
+  <text x="440" y="120" class="eyebrow">SOLVED — 5 OF 8</text>
+  <text x="780" y="120" class="id" text-anchor="end">REQ-007 · REQ-011</text>
+  <text x="440" y="164" font-size="19" font-style="italic" font-weight="700" fill="#1f2b38">Tyrannosaurus</text>
+  <path d="M640 176 q5 -24 29 -26 q14 -12 31 -8 q16 4 18 16 q14 3 19 11 h-21 l-6 8 h-12 l-4 -8 h-21 l-5 8 h-12 l-3 -8 z" fill="#33424f" opacity="0.7"/>
+  <text x="440" y="188" class="faint">genus · 83.6–66 Ma · Late Cretaceous</text>
+  <text x="440" y="212" class="faint">Dinosauria › Theropoda › … › Tyrannosaurini</text>
+  <text x="440" y="236" class="faint">accepted per H. F. Osborn, 1905</text>
+  <text x="440" y="276" class="act">open taxon page</text>
+  <text x="620" y="276" class="act">copy result</text>
+  <line x1="440" y1="300" x2="780" y2="300" stroke="#e3e9ee"/>
+  <text x="440" y="322" class="faint">the shared text names no taxon:</text>
+  <text x="440" y="344" class="faint" fill="#33424f">DAILY GENUS 128 · 5/8 · ▲▲···</text>
+
+  <!-- ════ 3 · NOT SOLVED ════ -->
+  <text x="840" y="120" class="eyebrow">NOT SOLVED — 8 OF 8</text>
+  <text x="1160" y="120" class="id" text-anchor="end">REQ-007</text>
+  <text x="840" y="164" font-size="19" font-style="italic" font-weight="700" fill="#1f2b38">Tyrannosaurus</text>
+  <text x="840" y="192" class="faint">you reached <tspan fill="#33424f">Tyrannosauridae</tspan> — two steps short</text>
+  <line x1="840" y1="208" x2="1160" y2="208" stroke="#e3e9ee"/>
+  <text x="840" y="232" class="faint">Dinosauria › Theropoda › Neotheropoda ›</text>
+  <text x="840" y="248" class="faint">Averostra › Tetanurae › Coelurosauria ›</text>
+  <text x="840" y="264" class="faint">Tyrannosauroidea › Tyrannosauridae ›</text>
+  <text x="840" y="280" class="faint" fill="#33424f">Tyrannosaurinae › Tyrannosaurini</text>
+  <text x="840" y="316" class="faint">accepted per H. F. Osborn, 1905</text>
+  <text x="840" y="352" class="act">open taxon page</text>
+
+  <!-- ════ 4 · ALREADY PLAYED ════ -->
+  <text x="40" y="432" class="eyebrow">ALREADY PLAYED TODAY</text>
+  <text x="380" y="432" class="id" text-anchor="end">REQ-009 · REQ-013</text>
+  <text x="40" y="490" font-size="28" font-weight="700" fill="#1f2b38">06:12:44</text>
+  <text x="40" y="512" class="faint">until the next puzzle · 00:00 UTC, worldwide</text>
+  <line x1="40" y1="536" x2="380" y2="536" stroke="#e3e9ee"/>
+  <text x="40" y="560" class="faint">played 41 · solved 34 · streak 6 · best 11</text>
+  <text x="40" y="584" class="faint">solved in  3 ▍▍  4 ▍▍▍▍  5 ▍▍▍▍▍▍  6 ▍▍▍</text>
+  <text x="40" y="624" class="act">copy result</text>
+  <text x="180" y="624" class="act">practice round</text>
+  <text x="40" y="664" class="faint">At 00:00 UTC this becomes “start today’s</text>
+  <text x="40" y="680" class="faint">puzzle” — never a silent swap mid-round.</text>
+
+  <!-- ════ 5 · PRACTICE ════ -->
+  <text x="440" y="432" class="eyebrow">PRACTICE — NOT TODAY’S PUZZLE</text>
+  <text x="780" y="432" class="id" text-anchor="end">REQ-010</text>
+  <text x="440" y="464" class="faint">Nothing here is recorded, and it never draws</text>
+  <text x="440" y="480" class="faint">today’s genus, so it cannot spoil the daily.</text>
+  <circle cx="448" cy="518" r="4.5" fill="#b4bcc6"/>
+  <text x="462" y="523" class="node">Dinosauria</text>
+  <path d="M448 518 V576 H470" stroke="#33424f" stroke-width="1.6" fill="none"/>
+  <path d="M448 548 H640" stroke="#b9c2cb" stroke-width="1.2" fill="none"/>
+  <path d="M640 542 V554" stroke="#b9c2cb" stroke-width="1.2" fill="none"/>
+  <text x="650" y="552" class="cut">✕</text>
+  <text x="666" y="552" class="cut" text-decoration="line-through">Theropoda</text>
+  <circle cx="470" cy="576" r="4.5" fill="#82b6a7"/>
+  <text x="484" y="581" class="node">Sauropodomorpha</text>
+  <path d="M470 582 V612" stroke="#33424f" stroke-width="1.6" fill="none" stroke-dasharray="4 5"/>
+  <text x="484" y="618" class="faint">?  unresolved</text>
+  <text x="440" y="656" class="faint">Same tree, same eight guesses, same clues.</text>
+  <text x="440" y="688" class="act">back to today’s puzzle</text>
+
+  <!-- ════ 6 · GUESS NOT TAKEN ════ -->
+  <text x="840" y="432" class="eyebrow">A GUESS THAT CANNOT BE TAKEN</text>
+  <text x="1160" y="432" class="id" text-anchor="end">REQ-003</text>
+  <text x="840" y="462" class="faint">Never consumes a guess. Always says why.</text>
+
+  <line x1="840" y1="480" x2="840" y2="518" stroke="#8a5a12" stroke-width="2"/>
+  <text x="854" y="496" class="node" font-style="italic">Ornithischia</text>
+  <text x="854" y="514" class="faint" fill="#8a5a12">not a genus — that is a clade</text>
+
+  <line x1="840" y1="534" x2="840" y2="572" stroke="#8a5a12" stroke-width="2"/>
+  <text x="854" y="550" class="node" font-style="italic">Antrodemus</text>
+  <text x="854" y="568" class="faint" fill="#8a5a12">in the snapshot, but Synonymous, not Valid</text>
+
+  <line x1="840" y1="588" x2="840" y2="626" stroke="#8a5a12" stroke-width="2"/>
+  <text x="854" y="604" class="node" font-style="italic">Smilodon</text>
+  <text x="854" y="622" class="faint" fill="#8a5a12">outside Dinosauria — not in this atlas</text>
+
+  <line x1="840" y1="642" x2="840" y2="680" stroke="#cfd8de" stroke-width="2"/>
+  <text x="854" y="658" class="node" font-style="italic">Velociraptor</text>
+  <text x="854" y="676" class="faint">already guessed — that was guess 3</text>
+
+  <!-- ════ 7 · HINT TAKEN ════ -->
+  <text x="40" y="742" class="eyebrow">HINT TAKEN — OFFERED FROM GUESS 5</text>
+  <text x="380" y="742" class="id" text-anchor="end">REQ-008</text>
+  <path d="M70 866 q9 -40 49 -44 q24 -19 53 -12 q27 7 31 27 q23 4 30 17 h-34 l-9 12 h-19 l-7 -12 h-36 l-9 12 h-19 l-5 -12 z" fill="#33424f" opacity="0.72"/>
+  <text x="40" y="900" class="faint">the answer’s silhouette · consumes no guess</text>
+  <text x="40" y="924" class="faint">Optional, never automatic. Marked in your result.</text>
+  <text x="40" y="948" class="faint">Every genus in the snapshot has one.</text>
+
+  <!-- ════ 8 · STORAGE / CLIPBOARD ════ -->
+  <text x="440" y="742" class="eyebrow">STORAGE OR CLIPBOARD BLOCKED</text>
+  <text x="780" y="742" class="id" text-anchor="end">REQ-011 · SEC-002</text>
+  <line x1="440" y1="762" x2="440" y2="812" stroke="#8a5a12" stroke-width="2"/>
+  <text x="454" y="780" class="node" fill="#8a5a12">progress will not be kept</text>
+  <text x="454" y="798" class="faint">this browser blocks local storage — you can</text>
+  <text x="454" y="814" class="faint">finish, but a reload starts the round over</text>
+  <line x1="440" y1="838" x2="780" y2="838" stroke="#e3e9ee"/>
+  <text x="440" y="862" class="faint">copy is unavailable — your result:</text>
+  <text x="440" y="884" class="faint" fill="#33424f">DAILY GENUS 128 · 5/8 · hint · ▲··▲·</text>
+  <text x="440" y="924" class="faint">Nothing is ever sent anywhere. Stored data is</text>
+  <text x="440" y="940" class="faint">ids, counts and dates; clearing it resets cleanly.</text>
+
+  <!-- ════ 9 · CANNOT BUILD ════ -->
+  <text x="840" y="742" class="eyebrow">THE PUZZLE CANNOT BE BUILT</text>
+  <text x="1160" y="742" class="id" text-anchor="end">Error handling</text>
+  <line x1="840" y1="762" x2="840" y2="830" stroke="#c0392b" stroke-width="2"/>
+  <text x="854" y="780" class="node" fill="#c0392b">no puzzle today</text>
+  <text x="854" y="798" class="faint">the snapshot loaded, but too few genera</text>
+  <text x="854" y="814" class="faint">qualify to build a fair round, so no genus</text>
+  <text x="854" y="830" class="faint">was chosen — a data problem, not a guess</text>
+  <text x="840" y="872" class="act">retry</text>
+  <text x="920" y="872" class="act">back to map</text>
+  <text x="840" y="924" class="faint">Red marks the failure; recovery stays teal.</text>
+  <text x="840" y="940" class="faint">The game never starts on a degraded pool.</text>
+
+  <line x1="40" y1="960" x2="1160" y2="960" stroke="#cfd8de"/>
+  <text x="1160" y="982" class="faint" text-anchor="end">Per PBDB snapshot 26 Jul 2026 — a placement is a sourced opinion</text>
+</svg>
