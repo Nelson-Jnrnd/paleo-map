@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-020
 title: Daily Genus — a parallel well-known track, ranked by encyclopedic attention
-status: In Implementation
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [23]
 affected_components: [app-frontend, pipeline, read-model, domain, scripts]
 affected_interfaces: [ReadProfile, popularity-cache, local-storage, url-fragments]
 supersedes: []
