@@ -1,0 +1,579 @@
+/*
+ * Daily Genus (SPEC-019 UX-001). The cladogram is the screen, so this sheet is
+ * mostly lines and spacing: no card containers, no bordered boxes, no pill
+ * chips (docs/mockups/anti-slop-checklist.md). Structure comes from the tree's
+ * own connectors and a few hairline rules; every colour is a charter token.
+ */
+
+.screen {
+  min-height: 100vh;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.progress {
+  margin: var(--space-2) 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.headRight {
+  margin-left: auto;
+  text-align: right;
+}
+
+.countdown {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.countdownLabel {
+  margin: 0;
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.back {
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent-deep);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--target-min);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.back:hover {
+  background: var(--color-ground);
+}
+
+/* ── banners ────────────────────────────────────────────────────────────── */
+
+.practiceBanner,
+.rollover {
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-text-faint);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+.rollover {
+  border-left-color: var(--color-accent);
+}
+
+/* ── board: the tree, and the stratigraphic column ──────────────────────── */
+
+.board {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.treeWrap {
+  flex: 1 1 32rem;
+  min-width: 0;
+}
+
+.trunk {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+
+/*
+ * Each node is indented one step deeper than its parent and draws its own
+ * connector: a riser up to the parent's row and an elbow across to the dot.
+ * That is the whole cladogram — no absolute positioning, so it reflows and
+ * stays keyboard- and screen-reader-legible.
+ */
+.node {
+  position: relative;
+  padding-left: calc(var(--depth, 0) * 0.875rem);
+}
+
+.nodeRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  position: relative;
+  padding: var(--space-1) 0;
+}
+
+.node + .node .nodeRow::before {
+  content: "";
+  position: absolute;
+  left: calc(-0.875rem + 4px);
+  top: -0.35rem;
+  width: 0.875rem;
+  height: 0.85rem;
+  border-left: 1.5px solid var(--color-text);
+  border-bottom: 1.5px solid var(--color-text);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--clade-tint, #b4bcc6);
+  border: 1px solid var(--color-text-faint);
+  flex: none;
+}
+
+.nodeName {
+  font-size: 0.9375rem;
+  color: var(--color-text-hi);
+}
+
+.frontier .nodeName {
+  font-weight: 700;
+  border-bottom: 1.5px solid var(--color-accent);
+}
+
+.frontier .dot {
+  border-color: var(--color-accent-deep);
+  border-width: 2px;
+}
+
+.rank {
+  font-size: var(--text-min);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.reached {
+  font-style: italic;
+  font-size: 0.8125rem;
+  color: var(--color-accent-deep);
+}
+
+/* Ruled-out branches: the same tree, thinner and grey, ending in a terminal. */
+.cuts {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--space-1) 0.9rem;
+}
+
+.cut {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  position: relative;
+  padding: 2px 0 2px var(--space-4);
+  color: var(--color-text-faint);
+  font-size: 0.8125rem;
+}
+
+.cut::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -0.3rem;
+  width: var(--space-3);
+  height: 0.75rem;
+  border-left: 1.2px solid var(--color-border);
+  border-bottom: 1.2px solid var(--color-border);
+}
+
+.cutMark {
+  color: var(--color-text-faint);
+}
+
+.cutName {
+  color: var(--color-text-faint);
+}
+
+.cutBy {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.unresolved {
+  margin: var(--space-1) 0 0;
+  padding-left: calc(var(--depth, 0) * 0.875rem);
+  font-size: 0.8125rem;
+  color: var(--color-text-faint);
+  border-left: none;
+}
+
+.unresolved::before {
+  content: "";
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.9rem;
+  margin-right: var(--space-2);
+  border-left: 1.5px dashed var(--color-text);
+  vertical-align: -0.35rem;
+}
+
+.key {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-divider);
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.keyDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #dc9a80;
+  border: 1px solid var(--color-text-faint);
+  display: inline-block;
+}
+
+.keySep {
+  width: var(--space-4);
+}
+
+/* ── stratigraphic column: the time clue as an axis, not a badge ─────────── */
+
+.column {
+  flex: 0 0 20rem;
+}
+
+.columnBody {
+  position: relative;
+  height: 22rem;
+  margin-top: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* The scale: Ma at each period boundary, and the period each band is. */
+.ticks {
+  position: relative;
+  width: 2.2rem;
+  height: 100%;
+  flex: none;
+}
+
+.tick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-0.5em);
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.bands {
+  position: relative;
+  width: 18px;
+  height: 100%;
+  flex: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.periodNames {
+  position: relative;
+  width: 5.5rem;
+  height: 100%;
+  flex: none;
+}
+
+.periodName {
+  position: absolute;
+  left: 0;
+  transform: translateY(-0.5em);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0.22;
+}
+
+.bandLit {
+  opacity: 0.62;
+}
+
+.bars {
+  position: relative;
+  height: 100%;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.barSlot {
+  position: relative;
+  width: 8px;
+  height: 100%;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: var(--color-accent);
+  opacity: 0.5;
+}
+
+.periodNote {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  max-width: 20rem;
+}
+
+/* ── the guess line: a rule, not a boxed field ──────────────────────────── */
+
+.entry {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+  position: relative;
+}
+
+.entryLabel {
+  display: block;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 34rem;
+}
+
+.caret {
+  color: var(--color-accent-deep);
+}
+
+.entryInput {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-text-hi);
+  padding: var(--space-2) 0;
+  min-height: var(--target-min);
+}
+
+.entryInput:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.enter {
+  border: none;
+  background: transparent;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  min-height: var(--target-min);
+  padding: 0 var(--space-2);
+}
+
+.enter:hover {
+  text-decoration: underline;
+}
+
+.options {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  max-width: 34rem;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.option {
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  border-top: 1px solid var(--color-divider);
+}
+
+.optionActive {
+  color: var(--color-text-hi);
+  font-weight: 700;
+}
+
+.entryNote,
+.note,
+.record,
+.provenance {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.entryNote {
+  margin: var(--space-2) 0 0;
+}
+
+.rejection {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-attention);
+  color: var(--color-attention);
+  font-size: 0.8125rem;
+  max-width: 34rem;
+}
+
+.aside {
+  margin: var(--space-4) 0 0;
+  display: flex;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+.linkAction {
+  border: none;
+  background: transparent;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: var(--space-1) 0;
+  min-height: var(--target-min);
+  text-decoration: underline;
+}
+
+.hintSilhouette,
+.revealSilhouette {
+  display: block;
+  margin-top: var(--space-3);
+  max-width: 12rem;
+  height: auto;
+}
+
+/* ── the reveal ─────────────────────────────────────────────────────────── */
+
+.reveal {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.revealName {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-text-hi);
+}
+
+.revealMeta,
+.revealLineage,
+.revealSource {
+  margin: var(--space-2) 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.revealLineage {
+  max-width: 48rem;
+}
+
+.actions {
+  margin: var(--space-4) 0 0;
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.primary {
+  border: none;
+  background: var(--color-accent-deep);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--target-min);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.record {
+  margin: var(--space-3) 0 0;
+}
+
+/* ── footer ─────────────────────────────────────────────────────────────── */
+
+.foot {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Phone: the column drops under the tree rather than squeezing it. */
+@media (max-width: 40rem) {
+  .screen {
+    padding: var(--space-4) var(--space-3) var(--space-5);
+  }
+
+  .board {
+    flex-direction: column;
+  }
+
+  /* Once the board stacks, `flex-basis` is a *height*: the tree's 32rem basis
+     would leave a dead gap under a short tree. */
+  .treeWrap {
+    flex: 0 0 auto;
+  }
+
+  .column {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .columnBody {
+    height: 12rem;
+  }
+}

@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-019
 title: Daily Genus — a daily taxonomic deduction puzzle
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -12,7 +12,7 @@ supersedes: []
 superseded_by:
 depends_on: [SPEC-001, SPEC-002, SPEC-003, SPEC-012, SPEC-013, SPEC-017]
 conflicts_with: []
-last_verified_at: 2026-08-10
+last_verified_at: 2026-08-11
 ---
 
 # SPEC-019: Daily Genus — a daily taxonomic deduction puzzle
@@ -364,7 +364,7 @@ several branches fewer to search.
   - It never issues a network request.
   - It reads zero for at most one tick before the rollover control appears.
 - **Verification method:** automated test (controlled clock) + manual check.
-- **Evidence location:** `test/ui/spec019-countdown.test.tsx`
+- **Evidence location:** `test/ui/spec019-rollover.test.tsx`
 
 ### REQ-010: Practice mode
 
@@ -415,7 +415,7 @@ several branches fewer to search.
   - With the clipboard unavailable, the summary is still shown as selectable text.
 - **Verification method:** automated test (rendered screen with a stubbed
   storage) + manual check.
-- **Evidence location:** `test/ui/spec019-persistence.test.tsx`
+- **Evidence location:** `test/spec019-persistence.test.ts`
 
 ### REQ-012: Entry points and addressability
 
@@ -560,7 +560,7 @@ several branches fewer to search.
   - The stored payload matches a documented schema and contains no other field.
   - Clearing storage mid-round leaves the app functional.
 - **Verification method:** automated test + inspection.
-- **Evidence location:** `test/ui/spec019-persistence.test.tsx`
+- **Evidence location:** `test/spec019-persistence.test.ts`
 
 ## Data model impact
 
@@ -759,9 +759,9 @@ This spec is satisfied when all of the following hold:
 | REQ-006 | Older/younger/overlap; period gated; explicit "Not available" | automated test | `pnpm test spec019-clue-rows` | `test/spec019-clue-rows.test.ts` | |
 | REQ-007 | Win/loss at 8; reveal block; taxon-page handoff | automated test + manual | `pnpm test spec019-daily-screen` | `test/ui/spec019-daily-screen.test.tsx` | |
 | REQ-008 | Hint gated at guess 5; recorded; consumes no guess | automated test | `pnpm test spec019-daily-screen` | `test/ui/spec019-daily-screen.test.tsx` | |
-| REQ-009 | Countdown matches the interval to 00:00 UTC; no network | automated test + manual | `pnpm test spec019-countdown` | `test/ui/spec019-countdown.test.tsx` | |
+| REQ-009 | Countdown matches the interval to 00:00 UTC; no network | automated test + manual | `pnpm test spec019-rollover` | `test/ui/spec019-rollover.test.tsx` | |
 | REQ-010 | Practice never draws today's answer and never alters the record | automated test | `pnpm test spec019-practice` | `test/ui/spec019-practice.test.tsx` | |
-| REQ-011 | Reload resumes; summary is spoiler-free and number-free | automated test + manual | `pnpm test spec019-persistence` | `test/ui/spec019-persistence.test.tsx` | |
+| REQ-011 | Reload resumes; summary is spoiler-free and number-free | automated test + manual | `pnpm test spec019-persistence` | `test/spec019-persistence.test.ts` | |
 | REQ-012 | `#daily` and `#practice` boot the right mode; no router added | automated test + manual | `pnpm test spec019-entry-point` | `test/ui/spec019-entry-point.test.tsx` | |
 | REQ-013 | UTC date change mid-round does not swap the answer | automated test | `pnpm test spec019-rollover` | `test/ui/spec019-rollover.test.tsx` | |
 | REQ-014 | Nothing outside the `Dinosauria` subtree is rendered | automated test | `pnpm test spec019-revealed-tree` | `test/spec019-revealed-tree.test.ts` | |
@@ -770,7 +770,7 @@ This spec is satisfied when all of the following hold:
 | NFR-003 | No `public/data/` change; budget unchanged; no dependency | script + inspection | `pnpm run check:budget`, `git status` | PR diff | |
 | NFR-004 | Instant injected; suite clock- and timezone-independent | automated test + inspection | `pnpm test` with a shifted clock and TZ | `test/spec019-daily-selection.test.ts` | |
 | SEC-001 | No obfuscation implemented or implied | inspection | PR review | PR review notes | |
-| SEC-002 | Stored payload matches the documented schema only | automated test | `pnpm test spec019-persistence` | `test/ui/spec019-persistence.test.tsx` | |
+| SEC-002 | Stored payload matches the documented schema only | automated test | `pnpm test spec019-persistence` | `test/spec019-persistence.test.ts` | |
 | DATA-001 | Pool and indexes built from `ReadModel`; model not mutated | automated test | `pnpm test spec019-answer-pool` | `test/spec019-answer-pool.test.ts` | |
 | API-001 | Existing read-API behaviour unchanged; no duplicate traversal | automated test + inspection | `pnpm test` | PR diff | |
 | UX-001 | Charter vocabulary and colour rules honoured | inspection + automated copy check | `pnpm test spec019-daily-screen` | `test/ui/spec019-daily-screen.test.tsx` | |
@@ -907,41 +907,72 @@ No conflicts found.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | daily selection | | `test/spec019-daily-selection.test.ts` | Not started |
-| REQ-002 | derived pool | | `test/spec019-answer-pool.test.ts` | Not started |
-| REQ-003 | guess input | | `test/ui/spec019-guess-input.test.tsx` | Not started |
-| REQ-004 | guess evaluation | | `test/spec019-guess-evaluation.test.ts` | Not started |
-| REQ-005 | revealed tree | | `test/spec019-revealed-tree.test.ts` | Not started |
-| REQ-006 | time clue | | `test/spec019-clue-rows.test.ts` | Not started |
-| REQ-007 | daily screen | | `test/ui/spec019-daily-screen.test.tsx` | Not started |
-| REQ-008 | daily screen | | `test/ui/spec019-daily-screen.test.tsx` | Not started |
-| REQ-009 | countdown | | `test/ui/spec019-countdown.test.tsx` | Not started |
-| REQ-010 | practice mode | | `test/ui/spec019-practice.test.tsx` | Not started |
-| REQ-011 | persistence | | `test/ui/spec019-persistence.test.tsx` | Not started |
-| REQ-012 | app shell | | `test/ui/spec019-entry-point.test.tsx` | Not started |
-| REQ-013 | rollover | | `test/ui/spec019-rollover.test.tsx` | Not started |
-| REQ-014 | revealed tree | | `test/spec019-revealed-tree.test.ts` | Not started |
-| NFR-001 | daily screen | | `test/ui/spec019-no-egress.test.tsx` | Not started |
-| NFR-002 | game index | | `test/spec019-guess-evaluation.test.ts` | Not started |
-| NFR-003 | build budget | | `pnpm run check:budget` | Not started |
-| NFR-004 | clock injection | | `test/spec019-daily-selection.test.ts` | Not started |
-| SEC-001 | — | | inspection | Not started |
-| SEC-002 | persistence | | `test/ui/spec019-persistence.test.tsx` | Not started |
-| DATA-001 | derived pool & index | | `test/spec019-answer-pool.test.ts` | Not started |
-| API-001 | read API | | `pnpm test` | Not started |
-| UX-001 | daily screen | | `test/ui/spec019-daily-screen.test.tsx` | Not started |
-| UX-002 | screen states | | `test/ui/spec019-states.test.tsx` | Not started |
-| UX-003 | daily screen | | `test/e2e/spec019-daily.e2e.ts` | Not started |
-| UX-004 | daily screen | | `test/ui/spec019-daily-screen.test.tsx` | Not started |
+| REQ-001 | daily selection | `state/dailyGenus.ts` · `selectDailyGenus`, `utcDateKey`, `puzzleNumber` | `test/spec019-daily-selection.test.ts` | Implemented |
+| REQ-002 | derived pool | `state/dailyGenus.ts` · `derivePool`, `buildGameData` | `test/spec019-answer-pool.test.ts` | Implemented |
+| REQ-003 | guess input | `state/dailyGenus.ts` · `resolveGuess`; `components/DailyGenusScreen.tsx` | `test/spec019-guess-evaluation.test.ts`, `test/ui/spec019-guess-input.test.tsx` | Implemented |
+| REQ-004 | guess evaluation | `state/dailyGenus.ts` · `evaluateGuess` | `test/spec019-guess-evaluation.test.ts`, `test/ui/spec019-daily-screen.test.tsx` | Implemented |
+| REQ-005 | revealed tree | `state/dailyGenus.ts` · `revealedTree`; `DailyGenusScreen` trunk | `test/spec019-revealed-tree.test.ts`, `test/ui/spec019-daily-screen.test.tsx` | Implemented |
+| REQ-006 | time clue | `state/dailyGenus.ts` · `timeVerdict`; `DailyGenusScreen` column | `test/spec019-clue-rows.test.ts`, `test/ui/spec019-states.test.tsx` | Implemented |
+| REQ-007 | termination + reveal | `state/dailyGenus.ts` · `applyGuess`; `DailyGenusScreen` reveal | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| REQ-008 | silhouette hint | `state/dailyGenus.ts` · `hintAvailable`, `takeHint` | `test/spec019-revealed-tree.test.ts`, `test/ui/spec019-daily-screen.test.tsx` | Implemented |
+| REQ-009 | countdown | `state/dailyGenus.ts` · `msUntilNextUtcDay`, `formatCountdown` | `test/spec019-daily-selection.test.ts`, `test/ui/spec019-rollover.test.tsx` | Implemented |
+| REQ-010 | practice mode | `state/dailyGenus.ts` · `selectPracticeGenus`; `DailyGenusScreen` | `test/ui/spec019-practice.test.tsx` | Implemented |
+| REQ-011 | persistence + share | `state/dailyGenusStorage.ts` | `test/spec019-persistence.test.ts`, `test/ui/spec019-rollover.test.tsx` | Implemented |
+| REQ-012 | app shell | `state/screenFragment.ts`; `ExplorationView`; `ContextBar` | `test/ui/spec019-entry-point.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| REQ-013 | rollover | `DailyGenusScreen` countdown effect | `test/ui/spec019-rollover.test.tsx` | Implemented |
+| REQ-014 | scope boundary | `state/taxonomy.ts` (SPEC-017 index, reused) | `test/spec019-revealed-tree.test.ts` | Implemented |
+| NFR-001 | no egress | `DailyGenusScreen` (snapshot only) | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec019-entry-point.test.tsx` | Implemented |
+| NFR-002 | game index | `buildGameData` over `buildTaxonomyIndex` | `test/spec019-guess-evaluation.test.ts` | Implemented |
+| NFR-003 | build budget | no new data artifact | `pnpm run check:budget` | Implemented |
+| NFR-004 | clock injection | `now`/`random` props on `DailyGenusScreen` | `test/spec019-daily-selection.test.ts` | Implemented |
+| SEC-001 | — | no obfuscation implemented | inspection | Implemented |
+| SEC-002 | persistence | `state/dailyGenusStorage.ts` | `test/spec019-persistence.test.ts` | Implemented |
+| DATA-001 | derived pool & index | `buildGameData` (in-browser, no artifact) | `test/spec019-answer-pool.test.ts` | Implemented |
+| API-001 | read layer | reuses `buildTaxonomyIndex` + `relatedness` unchanged | `pnpm test` | Implemented |
+| UX-001 | daily screen | `components/dailyGenus.module.css` (tokens only) | `test/ui/spec019-daily-screen.test.tsx` | Implemented |
+| UX-002 | screen states | `DailyGenusScreen` state branches | `test/ui/spec019-states.test.tsx` | Implemented |
+| UX-003 | accessibility | live region, labels, keyboard | `test/e2e/a11y.e2e.ts`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| UX-004 | provenance | snapshot date + `acceptedPer` in the reveal | `test/ui/spec019-daily-screen.test.tsx` | Implemented |
 
 ## Implementation notes
 
-To be filled during implementation. Expected shape, for review at approval time:
-a pure core (`derivePool`, `selectDailyGenus`, `evaluateGuess`, the revealed-tree
-reducer, the time comparison, the countdown computation) with no React, no clock
-and no storage of its own; a thin screen over it in `src/app/components`; a
-storage adapter isolated behind one module so SEC-002 is checkable in one place;
-and the current instant injected at the app boundary so NFR-004 holds.
+Implemented 2026-08-11. Shape as predicted at approval: a pure core
+(`src/app/state/dailyGenus.ts`) with no React, no clock and no storage; the
+storage adapter isolated in one module (`dailyGenusStorage.ts`) so SEC-002 is
+checkable in one place; a screen over both; and the instant and the practice
+draw injected as props so NFR-004 holds.
+
+**No deviations from the approved requirements.** Four decisions worth
+recording, all inside the approved scope:
+
+1. **API-001 cost nothing.** SPEC-017's `buildTaxonomyIndex` and `relatedness`
+   already provided indexed lookups and the last-common-ancestor walk, so the
+   game added no traversal code and no read-API surface at all.
+2. **The frontier no longer repeats its guess.** The mockup labelled both the
+   frontier node (`◂ Gorgosaurus`) and the branch that guess ruled out
+   (`✕ Albertosaurinae ◂ Gorgosaurus`). Since a guess's eliminated branch hangs
+   from the very clade it established, that printed the same name twice on one
+   row. The node label is now suppressed when one of its own eliminations
+   already names that guess; the frontier stays marked by the teal ring, the
+   underline, and its accessible text.
+3. **The boot fragment is read before the first render, not dispatched after
+   it.** Applying `#daily` in an effect let the map mount for one pass first,
+   and the map fetches its basemap index on mount — so a cold boot at `#daily`
+   touched the network before the puzzle appeared, breaking NFR-001. The
+   fragment now seeds the reducer's initial state.
+4. **The stratigraphic column gained its scale.** As first built it drew bands
+   and bars with no tick labels, which made it decoration rather than an axis
+   (anti-slop checklist, "turn a scalar into an axis"). It now carries the Ma
+   boundaries and the period names.
+
+**Verified on the shipped snapshot**, not only on fixtures: the derived pool is
+**985 genera** from 1,492 guessable, and a real round was played end to end in a
+browser at `#daily`.
+
+**Known limitations**, all previously recorded rather than discovered late: no
+size, diet or geography clue (Non-goals); roughly one puzzle in a hundred is a
+trace-fossil genus (Open questions); the eight-guess budget is reasoned, not
+playtested; and the answer is in the client bundle by construction (SEC-001).
 
 ## Spec amendments
 
