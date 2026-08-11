@@ -41,6 +41,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-017 | Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-taxonomy-infographics.md`](specs/approved/SPEC-017-taxonomy-infographics.md) |
 | SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | Implemented | nelsonjeanrenaud@gmail.com | — | #20 | [`specs/implemented/SPEC-018-map-cartographic-styling.md`](specs/implemented/SPEC-018-map-cartographic-styling.md) |
 | SPEC-019 | Daily Genus — a daily taxonomic deduction puzzle | Implemented | nelsonjeanrenaud@gmail.com | — | #22 | [`specs/implemented/SPEC-019-daily-genus-puzzle.md`](specs/implemented/SPEC-019-daily-genus-puzzle.md) |
+| SPEC-020 | Daily Genus — a parallel well-known track, ranked by encyclopedic attention | Draft | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-020-daily-genus-well-known-track.md`](specs/active/SPEC-020-daily-genus-well-known-track.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in
