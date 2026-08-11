@@ -714,9 +714,10 @@ will fill most of them in.
 - **Test impact:** `test/spec020-popularity-cache.test.ts` asserts the
   provenance lands on the metadata, that an absent figure is never read as zero,
   and that applying an empty cache clears both.
-- **Human approval reference:** **Pending.** Raised with the owner in the
-  implementation report of 2026-08-11; the alternative is to raise NFR-003's
-  budget from 40 KB to 50 KB and keep the per-profile shape.
+- **Human approval reference:** **Approved by the owner, 2026-08-11** ("I
+  validate everything"), on the implementation report of the same day. The
+  alternative offered — raising NFR-003's budget to 50 KB and keeping the
+  per-profile shape — was not taken.
 
 ### AMEND-002 — each track gets its own permutation salt
 
@@ -736,8 +737,8 @@ will fill most of them in.
   order: the two coincide on fewer than 6 days in 30.
 - **Test impact:** `test/spec020-well-known-pool.test.ts` asserts both the
   independence and the unchanged full-track sequence.
-- **Human approval reference:** **Pending.** Raised in the same report; without
-  it the option is materially misleading in its first week.
+- **Human approval reference:** **Approved by the owner, 2026-08-11** ("I
+  validate everything"), on the implementation report of the same day.
 
 ## Review checklist
 
