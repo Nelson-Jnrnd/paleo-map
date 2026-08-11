@@ -2,10 +2,10 @@
 doc_type: spec
 spec_id: SPEC-019
 title: Daily Genus — a daily taxonomic deduction puzzle
-status: In Implementation
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [22]
 affected_components: [app-frontend, app-shell, read-model, domain, styling]
 affected_interfaces: [ReadTaxon, ReadProfile, taxonomy-index, local-storage]
 supersedes: []
