@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-020
 title: Daily Genus — a parallel well-known track, ranked by encyclopedic attention
-status: Approved
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -630,48 +630,114 @@ No conflicts found.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | popularity cache | | `test/spec020-popularity-cache.test.ts` | Not started |
-| REQ-002 | well-known pool | | `test/spec020-well-known-pool.test.ts` | Not started |
-| REQ-003 | track selection | | `test/spec020-tracks.test.ts` | Not started |
-| REQ-004 | track option | | `test/ui/spec020-track-option.test.tsx` | Not started |
-| REQ-005 | per-track record | | `test/ui/spec020-track-record.test.tsx` | Not started |
-| REQ-006 | share summary | | `test/spec020-share-track.test.ts` | Not started |
-| REQ-007 | fragments | | `test/ui/spec020-track-fragments.test.tsx` | Not started |
-| REQ-008 | no-regression | | `test/spec020-tracks.test.ts` | Not started |
-| NFR-001 | no egress | | `test/ui/spec020-no-egress.test.tsx` | Not started |
-| NFR-002 | fetch script | | `test/spec020-popularity-cache.test.ts` | Not started |
-| NFR-003 | build budget | | `pnpm run check:budget` | Not started |
-| NFR-004 | determinism | | `test/spec020-well-known-pool.test.ts` | Not started |
-| SEC-001 | popularity cache | | `test/spec020-popularity-cache.test.ts` | Not started |
-| DATA-001 | read model | | `test/spec020-popularity-cache.test.ts` | Not started |
-| API-001 | pure core (unchanged) | | `pnpm test` | Not started |
-| UX-001 | track option copy | | `test/ui/spec020-track-option.test.tsx` | Not started |
-| UX-002 | track option copy | | `test/ui/spec020-track-option.test.tsx` | Not started |
-| UX-003 | track option states | | `test/ui/spec020-track-option.test.tsx` | Not started |
-| UX-004 | accessibility | | `test/e2e/a11y.e2e.ts` | Not started |
+| REQ-001 | popularity cache | `scripts/fetch_popularity.ts`; `src/pipeline/popularity.ts` | `test/spec020-popularity-cache.test.ts` | Implemented |
+| REQ-002 | well-known pool | `state/dailyGenus.ts` · `deriveWellKnownPool` | `test/spec020-well-known-pool.test.ts` | Implemented |
+| REQ-003 | track selection | `selectDailyGenus` + `saltForTrack` (AMEND-002) | `test/spec020-well-known-pool.test.ts` | Implemented |
+| REQ-004 | track option | `DailyGenusScreen` · `chooseTrack` | `test/ui/spec020-track-option.test.tsx` | Implemented |
+| REQ-005 | per-track record | `state/dailyGenusStorage.ts` · `stateKey`/`recordKey` | `test/ui/spec020-track-option.test.tsx` | Implemented |
+| REQ-006 | share summary | `dailyGenusStorage.ts` · `shareSummary` | `test/spec020-share-track.test.ts` | Implemented |
+| REQ-007 | fragments | `state/screenFragment.ts`; `ExplorationView` | `test/ui/spec020-track-fragments.test.tsx` | Implemented |
+| REQ-008 | no-regression | full track keeps its salt and its pool | `test/spec020-well-known-pool.test.ts`, SPEC-019 suite | Implemented |
+| NFR-001 | no egress | figures read from the loaded snapshot | `test/ui/spec020-no-egress.test.tsx` | Implemented |
+| NFR-002 | fetch script | concurrency 3, backoff, straggler sweep, atomic write | `test/spec020-popularity-cache.test.ts` | Implemented |
+| NFR-003 | build budget | bare figure + shared provenance (AMEND-001) | `pnpm run check:budget` (+17.2 KB) | Implemented |
+| NFR-004 | determinism | pure derivation from the snapshot | `test/spec020-well-known-pool.test.ts` | Implemented |
+| SEC-001 | popularity cache | ids, integers and dates only | `test/spec020-popularity-cache.test.ts` | Implemented |
+| DATA-001 | read model | `ReadProfile.popularity`, `SnapshotMetadata.popularity` | `test/spec020-popularity-cache.test.ts` | Implemented |
+| API-001 | pure core | signature extended by an optional salt only | `pnpm test` (SPEC-019 suite unmodified) | Implemented |
+| UX-001 | track option copy | `DailyGenusScreen` track fieldset | `test/ui/spec020-track-option.test.tsx` | Implemented |
+| UX-002 | track option copy | names English Wikipedia and the window | `test/ui/spec020-track-option.test.tsx` | Implemented |
+| UX-003 | track option states | option absent when the track is unavailable | `test/ui/spec020-track-option.test.tsx` | Implemented |
+| UX-004 | accessibility | labelled radio group in a named fieldset | `test/ui/spec020-track-option.test.tsx`, `test/e2e/a11y.e2e.ts` | Implemented |
 
 ## Implementation notes
 
-To be filled during implementation. Expected shape: a fetch script beside
-`scripts/enrich_fetch.ts` writing a committed cache; a pipeline step folding it
-into `ReadProfile.popularity`; a `wellKnownPool` derivation next to `derivePool`
-in `src/app/state/dailyGenus.ts`; a `track` dimension threaded through the round
-state and the storage keys; and a track control on the screen. The pure core's
-existing functions should need no edit — if one does, that is a signal to
-re-read API-001 before changing it.
+Implemented 2026-08-11. Two amendments were needed (see below), both discovered
+by measuring rather than by reasoning; everything else landed as specified.
+
+**The fetch policy had to be rewritten after the first run.** At 6 concurrent
+requests with a 150 ms pause and two 0.5 s retries, **373 of 985 articles came
+back unresolved** — and every one of them returned HTTP 200 when fetched alone
+afterwards. They had been throttled, not missed. Because a null excludes a genus
+from the track, that did not merely lose data, it reshaped the pool: the 250th
+genus was *Segisaurus* at 9,110 views. After dropping to 3 concurrent with a
+300 ms pause, exponential backoff honouring `Retry-After`, and a slow
+one-at-a-time sweep over the run's own nulls, **953 of 985 resolved** and the
+250th genus became *Zupaysaurus* at **14,734 views/yr** — where the pre-spec
+sample predicted it would land.
+
+**The pool size of 250 is confirmed** (Open questions): #50 is at 79 k views,
+#100 at 40 k, #200 at 19 k, #250 at 14.7 k. The tail is recognisable
+(*Skorpiovenator*, *Haplocanthosaurus*, *Barapasaurus*, *Chaoyangsaurus*), so
+the cut does not reach into obscurity.
+
+**The trace-fossil win is real**: no ichnotaxon or ootaxon survives into the
+well-known track — not by an exclusion list, but because nobody reads about
+them. `test/spec020-well-known-pool.test.ts` asserts it.
+
+**Applying the cache is authoritative, not additive.** A test caught that
+re-applying a cache which no longer knows a taxon left the old figure in place,
+contradicting REQ-001's "the value in the read model equals the value in the
+cache". `applyPopularity` now clears a figure the cache does not carry.
+
+**`scripts/apply_popularity.ts`** exists so refreshing popularity does not force
+a full live re-ingest from PBDB. `gen_web_data.ts` folds the cache in as well, so
+a full rebuild produces the same artifact; the script reuses the same
+`applyPopularity` and serializer.
+
+**Known limitations.** The ranking is English-language attention in one window
+and nothing more (UX-001/UX-002 carry that into the product's wording). Recently
+named genera can rank high on novelty — *Qianlong* and *Tiamat* sit in the top
+ten — which the 12-month window damps but does not remove. 32 pool genera still
+have no figure and are therefore outside the track; re-running the fetch later
+will fill most of them in.
 
 ## Spec amendments
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-001 — popularity is stored as a bare figure with shared provenance
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-08-11
+- **Reason:** DATA-001 specified `popularity: { views; window; retrievedOn;
+  sourceId } | null` **per profile**. Implemented literally, that repeats the
+  same three strings on every profile: measured at **+45 KB** on the shipped
+  reference, against a **40 KB** budget in NFR-003 — and 26 KB of that was the
+  word `null` on the 1,570 profiles that are not in the answer pool.
+- **Changed requirements:** DATA-001. The profile now carries
+  `popularity?: number` — the figure alone, present only when established — and
+  the window, retrieval date and source id are recorded **once** on
+  `SnapshotMetadata.popularity`.
+- **Behavioral impact:** None visible. The value is still sourced and dated, it
+  is still never a zero when unknown, and it is still never rendered as a fact
+  about the animal. Measured cost after the change: **+17.2 KB**, inside budget.
+- **Test impact:** `test/spec020-popularity-cache.test.ts` asserts the
+  provenance lands on the metadata, that an absent figure is never read as zero,
+  and that applying an empty cache clears both.
+- **Human approval reference:** **Pending.** Raised with the owner in the
+  implementation report of 2026-08-11; the alternative is to raise NFR-003's
+  budget from 40 KB to 50 KB and keep the per-profile shape.
+
+### AMEND-002 — each track gets its own permutation salt
+
+- **Date:** 2026-08-11
+- **Reason:** REQ-003 has both tracks select with `selectDailyGenus(dateKey,
+  pool)`. Because the well-known pool is a *subset* of the full pool, a shared
+  permutation makes the well-known order the full order with non-members removed
+  — so both tracks open on the same genus and stay in step until the first
+  non-member appears. Measured on the shipped snapshot: **identical on 4 of the
+  first 14 days, including the first four in a row.** A player switching tracks
+  on launch day would have seen the option do nothing.
+- **Changed requirements:** REQ-003. `selectDailyGenus` takes an optional
+  third argument, the permutation salt, supplied per track by `saltForTrack`.
+- **Behavioral impact:** The full track keeps the original salt as the default,
+  so its sequence is byte-identical to SPEC-019's — REQ-008 holds, and the
+  SPEC-019 suite passes unmodified. The well-known track now has an independent
+  order: the two coincide on fewer than 6 days in 30.
+- **Test impact:** `test/spec020-well-known-pool.test.ts` asserts both the
+  independence and the unchanged full-track sequence.
+- **Human approval reference:** **Pending.** Raised in the same report; without
+  it the option is materially misleading in its first week.
 
 ## Review checklist
 

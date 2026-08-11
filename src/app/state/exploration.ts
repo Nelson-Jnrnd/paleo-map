@@ -40,6 +40,9 @@ export type Screen = "map" | "profile" | "taxonomy" | "daily";
 /** Which round the Daily Genus screen opens in (SPEC-019 REQ-010/012). */
 export type DailyMode = "daily" | "practice";
 
+/** Which of the two parallel puzzles (SPEC-020 REQ-004/007). */
+export type DailyTrack = "full" | "wellKnown";
+
 export type { GroupingMode, RankTier } from "./grouping.js";
 
 export interface ExplorationState {
@@ -62,6 +65,8 @@ export interface ExplorationState {
   taxonomyTaxonId: string | null;
   /** Round the Daily Genus screen is playing (SPEC-019 REQ-010). */
   dailyMode: DailyMode;
+  /** Which parallel puzzle it is playing (SPEC-020 REQ-004). */
+  dailyTrack: DailyTrack;
 }
 
 export const initialExplorationState: ExplorationState = {
@@ -76,6 +81,7 @@ export const initialExplorationState: ExplorationState = {
   profileTaxonId: null,
   taxonomyTaxonId: null,
   dailyMode: "daily",
+  dailyTrack: "full",
 };
 
 export type ExplorationAction =
@@ -98,7 +104,7 @@ export type ExplorationAction =
   | { type: "clearSelection" }
   | { type: "openProfile"; taxonId: string }
   | { type: "openTaxonomy"; taxonId: string | null }
-  | { type: "openDaily"; mode: DailyMode }
+  | { type: "openDaily"; mode: DailyMode; track?: DailyTrack }
   | { type: "backToMap" }
   | { type: "reset" };
 
@@ -172,7 +178,12 @@ export function explorationReducer(
       // SPEC-019: the puzzle is a screen in this shell, not a routed page —
       // same navigation contract as the taxonomy screen, so age and filters
       // survive and one action returns to the map (REQ-012).
-      return { ...state, screen: "daily", dailyMode: action.mode };
+      return {
+        ...state,
+        screen: "daily",
+        dailyMode: action.mode,
+        dailyTrack: action.track ?? state.dailyTrack,
+      };
     case "backToMap":
       // Single-action return; age, filters and the selected occurrence persist
       // (FONC-1000/1080, CONS-470).

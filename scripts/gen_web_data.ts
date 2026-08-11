@@ -41,6 +41,10 @@ import {
   applyWikipedia,
   loadWikipediaResolution,
 } from "../src/pipeline/wikipedia.js";
+import {
+  applyPopularity,
+  loadPopularityCache,
+} from "../src/pipeline/popularity.js";
 
 /** Load the committed reconstruction cache; an absent file yields an empty cache. */
 async function loadReconstructionCache(
@@ -99,10 +103,24 @@ async function main(): Promise<void> {
   const resolution = await loadWikipediaResolution(
     join(repoRoot, "wikipedia", "resolution.json"),
   );
-  const model = applyWikipedia(silhouettedModel, resolution);
-  const withWiki = model.taxa.filter((t) => t.wikipedia != null).length;
+  const wikiModel = applyWikipedia(silhouettedModel, resolution);
+  const withWiki = wikiModel.taxa.filter((t) => t.wikipedia != null).length;
   console.log(
     `Wikipedia: ${Object.keys(resolution.entries).length} resolved entr(ies) → ${withWiki} taxon(a) with an article`,
+  );
+
+  // SPEC-020 REQ-001: attach the committed pageview cache
+  // (popularity/pageviews.json, produced by scripts/fetch_popularity.ts).
+  // Read-only and offline — no pageviews call here; an absent cache simply means
+  // no popularity, and the well-known track is not offered (REQ-008).
+  const popularity = await loadPopularityCache(
+    join(repoRoot, "popularity", "pageviews.json"),
+  );
+  const model = applyPopularity(wikiModel, popularity);
+  const withViews = model.profiles.filter((p) => p.popularity !== null).length;
+  console.log(
+    `Popularity: ${Object.keys(popularity.entries).length} cached figure(s) → ${withViews} profile(s) ranked` +
+      (popularity.window ? ` (${popularity.window})` : ""),
   );
 
   const outDir = join(repoRoot, "public", "data");

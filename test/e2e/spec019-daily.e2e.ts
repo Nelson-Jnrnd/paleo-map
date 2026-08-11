@@ -62,3 +62,33 @@ test("UX-003: a round is playable with the keyboard alone", async ({
   await page.keyboard.press("Enter");
   await expect(page.getByText("1 of 8 guesses")).toBeVisible();
 });
+
+/**
+ * SPEC-020 REQ-004/REQ-007 — the track option in a real browser: it is offered,
+ * it names what the ranking is, and choosing it changes the puzzle.
+ */
+test("SPEC-020 REQ-004: the track option offers both puzzles and is honest about the ranking", async ({
+  page,
+}) => {
+  await page.goto("/#daily");
+  await page.getByLabel("Guess a genus").waitFor();
+
+  await expect(
+    page.getByRole("group", { name: /which puzzle/i }),
+  ).toBeVisible();
+  await expect(page.getByText(/English Wikipedia/i).first()).toBeVisible();
+  await expect(
+    page.getByText(/attention, not of scientific importance/i),
+  ).toBeVisible();
+
+  await page.getByRole("radio", { name: /well-known/i }).check();
+  await expect(page.getByText(/well-known/i).first()).toBeVisible();
+});
+
+test("SPEC-020 REQ-007: #daily-known opens the well-known track directly", async ({
+  page,
+}) => {
+  await page.goto("/#daily-known");
+  await page.getByLabel("Guess a genus").waitFor();
+  await expect(page.getByRole("radio", { name: /well-known/i })).toBeChecked();
+});

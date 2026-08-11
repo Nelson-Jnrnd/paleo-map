@@ -12,10 +12,26 @@
  */
 
 import { MAX_GUESSES, puzzleNumber } from "./dailyGenus.js";
-import type { Round } from "./dailyGenus.js";
+import type { Round, Track } from "./dailyGenus.js";
 
+/**
+ * Storage keys are per track (SPEC-020 REQ-005). The two dailies are different
+ * puzzles, so their rounds, records and streaks are stored separately and no
+ * combined figure is ever derived. The full track keeps SPEC-019's original
+ * keys unsuffixed, so a player's existing history survives this change
+ * (SPEC-020 REQ-008).
+ */
 const STATE_KEY = "paleo-map:daily-genus:round";
 const RECORD_KEY = "paleo-map:daily-genus:record";
+const TRACK_KEY = "paleo-map:daily-genus:track";
+
+function stateKey(track: Track): string {
+  return track === "full" ? STATE_KEY : `${STATE_KEY}:${track}`;
+}
+
+function recordKey(track: Track): string {
+  return track === "full" ? RECORD_KEY : `${RECORD_KEY}:${track}`;
+}
 
 /** The minimum of `Storage` this module uses, so tests can inject a stub. */
 export interface KeyValueStore {
@@ -108,8 +124,9 @@ function writeJson(
 export function loadRound(
   store: KeyValueStore | null,
   dateKey: string,
+  track: Track = "full",
 ): StoredRound | null {
-  const stored = readJson<StoredRound>(store, STATE_KEY);
+  const stored = readJson<StoredRound>(store, stateKey(track));
   if (!stored || stored.dateKey !== dateKey) return null;
   if (!Array.isArray(stored.guesses) || typeof stored.answerId !== "string")
     return null;
@@ -129,11 +146,14 @@ export function saveRound(store: KeyValueStore | null, round: Round): boolean {
     hintUsed: round.hintUsed,
     outcome: round.outcome,
   };
-  return writeJson(store, STATE_KEY, payload);
+  return writeJson(store, stateKey(round.track), payload);
 }
 
-export function loadRecord(store: KeyValueStore | null): StoredRecord {
-  const stored = readJson<StoredRecord>(store, RECORD_KEY);
+export function loadRecord(
+  store: KeyValueStore | null,
+  track: Track = "full",
+): StoredRecord {
+  const stored = readJson<StoredRecord>(store, recordKey(track));
   if (!stored || typeof stored.played !== "number") return EMPTY_RECORD;
   return { ...EMPTY_RECORD, ...stored };
 }
@@ -170,8 +190,22 @@ export function recordRound(record: StoredRecord, round: Round): StoredRecord {
 export function saveRecord(
   store: KeyValueStore | null,
   record: StoredRecord,
+  track: Track = "full",
 ): boolean {
-  return writeJson(store, RECORD_KEY, record);
+  return writeJson(store, recordKey(track), record);
+}
+
+/**
+ * The player's chosen track (SPEC-020 REQ-004), defaulting to the full one for
+ * anyone who has never chosen. One enumerated field, nothing else (SEC-001).
+ */
+export function loadTrack(store: KeyValueStore | null): Track {
+  const stored = readJson<{ track?: string }>(store, TRACK_KEY);
+  return stored?.track === "wellKnown" ? "wellKnown" : "full";
+}
+
+export function saveTrack(store: KeyValueStore | null, track: Track): boolean {
+  return writeJson(store, TRACK_KEY, { track });
 }
 
 /**
@@ -182,6 +216,10 @@ export function saveRecord(
  */
 export function shareSummary(round: Round): string {
   const n = round.dateKey ? puzzleNumber(round.dateKey) : 0;
+  // The track is named because two people comparing "4/8" across different
+  // tracks would be comparing different puzzles (SPEC-020 REQ-006). It is the
+  // only thing added: still no taxon, rank, clade or distance.
+  const track = round.track === "wellKnown" ? " · well-known" : "";
   const score =
     round.outcome === "won"
       ? `${round.guesses.length}/${MAX_GUESSES}`
@@ -195,5 +233,5 @@ export function shareSummary(round: Round): string {
     return "·";
   });
   const hint = round.hintUsed ? " · hint" : "";
-  return `Daily Genus ${n} · ${score}${hint} · ${marks.join("")}`;
+  return `Daily Genus ${n}${track} · ${score}${hint} · ${marks.join("")}`;
 }
