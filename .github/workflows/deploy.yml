@@ -1,0 +1,76 @@
+name: deploy
+
+# Publishes the static SPA (SPEC-002 REQ-003) to GitHub Pages at
+# https://paleomap.nelson-j.ch/.
+#
+# The custom domain is carried by `public/CNAME`, which Vite copies verbatim
+# into `dist/`, so the domain survives every redeploy without depending on the
+# repository settings alone.
+#
+# The served data artifact under `public/data/` is committed, so this workflow
+# only builds — it never regenerates the snapshot and makes no upstream calls
+# (SPEC-003 NFR-001, SPEC-002 REQ-001/006). Refreshing the data stays a
+# deliberate, reviewable commit via `pnpm run gen:web-data`.
+#
+# Correctness gates live in `ci.yml`, which runs on the same pushes to main.
+# This workflow deliberately does not duplicate them: a deploy that builds is
+# the only thing being asserted here.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. In-progress runs are not cancelled: cancelling a
+# half-finished Pages deployment can leave the live site on a partial upload.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Static production build
+        run: pnpm run build
+
+      - name: Verify the custom domain survived the build
+        run: |
+          test -f dist/CNAME || { echo "dist/CNAME missing — the custom domain would be dropped on deploy"; exit 1; }
+          echo "dist/CNAME -> $(cat dist/CNAME)"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
