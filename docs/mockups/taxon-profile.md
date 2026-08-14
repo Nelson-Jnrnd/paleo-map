@@ -12,7 +12,7 @@ mark interpretative and missing data.
 ## Related requirements
 
 FONC-510…FONC-590, FONC-670, FONC-430…FONC-450, FONC-480, FONC-490, FONC-690,
-FONC-710, FONC-720, FONC-1000, FONC-1080, FONC-1120, FONC-1130, FONC-1140,
+FONC-710, FONC-720, FONC-1000, FONC-1080, FONC-1120, FONC-1140,
 FONC-1240, PERF-160, PERF-170, PERF-180, PERF-190.
 
 ## Expected contents
@@ -27,8 +27,9 @@ FONC-1240, PERF-160, PERF-170, PERF-180, PERF-190.
 - **Fossil occurrences** — the known occurrences associated with the taxon
   (FONC-560).
 - **Modern discovery locations** — present-day discovery sites (FONC-570).
-- **Paleogeographic positions** — reconstructed positions, marked as reconstructed
-  (FONC-580, FONC-1130).
+- **Paleogeographic positions** — the reconstructed positions, shown distinctly
+  from modern discovery locations (FONC-580, CONS-110). *(SPEC-021, 2026-08-14:
+  FONC-1130's "marked as reconstructed" cue is retired.)*
 - **Editorial summary** — narrative for Detailed/Featured taxa (FONC-640), sourced
   and attributed; in the mockup it is a Wikipedia (tertiary) summary carrying
   CC BY-SA attribution.
