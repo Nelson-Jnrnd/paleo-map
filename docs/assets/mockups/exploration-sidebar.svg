@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1570" font-family="'Courier New',Courier,monospace" role="img" aria-label="Exploration sidebar redesign at its real 360 pixel width: one 'one row per' unit selector replacing the mode segments plus the rank dropdown, one list whose chrome is invariant, a detail view that replaces the list, and the loading, empty, error, capped and messy-data states.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1570" font-family="'Courier New',Courier,monospace" role="img" aria-label="Exploration sidebar redesign at its real 360 pixel width: one 'one row per' unit selector replacing the mode segments plus the rank dropdown, one list whose chrome is invariant and whose rows carry at most two subtitles, details that replace the list, and the loading, empty, error, capped and messy-data states.">
   <style>
     .h1{font-size:19px;fill:#1f2b38}
     .sub{font-size:12px;fill:#52606e}
@@ -28,7 +28,7 @@
   <rect width="1680" height="1570" fill="#e9eef2"/>
 
   <text class="h1" x="40" y="46">Exploration sidebar — one unit selector, one list, one detail</text>
-  <text class="sub" x="40" y="68">Drawn at the shipped 360 px column width. Every name, count and span is read from the shipped snapshot: Maastrichtian, whole map in view (5,064 occurrences · 2,439 localities · 379 genera).</text>
+  <text class="sub" x="40" y="68">Drawn at the shipped 360 px column width. Every name, count and span is read from the shipped snapshot: Maastrichtian, whole map in view (5,064 occurrences · 2,439 localities · 378 genera).</text>
 
   <!-- ══════════════ ROW 1 ══════════════ -->
   <text class="cap" x="40" y="112">A · DEFAULT LIST — ONE ROW PER GENUS</text>
@@ -50,75 +50,68 @@
     <rect x="165" y="56" width="33" height="2" fill="#0f9d83"/>
     <line x1="0" y1="72" x2="360" y2="72" stroke="#dde5ea"/>
 
-    <text x="16" y="100"><tspan class="num">379</tspan><tspan class="noun" xml:space="preserve">  genera in view</tspan></text>
-    <text class="faint" x="16" y="118">Showing the first 300 of 379 — zoom in to narrow the view.</text>
+    <text x="16" y="100"><tspan class="num">378</tspan><tspan class="noun" xml:space="preserve">  genera in view</tspan></text>
+    <text class="faint" x="16" y="118">Showing the first 300 of 378 — zoom in to narrow the view.</text>
     <line x1="0" y1="130" x2="360" y2="130" stroke="#dde5ea"/>
 
-    <!-- pinned "not classified" bucket — never truncated, never hidden (charter §2) -->
-    <rect x="0" y="130" width="360" height="52" fill="#fbfcfd"/>
-    <rect x="7" y="140" width="2.5" height="30" fill="#8a5a12"/>
-    <text class="row" x="16" y="152">Not classified at genus</text>
-    <text class="meta" x="16" y="168">2,898 occurrences · 57% of the records in view</text>
-    <line x1="0" y1="182" x2="360" y2="182" stroke="#cfd8de"/>
-
     <g>
-      <rect x="7" y="192" width="2.5" height="28" fill="#c893ad"/>
-      <text class="rowIt" x="16" y="204">Triceratops</text>
-      <text class="meta" x="16" y="220">165 occurrences · Ceratopsian · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#c893ad"/>
+      <text class="rowIt" x="16" y="152">Triceratops</text>
+      <text class="meta" x="16" y="168">165 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,44)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#82b6a7"/>
-      <text class="rowIt" x="16" y="204">Megaloolithus</text>
-      <text class="meta" x="16" y="220">162 occurrences · Sauropod · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#82b6a7"/>
+      <text class="rowIt" x="16" y="152">Megaloolithus</text>
+      <text class="meta" x="16" y="168">162 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,88)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#dc9a80"/>
-      <text class="rowIt" x="16" y="204">Richardoestesia</text>
-      <text class="meta" x="16" y="220">93 occurrences · Theropod · 66–100.5 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#dc9a80"/>
+      <text class="rowIt" x="16" y="152">Richardoestesia</text>
+      <text class="meta" x="16" y="168">93 occurrences · 66–100.5 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,132)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#dc9a80"/>
-      <text class="rowIt" x="16" y="204">Tyrannosaurus</text>
-      <text class="meta" x="16" y="220">83 occurrences · Theropod · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#dc9a80"/>
+      <text class="rowIt" x="16" y="152">Tyrannosaurus</text>
+      <text class="meta" x="16" y="168">83 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,176)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#93a9cc"/>
-      <text class="rowIt" x="16" y="204">Edmontosaurus</text>
-      <text class="meta" x="16" y="220">80 occurrences · Ornithopod · 66–89.8 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#93a9cc"/>
+      <text class="rowIt" x="16" y="152">Edmontosaurus</text>
+      <text class="meta" x="16" y="168">80 occurrences · 66–89.8 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,220)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#dc9a80"/>
-      <text class="rowIt" x="16" y="204">Paronychodon</text>
-      <text class="meta" x="16" y="220">67 occurrences · Theropod · 66–72.2 Ma</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#dc9a80"/>
+      <text class="rowIt" x="16" y="152">Paronychodon</text>
+      <text class="meta" x="16" y="168">67 occurrences · 66–72.2 Ma</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,264)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#b4bcc6"/>
-      <text class="rowIt" x="16" y="204">Fusioolithus</text>
-      <text class="meta" x="16" y="220">59 occurrences · Dinosaur · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#b4bcc6"/>
+      <text class="rowIt" x="16" y="152">Fusioolithus</text>
+      <text class="meta" x="16" y="168">59 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,308)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#dc9a80"/>
-      <text class="rowIt" x="16" y="204">Tarbosaurus</text>
-      <text class="meta" x="16" y="220">55 occurrences · Theropod · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#dc9a80"/>
+      <text class="rowIt" x="16" y="152">Tarbosaurus</text>
+      <text class="meta" x="16" y="168">55 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,352)">
-      <rect x="7" y="192" width="2.5" height="28" fill="#9cc49b"/>
-      <text class="rowIt" x="16" y="204">Thescelosaurus</text>
-      <text class="meta" x="16" y="220">45 occurrences · Ornithischian · 66–83.6 Ma ≈</text>
-      <line x1="16" y1="230" x2="360" y2="230" stroke="#e7edf1"/>
+      <rect x="7" y="140" width="2.5" height="28" fill="#9cc49b"/>
+      <text class="rowIt" x="16" y="152">Thescelosaurus</text>
+      <text class="meta" x="16" y="168">45 occurrences · 66–83.6 Ma ≈</text>
+      <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <text class="faint" x="16" y="596">…</text>
   </g>
-  <text class="note" x="40" y="726">Rows are ordered by count, so the 300-row cap cuts the rare tail, not the alphabet. Left rule = clade tint (SPEC-015); the clade is also named in words.</text>
-  <text class="note" x="40" y="742">The not-classified bucket is pinned above the cap: at genus it holds 2,898 of 5,064 records and today falls at position 380 — past the cap, invisible.</text>
+  <text class="note" x="40" y="726">Two subtitles at most, and the clade word is gone from the row: the tint carries it, the detail names it. Rows are ordered by count, so the cap cuts the rare tail.</text>
+  <text class="note" x="40" y="742">Records that do not classify at the tier are filtered out of the taxon units entirely — 2,898 of 5,064 at genus — and stay visible under Occurrence and Locality.</text>
 
   <!-- ══ B: occurrence list, capped, one row highlighted from the map ══ -->
   <g transform="translate(440,124)">
@@ -141,13 +134,13 @@
     <g>
       <rect x="7" y="140" width="2.5" height="28" fill="#82b6a7"/>
       <text class="rowIt" x="16" y="152">Alamosaurus</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Ojo Alamo · SMP Loc. 410b, Willow…</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · SMP Loc. 410b, Willow Wash</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,44)">
       <rect x="7" y="140" width="2.5" height="28" fill="#82b6a7"/>
       <text class="rowIt" x="16" y="152">Alamosaurus</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Ojo Alamo · SMP loc. 389b, Willow…</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · SMP loc. 389b, Willow Wash</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <!-- highlighted from a map hover: the shared two way highlight (SPEC 009 REQ 004) -->
@@ -155,50 +148,50 @@
       <rect x="0" y="132" width="360" height="44" fill="#eef7f5"/>
       <rect x="7" y="140" width="2.5" height="28" fill="#dc9a80"/>
       <text class="rowIt" x="16" y="152">Theropoda</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Barun Goyot · Turtle Graveyard loc…</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Turtle Graveyard locality</text>
       <text class="faint" x="292" y="152">hovered</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,132)">
       <rect x="7" y="140" width="2.5" height="28" fill="#82b6a7"/>
       <text class="rowIt" x="16" y="152">Sauropoda</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Formation not recorded · Pajcha Pata</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Pajcha Pata</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,176)">
       <rect x="7" y="140" width="2.5" height="28" fill="#b4bcc6"/>
       <text class="rowIt" x="16" y="152">Euenantiornithes</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Râul Mare · Nălaţ-Vad</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Nălaţ-Vad</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,220)">
       <rect x="7" y="140" width="2.5" height="28" fill="#b4bcc6"/>
       <text class="rowIt" x="16" y="152">Ornithurae</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Maastricht · CBR-Romontbos quarry</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · CBR-Romontbos quarry, Valkenburg…</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,264)">
       <rect x="7" y="140" width="2.5" height="28" fill="#b4bcc6"/>
       <text class="rowIt" x="16" y="152">Enantiornithes</text>
-      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Maastricht · Ankerpoort-Marnebel q…</text>
+      <text class="meta" x="16" y="168">66–72.2 Ma ≈ · Ankerpoort-Marnebel quarry (Emael…</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,308)">
       <rect x="7" y="140" width="2.5" height="28" fill="#93a9cc"/>
       <text class="rowIt" x="16" y="152">Edmontosaurus</text>
-      <text class="meta" x="16" y="168">66–83.6 Ma ≈ · Hell Creek · Lead Slug Hill 1</text>
+      <text class="meta" x="16" y="168">66–83.6 Ma ≈ · Lead Slug Hill 1</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,352)">
       <rect x="7" y="140" width="2.5" height="28" fill="#c893ad"/>
       <text class="rowIt" x="16" y="152">Triceratops</text>
-      <text class="meta" x="16" y="168">66–83.6 Ma ≈ · Lance · Bushy Tailed Blowout</text>
+      <text class="meta" x="16" y="168">66–83.6 Ma ≈ · Bushy Tailed Blowout</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <text class="faint" x="16" y="596">…</text>
   </g>
-  <text class="note" x="440" y="726">The chrome is identical to A. Only the row body changes: an occurrence names its formation and collection instead of a count.</text>
-  <text class="note" x="440" y="742">"Formation not recorded" is the explicit missing label — the row is never dropped and never left blank (charter §2).</text>
+  <text class="note" x="440" y="726">The chrome is identical to A. Only the row body changes: an occurrence names the Ma range and the collection it comes from instead of a count.</text>
+  <text class="note" x="440" y="742">Formation was the third subtitle and is now a field of the occurrence detail (I), where "Formation not recorded" remains the explicit missing label (charter §2).</text>
 
   <!-- ══ C: locality list ══ -->
   <g transform="translate(840,124)">
@@ -220,53 +213,53 @@
 
     <g>
       <text class="row" x="16" y="152">Lull 2 Quarry (UCMP V-5620)</text>
-      <text class="meta" x="16" y="168">26 taxa · 30 occurrences · Lance · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">26 taxa · Wyoming, US</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,44)">
       <text class="row" x="16" y="152">Tooth Draw Quarry (TD), Deer'…</text>
-      <text class="meta" x="16" y="168">24 taxa · 25 occurrences · Hell Creek · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">24 taxa · South Dakota, US</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,88)">
       <text class="row" x="16" y="152">Bushy Tailed Blowout</text>
-      <text class="meta" x="16" y="168">18 taxa · 22 occurrences · Lance · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">18 taxa · Wyoming, US</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,132)">
       <text class="row" x="16" y="152">Bugin Tsav I [HMNS-GIN/KID]</text>
-      <text class="meta" x="16" y="168">17 taxa · 19 occurrences · Nemegt · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">17 taxa · Omnogov, MN</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,176)">
       <text class="row" x="16" y="152">Nălaţ-Vad</text>
-      <text class="meta" x="16" y="168">16 taxa · 18 occurrences · Râul Mare · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">16 taxa · Hunedoara, RO</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,220)">
       <text class="row" x="16" y="152">Albertosaurus Bonebed, Dry</text>
-      <text class="meta" x="16" y="168">15 taxa · 15 occurrences · Horseshoe Canyon · 66–72.2 Ma</text>
+      <text class="meta" x="16" y="168">15 taxa · Alberta, CA</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,264)">
       <text class="row" x="16" y="152">Dragon's Grave bonebed, Hans</text>
-      <text class="meta" x="16" y="168">15 taxa · 15 occurrences · Lance · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">15 taxa · Wyoming, US</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,308)">
       <text class="row" x="16" y="152">Lead Slug Hill 1</text>
-      <text class="meta" x="16" y="168">15 taxa · 16 occurrences · Hell Creek · 66–72.2 Ma ≈</text>
+      <text class="meta" x="16" y="168">15 taxa · Montana, US</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,352)">
       <text class="row" x="16" y="152">F 1/89, Wadi Abu Hashim</text>
-      <text class="meta" x="16" y="168">14 taxa · 15 occurrences · Wadi Milk · 66–83.6 Ma ≈</text>
+      <text class="meta" x="16" y="168">14 taxa · Ash Shamaliyah, SD</text>
       <line x1="16" y1="178" x2="360" y2="178" stroke="#e7edf1"/>
     </g>
     <text class="faint" x="16" y="596">…</text>
   </g>
-  <text class="note" x="840" y="726">A locality is a place, not a clade, so it carries no clade rule — the tint is never applied to something that is not a clade (charter §4).</text>
-  <text class="note" x="840" y="742">Collection names run long and are truncated to the column, with the full name in the row's title (charter §6).</text>
+  <text class="note" x="840" y="726">A locality is a place, not a clade, so it carries no clade rule. Its two subtitles are the distinct-taxon count and the present-day region as the snapshot records it.</text>
+  <text class="note" x="840" y="742">Formation, occurrence count and Ma span left the row for the detail (K). Collection names run long and truncate, with the full name in the row's title (charter §6).</text>
 
   <!-- ══ D: detail replaces list ══ -->
   <g transform="translate(1240,124)">
@@ -282,7 +275,7 @@
     <rect x="165" y="56" width="33" height="2" fill="#0f9d83"/>
     <line x1="0" y1="72" x2="360" y2="72" stroke="#dde5ea"/>
 
-    <text class="back" x="16" y="96">← 379 genera in view</text>
+    <text class="back" x="16" y="96">← 378 genera in view</text>
     <line x1="0" y1="110" x2="360" y2="110" stroke="#dde5ea"/>
 
     <rect x="7" y="126" width="2.5" height="34" fill="#c893ad"/>
@@ -298,15 +291,10 @@
     <text class="val" x="16" y="326">Genus — its own rank</text>
     <text class="lbl" x="16" y="354">On the map</text>
     <text class="val" x="16" y="372">165 points emphasised,</text>
-    <text class="val" x="16" y="390">4,899 dimmed</text>
+    <text class="val" x="16" y="390">2,001 dimmed</text>
 
     <rect x="16" y="418" width="200" height="30" rx="4" fill="#0a7f66"/>
     <text class="btn" x="30" y="438">Open taxon profile →</text>
-    <text class="meta" x="16" y="470">Wikipedia article available.</text>
-
-    <line x1="0" y1="500" x2="360" y2="500" stroke="#dde5ea"/>
-    <text class="meta" x="16" y="522">Esc, or the link above, returns to the list —</text>
-    <text class="meta" x="16" y="538">scrolled to this row, with the row marked.</text>
   </g>
   <text class="note" x="1240" y="726">The unit selector never moves: the user always knows what a row is, even inside a detail. The back link names the list it returns to.</text>
   <text class="note" x="1240" y="742">Selecting a point on the map lands here too — the map keeps its focus/dim, so the detail is evidence, not a second copy of it.</text>
@@ -333,8 +321,6 @@
     <rect x="16" y="128" width="328" height="6" rx="3" fill="#e3ecf1"/>
     <rect x="16" y="128" width="212" height="6" rx="3" fill="#0f9d83"/>
     <text class="faint" x="16" y="152">64%</text>
-    <text class="meta" x="16" y="188">The unit selector is disabled while the stage</text>
-    <text class="meta" x="16" y="204">loads, and keeps the unit you chose.</text>
   </g>
 
   <!-- F: empty at age -->
@@ -354,8 +340,6 @@
     <text class="meta" x="16" y="148">stage (Santonian, 86.3–83.6 Ma).</text>
     <rect x="16" y="168" width="106" height="30" rx="4" fill="#0a7f66"/>
     <text class="btn" x="30" y="188">Reset view</text>
-    <text class="meta" x="16" y="222">Nothing is countable, so the counts and the</text>
-    <text class="meta" x="16" y="238">rows are absent rather than shown as zero.</text>
   </g>
 
   <!-- G: error -->
@@ -376,8 +360,6 @@
     <text class="meta" x="16" y="148">failed.</text>
     <rect x="16" y="168" width="70" height="30" rx="4" fill="#0a7f66"/>
     <text class="btn" x="34" y="188">Retry</text>
-    <text class="meta" x="16" y="222">The age, the unit and the map view are kept,</text>
-    <text class="meta" x="16" y="238">so a retry lands where you were.</text>
   </g>
 
   <!-- H: empty in view -->
@@ -399,41 +381,45 @@
     <text class="meta" x="16" y="184">fall inside the current map view.</text>
     <text class="btnGhost" x="16" y="212">Zoom out to the whole map</text>
     <line x1="16" y1="218" x2="176" y2="218" stroke="#0a7f66"/>
-    <text class="meta" x="16" y="246">The count stays on screen at 0 — the list is</text>
-    <text class="meta" x="16" y="262">empty because the view is, not the age.</text>
   </g>
 
   <!-- ══════════════ ROW 3 ══════════════ -->
-  <text class="cap" x="40" y="1160">I · THE NOT-CLASSIFIED BUCKET, OPENED</text>
+  <text class="cap" x="40" y="1160">I · AN OCCURRENCE OPENED — FORMATION'S NEW HOME</text>
   <text class="cap" x="440" y="1160">J · REAL NAMES, AT FULL LENGTH</text>
   <text class="cap" x="840" y="1160">K · A LOCALITY, OPENED</text>
   <text class="cap" x="1240" y="1160">WHAT CHANGED, AND WHY</text>
 
-  <!-- I: the "not classified" detail -->
+  <!-- I: an occurrence detail — the fields displaced from the row land here -->
   <g transform="translate(40,1172)">
     <rect width="360" height="340" fill="#ffffff"/>
     <line x1="0.5" y1="0" x2="0.5" y2="340" stroke="#cfd8de"/>
     <text class="eyebrow" x="16" y="26">ONE ROW PER</text>
-    <text class="unit" x="16" y="50">Occurrence</text>
+    <text class="unitOn" x="16" y="50">Occurrence</text>
     <text class="unit" x="97" y="50">Locality</text>
-    <text class="unitOn" x="165" y="50">Genus</text>
+    <text class="unit" x="165" y="50">Genus</text>
     <text class="unit" x="213" y="50">Family</text>
     <text class="unit" x="268" y="50">Major group</text>
-    <rect x="165" y="56" width="33" height="2" fill="#0f9d83"/>
+    <rect x="16" y="56" width="66" height="2" fill="#0f9d83"/>
     <line x1="0" y1="72" x2="360" y2="72" stroke="#dde5ea"/>
-    <text class="back" x="16" y="96">← 379 genera in view</text>
+    <text class="back" x="16" y="96">← 5,064 occurrences in view</text>
     <line x1="0" y1="110" x2="360" y2="110" stroke="#dde5ea"/>
-    <rect x="7" y="126" width="2.5" height="34" fill="#8a5a12"/>
-    <text class="title" x="16" y="146">Not classified at genus</text>
-    <text class="meta" x="16" y="164">2,898 occurrences · 57% of the records in view</text>
-    <text class="lbl" x="16" y="200">Time range</text>
-    <text class="val" x="16" y="218">66–201.4 Ma</text>
-    <text class="meta" x="16" y="234">≈ spans multiple stages</text>
-    <text class="meta" x="16" y="266">These records are identified no deeper than</text>
-    <text class="meta" x="16" y="282">genus — "Theropoda", "? Titanosaurinae indet."</text>
-    <text class="meta" x="16" y="298">— so they have no single taxon profile.</text>
-    <text class="btnGhost" x="16" y="324">Group by family instead — 39% unclassified</text>
-    <line x1="16" y1="330" x2="298" y2="330" stroke="#0a7f66"/>
+    <rect x="7" y="126" width="2.5" height="34" fill="#82b6a7"/>
+    <text class="titleIt" x="16" y="146">Titanosaurinae indet.</text>
+    <text class="meta" x="16" y="164">Shangang, Chongren (IVPP)</text>
+    <text class="lbl" x="16" y="192">Time range</text>
+    <text class="val" x="150" y="192">66–72.2 Ma ≈</text>
+    <text class="lbl" x="16" y="214">Formation</text>
+    <text class="val" x="150" y="214" fill="#8a5a12">Formation not recorded</text>
+    <text class="lbl" x="16" y="236">Modern location</text>
+    <text class="val" x="150" y="236">Jiangxi, CN</text>
+    <text class="val" x="150" y="252">(27.7°, 116.0°)</text>
+    <text class="lbl" x="16" y="274">Paleogeographic</text>
+    <text class="val" x="150" y="274">27.8°, 108.4°</text>
+    <text class="lbl" x="16" y="296">Source</text>
+    <text class="val" x="150" y="296">Z. Dong 1979</text>
+    <rect x="16" y="304" width="200" height="28" rx="4" fill="#eef1f4"/>
+    <text class="lbl" x="30" y="322" fill="#7a848f">Open taxon profile →</text>
+    <text class="faint" x="228" y="322">no article</text>
   </g>
 
   <!-- J: messy real names -->
@@ -453,35 +439,32 @@
     <g>
       <rect x="7" y="128" width="2.5" height="28" fill="#93a9cc"/>
       <text class="rowIt" x="16" y="140">Hadrosauropodus langstoni n.…</text>
-      <text class="meta" x="16" y="156">66–72.2 Ma ≈ · Blackhawk · SDNHM Loc. 3405 - Carl…</text>
+      <text class="meta" x="16" y="156">66–83.6 Ma ≈ · St. Mary River tracksite</text>
       <line x1="16" y1="166" x2="360" y2="166" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,44)">
       <rect x="7" y="128" width="2.5" height="28" fill="#93a9cc"/>
       <text class="rowIt" x="16" y="140">cf. Hadrosauropodus langstoni</text>
-      <text class="meta" x="16" y="156">66–83.6 Ma ≈ · Formation not recorded · Raposo Ta…</text>
+      <text class="meta" x="16" y="156">66–72.2 Ma ≈ · La Mata del Viudà tracksite</text>
       <line x1="16" y1="166" x2="360" y2="166" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,88)">
       <rect x="7" y="128" width="2.5" height="28" fill="#dc9a80"/>
       <text class="rowIt" x="16" y="140">? Neoceratosauria indet.</text>
-      <text class="meta" x="16" y="156">66–83.6 Ma ≈ · Grès à Reptiles · Massecaps locali…</text>
+      <text class="meta" x="16" y="156">66–72.2 Ma ≈ · Cabana de Gori</text>
       <line x1="16" y1="166" x2="360" y2="166" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,132)">
       <rect x="7" y="128" width="2.5" height="28" fill="#82b6a7"/>
       <text class="rowIt" x="16" y="140">? Titanosaurinae indet.</text>
-      <text class="meta" x="16" y="156">66–83.6 Ma ≈ · Marília · Collection not recorded</text>
+      <text class="meta" x="16" y="156">66–72.2 Ma ≈ · Price Quarry 2</text>
       <line x1="16" y1="166" x2="360" y2="166" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,176)">
       <rect x="7" y="128" width="2.5" height="28" fill="#93a9cc"/>
-      <text class="rowIt" x="16" y="140">Euhadrosauria indet.</text>
-      <text class="meta" x="16" y="156">66–72.2 Ma ≈ · Tremp · Blasi 2-3</text>
-      <line x1="16" y1="166" x2="360" y2="166" stroke="#e7edf1"/>
+      <text class="rowIt" x="16" y="140">Hadrosauridae</text>
+      <text class="meta" x="16" y="156">66–83.6 Ma ≈ · SDNHM Loc. 3405 - Carlsbad area, o…</text>
     </g>
-    <text class="meta" x="16" y="316">Names wrap to one line and truncate with the</text>
-    <text class="meta" x="16" y="332">full string in the row's title — never clipped.</text>
   </g>
 
   <!-- K: locality detail -->
@@ -499,35 +482,35 @@
     <text class="back" x="16" y="96">← 2,439 localities in view</text>
     <line x1="0" y1="110" x2="360" y2="110" stroke="#dde5ea"/>
     <text class="title" x="16" y="140">Lull 2 Quarry (UCMP V-5620)</text>
-    <text class="meta" x="16" y="158">Lance Formation · 66–72.2 Ma ≈</text>
-    <text class="meta" x="16" y="174">26 taxa · 30 occurrences</text>
-    <line x1="0" y1="190" x2="360" y2="190" stroke="#dde5ea"/>
-    <text class="eyebrow" x="16" y="210">TAXA RECORDED HERE</text>
+    <text class="meta" x="16" y="158">Wyoming, US</text>
+    <text class="meta" x="16" y="174">Lance Formation · 66–72.2 Ma ≈</text>
+    <text class="meta" x="16" y="190">26 taxa · 30 occurrences</text>
+    <line x1="0" y1="206" x2="360" y2="206" stroke="#dde5ea"/>
+    <text class="eyebrow" x="16" y="226">TAXA RECORDED HERE</text>
     <g>
-      <rect x="7" y="222" width="2.5" height="16" fill="#c893ad"/>
-      <text class="rowIt" x="16" y="234">Triceratops</text>
-      <text class="back" x="252" y="234">profile →</text>
-      <line x1="16" y1="244" x2="360" y2="244" stroke="#e7edf1"/>
+      <rect x="7" y="238" width="2.5" height="16" fill="#c893ad"/>
+      <text class="rowIt" x="16" y="250">Triceratops</text>
+      <text class="back" x="252" y="250">profile →</text>
+      <line x1="16" y1="260" x2="360" y2="260" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,26)">
-      <rect x="7" y="222" width="2.5" height="16" fill="#dc9a80"/>
-      <text class="rowIt" x="16" y="234">Tyrannosaurus</text>
-      <text class="back" x="252" y="234">profile →</text>
-      <line x1="16" y1="244" x2="360" y2="244" stroke="#e7edf1"/>
+      <rect x="7" y="238" width="2.5" height="16" fill="#dc9a80"/>
+      <text class="rowIt" x="16" y="250">Tyrannosaurus</text>
+      <text class="back" x="252" y="250">profile →</text>
+      <line x1="16" y1="260" x2="360" y2="260" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,52)">
-      <rect x="7" y="222" width="2.5" height="16" fill="#9cc49b"/>
-      <text class="rowIt" x="16" y="234">Thescelosaurus</text>
-      <text class="back" x="252" y="234">profile →</text>
-      <line x1="16" y1="244" x2="360" y2="244" stroke="#e7edf1"/>
+      <rect x="7" y="238" width="2.5" height="16" fill="#9cc49b"/>
+      <text class="rowIt" x="16" y="250">Thescelosaurus</text>
+      <text class="back" x="252" y="250">profile →</text>
+      <line x1="16" y1="260" x2="360" y2="260" stroke="#e7edf1"/>
     </g>
     <g transform="translate(0,78)">
-      <rect x="7" y="222" width="2.5" height="16" fill="#b4bcc6"/>
-      <text class="rowIt" x="16" y="234" fill="#7a848f">Paronychodon</text>
-      <text class="meta" x="248" y="234">no article</text>
-      <line x1="16" y1="244" x2="360" y2="244" stroke="#e7edf1"/>
+      <rect x="7" y="238" width="2.5" height="16" fill="#b4bcc6"/>
+      <text class="rowIt" x="16" y="250" fill="#7a848f">Gaviiformes indet.</text>
+      <text class="meta" x="248" y="250">no article</text>
     </g>
-    <text class="faint" x="16" y="330">… 22 more</text>
+    <text class="faint" x="16" y="336">… 22 more</text>
   </g>
 
   <!-- annotation column -->
@@ -537,23 +520,29 @@
     <text class="ann" x="0" y="50">one question. Five units, one flat set, one</text>
     <text class="ann" x="0" y="66">choice. No control appears or disappears.</text>
 
-    <text class="annId" x="0" y="98">REQ-002 · ONE LIST</text>
+    <text class="annId" x="0" y="98">REQ-002 · ONE LIST, TWO SUBTITLES</text>
     <text class="ann" x="0" y="116">Header, count, cap notice, empty-in-view and</text>
     <text class="ann" x="0" y="132">highlight are the same code for every unit.</text>
-    <text class="ann" x="0" y="148">Only the two lines of a row body differ.</text>
+    <text class="ann" x="0" y="148">A row body is a name and at most two values:</text>
+    <text class="ann" x="0" y="164">count · Ma span (taxa), Ma span · collection</text>
+    <text class="ann" x="0" y="180">(occurrences), taxa · region (localities).</text>
 
-    <text class="annId" x="0" y="180">REQ-003 · DETAIL REPLACES LIST</text>
-    <text class="ann" x="0" y="198">A detail no longer pushes the list down a</text>
-    <text class="ann" x="0" y="214">360 px scroll column. Back is one action and</text>
-    <text class="ann" x="0" y="230">restores the scroll position and the row.</text>
+    <text class="annId" x="0" y="212">REQ-003 · DETAIL REPLACES LIST</text>
+    <text class="ann" x="0" y="230">A detail no longer pushes the list down a</text>
+    <text class="ann" x="0" y="246">360 px scroll column. Back is one action and</text>
+    <text class="ann" x="0" y="262">restores the scroll position and the row.</text>
+    <text class="ann" x="0" y="278">The clade word and the formation live here.</text>
 
-    <text class="annId" x="0" y="262">REQ-004 · THE BUCKET IS PINNED</text>
-    <text class="ann" x="0" y="280">At genus, 2,898 of 5,064 records are not</text>
-    <text class="ann" x="0" y="296">classified — and today that row sorts to</text>
-    <text class="ann" x="0" y="312">position 380, past the 300-row cap.</text>
+    <text class="annId" x="0" y="310">REQ-004 · TAXON UNITS ARE CLASSIFIED-ONLY</text>
+    <text class="ann" x="0" y="328">Records that reach no taxon at the tier —</text>
+    <text class="ann" x="0" y="344">2,898 of 5,064 at genus — are filtered out of</text>
+    <text class="ann" x="0" y="360">list, count and map together at Genus, Family</text>
+    <text class="ann" x="0" y="376">and Major group. Occurrence and Locality keep</text>
+    <text class="ann" x="0" y="392">every record: owner decision, 2026-08-14.</text>
 
-    <text class="annId" x="0" y="344">REQ-005 · COUNT-ORDERED ROWS</text>
-    <text class="ann" x="0" y="362">Alphabetical order plus a cap hid</text>
-    <text class="ann" x="0" y="378">Triceratops and Tyrannosaurus entirely.</text>
+    <text class="annId" x="0" y="424">REQ-005 · COUNT-ORDERED ROWS</text>
+    <text class="ann" x="0" y="442">Alphabetical order plus a 300-row cap hid</text>
+    <text class="ann" x="0" y="458">Triceratops (343rd) and Tyrannosaurus (348th)</text>
+    <text class="ann" x="0" y="474">among the 378 classified genera.</text>
   </g>
 </svg>

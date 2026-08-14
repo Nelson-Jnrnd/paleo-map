@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-026
 title: Exploration sidebar redesign — one unit selector, one list, one detail
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -39,12 +39,17 @@ panel on top of the list inside a 360 px scroll column, pushing away the list yo
 were reading. This spec collapses that into one flat unit selector — **Occurrence
 · Locality · Genus · Family · Major group** — one list whose chrome is identical
 for every unit and whose row body is not, and a detail that **replaces** the list
-with a one-action way back. It also fixes two defects the redesign exposed on real
-data: at the default genus tier the *not classified* bucket holds 2,898 of 5,064
-Maastrichtian records yet sorts to row 380, past the 300-row render cap — so the
-charter's "never hidden" disclosure is currently hidden — and alphabetical
-ordering plus that same cap hides *Triceratops* and *Tyrannosaurus* from the
-genus list entirely. No data, pipeline, map or snapshot change.
+with a one-action way back. Owner review of the mockup, 2026-08-14, added three
+cuts: a row carries **at most two subtitles** (the clade word, the formation and
+the locality's occurrence count and Ma span come off the rows and live in the
+detail), a locality row must say **where it is today**, and the records that
+reach no taxon at the chosen tier are **filtered out of the taxon units**
+altogether rather than disclosed in a bucket — 2,898 of 5,064 Maastrichtian
+records at genus. It also fixes the ordering defect the redesign exposed:
+alphabetical ordering plus the 300-row render cap hides *Triceratops* and
+*Tyrannosaurus* from the genus list entirely. No data, pipeline or snapshot
+change; the map's rendering is unchanged, but at a taxon unit it plots the same
+filtered set the list and the count are derived from (REQ-004).
 
 ## Context
 
@@ -110,19 +115,32 @@ cosmetic:
 - The count nouns are `occurrence(s)`, `locality(ies)`, `taxon(a)` — three
   different parenthetical plural spellings for the same sentence shape.
 
-**4 — The mandated disclosure is hidden by the cap.** `groupByTaxon`
-(`grouping.ts:228-231`) sorts the *not classified* bucket **last**. On the shipped
-Maastrichtian snapshot at the default genus tier there are **379 groups** and the
-bucket holds **2,898 of 5,064 records (57 %)** — so it sits at position 380, and
-`LIST_RENDER_CAP = 300` slices it away. SPEC-010 REQ-005 and charter §2 require it
-to be disclosed, never silently dropped; today, at the default tier and the
-default viewport, it is not on screen at all.
+**4 — The not-classified bucket dominates and discloses nothing usable.**
+`groupByTaxon` (`grouping.ts:228-231`) sorts the *not classified* bucket **last**.
+At the Maastrichtian default it holds **2,810 of 4,945 records (57 %)** and sits
+at **row 358 of 358** — beyond `LIST_RENDER_CAP = 300`, so the disclosure
+SPEC-010 REQ-005 and charter §2 ask for is not on screen in the shipped build
+anyway. The owner's decision (2026-08-14) is not to pin it but to **remove it**:
+the taxon units answer "which taxa are here?", and a row that stands for half the
+stage and names no taxon is noise in that list. REQ-004 states the rule and its
+scope.
 
 **5 — Alphabetical order plus a cap truncates arbitrarily.** Classified groups
 are sorted by name (`grouping.ts:230`), localities by `collectionId`
-(`grouping.ts:185-191`, effectively arbitrary). With 379 genera and a 300-row cap,
-*Triceratops* (165 occurrences, the largest group at this age) and
-*Tyrannosaurus* (83) both fall past the cap and never render.
+(`grouping.ts:185-191`, effectively arbitrary). Even with the bucket removed the
+classified set is larger than the cap — **378 genera** on the shipped stage — so
+name ordering still decides what is cut: *Triceratops* (165 occurrences, the
+largest group at this age) sorts **343rd** and *Tyrannosaurus* (83) **348th**,
+both past the 300-row cap, and neither renders.
+
+**6 — Rows carry more subtitles than they can hold.** Owner review of the mockup,
+2026-08-14: *"Too much noise in the list, reduce the number of subtitles. At most
+two. And remove non-necessary ones like Family, it's redundant with the color code
+and visible when you click on it anyway."* As drawn, a locality row carried four
+values, an occurrence row three and a taxon row three. REQ-002 cuts every row to
+two. Separately: *"Locality must say where it is in our current day and age
+(country)"* — a locality row states a paleo-era formation and span but never says
+where the place is today.
 
 ## Diagnosis — checked against the source, 2026-08-14
 
@@ -134,8 +152,27 @@ is confirmed and larger than described, and two further defects were found.
 | Mode and rank are two controls answering one question | **Confirmed** — `GroupingControls.tsx:52-68` |
 | Selection stacks a panel above the list in a 360 px scroll column | **Confirmed** — `ExplorationView.tsx:535-607` |
 | The three list/panel pairs have drifted | **Confirmed and worse** — the drift includes a missing SPEC-010 REQ-004 behaviour (hover linkage), a missing empty-in-view state, and a missing keep-selected-row-rendered rule |
-| *(new)* The not-classified bucket is cut off by the render cap | Found here |
+| *(new)* The not-classified bucket is cut off by the render cap | Found here — and resolved by removing the bucket from the taxon units (REQ-004, owner decision 2026-08-14), not by pinning it |
 | *(new)* Name ordering plus the cap hides the two largest genus groups | Found here |
+| *(owner review)* Rows carry three or four subtitles; a locality never says where it is today | Confirmed against the mockup; REQ-002 |
+
+**Measurement note — the not-classified share, 2026-08-14.** Two independent
+folds over the shipped Maastrichtian snapshot agree on the magnitude and on the
+conclusion:
+
+- At the app's default settings: **2,810 of 4,945 records (57 %)** reach no genus;
+  the bucket sorts last at **row 358 of 358**, past `LIST_RENDER_CAP = 300`.
+- A re-fold in this session over `public/data/stage-maastrichtian.json` with the
+  SPEC-014 AMEND-005 article gate lifted: **2,898 of 5,064 records (57 %)** reach
+  no genus, leaving **378** classified genera; at Family **1,951 (39 %)** and at
+  Major group **532 (11 %)** reach no taxon at the tier.
+- One interaction worth recording, because it bounds where REQ-004 bites: with
+  the article gate at its **default (on)**, the gate itself admits only
+  occurrences whose taxon is a Wikipedia-documented **genus**, so the genus-tier
+  bucket is empty and REQ-004 changes nothing there; the bucket is non-empty at
+  the default gate at **Family (18 %)** and **Major group (3.5 %)**, and at every
+  tier once "Show taxa without a Wikipedia article" is on. The figures above are
+  the honest worst case, which is the one the rule is written for.
 
 **On the proposed direction — adopted, with two corrections.** A single flat unit
 set and one list component are right, and the two things the orchestrator asked
@@ -169,10 +206,10 @@ Two corrections to the proposed direction:
 1. **The unit selector must not disappear inside the detail.** Replace-not-stack
    only works if the user can still see what a row is and what list they will
    return to. REQ-003 therefore pins the selector plus a back link that *names*
-   the list ("← 379 genera in view").
-2. **Flattening alone does not fix the mess.** Two of the five problems above
-   (the buried bucket, the arbitrary truncation) are ordering defects that a new
-   control would leave in place. REQ-004 and REQ-005 fix them.
+   the list ("← 378 genera in view").
+2. **Flattening alone does not fix the mess.** The buried bucket, the arbitrary
+   truncation and the crowded rows are not control problems; a new control would
+   leave all three in place. REQ-002, REQ-004 and REQ-005 fix them.
 
 ## Goals
 
@@ -182,7 +219,11 @@ Two corrections to the proposed direction:
   behaviour, empty-in-view state and highlight linkage are shared code.
 - Make a selection **replace** the list in the same column, with the selector and
   a naming back link retained, and a one-action return that restores position.
-- **Pin the not-classified bucket** so it can never be truncated.
+- Cut every row to a name plus **at most two subtitles**, and give a locality
+  row its **present-day region**.
+- **Filter the not-classified records out of the taxon units**, consistently
+  across the list, the count and the map, while keeping them under Occurrence and
+  Locality.
 - **Order rows by count** so the render cap cuts the rare tail.
 - Close the drift: hover linkage, empty-in-view and keep-selected-rendered
   behave the same for every unit.
@@ -190,9 +231,12 @@ Two corrections to the proposed direction:
 
 ## Non-goals
 
-- **No change to the map.** No marker, cluster, paint, focus/dim, legend or
-  accessible-name change. SPEC-021 owns the cluster disclosure; this spec must
-  not touch it.
+- **No change to how the map renders.** No marker, cluster, paint, focus/dim,
+  legend or accessible-name change. SPEC-021 owns the cluster disclosure; this
+  spec must not touch it. The one map-facing change is *which occurrences are in
+  the visible set at a taxon unit* (REQ-004), applied through the same seam the
+  shipped article gate already uses (`gateOccurrences`), not through the map's
+  own code.
 - **No change to the data layer** — no snapshot field, no pipeline step, no
   `ReadOccurrence` / `ReadTaxon` change, no rebuild.
 - **No change to the roll-up itself.** `resolveTierTaxon`, `MAJOR_GROUP_NAMES`
@@ -208,8 +252,11 @@ Two corrections to the proposed direction:
   REQ-005, not user-chosen.
 - **No change to `LIST_RENDER_CAP`'s value or the overflow wording.**
 - **No URL/deep-link state** (SPEC-009 assumption A-2 still stands).
-- **No change to the taxon profile, the taxonomy screen or the occurrence
-  panel's field set** — only where the occurrence panel is rendered changes.
+- **No change to the taxon profile or the taxonomy screen.** The occurrence
+  panel changes in exactly two ways: where it is rendered (REQ-003), and one
+  added field — **Formation**, displaced from the occurrence row by REQ-002 — so
+  the cut loses nothing from the product. No other field is added, removed or
+  reworded.
 
 ## Users or actors
 
@@ -269,25 +316,42 @@ the shipped column against SPEC-009/010 requirements.
   keep-the-selected-row-rendered rule, and the two-way highlight linkage
   (REQ-006). Only the **row body** varies, and it varies in content, not in
   structure: every row is a name line plus a meta line, and is a single
-  keyboard-operable control.
-  - **Occurrence** row: taxon name (italic, CONS-350); meta = Ma range · formation
-    · collection name.
-  - **Locality** row: collection name; meta = distinct-taxon count · occurrence
-    count · formation · Ma range (SPEC-010 REQ-003's distinct-taxon count is
-    preserved).
+  keyboard-operable control. **A row's meta line carries at most two values**
+  (owner review, 2026-08-14), and exactly these:
+  - **Occurrence** row: taxon name (italic, CONS-350); meta = Ma range ·
+    collection name. **Formation is cut from the row** and becomes a field of the
+    occurrence detail, where the explicit missing label `Formation not recorded`
+    is rendered (501 of 5,064 Maastrichtian records have none).
+  - **Locality** row: collection name; meta = distinct-taxon count · **present-day
+    region**. SPEC-010 REQ-003's distinct-taxon count is preserved; the occurrence
+    count, the formation and the Ma range are **cut from the row** and are shown
+    in the locality detail, which already carries them.
   - **Genus / Family / Major group** row: taxon name (italic); meta = occurrence
-    count · clade name · aggregate Ma range (SPEC-010 REQ-004's count + aggregate
-    span are preserved).
+    count · aggregate Ma range (SPEC-010 REQ-004's two figures, both preserved).
+    **The clade word is cut from the row** — see UX-002 for the rule that keeps
+    the clade legible without it.
 
-  The count line states the unit's plural noun as a whole word — `379 genera in
+  The **present-day region** is `ReadOccurrence.modernPosition.value.region`
+  rendered **verbatim as the snapshot records it** — `Wyoming, US`, `Alberta, CA`,
+  `Omnogov, MN`, `Ash Shamaliyah, SD`: a sub-national area plus an ISO-2 country
+  code. It is not expanded to a country name (see *Assumptions and decisions*).
+  All occurrences of a collection carry the same region, so the locality's region
+  is that value; a collection with no region renders `Region not recorded`,
+  though the shipped snapshot has none (100 % coverage, 41,116 occurrences).
+
+  The count line states the unit's plural noun as a whole word — `378 genera in
   view`, `2,439 localities in view`, `5,064 occurrences in view` — replacing the
   `occurrence(s)` / `locality(ies)` / `taxon(a)` parenthetical forms. A value
-  that is absent renders an explicit label (`Formation not recorded`), never a
-  blank (charter §2, FONC-490).
+  that is absent renders an explicit label, never a blank (charter §2, FONC-490).
 - **Rationale:** Three near-duplicate implementations drifted into three
   different behaviours, one of which silently dropped a SPEC-010 requirement. One
   component makes divergence impossible and makes the row body the only place a
-  unit is allowed to differ.
+  unit is allowed to differ. The two-subtitle ceiling is the owner's: three and
+  four values under a 13 px name in a 360 px column read as noise, and each value
+  cut is one that the detail already states one click away. The two kept on a
+  taxon row are the two SPEC-010 REQ-004 leans on (count, aggregate span); the two
+  kept on a locality row are SPEC-010 REQ-003's distinct-taxon count and the
+  owner's new requirement that a place say where it is today.
 - **Acceptance criteria:**
   - `LocalityList`, `TaxonList` and `OccurrenceList` no longer exist as three
     separate list implementations; one component renders all five units.
@@ -297,9 +361,16 @@ the shipped column against SPEC-009/010 requirements.
   - For each of the five units: an age with records and an empty viewport
     produces the empty-in-view state with its recovery action (today `TaxonList`
     produces an empty `<ul>` instead).
-  - A locality row states its distinct-taxon count; a taxon row states its
-    occurrence count and aggregate Ma range.
-  - An occurrence with no formation renders `Formation not recorded`.
+  - Every row in every unit renders a name line and **exactly two** meta values;
+    no row renders a third.
+  - A locality row states its distinct-taxon count and its present-day region,
+    and states no formation, occurrence count or Ma range.
+  - A taxon row states its occurrence count and aggregate Ma range, and states no
+    clade word.
+  - An occurrence row states its Ma range and collection name, and states no
+    formation.
+  - Opening an occurrence renders a `Formation` field; for an occurrence whose
+    collection records none it renders `Formation not recorded`.
   - No rendered text matches `/occurrence\(s\)|locality\(ies\)|taxon\(a\)/`.
 - **Verification method:** automated component test.
 - **Evidence location:** `test/ui/grouping-mode.test.tsx`,
@@ -313,7 +384,7 @@ the shipped column against SPEC-009/010 requirements.
   detail must not be stacked above, below, or beside the list. While a detail is
   open the column must still show (a) the REQ-001 unit selector, unchanged and
   still operable, and (b) a **back control whose accessible name states the list
-  it returns to**, e.g. "Back to 379 genera in view". Activating back, or pressing
+  it returns to**, e.g. "Back to 378 genera in view". Activating back, or pressing
   `Escape` while focus is inside the column, must clear the selection, restore the
   list **scrolled to the previously selected row**, mark that row with
   `aria-current="true"`, and move keyboard focus to it. Opening a detail must move
@@ -349,38 +420,59 @@ the shipped column against SPEC-009/010 requirements.
   `test/ui/taxon-mode.test.tsx`, `test/ui/locality-mode.test.tsx`,
   `test/ui/spec013-search-ui.test.tsx`.
 
-### REQ-004: The not-classified bucket is pinned and can never be truncated
+### REQ-004: The taxon units show classified taxa only — list, count and map filtered together
 
-- **Statement:** When grouping at Genus, Family or Major group, the *not
-  classified at this level* bucket (SPEC-010 REQ-005, `NOT_CLASSIFIED_KEY`) must
-  be rendered **outside the render cap**, pinned directly below the count line
-  and above the capped rows, whenever it is non-empty. It must state its
-  occurrence count **and its share of the records in view** (e.g. "2,898
-  occurrences · 57 % of the records in view"). Its status must be carried by a
-  non-colour-only cue (a labelled marker plus its own wording, with the charter's
-  muted-amber "incomplete / attention" hue as reinforcement only). When it is
-  empty it must not render at all. Its detail view (REQ-003) must state why there
-  is no single taxon profile **and offer a recovery**: a control that switches to
-  the next coarser unit and names what that costs (e.g. "Group by family instead
-  — 39 % unclassified").
-- **Rationale:** On the shipped snapshot at the default tier the bucket is the
-  largest group in the atlas (2,898 of 5,064 records) and sorts to position 380,
-  behind a 300-row cap — so charter §2's "shown plainly, never hidden" and
-  SPEC-010 REQ-005's "never silently dropped" are both violated today at the
-  default settings. Pinning is the only fix that is independent of ordering, the
-  cap value and the viewport.
+- **Statement:** At the **Genus**, **Family** and **Major group** units, an
+  occurrence that resolves to **no** taxon at the chosen tier (`resolveTierTaxon`
+  returns null — SPEC-010 REQ-005's *not classified at this level* case) must be
+  **excluded from the unit's visible set**. The exclusion is applied **once**, to
+  the occurrence set the unit derives everything from, so that all three surfaces
+  agree:
+  - the **list** contains no *not classified* row, at any position, capped or not;
+  - the **count line** counts only classified groups (`378 genera in view`), and
+    any in-view occurrence total the column reports at that unit counts only the
+    classifying records (2,166 of 5,064 at the drawn genus scenario);
+  - the **map** plots only those same records while a taxon unit is active, so a
+    point on the map always has a row behind it and the two-way highlight
+    (REQ-006) and map-selection (REQ-003) can never land on a record with no row.
+
+  Switching to the **Occurrence** or **Locality** unit restores the full set:
+  those records are real fossil occurrences and are listed, counted, mapped and
+  openable there exactly as today. `NOT_CLASSIFIED_KEY`, `notClassifiedLabel` and
+  the bucket branch of `groupByTaxon` are removed from the rendered surface; a
+  taxon group is always a real taxon with a real key. The filter is a pure
+  predicate over the already-loaded stage (NFR-001) and composes with the
+  SPEC-014 AMEND-005 article gate rather than replacing it.
+- **Rationale:** Owner instruction, 2026-08-14: the bucket must be filtered out.
+  At the Maastrichtian default it holds **2,810 of 4,945 records (57 %)** and
+  sorts to **row 358 of 358**, past `LIST_RENDER_CAP = 300` — so it is not on
+  screen in the shipped build in any case. A taxon unit answers "which taxa are
+  in view?", and a row that names no taxon is not an answer to that question.
+  **This is a deliberate owner decision to stop disclosing that share of records
+  in the taxon views** (it changes SPEC-010 REQ-005 and touches charter §2 —
+  recorded once, in AMEND-003 below, and not re-argued here). It is bounded: the
+  records are not deleted, hidden from the atlas, or dropped from any count that
+  is not a taxon count — they remain in full under Occurrence and Locality, which
+  is where an identification that reaches no genus is a meaningful row.
+  Filtering *all three* surfaces together rather than the list alone is what
+  keeps the column honest: a filtered list over an unfiltered map would show a
+  count that disagrees with the points and a hover that resolves to nothing.
 - **Acceptance criteria:**
-  - With more groups than the cap and a non-empty bucket, the bucket row is in
-    the document and is not one of the capped rows.
-  - The bucket row states its count and its percentage share of the in-view
-    records.
-  - With an empty bucket, no bucket row renders.
-  - The bucket's state is legible in words and in shape, not by hue alone.
-  - The bucket's detail offers a control that switches to the next coarser unit,
-    and states that unit's unclassified share.
-  - In Occurrence and Locality units no bucket row renders (there is no roll-up).
+  - At each of Genus, Family and Major group, no row, key or accessible name
+    matches `/not classified/i`, with or without the render cap in play.
+  - The taxon-unit count line equals the number of **classified** groups, and the
+    occurrence total reported at that unit equals the number of records that
+    resolve at the tier.
+  - The map's feature set at a taxon unit equals that same record set; switching
+    to Occurrence or Locality restores every record.
+  - A record that resolves at no tier is present in the Occurrence list and in
+    its locality's detail, and its occurrence detail opens normally.
+  - `groupByTaxon` returns only groups with a non-null `taxonId`; no group has
+    `notClassified: true`.
+  - The filter is pure and issues no request (NFR-001, SEC-001).
 - **Verification method:** automated component test + unit test.
-- **Evidence location:** `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`.
+- **Evidence location:** `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`,
+  `test/ui/rank-rollup.test.ts`.
 
 ### REQ-005: Rows are ordered by count, descending, with a deterministic tie-break
 
@@ -392,9 +484,12 @@ the shipped column against SPEC-009/010 requirements.
   no count to sort by). The ordering must be produced by the pure functions in
   `src/app/state/grouping.ts`, not by the component.
 - **Rationale:** With a 300-row render cap, the order decides what is *not* shown.
-  Alphabetical ordering makes that arbitrary: on the shipped Maastrichtian
-  snapshot the two largest genus groups — *Triceratops* (165) and *Tyrannosaurus*
-  (83) — both fall past the cap and never render, and locality rows are ordered by
+  The claim was re-checked against the **smaller, bucket-free set** REQ-004
+  leaves behind and still holds: 378 classified genera on the shipped
+  Maastrichtian stage (357 with the article gate at its default), so the cap
+  still bites, and under name ordering the two largest groups — *Triceratops*
+  (165 occurrences) at position **343** and *Tyrannosaurus* (83) at **348** —
+  both fall past it and never render. Locality rows are ordered by
   `collectionId`, which carries no meaning at all. Count-descending makes the
   truncated tail the rare tail, which is also what the existing overflow line
   ("zoom in to narrow the view") implies.
@@ -404,8 +499,9 @@ the shipped column against SPEC-009/010 requirements.
   - `groupByLocality` returns localities in taxon-count-descending order, ties by
     name then `collectionId`.
   - In the genus list over the shipped stage fixture, the highest-count group is
-    the first row.
-  - The not-classified bucket's position is set by REQ-004, not by this ordering.
+    the first row, and *Triceratops* and *Tyrannosaurus* both render.
+  - Every group in the ordering is a classified group (REQ-004); the sort has no
+    not-classified branch left to special-case.
 - **Verification method:** automated unit test.
 - **Evidence location:** `test/ui/grouping.test.ts`.
 
@@ -440,12 +536,13 @@ the shipped column against SPEC-009/010 requirements.
 ### NFR-001: Still pure, in-memory and inside PERF-030
 
 - **Statement:** Every derivation the redesign adds — the unit→(mode, rank)
-  mapping, the count-descending ordering, the bucket's share percentage — must be
-  a pure in-memory computation over the already-loaded stage, with no I/O, and a
-  unit switch, a selection, a back, or a pan/zoom must complete well within
-  PERF-030 (≤ 1 s) at MVP volume (5,064 occurrences / 2,439 localities / 379
-  genus groups in the largest shipped stage). Ordering is an O(n log n) sort over
-  groups, not over occurrences.
+  mapping, the count-descending ordering, and REQ-004's classified-only filter —
+  must be a pure in-memory computation over the already-loaded stage, with no
+  I/O, and a unit switch, a selection, a back, or a pan/zoom must complete well
+  within PERF-030 (≤ 1 s) at MVP volume (5,064 occurrences / 2,439 localities /
+  378 classified genus groups in the largest shipped stage). Ordering is an
+  O(n log n) sort over groups; the filter is one O(n) pass over occurrences that
+  reuses the resolver the fold already runs.
 - **Rationale:** SPEC-010 NFR-001 and SPEC-002 NFR-001 budgets, unchanged.
 - **Acceptance criteria:** No network request is issued on a unit switch, row
   activation, back, hover or pan/zoom; the grouping functions remain pure and
@@ -508,8 +605,12 @@ the shipped column against SPEC-009/010 requirements.
 
 **None.** No domain type, snapshot field, read-model shape, pipeline step or
 budget changes, and no snapshot rebuild is required. `ReadOccurrence`,
-`ReadTaxon`, `LocalityGroup` and `TaxonGroup` keep their current fields; REQ-004's
-percentage and REQ-005's ordering are computed from fields that already exist.
+`ReadTaxon` and `LocalityGroup` keep their current fields, and REQ-002's
+present-day region reads `ReadOccurrence.modernPosition.value.region`, which
+already exists and is populated on 100 % of the snapshot. `TaxonGroup` loses no
+field either, but REQ-004 makes two of them dead weight in practice
+(`notClassified` is always `false`, `taxonId` is never null); removing them is a
+type-level tidy the implementation may do, not a data-model change.
 
 ## API impact
 
@@ -548,14 +649,16 @@ percentage and REQ-005's ordering are computed from fields that already exist.
   Locality, Genus, Family, Major group, taxa, occurrences, formation, Ma — never
   "items", "records" for occurrences, or product-speak); keep teal as the only
   accent, carrying interaction and selection; keep status colour meaning-only
-  (muted amber for the not-classified bucket, red for a load failure with the
-  recovery action staying teal); and design **all** of these states, each legible
-  in words and in shape: loading (selector disabled, choice legible), empty at
-  this age with `Reset view`, error with `Retry` and the age/unit/viewport
-  preserved, empty in view with a recovery action, capped/overflow, a selected-row
-  detail, the not-classified bucket both as a row and opened, and real long /
-  messy / missing values. The column must contain **no bordered card per row or
-  per panel, no pill chips, and no sentence explaining how to read the column**;
+  (muted amber for a missing value such as `Formation not recorded`, red for a
+  load failure with the recovery action staying teal); and design **all** of these
+  states, each legible in words and in shape: loading (selector disabled, choice
+  legible), empty at this age with `Reset view`, error with `Retry` and the
+  age/unit/viewport preserved, empty in view with a recovery action,
+  capped/overflow, a selected-row detail (taxon, locality and occurrence), a
+  disabled "no article" profile control, and real long / messy / missing values.
+  The column must contain **no bordered card per row or per panel, no pill chips,
+  and no sentence explaining how to read the column** — the shipped column states
+  facts and states, never instructions for reading itself;
   structure comes from hairlines, spacing and type weight. The design is bound to
   [`docs/mockups/exploration-sidebar.md`](../../mockups/exploration-sidebar.md)
   and its SVG.
@@ -563,46 +666,80 @@ percentage and REQ-005's ordering are computed from fields that already exist.
   a sidebar as the likeliest place in an app to drift into cards, chips and
   captions.
 - **Acceptance criteria:**
-  - Each of the eight states above renders with the content the mockup page
-    documents, and each is reachable in a test or a named manual check.
+  - Each of the states above renders with the content the mockup page documents,
+    and each is reachable in a test or a named manual check.
   - The error state's heading uses the error hue and the recovery button uses the
     accent.
   - No rendered text in the column matches `/items|insights|overview|engagement/i`.
   - A long collection name (≥ 60 characters) truncates to the column with the
     full string available as the row's `title`, and does not overlap or clip.
-  - A missing formation renders `Formation not recorded`.
+  - A missing formation renders `Formation not recorded` in the occurrence
+    detail.
+  - A locality row renders its present-day region as the snapshot records it.
+  - No rendered string in the column instructs the reader how to use the column
+    (the mockup's seven such sentences were removed at owner review, 2026-08-14).
 - **Verification method:** automated component test + inspection against the
   mockup.
 - **Evidence location:** `test/ui/grouping-mode.test.tsx`,
   `test/ui/data-states.test.tsx`, `docs/mockups/exploration-sidebar.md`.
 
-### UX-002: The clade rule on taxon and occurrence rows — **gated on OQ-2**
+### UX-002: The clade rule on taxon and occurrence rows — adopted
 
-- **Statement:** Occurrence rows and taxon rows (all three tiers) may carry a
-  2–3 px vertical rule in the row's clade tint, resolved through the existing
-  `mapCladeMarkers.ts` mapping, **and the clade must also be named in words on the
-  row** ("Ceratopsian", "Theropod", "Dinosaur" for the neutral fallback), so the
-  tint is never the only carrier (charter §4, PERF-250). A **locality row must not
-  carry a clade rule**, because a locality is a place, not a clade. This
-  requirement is **gated**: it must not be implemented until the owner records a
-  decision under OQ-2 / *Human decisions required*. If the owner declines, the
-  requirement is struck and rows carry no tint; nothing else in this spec changes.
-- **Rationale:** It ties a sidebar row to the clade-tinted marker it corresponds
-  to on the map (SPEC-015), which SPEC-017 AMEND-001 already established as
-  learnable across screens rather than map-only. It is also the one **additive**
-  element in an otherwise subtractive spec, which is why it is gated rather than
-  assumed: the owner asked for a mess to be cleaned up, not for a new signal.
+- **Statement:** Occurrence rows and taxon rows (all three tiers) carry a 2–3 px
+  vertical rule in the row's clade tint, resolved through the existing
+  `mapCladeMarkers.ts` mapping. A **locality row must not carry a clade rule**,
+  because a locality is a place, not a clade. The clade is **not named on the
+  row**: REQ-002 caps a row at two subtitles and the owner cut the clade word as
+  redundant with the tint. Two rules keep that from making colour the sole
+  carrier (charter §4, PERF-250):
+  1. **The row's identity is its name, not its tint.** The scientific name
+     identifies the row; the tint reinforces which clade it belongs to and is
+     never the only difference between two rows.
+  2. **The clade is named in words within one action and without sight.** The
+     row's accessible name states it ("Triceratops, Ceratopsian, 165 occurrences,
+     66–83.6 Ma"), and the detail the row opens states it in visible text
+     ("Ceratopsian · genus"). A tint therefore never carries a meaning that has
+     no worded form.
+- **Rationale:** Owner decision, 2026-08-14 (OQ-2 — "Tint"): adopt the tint, drop
+  the word. It ties a sidebar row to the clade-tinted marker it corresponds to on
+  the map (SPEC-015), which SPEC-017 AMEND-001 already established as learnable
+  across screens rather than map-only, and it buys back the row's second subtitle
+  for the two figures SPEC-010 REQ-004 requires. The charter's rule that "shape
+  and name carry identity first, the tint reinforces" is satisfied by the name;
+  the compensating rules above satisfy "a clade tint may never be the only way a
+  clade is identified".
 - **Acceptance criteria:**
-  - The owner's decision is recorded in this spec before implementation begins.
-  - If adopted: every row carrying a tint also names its clade in text; locality
-    rows carry no tint; every tint value comes from `CLADE_MARKERS` (no new hue);
-    the axe contrast gate stays clean.
-  - If declined: no tint is rendered in the column and the clade word may still
-    be shown on taxon rows.
-- **Verification method:** automated component test + inspection of the recorded
-  decision.
+  - Taxon and occurrence rows render a clade rule; every tint value comes from
+    `CLADE_MARKERS` (no new hue); locality rows render none.
+  - No row renders a clade word as a visible subtitle.
+  - Every row carrying a tint states its clade in its accessible name, and the
+    detail it opens states the clade in visible text.
+  - The axe contrast gate stays clean.
+- **Verification method:** automated component test + inspection.
 - **Evidence location:** `test/ui/taxon-mode.test.tsx`,
-  `src/app/components/mapCladeMarkers.ts`.
+  `test/ui/occurrence-list.test.tsx`, `src/app/components/mapCladeMarkers.ts`.
+
+## Assumptions and decisions recorded
+
+- **A-1 — the present-day region is shown as the snapshot records it.**
+  `modernPosition.value.region` is present on **100 % of the 41,116 occurrences
+  across all stages**, with **667 distinct values** and no collection carrying a
+  conflicting region, so no pipeline work and no fallback path is needed. The
+  format is a sub-national area plus an ISO-2 country code (`New Mexico, US`,
+  `Alberta, CA`, `Omnogov, MN`). **Rejected alternative:** mapping the code to a
+  country name would need a **95-entry** ISO-2→name table living in the view
+  layer (`src/app/state/`), one of whose codes — `O2`, PBDB's open-ocean code —
+  names no country at all; it would also cost row width that the long collection
+  names need. Shipping the string verbatim shows the country *and* the state or
+  province, invents nothing, and adds no table to maintain.
+- **A-2 — what the region displaces on a locality row.** The occurrence count,
+  the formation and the Ma range. All three are already in the locality detail
+  (REQ-003), so nothing leaves the product; SPEC-010 REQ-003's distinct-taxon
+  count stays on the row. Recorded in AMEND-003.
+- **A-3 — the taxon units' filter narrows the map too.** Chosen over filtering
+  the list alone, which would leave the count and the map disagreeing with the
+  rows. It changes SPEC-010 REQ-004's "the map still contains one feature per
+  occurrence" clause; recorded in AMEND-003.
 
 ## Configuration impact
 
@@ -610,8 +747,9 @@ No environment variable, feature flag, build setting or budget changes. Two
 view-layer constant sets change: the mode/rank pair is joined by a `ListUnit`
 enum and its labels (`src/app/state/grouping.ts`), and `RANK_TIER_LABEL` is
 reused for three of the five unit labels. `LIST_RENDER_CAP` keeps its value
-(300). No token is added to `src/app/styles/tokens.css`; UX-002, if adopted,
-consumes the existing clade tints.
+(300). `NOT_CLASSIFIED_KEY` and `notClassifiedLabel` (`grouping.ts`) lose their
+only consumers under REQ-004. No token is added to `src/app/styles/tokens.css`;
+UX-002 consumes the existing clade tints.
 
 ## Error handling
 
@@ -624,8 +762,9 @@ consumes the existing clade tints.
   under the new unit (existing reducer behaviour, `exploration.ts:131-134`).
 - **Selection that no longer exists after a stage change** → cleared, list shown
   (existing behaviour, `exploration.ts:123-130`).
-- **A taxon group with no profile** (the not-classified bucket) → REQ-004's
-  detail with the coarser-unit recovery, never a dead end.
+- **A record that classifies at no tier** → not an error and not a dead end: it
+  is absent from the taxon units by REQ-004 and fully present under Occurrence
+  and Locality.
 - **A taxon with no Wikipedia article** → the existing disabled profile
   affordance with its reason (SPEC-014 AMEND-005), unchanged.
 - **A collection with no paleocoordinate** → excluded from the map as today, still
@@ -634,18 +773,26 @@ consumes the existing clade tints.
 ## Edge cases
 
 - **Exactly one row** in a unit — the count line reads `1 genus in view` (singular
-  noun), no overflow line, no bucket if empty.
-- **Zero classified groups, non-empty bucket** — the pinned bucket is the only
-  row; the count line must not read `0` while a row is visible, so the count
-  counts the bucket as a group (state which, in the implementation note).
-- **The bucket is the only group at Major group tier** — same shape; it must still
-  offer no coarser unit, so the recovery control is absent, not broken.
+  noun) and no overflow line renders.
+- **No record classifies at the tier** (e.g. a viewport holding only
+  "*Theropoda indet.*" records at the Genus unit) — the taxon unit is **empty in
+  view**, not zero-with-rows: the empty-in-view state renders with its recovery
+  action, and the map is empty at that unit for the same reason the list is. The
+  Occurrence unit still shows every one of those records, which is the recovery
+  the state points at.
+- **A viewport where the only difference between units is the filter** — the
+  Occurrence count and the taxon-unit occurrence total legitimately differ
+  (5,064 vs 2,166 on the drawn stage); they are counts of different sets, and
+  each unit reports its own.
 - **More groups than the cap plus a selected row past the cap** — the selected row
   stays rendered (REQ-002); when the detail is open the question is moot, and on
   back the row must be scrolled to (REQ-003).
-- **A 78-character collection name** (`SDNHM Loc. 3405 - Carlsbad area, off
+- **A 79-character collection name** (`SDNHM Loc. 3405 - Carlsbad area, off
   College Boulevard and Palomar Airport Road`, real, in the shipped snapshot) —
   truncates with a `title`.
+- **A long region string** (`Languedoc-Roussillon, FR`) next to a long
+  distinct-taxon count — the locality row's two subtitles truncate the region,
+  never the count.
 - **PBDB name forms** — `? Neoceratosauria indet.`, `cf. Hadrosauropodus
   langstoni`, `Hadrosauropodus langstoni n. gen. n. sp.` all render as one line
   without clipping.
@@ -664,37 +811,39 @@ consumes the existing clade tints.
 
 This spec is satisfied when: one control offers the five flat units and no rank
 `<select>` exists in any state (REQ-001); one list component renders all five
-units with identical chrome and a unit-specific two-line row body (REQ-002);
-activating a row or a map point replaces the list with a detail that keeps the
-unit selector and a naming back control, and back/`Escape` restores the list
-scrolled to the row with focus on it (REQ-003); the not-classified bucket is
-pinned outside the render cap, states its share, and its detail offers a coarser
-unit (REQ-004); taxon and locality rows are ordered count-descending with a
-deterministic tie-break (REQ-005); hover linkage works in all five units
-(REQ-006); the column is keyboard-operable with no lost focus and a clean axe run
-(NFR-002); every listed test is updated and none skipped or deleted (NFR-003);
-`setUnit` sets mode and rank atomically with `unitOf`/`modeAndRankOf` mutual
-inverses (API-001); all eight real states render per the mockup with no card,
-chip or interface caption (UX-001); and the SPEC-010 AMEND-003 block below has
-been transplanted with the owner's approval reference.
+units with identical chrome and a two-line row body whose meta line carries at
+most two values — Ma range · collection, taxa · present-day region, count ·
+aggregate span (REQ-002); activating a row or a map point replaces the list with
+a detail that keeps the unit selector and a naming back control, and
+back/`Escape` restores the list scrolled to the row with focus on it (REQ-003);
+the Genus, Family and Major group units contain no *not classified* row and
+filter list, count and map from one set (REQ-004); taxon and locality rows are
+ordered count-descending with a deterministic tie-break (REQ-005); hover linkage
+works in all five units (REQ-006); the column is keyboard-operable with no lost
+focus and a clean axe run (NFR-002); every listed test is updated and none
+skipped or deleted (NFR-003); `setUnit` sets mode and rank atomically with
+`unitOf`/`modeAndRankOf` mutual inverses (API-001); every real state renders per
+the mockup with no card, chip or interface caption (UX-001); the clade tint is
+carried with the compensating worded rules (UX-002); and the SPEC-010 AMEND-003
+block below has been transplanted with the owner's approval reference.
 
 ## Verification matrix
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
 | REQ-001 | Five flat units, one control, no rank combobox, default Occurrence, disabled-with-choice in loading/error, non-colour-only active state | automated + inspection | `pnpm test grouping-mode` | `test/ui/grouping-mode.test.tsx` | |
-| REQ-002 | One list component; identical chrome, unit-specific row body; empty-in-view in every unit; no `(s)`/`(ies)`/`(a)` plurals | automated | `pnpm test grouping-mode occurrence-list locality-mode taxon-mode` | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/ui/taxon-mode.test.tsx` | |
+| REQ-002 | One list component; identical chrome; **exactly two** meta values per row (Ma · collection, taxa · region, count · span); no clade word or formation on a row; formation in the occurrence detail; empty-in-view in every unit; no `(s)`/`(ies)`/`(a)` plurals | automated | `pnpm test grouping-mode occurrence-list locality-mode taxon-mode occurrence-panel` | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-panel.test.tsx` | |
 | REQ-003 | Detail replaces rows; selector persists; back names the list; back/Esc restores scroll, `aria-current` and focus; map selection lands the same | automated + inspection | `pnpm test occurrence-list taxon-mode locality-mode spec013-search-ui` | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/spec013-search-ui.test.tsx` | |
-| REQ-004 | Bucket rendered outside the cap, states count + share, absent when empty, detail offers the coarser unit | automated | `pnpm test taxon-mode grouping` | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts` | |
-| REQ-005 | Count-descending order with name-then-id tie-break, deterministic across two folds | automated | `pnpm test grouping` | `test/ui/grouping.test.ts` | |
+| REQ-004 | No `/not classified/i` row at any taxon unit; count, list and map feature set derived from the same filtered records; Occurrence/Locality keep every record | automated | `pnpm test taxon-mode grouping rank-rollup` | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`, `test/ui/rank-rollup.test.ts` | |
+| REQ-005 | Count-descending order with name-then-id tie-break, deterministic across two folds; *Triceratops* and *Tyrannosaurus* render | automated | `pnpm test grouping taxon-mode` | `test/ui/grouping.test.ts`, `test/ui/taxon-mode.test.tsx` | |
 | REQ-006 | Hover/focus reports ids and `data-highlighted` marks the row, in all five units | automated | `pnpm test occurrence-list taxon-mode locality-mode` | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/locality-mode.test.tsx` | |
 | NFR-001 | Pure, no I/O on unit switch / select / back / pan | automated + inspection | `pnpm test data-005-no-runtime-egress` | `test/data-005-no-runtime-egress.test.ts` | |
 | NFR-002 | Keyboard operable, focus moves to detail heading and back to the row, axe clean | automated | `pnpm test occurrence-list`; `pnpm exec playwright test a11y`; lint | `test/ui/occurrence-list.test.tsx`, `test/e2e/a11y.e2e.ts` | |
 | NFR-003 | No test deleted, skipped or weakened; suite green | automated + diff review | `pnpm test`; `git diff -- test` | CI run on the PR | |
 | SEC-001 | No new fetch/XHR/storage | automated + inspection | `pnpm test data-005-no-runtime-egress` | `test/data-005-no-runtime-egress.test.ts` | |
 | API-001 | `unitOf`/`modeAndRankOf` mutual inverses; `setUnit` sets both and clears selections; no `setMode`/`setRank` | automated | `pnpm test grouping`; `pnpm run typecheck` | `test/ui/grouping.test.ts`, `src/app/state/exploration.ts` | |
-| UX-001 | Eight states render per the mockup; domain language; no card/chip/caption; long and missing values survive | automated + inspection | `pnpm test grouping-mode data-states`; review against the mockup | `test/ui/grouping-mode.test.tsx`, `test/ui/data-states.test.tsx`, `docs/mockups/exploration-sidebar.md` | |
-| UX-002 | Owner decision recorded; if adopted, tint always paired with the clade word, no tint on localities, no new hue | automated + inspection | `pnpm test taxon-mode` | `test/ui/taxon-mode.test.tsx` | |
+| UX-001 | Every state renders per the mockup; domain language; no card/chip/caption; long, missing and region values survive | automated + inspection | `pnpm test grouping-mode data-states`; review against the mockup | `test/ui/grouping-mode.test.tsx`, `test/ui/data-states.test.tsx`, `docs/mockups/exploration-sidebar.md` | |
+| UX-002 | Tint on taxon and occurrence rows only, no new hue, no clade word on a row, clade in the accessible name and in the detail | automated + inspection | `pnpm test taxon-mode occurrence-list` | `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-list.test.tsx` | |
 
 ## Test plan
 
@@ -706,12 +855,12 @@ confirmed on 2026-08-14.
 | File | What it asserts today | Required change |
 | ---- | --------------------- | --------------- |
 | `test/ui/grouping-mode.test.tsx` | `role="group"` named `/group occurrences by/i` with buttons `Occurrences` / `Localities` / `Taxa`; `combobox` named `/group by rank/i` appears only in Taxa mode; regions `/occurrences on the map/i`, `/localities on the map/i`, `/taxa on the map/i` | Rewrite to the five-unit control (REQ-001): five options, default `Occurrence`, no combobox in **any** state, the disabled-but-legible loading/error state, and the region name per unit. Add the REQ-002 chrome-parity assertions. **Coordinate with SPEC-021**, which also edits this file (its cluster-legend assertion) — see *Conflict check* |
-| `test/ui/taxon-mode.test.tsx` | Clicks `Taxa`, then the rank combobox, to reach genus/family rows; asserts `Tyrannosaurus`, `Triceratops`, `Tyrannosauridae`; selecting a taxon opens region `/taxon:/i` with `Open taxon profile` | Reach the tiers by activating the `Genus` / `Family` options. Add: the pinned bucket (REQ-004), its share, its coarser-unit recovery, count-descending order (REQ-005), hover linkage (REQ-006), and that the rows are gone once the detail is open (REQ-003) |
-| `test/ui/locality-mode.test.tsx` | Clicks `Localities`; asserts region `/localities on the map/i`, a locality panel `/locality:/i`, per-taxon `Open profile`, and the profile→back loop | Reach the unit via the `Locality` option; assert the detail replaces the rows, the back control's name, hover linkage, and count-descending order |
-| `test/ui/occurrence-list.test.tsx` | In-view count wording `occurrence(s) in the current map view`; hover reports the id; `aria-current` + `data-highlighted`; the fallback header `occurrence(s) at this age`; the empty-in-view message; the cap + overflow line; row → panel → `Open taxon profile` | Update the count wording to whole-word plurals (REQ-002); keep every other assertion; add the REQ-003 assertions (rows absent while the detail is open, back restores scroll + `aria-current` + focus) and the NFR-002 focus assertions |
+| `test/ui/taxon-mode.test.tsx` | Clicks `Taxa`, then the rank combobox, to reach genus/family rows; asserts `Tyrannosaurus`, `Triceratops`, `Tyrannosauridae`; selecting a taxon opens region `/taxon:/i` with `Open taxon profile` | Reach the tiers by activating the `Genus` / `Family` options. Add: **no `/not classified/i` row and no unclassified record in the unit's count or map set** (REQ-004), the two-value row body with no clade word (REQ-002), count-descending order (REQ-005), hover linkage (REQ-006), and that the rows are gone once the detail is open (REQ-003). Any existing assertion that the bucket is present must be **inverted, not deleted** (NFR-003) |
+| `test/ui/locality-mode.test.tsx` | Clicks `Localities`; asserts region `/localities on the map/i`, a locality panel `/locality:/i`, per-taxon `Open profile`, and the profile→back loop | Reach the unit via the `Locality` option; assert the detail replaces the rows, the back control's name, hover linkage, count-descending order, and the row's two subtitles — distinct-taxon count + **present-day region**, with no formation, occurrence count or Ma range on the row |
+| `test/ui/occurrence-list.test.tsx` | In-view count wording `occurrence(s) in the current map view`; hover reports the id; `aria-current` + `data-highlighted`; the fallback header `occurrence(s) at this age`; the empty-in-view message; the cap + overflow line; row → panel → `Open taxon profile` | Update the count wording to whole-word plurals (REQ-002); assert the row's two subtitles are Ma range + collection name with **no formation on the row**; keep every other assertion; add the REQ-003 assertions (rows absent while the detail is open, back restores scroll + `aria-current` + focus) and the NFR-002 focus assertions |
 | `test/ui/grouping.test.ts` | The locality and taxon folds and their current ordering | Add REQ-005 ordering (count-descending, tie-break, determinism across two folds) and API-001's `unitOf`/`modeAndRankOf` inverse property |
-| `test/ui/rank-rollup.test.ts` | `resolveTierTaxon` over the ingested ancestry, incl. the not-classified case | **No change expected** — the resolver is untouched. Re-run as a regression guard; if it needs editing, that is a signal the change has exceeded its scope |
-| `test/ui/occurrence-panel.test.tsx` | Region `/Occurrence:/i`, its field set, `Open taxon profile` | Update only if the close control's accessible name changes to the REQ-003 back control; the field assertions stay |
+| `test/ui/rank-rollup.test.ts` | `resolveTierTaxon` over the ingested ancestry, incl. the not-classified case | **The resolver is untouched** and its null case must keep its assertion — it is now what REQ-004 filters on rather than what fills a bucket. Add one assertion that the filter drops exactly the records for which the resolver returns null |
+| `test/ui/occurrence-panel.test.tsx` | Region `/Occurrence:/i`, its field set, `Open taxon profile` | Keep every field assertion, update the close control's accessible name to the REQ-003 back control, and add the one new field: `Formation`, with `Formation not recorded` when the collection records none (REQ-002) |
 | `test/ui/spec013-search-ui.test.tsx` | A search result lands "in the side panel, not the profile" | Update the landing assertion to the replaced-list detail; the requirement (land in context) is unchanged |
 | `test/ui/scenario-perf-370.test.tsx` | Empty state → `Reset view` → region `/occurrences on the map/i` | Update the region name if it changes; the PERF-370 scenario itself is unchanged |
 | `test/ui/data-states.test.tsx` | Loading `status` + `progressbar`, `Retry`, back-to-map | Add the REQ-001 assertion that the unit selector is present-but-disabled in the loading and error states |
@@ -723,10 +872,10 @@ confirmed on 2026-08-14.
 | `test/e2e/exploration.e2e.ts:44-46` | `complementary` named `/occurrence details/i` is visible | Update the landmark's accessible name if it changes (it should name the column, not one unit) |
 | `test/e2e/a11y.e2e.ts` | axe over the exploration view | No edit expected, but it is a **required gate** for NFR-002 — new left rules, a disabled control and a focus-moving swap are exactly what trips axe. Must be run and reported |
 
-**Fixtures.** No new fixture. REQ-004's "more groups than the cap" case needs a
+**Fixtures.** No new fixture. REQ-005's "more groups than the cap" case needs a
 fixture (or a lowered cap injected as a prop in the test) that produces > 300
-groups; the shipped Maastrichtian stage produces 379 at genus and is the honest
-source. If the jsdom harness cannot hold the full stage, the assertion is made
+groups; the shipped Maastrichtian stage produces 378 classified genera and is the
+honest source. If the jsdom harness cannot hold the full stage, the assertion is made
 against the pure fold plus a component test with an injected cap — it must **not**
 be resolved by skipping (NFR-003).
 
@@ -742,10 +891,16 @@ network surface — so `git revert` of the squashed commit restores the previous
 sidebar exactly, with no cleanup step. Partial rollback is possible along two
 seams:
 
-- **REQ-005 (ordering) and REQ-004 (pinning) are independent of REQ-001…003.**
-  Either can be reverted alone by restoring the sort in `grouping.ts` and the
-  bucket's place in the row list; both are pure-function changes with their own
-  unit tests.
+- **REQ-005 (ordering) and REQ-004 (the classified-only filter) are independent
+  of REQ-001…003.** Either can be reverted alone — restore the name sort in
+  `grouping.ts`, or restore the bucket branch of `groupByTaxon` and stop
+  narrowing the visible set — and both are pure-function changes with their own
+  unit tests. Reverting REQ-004 also reinstates SPEC-010 REQ-005's disclosure, so
+  AMEND-003's REQ-004/005 clauses must be struck with it.
+- **REQ-002's row trims are revertible field by field** (formation back onto the
+  occurrence row, region off the locality row), since each is one line of the row
+  body; the two-value ceiling is the owner's constraint, so a partial revert must
+  say which value it puts back and which it removes.
 - **REQ-003 (replace) can be reverted to stacking** by rendering the detail above
   the list again, without touching the unit selector — the selector and the list
   do not depend on the swap.
@@ -756,16 +911,13 @@ revert must also strike it, or SPEC-010 will describe a UI that no longer exists
 
 ## Open questions
 
-- [ ] **OQ-1 — the remembered rank.** Today, leaving Taxa mode and returning
-      restores the last rank tier. With five flat units there is no "Taxa" to
-      return to, so the tier is re-picked explicitly. Recorded as an accepted
-      trade-off: the tier is one visible click either way, and the alternative
-      (invisible remembered state behind a visible control) is worse. **Confirm
-      or reject** — rejecting would mean keeping a separate rank control, i.e.
-      not adopting REQ-001.
-- [ ] **OQ-2 — the clade rule (UX-002).** Adopt the clade tint + clade word on
-      taxon and occurrence rows, or ship the redesign with no tint in the column?
-      This is the only additive element in the spec, which is why it is gated.
+- [x] **OQ-1 — the remembered rank.** **Confirmed by the owner, 2026-08-14.** The
+      remembered tier is dropped; the tier is one visible click either way, and
+      REQ-001 stands as written.
+- [x] **OQ-2 — the clade rule (UX-002).** **Adopted by the owner, 2026-08-14
+      ("Tint").** The tint ships, ungated. The clade *word* does not appear on a
+      row (owner review: redundant with the tint and present in the detail); the
+      compensating rules are in UX-002.
 - [x] **Does flattening lose reducer state?** **No** — `(mode, rank)` maps
       one-to-one onto the five units and nothing consumes one without the other
       (see *Diagnosis*). Resolved by inspection of
@@ -779,6 +931,14 @@ revert must also strike it, or SPEC-010 will describe a UI that no longer exists
       shipped snapshot: nearly every Maastrichtian row spans 66–83.6 or
       66–72.2 Ma, so a column of bars would carry no reading. The span stays a
       figure with its unit.
+- [x] **Should the taxon units filter the map as well as the list?** **Yes** —
+      resolved in REQ-004 and recorded as A-3: a filtered list over an unfiltered
+      map would leave the count disagreeing with the points and would let a hover
+      or a map selection resolve to no row.
+- [x] **Should the present-day region be expanded to a country name?** **No** —
+      resolved as A-1: the shipped string already carries the country as an ISO-2
+      code plus the state or province, a lookup would be 95 entries with one code
+      (`O2`) that names no country, and the row has no width to spare.
 - [ ] **Deferred to implementation:** whether the unit selector is a radio group
       (`aria-checked`, one tab stop, arrow keys) or five `aria-pressed` buttons.
       Either satisfies REQ-001; the radio group is the better keyboard model and
@@ -790,41 +950,60 @@ revert must also strike it, or SPEC-010 will describe a UI that no longer exists
 
 ## Human decisions required
 
-- [ ] **Approve the direction: one flat unit selector, one list, detail replaces
+All four are answered. **Owner approval recorded in session, 2026-08-14
+(nelsonjeanrenaud@gmail.com)** — "I confirm and approve everything mentionned
+here", given on the revised mockup and this spec together.
+
+- [x] **Approve the direction: one flat unit selector, one list, detail replaces
       the list.** This is the substance of the redesign, and it changes SPEC-010
       REQ-001/005's delivery mechanism (AMEND-003 below).
 
-      **Answer:** _______________
+      **Answer:** Approved. Owner approval recorded in session, 2026-08-14
+      (nelsonjeanrenaud@gmail.com). OQ-1 confirmed with it.
 
-- [ ] **OQ-2 — the clade rule (UX-002).** Adopt (tint + clade word on taxon and
-      occurrence rows, never on localities), or decline (no tint in the column)?
+- [x] **OQ-2 — the clade rule (UX-002).** Adopt, or decline?
 
-      **Answer:** _______________
+      **Answer:** **Adopt the tint** ("Tint"), ungated — UX-002 is a live
+      requirement, not a gated one. The clade *word* is cut from the row as
+      redundant with the tint and with the detail. Owner approval recorded in
+      session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
 
-- [ ] **Confirm the ordering change (REQ-005).** Rows become count-ordered rather
-      than alphabetical. This is what stops the render cap from hiding
-      *Triceratops* and *Tyrannosaurus*, but it does change what the list looks
-      like on every stage.
+- [x] **Confirm the ordering change (REQ-005).** Rows become count-ordered rather
+      than alphabetical.
 
-      **Answer:** _______________
+      **Answer:** Approved. Owner approval recorded in session, 2026-08-14
+      (nelsonjeanrenaud@gmail.com).
 
-- [ ] **Approve this spec** (status → Approved, move to `docs/specs/approved/`).
+- [x] **Approve the mockup review changes** — at most two subtitles per row, no
+      interface-explaining copy in the product, the not-classified records
+      filtered out of the taxon units, and the present-day region on a locality
+      row.
 
-      **Answer:** _______________
+      **Answer:** Approved. Owner approval recorded in session, 2026-08-14
+      (nelsonjeanrenaud@gmail.com).
+
+- [x] **Approve this spec** (status → Approved; the move to
+      `docs/specs/approved/` is the orchestrator's step, not this change's).
+
+      **Answer:** Approved. Owner approval recorded in session, 2026-08-14
+      (nelsonjeanrenaud@gmail.com).
 
 ## Conflict check
 
 | Document | What overlaps or conflicts | Resolution |
 | -------- | -------------------------- | ---------- |
 | `SPEC-010` REQ-001 (three-mode control) | This spec replaces the three-mode control + rank `<select>` with one five-unit control | **AMEND-003** below — the *mechanism* changes, the requirement (an always-visible, keyboard-operable, non-colour-only unit control that switches list, map semantics and panel target together) is preserved |
-| `SPEC-010` REQ-005 (rank selector inside Taxon mode) | The rank selector ceases to exist as a separate control; the tiers become three of the five units | **AMEND-003** — the ladder (Genus / Family / Major group, no Species), the roll-up and the not-classified bucket are all unchanged; only the control is folded in, and the bucket's placement is strengthened |
-| `SPEC-010` REQ-003/REQ-004 (row contents, focus/dim) | Preserved verbatim: locality rows keep the distinct-taxon count, taxon rows keep the occurrence count and aggregate span, the map keeps every point and the focus/dim | **No conflict** — REQ-002 restates them as the row body, and REQ-006 finally implements REQ-004's hover clause |
+| `SPEC-010` REQ-005 (rank selector inside Taxon mode; the disclosed bucket) | The rank selector ceases to exist as a separate control; the tiers become three of the five units; **the disclosed "not classified at this level" bucket is removed from the taxon units** | **AMEND-003** — the ladder (Genus / Family / Major group, no Species) and the roll-up are unchanged, but the disclosure clause is **reversed by owner decision** and the records are shown under Occurrence and Locality instead. This is the one place this spec removes something SPEC-010 required |
+| `SPEC-010` REQ-003 (locality row contents) | The row keeps its distinct-taxon count but loses its formation/Ma range to the detail, and gains the present-day region | **AMEND-003** — REQ-003's "distinct-taxon count" survives; "collection or formation name … + the locality's Ma range" moves to the locality detail |
+| `SPEC-010` REQ-004 (taxon rows, map keeps every point, focus/dim) | Row contents preserved (count + aggregate span). **The "map still contains one feature per occurrence" clause is amended**: at a taxon unit the map plots the classified records only | **AMEND-003** — the focus/dim behaviour, the no-collapsing rule and the no-per-taxon-hue rule are unchanged; only the membership of the visible set changes, through the same seam as the shipped article gate. REQ-006 finally implements REQ-004's hover clause |
+| `docs/mockups/design-guidelines.md` §2 (uncertainty never hidden) | Removing the bucket removes a disclosure from the taxon views | **Owner decision, recorded once in AMEND-003.** Bounded: the records are neither deleted nor hidden from the atlas — they are listed, counted, mapped and openable under Occurrence and Locality — and no *shown* value becomes less certain. Charter §2 is a design convention; the requirement it served (SPEC-010 REQ-005) is amended, not silently ignored |
 | `SPEC-010` AMEND-001 (cluster legend in the map pane) | Untouched — it lives in the map pane, not the sidebar | **No conflict** |
-| `SPEC-021` | Also edits `test/ui/grouping-mode.test.tsx`, and **already claims SPEC-010 AMEND-002** for its cluster-accessible-name change | **Coordination, not conflict.** This spec takes **AMEND-003**, the next free number. Whichever change lands second rebases its edits to that shared test file; neither may drop the other's assertions (NFR-003) |
-| `SPEC-009` REQ-003/004 (viewport list, cap, overflow, highlight) | Extended, not reversed: the cap, the overflow wording and the highlight survive; REQ-006 generalises the highlight to every unit and REQ-004 exempts one row from the cap | **No conflict** — record as a coordinated extension on approval |
+| `SPEC-021` | Also edits `test/ui/grouping-mode.test.tsx`; **SPEC-021 is Approved and its AMEND-002 has landed in SPEC-010** | **Coordination, not conflict.** This spec takes **AMEND-003**, the next free number (AMEND-001 and AMEND-002 both exist in SPEC-010 today). Whichever change lands second rebases its edits to that shared test file; neither may drop the other's assertions (NFR-003) |
+| `SPEC-009` REQ-003 (row shows "at least the taxon name and the Ma range") | The occurrence row keeps both and loses only the formation | **No conflict** — SPEC-009's floor is met; the cap and overflow wording survive, and REQ-006 generalises the highlight to every unit |
 | `SPEC-013` REQ-004 (search lands in the side panel) | The "side panel" is now the detail that replaces the list | **No conflict** — the requirement is "land in context, not on the profile", which is preserved; the test's landing assertion is updated |
 | `SPEC-003` REQ-006/007 (selection → panel → profile, ≤1 action back) | The panel moves; the loop and the one-action back are preserved and strengthened by REQ-003's focus/scroll restoration | **No conflict** |
-| `SPEC-015` / `SPEC-017` AMEND-001 (clade tints) | UX-002 reuses the tints in the sidebar | **No conflict** — SPEC-017 AMEND-001 already says the tints are not map-only; UX-002 adds no hue and is gated on the owner |
+| `SPEC-015` / `SPEC-017` AMEND-001 (clade tints) | UX-002 reuses the tints in the sidebar, without the clade word on the row | **No conflict** — SPEC-017 AMEND-001 already says the tints are not map-only, and its "never the only way a clade is identified" rule is met by the row's accessible name and the detail (UX-002). UX-002 adds no hue |
+| `SPEC-014` AMEND-005 (the Wikipedia article gate) | REQ-004 adds a second filter over the same occurrence set | **No conflict** — the two compose; the gate's default already empties the genus-tier bucket, so REQ-004 bites at Family, Major group, and at every tier with "show all" on |
 | `docs/mockups/design-guidelines.md` | Binding; this spec's UX-001 is written to it | **No conflict** |
 
 No functional-specification requirement is touched: FONC-040/050/060 (permanent
@@ -838,33 +1017,34 @@ One ready-to-transplant block. **Do not edit the target spec from this spec** �
 the orchestrator transplants it into SPEC-010's `## Spec amendments` section
 under the number given.
 
-**Number chosen: AMEND-003.** AMEND-001 exists in SPEC-010 today (the cluster
-legend); **AMEND-002 is already claimed by SPEC-021** (`docs/specs/active/
-SPEC-021-chrome-copy-removal.md`, the block headed "For
-`docs/specs/approved/SPEC-010-occurrence-locality-taxon-modes.md` — next free
-number is **AMEND-002**"). AMEND-003 is therefore the next free number. If
-SPEC-021 is abandoned before it lands, this block should be renumbered to
-AMEND-002 rather than leaving a gap.
+**Number chosen: AMEND-003.** SPEC-010 carries **AMEND-001** (the cluster legend)
+and **AMEND-002** (SPEC-021's per-cluster accessible name, landed with SPEC-021's
+approval on 2026-08-14). **AMEND-003** is therefore the next free number, and it
+is unambiguous — SPEC-021 is Approved, so no renumbering case remains.
 
 ---
 
-### For `docs/specs/approved/SPEC-010-occurrence-locality-taxon-modes.md` — next free number is **AMEND-003** (AMEND-001 is used; AMEND-002 is claimed by SPEC-021)
+### For `docs/specs/approved/SPEC-010-occurrence-locality-taxon-modes.md` — next free number is **AMEND-003** (AMEND-001 and AMEND-002 are both used)
 
 ```markdown
-### AMEND-003: The mode control and the rank selector are folded into one five-unit selector, and the not-classified bucket is pinned (via SPEC-026)
+### AMEND-003: One five-unit selector replaces the mode + rank controls; rows carry two subtitles; the not-classified bucket is removed from the taxon units (via SPEC-026)
 
 - **Date:** 2026-08-14
 - **Reason:** Owner feedback, 2026-08-14 — "We need to rethink and redesign the
-  sidebar with occurence/genus/family it's a mess as it is." As built, REQ-001's
-  three-mode segmented control and REQ-005's rank `<select>` are two controls
-  answering one question ("what is one row?"), and the rank control exists only
-  inside one of the three segments, so it appears and disappears under the user.
-  Separately, two defects were found on the shipped snapshot while redesigning:
-  REQ-005's disclosed "not classified at this level" bucket sorts last and, at
-  the default genus tier on the Maastrichtian stage, lands at row 380 behind the
-  300-row render cap — so the disclosure this spec requires is not actually on
-  screen; and alphabetical ordering plus the same cap hides the two largest genus
-  groups (*Triceratops*, 165 occurrences; *Tyrannosaurus*, 83).
+  sidebar with occurence/genus/family it's a mess as it is." — followed by owner
+  review of the redesign mockup the same day. As built, REQ-001's three-mode
+  segmented control and REQ-005's rank `<select>` are two controls answering one
+  question ("what is one row?"), and the rank control exists only inside one of
+  the three segments, so it appears and disappears under the user. The mockup
+  review added three cuts: a row may carry at most two subtitles; a locality row
+  must say where it is in the present day; and the *not classified at this level*
+  bucket must be filtered out rather than disclosed. Two defects were also found
+  on the shipped snapshot: the bucket sorts last and, at the Maastrichtian
+  default, holds **2,810 of 4,945 records (57 %)** at **row 358 of 358**, behind
+  the 300-row render cap — so REQ-005's disclosure is not actually on screen; and
+  alphabetical ordering plus the same cap hides the two largest genus groups
+  (*Triceratops*, 165 occurrences, sorted 343rd of 378; *Tyrannosaurus*, 83,
+  sorted 348th).
 - **Changed requirements:**
   - **REQ-001** — the *mechanism* changes. The always-visible grouping control is
     no longer three options named Occurrences / Localities / Taxa; it is one
@@ -876,44 +1056,76 @@ AMEND-002 rather than leaving a gap.
     the list row unit, the map glyph/selection semantics and the panel target
     together while preserving the stage, the viewport and (where still
     meaningful) the selection.
-  - **REQ-005** — the *carrier* changes and one acceptance criterion is
-    strengthened. There is no longer a separate rank selector "hidden or disabled
-    outside Taxon mode"; the three tiers are three of the five units, so the
-    acceptance criterion "outside Taxon mode the selector is not offered" is
-    struck as no longer meaningful. **Unchanged:** the ladder is still exactly
-    Genus / Family / Major group with no Species, Genus is still the default
-    taxonomic tier, roll-up still walks the parent chain via `resolveTierTaxon`,
-    and records above the chosen tier still land in a disclosed "not classified
-    at this level" bucket and are never silently dropped. **Strengthened:** that
-    bucket must now be rendered **outside the list render cap**, pinned above the
-    capped rows, and must state its share of the records in view — because
-    sorting it last put it behind the cap at the default tier.
-  - **REQ-004** — no requirement text changes, but its unimplemented hover clause
-    ("hovering a taxon row emphasises that taxon's points and vice-versa") is
-    delivered by SPEC-026 REQ-006. `LocalityList`/`TaxonList` as built take no
-    hover callback at all; the consolidated list component restores the coupling
-    for every unit.
-  - **REQ-002, REQ-003, AMEND-001** — unchanged. Occurrence mode's behaviour, the
-    locality collapse and its distinct-taxon count, the taxon focus/dim, and the
-    map-pane cluster legend are all untouched by this amendment.
+  - **REQ-005** — the *carrier* changes and **one clause is reversed**. There is
+    no longer a separate rank selector "hidden or disabled outside Taxon mode";
+    the three tiers are three of the five units, so the acceptance criterion
+    "outside Taxon mode the selector is not offered" is struck as no longer
+    meaningful. **Unchanged:** the ladder is still exactly Genus / Family / Major
+    group with no Species, Genus is still the default taxonomic tier, and roll-up
+    still walks the parent chain via `resolveTierTaxon`. **Reversed:** records
+    that resolve to no taxon at the chosen tier are **no longer shown in a
+    disclosed "not classified at this level" bucket**. They are filtered out of
+    the Genus, Family and Major group units entirely — out of the list, the
+    count and the map together, from one filtered set, so the three cannot
+    disagree. This is a **deliberate owner decision, taken on 2026-08-14, to stop
+    disclosing that share of records in the taxon views**; at the Maastrichtian
+    default that share is **57 %** (2,810 of 4,945 records; 2,898 of 5,064 with
+    the article gate lifted). It is bounded, and the bound is part of the
+    amendment: those records are **not** deleted, hidden from the atlas, or
+    dropped from any non-taxon count — they remain listed, counted, mapped and
+    openable under the **Occurrence** and **Locality** units, which is where an
+    identification that reaches no genus is a meaningful row.
+  - **REQ-003** — the locality **row** contents change; the locality *mode* does
+    not. The row keeps its **distinct-taxon count** and gains the collection's
+    **present-day region** (`modernPosition.value.region`, present on 100 % of
+    the snapshot, e.g. "Alberta, CA"); the formation, the occurrence count and
+    the locality's Ma range move off the row into the locality detail, which
+    already shows them. One marker per collection at the collection's own
+    paleocoordinate, the clustering, and the detail's taxa list are unchanged.
+  - **REQ-004** — row contents preserved, **one clause amended**, and one
+    unimplemented clause finally delivered. Taxon rows keep the accepted
+    scientific name, the in-view occurrence count and the aggregate Ma span (the
+    clade word that the SPEC-026 mockup had added is not shown on the row; the
+    clade is carried by the SPEC-015 tint, the row's accessible name and the
+    detail). **Amended:** the clause "the map still contains one feature per
+    occurrence (feature count unchanged from Occurrence mode)" no longer holds at
+    a taxon unit — the map plots the records that classify at the chosen tier,
+    the same set the list and the count are derived from. The no-collapsing rule,
+    the real-paleocoordinate rule, the focus/dim behaviour and the
+    no-per-taxon-hue rule are all unchanged. **Delivered:** REQ-004's hover clause
+    ("hovering a taxon row emphasises that taxon's points and vice-versa"), which
+    `LocalityList`/`TaxonList` never implemented, is delivered by SPEC-026
+    REQ-006 for every unit.
+  - **REQ-002, AMEND-001, AMEND-002** — unchanged. Occurrence mode's behaviour,
+    clustering, the cluster count's accessible name and the clade key are all
+    untouched by this amendment.
 - **Behavioral impact:** The Occurrences/Localities/Taxa segmented control and
-  the "Group by rank" `<select>` are replaced by one five-option selector; the
-  selector no longer changes size or spawns a second control. Locality and taxon
-  rows become count-ordered instead of name/id-ordered. The not-classified bucket
-  moves to a pinned position above the capped rows and states its share. A
-  selection replaces the list in the sidebar instead of stacking a panel above
-  it. No change to the map, to clustering, to the roll-up resolver, to the read
-  model, to the snapshot, or to which records are grouped where.
+  the "Group by rank" `<select>` are replaced by one five-option selector that
+  never changes size or spawns a second control. Every row is a name plus at most
+  two values; the formation leaves the occurrence row for the occurrence detail
+  (which gains a `Formation` field), and the locality row shows its present-day
+  region. Locality and taxon rows become count-ordered instead of name/id-ordered.
+  At Genus, Family and Major group the list, the count and the map exclude records
+  that classify at no taxon at that tier; Occurrence and Locality are unaffected
+  and still show every record. A selection replaces the list in the sidebar
+  instead of stacking a panel above it. No change to clustering, to the roll-up
+  resolver, to the read model, to the snapshot, or to which records exist.
 - **Test impact:** `test/ui/grouping-mode.test.tsx` moves from three mode buttons
   plus a rank combobox to five unit options and asserts no combobox exists in any
-  state; `test/ui/taxon-mode.test.tsx` and `test/ui/locality-mode.test.tsx` reach
-  their units through the new options and gain assertions for the pinned bucket,
-  the ordering, the hover linkage and the replaced list;
-  `test/ui/occurrence-list.test.tsx` keeps every assertion and gains the
-  detail-replaces-list and focus-restoration cases; `test/ui/grouping.test.ts`
-  gains the ordering and unit-mapping tests. `test/ui/rank-rollup.test.ts` is
-  unchanged. No test is deleted, skipped or weakened.
-- **Human approval reference:** Owner approval in session, 2026-08-14.
+  state; `test/ui/taxon-mode.test.tsx` inverts its bucket assertion (the bucket
+  must be absent, and the unit's count and map set must exclude the same records)
+  and gains the ordering, hover-linkage and replaced-list cases;
+  `test/ui/locality-mode.test.tsx` asserts the two-subtitle row with the
+  present-day region; `test/ui/occurrence-list.test.tsx` keeps every assertion,
+  drops the formation from the row and gains the detail-replaces-list and
+  focus-restoration cases; `test/ui/occurrence-panel.test.tsx` gains the
+  `Formation` field and its missing label; `test/ui/grouping.test.ts` gains the
+  ordering and unit-mapping tests; `test/ui/rank-rollup.test.ts` keeps its
+  null-resolution assertion, which is now the filter's predicate. No test is
+  deleted, skipped or weakened.
+- **Human approval reference:** Owner approval recorded in session, 2026-08-14
+  (nelsonjeanrenaud@gmail.com) — "I confirm and approve everything mentionned
+  here".
 ```
 
 ## Traceability table
@@ -921,9 +1133,9 @@ AMEND-002 rather than leaving a gap.
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
 | REQ-001 | Unit selector | `GroupingControls.tsx`, `grouping.ts` (`LIST_UNITS`, `LIST_UNIT_LABEL`) | `test/ui/grouping-mode.test.tsx` | Not started |
-| REQ-002 | The one list | consolidated list component (replacing `OccurrenceList` / `GroupedList`) | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/ui/taxon-mode.test.tsx` | Not started |
+| REQ-002 | The one list, two subtitles per row | consolidated list component (replacing `OccurrenceList` / `GroupedList`), `OccurrencePanel.tsx` (the displaced `Formation` field) | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-panel.test.tsx` | Not started |
 | REQ-003 | Detail replaces list | `ExplorationView.tsx` (sidebar branch), `OccurrencePanel.tsx`, `GroupedPanels.tsx` | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/spec013-search-ui.test.tsx` | Not started |
-| REQ-004 | Pinned bucket + recovery | list component, `GroupedPanels.tsx` (`TaxonPanel`) | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts` | Not started |
+| REQ-004 | Classified-only taxon units | `grouping.ts` (`groupByTaxon`, the tier filter), `ExplorationView.tsx` (the visible set feeding list, count and map) | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`, `test/ui/rank-rollup.test.ts` | Not started |
 | REQ-005 | Row ordering | `grouping.ts` (`groupByTaxon`, `groupByLocality`) | `test/ui/grouping.test.ts` | Not started |
 | REQ-006 | Highlight linkage | list component, `ExplorationView.tsx` (`highlightedId`) | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/locality-mode.test.tsx` | Not started |
 | NFR-001 | Pure folds | `grouping.ts` | `test/data-005-no-runtime-egress.test.ts` | Not started |
@@ -932,19 +1144,22 @@ AMEND-002 rather than leaving a gap.
 | SEC-001 | No egress | — | `test/data-005-no-runtime-egress.test.ts` | Not started |
 | API-001 | `setUnit` + unit mapping | `exploration.ts`, `grouping.ts` | `test/ui/grouping.test.ts` | Not started |
 | UX-001 | States + charter | `exploration.module.css`, `states.tsx` | `test/ui/grouping-mode.test.tsx`, `test/ui/data-states.test.tsx` | Not started |
-| UX-002 | Clade rule (gated) | list component, `mapCladeMarkers.ts` | `test/ui/taxon-mode.test.tsx` | Blocked on OQ-2 |
+| UX-002 | Clade rule (adopted) | list component, `mapCladeMarkers.ts` | `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-list.test.tsx` | Not started |
 
 ## Implementation notes
 
-To be filled during implementation. Two things to record when it happens: whether
-the unit selector shipped as a radio group or as `aria-pressed` buttons (OQ-2's
-deferred sibling), and how the count line counts the not-classified bucket when
-it is the only group (see *Edge cases*).
+To be filled during implementation. Three things to record when it happens:
+whether the unit selector shipped as a radio group or as `aria-pressed` buttons;
+where REQ-004's tier filter is applied (the recommendation is one derived set in
+`ExplorationView`, beside `gateOccurrences`, so the list, the count and the map
+provably read the same array); and the accessible-name format that carries the
+clade word on a row under UX-002.
 
 ## Spec amendments
 
-> Required for any behavioral change after the spec is Approved. None yet — this
-> spec is Draft.
+> Required for any behavioral change after the spec is Approved. None yet — the
+> spec reached Approved with the owner's review changes already folded in
+> (2026-08-14), so there is no post-approval behavioral change to record.
 
 ## Review checklist
 
@@ -952,14 +1167,17 @@ it is the only group (see *Edge cases*).
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [x] Open questions are resolved or explicitly deferred (three resolved by
-      inspection; OQ-1 and OQ-2 are owner decisions carried into *Human decisions
-      required*; two are explicitly deferred to implementation with no
-      requirement consequence).
+- [x] Open questions are resolved or explicitly deferred (OQ-1 confirmed and
+      OQ-2 adopted by the owner, 2026-08-14; five resolved by inspection or by
+      measurement; two explicitly deferred to implementation with no requirement
+      consequence).
 - [x] Verification matrix covers every requirement.
-- [x] Conflict check completed (SPEC-010 amended via AMEND-003; SPEC-021
-      coordination on the shared test file and the amendment numbering; SPEC-009
-      and SPEC-013 extended, not reversed).
+- [x] Conflict check completed (SPEC-010 REQ-001/003/004/005 amended via
+      AMEND-003, including the one reversal — the not-classified disclosure;
+      SPEC-021 coordination on the shared test file; SPEC-009, SPEC-013 and
+      SPEC-014 extended, not reversed; charter §2 impact recorded once).
 - [x] Risks listed — rollback plan and edge cases are present.
-- [ ] Human approval recorded before status set to Approved. **Outstanding — this
-      is the only Definition of Ready item not met.**
+- [x] Human approval recorded before status set to Approved. **Owner approval
+      recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com)** — "I confirm
+      and approve everything mentionned here", covering the direction, OQ-1, OQ-2
+      ("Tint"), the ordering change and the four mockup-review changes.
