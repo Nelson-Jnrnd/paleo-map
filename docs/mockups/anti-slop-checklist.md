@@ -75,9 +75,12 @@ generic two-panel dashboard.
 3. **Prefer hairlines, spacing and alignment to containers.** Structure a page
    the way a printed scientific plate does.
 4. **Make a verdict a mark on the object, not a badge beside it.** A ruled-out
-   clade is a struck-through branch on the tree. A frontier is a ring on the
-   node. A verdict that has nowhere to live on the object is a hint that the
-   object is drawn wrong.
+   clade is a dashed branch ending in a red-ringed hollow node, with the guess
+   that ruled it out drawn as a leaf inside it. The deepest node reached is a
+   teal ring on its tint dot, bold, with a rule under the name. A verdict that
+   has nowhere to live on the object is a hint that the object is drawn wrong.
+   *(SPEC-025, 2026-08-14: the ruled-out mark was a struck-through branch with
+   an `✕` terminal before the cladogram was redrawn.)*
 5. **Turn a scalar into an axis when the domain has one.** "Older / younger /
    overlaps" as a chip is a label; the same fact plotted against an Ma scale with
    ICS bands is a reading. Same information, and it teaches the axis.
@@ -118,7 +121,7 @@ Count them. Any answer above zero needs a reason.
 | Two bordered panels, near-equal weight | One full-bleed cladogram; margins for everything else |
 | Tree rendered as an indented bulleted list in the left panel | Real rectangular cladogram: trunk, risers, aligned terminals |
 | Separate guess list in the right panel | No guess list — each guess **is** the branch it ruled out |
-| Ruled-out clades as grey pill chips | Struck-through terminals on the tree, labelled with the guess |
+| Ruled-out clades as grey pill chips | Dashed branches ending in red-ringed hollow nodes, each with its guess as a leaf inside it |
 | "Advanced the tree" as a tinted card with a left bar | A teal ring on the frontier node and a rule under its name |
 | Time verdict as a chip per guess | Stratigraphic column: ICS bands on an Ma axis, guess ranges plotted |
 | Boxed input field with a filled button | A caret, a rule, and `↵ guess` |
