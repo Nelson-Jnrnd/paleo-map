@@ -1,242 +1,231 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1420" font-family="'Courier New',Courier,monospace" role="img" aria-label="Dinordle taxonomic tree: a horizontal rectangular cladogram in four states — a fresh round holding only Dinosauria, a mid-round descent from Dinosauria to Saltasaurinae with six ruled-out branches struck through at an aligned tip column, the solved round descending twenty nodes to Saltasaurus, and the same diagram inside a 360 pixel scroll container with the trunk pinned at the left edge">
-  <rect width="1280" height="1420" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1620" font-family="'Courier New',Courier,monospace" role="img" aria-label="Dinordle taxonomic tree: a horizontal rectangular cladogram in five states — a fresh round holding only Dinosauria, the marks key, a mid-round descent from Dinosauria to Saltasaurinae where each ruled-out branch is a red-ringed node with the guess that ruled it out hanging below it as a red-ringed leaf one column further right, the same diagram inside a 360 pixel scroll container with the trunk pinned at the left edge, and the solved round descending twenty nodes to Saltasaurus">
+  <rect width="1280" height="1620" fill="#ffffff"/>
   <text x="40" y="42" font-size="11" fill="#52606e" letter-spacing="2.2">DINORDLE · TAXONOMIC TREE · THE RENDER</text>
-  <text x="40" y="66" font-size="13" fill="#33424f">One row per label · depth runs left to right · ruled-out branches end at a shared tip column</text>
+  <text x="40" y="66" font-size="13" fill="#33424f">One row per label · depth runs left to right · a ruled-out branch and the guess inside it are ringed</text>
   <text x="1240" y="42" font-size="10" fill="#5b6773" text-anchor="end" letter-spacing="0.6">SPEC-025 · REQ-001…REQ-005 · UX-001…UX-003</text>
   <text x="1240" y="62" font-size="10" fill="#5b6773" text-anchor="end" letter-spacing="0.6">answer Saltasaurus · shipped snapshot 2026-07-26</text>
   <line x1="40" y1="86" x2="1240" y2="86" stroke="#cfd8de"/>
   <text x="40" y="118" font-size="11" fill="#52606e" letter-spacing="2.2">FRESH ROUND · NO GUESSES YET</text>
-  <text x="40" y="133" font-size="9.5" fill="#5b6773" letter-spacing="0.6">REQ-004 · REQ-005</text>
-    <path d="M50 158 V179 H72" fill="none" stroke="#33424f" stroke-width="1.4" stroke-dasharray="3 4"/>
-    <text x="79" y="183" font-size="12" fill="#5b6773">?</text>
-    <text x="92" y="183" font-size="12" fill="#5b6773">unresolved</text>
+  <text x="40" y="133" font-size="9.5" fill="#5b6773" letter-spacing="0.6">REQ-004 · REQ-005 — one row, and nothing below it</text>
     <circle cx="50" cy="158" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
     <text x="61" y="162.5" font-size="13" fill="#1f2b38">Dinosauria</text>
-    <text x="147" y="162" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-  <line x1="40" y1="222" x2="500" y2="222" stroke="#dde5ea"/>
-  <text x="40" y="252" font-size="11" fill="#52606e" letter-spacing="2.2">MARKS</text>
-  <text x="40" y="267" font-size="9.5" fill="#5b6773" letter-spacing="0.6">UX-002 — shape and word first, tint third</text>
-  <circle cx="60" cy="292" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/><text x="74" y="296" font-size="12.5" fill="#1f2b38">Sauropoda</text>
-  <text x="190" y="296" font-size="11.5" fill="#52606e">established ancestor</text>
-  <circle cx="60" cy="318" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/><circle cx="60" cy="318" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/><text x="78" y="322" font-size="12.5" font-weight="700" fill="#1f2b38">Saltasaurinae</text><line x1="78" y1="326" x2="175.5" y2="326" stroke="#0f9d83" stroke-width="1.6"/>
-  <text x="190" y="322" font-size="11.5" fill="#52606e">deepest reached — the frontier</text>
-  <path d="M48 344 H66" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="4 3"/><path d="M66 339.5 L75 348.5 M66 348.5 L75 339.5" stroke="#5b6773" stroke-width="1.4"/><text x="83" y="348" font-size="12" fill="#5b6773">Diplodocoidea</text><line x1="82" y1="344" x2="177.6" y2="344" stroke="#5b6773" stroke-width="1.1"/>
-  <text x="190" y="348" font-size="11.5" fill="#52606e">ruled out by that guess</text>
-  <path d="M48 370 H70" stroke="#33424f" stroke-width="1.4" stroke-dasharray="3 4"/><text x="76" y="374" font-size="12" fill="#5b6773">?</text>
-  <text x="190" y="374" font-size="11.5" fill="#52606e">unresolved — how far is not stated</text>
-  <line x1="40" y1="414" x2="500" y2="414" stroke="#dde5ea"/>
-  <text x="560" y="118" font-size="11" fill="#52606e" letter-spacing="2.2">MID-ROUND · 6 OF 8 GUESSES · FRONTIER AT DEPTH 18</text>
+    <text x="147.0" y="162" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+  <line x1="40" y1="200" x2="500" y2="200" stroke="#dde5ea"/>
+  <text x="40" y="230" font-size="11" fill="#52606e" letter-spacing="2.2">MARKS</text>
+  <text x="40" y="245" font-size="9.5" fill="#5b6773" letter-spacing="0.6">UX-002 — three marks, three words</text>
+  <circle cx="60" cy="270" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/><text x="74" y="274" font-size="12.5" fill="#1f2b38">Sauropoda</text>
+  <text x="200" y="274" font-size="11.5" fill="#52606e">ancestor</text>
+  <circle cx="60" cy="296" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/><circle cx="60" cy="296" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/><text x="78" y="300" font-size="12.5" font-weight="700" fill="#1f2b38">Saltasaurinae</text><line x1="78" y1="303.5" x2="175.5" y2="303.5" stroke="#0f9d83" stroke-width="1.6"/>
+  <text x="200" y="300" font-size="11.5" fill="#52606e">closest relative</text>
+  <path d="M42 322 H55.8 M60 322 V343 H74" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="3 2"/>
+  <circle cx="60" cy="322" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/><text x="74" y="326" font-size="12" fill="#5b6773">Diplodocoidea</text>
+  <circle cx="76" cy="343" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/><text x="90" y="347" font-size="12" fill="#5b6773">Diplodocus</text>
+  <text x="200" y="333" font-size="11.5" fill="#52606e">guess</text>
+  <line x1="40" y1="372" x2="500" y2="372" stroke="#dde5ea"/>
+  <text x="560" y="118" font-size="11" fill="#52606e" letter-spacing="2.2">MID-ROUND · 6 OF 8 GUESSES · CLOSEST RELATIVE 18 NODES DOWN</text>
   <text x="560" y="133" font-size="9.5" fill="#5b6773" letter-spacing="0.6">REQ-001 · REQ-002 · REQ-003 — the deep case, not a flattering one</text>
-    <path d="M570 158 V221 M586 221 V242 M602 242 V263 M618 263 V284 M634 284 V305 M650 305 V326 M666 326 V347 M682 347 V368 M698 368 V410 M714 410 V431 M730 431 V473 M746 473 V494 M762 494 V536 M778 536 V557 M794 557 V578 M810 578 V599 M826 599 V620 M842 620 V641 M570 221 H586 M586 242 H602 M602 263 H618 M618 284 H634 M634 305 H650 M650 326 H666 M666 347 H682 M682 368 H698 M698 410 H714 M714 431 H730 M730 473 H746 M746 494 H762 M762 536 H778 M778 557 H794 M794 578 H810 M810 599 H826 M826 620 H842" fill="none" stroke="#33424f" stroke-width="1.6"/>
-    <path d="M570 179 H845 M570 200 H845 M698 389 H845 M730 452 H845 M762 515 H845 M842 641 H845" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="4 3"/>
-    <path d="M842 641 V662 H864" fill="none" stroke="#33424f" stroke-width="1.4" stroke-dasharray="3 4"/>
-    <text x="871" y="666" font-size="12" fill="#5b6773">?</text>
-    <text x="884" y="666" font-size="12" fill="#5b6773">unresolved</text>
+    <path d="M570 158 V263 M570 263 H586 M586 263 V284 M586 284 H602 M602 284 V305 M602 305 H618 M618 305 V326 M618 326 H634 M634 326 V347 M634 347 H650 M650 347 V368 M650 368 H666 M666 368 V389 M666 389 H682 M682 389 V410 M682 410 H698 M698 410 V473 M698 473 H714 M714 473 V494 M714 494 H730 M730 494 V557 M730 557 H746 M746 557 V578 M746 578 H762 M762 578 V641 M762 641 H778 M778 641 V662 M778 662 H794 M794 662 V683 M794 683 H810 M810 683 V704 M810 704 H826 M826 704 V725 M826 725 H842 M842 725 V746" fill="none" stroke="#33424f" stroke-width="1.6"/>
+    <path d="M570 179 H858 M570 221 H858 M698 431 H858 M730 515 H858 M762 599 H858 M842 746 H858 M858 179 V200 H874 M858 221 V242 H874 M858 431 V452 H874 M858 515 V536 H874 M858 599 V620 H874" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="3 2"/>
     <circle cx="570" cy="158" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
     <text x="581" y="162.5" font-size="13" fill="#1f2b38">Dinosauria</text>
-    <text x="667" y="162" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M846 174.5 L855 183.5 M846 183.5 L855 174.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="183" font-size="12" fill="#5b6773">Ornithischia</text>
-    <line x1="862" y1="179" x2="950.4" y2="179" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="958.4" y="183" font-size="11.5" fill="#52606e">◂ Triceratops</text>
-    <path d="M846 195.5 L855 204.5 M846 204.5 L855 195.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="204" font-size="12" fill="#5b6773">Theropoda</text>
-    <line x1="862" y1="200" x2="928.8" y2="200" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="936.8" y="204" font-size="11.5" fill="#52606e">◂ Allosaurus</text>
-    <circle cx="586" cy="221" r="4.2" fill="#cbb49b" stroke="#33424f" stroke-width="1"/>
-    <text x="597" y="225.5" font-size="13" fill="#1f2b38">Saurischia</text>
-    <text x="683" y="225" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="602" cy="242" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="613" y="246.5" font-size="13" fill="#1f2b38">Sauropodomorpha</text>
-    <text x="738" y="246" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="618" cy="263" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="629" y="267.5" font-size="13" fill="#1f2b38">Massopoda</text>
-    <text x="707.2" y="267" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="634" cy="284" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="645" y="288.5" font-size="13" fill="#1f2b38">Sauropodiformes</text>
-    <text x="770" y="288" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="650" cy="305" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="661" y="309.5" font-size="13" fill="#1f2b38">Sauropoda</text>
-    <text x="739.2" y="309" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="666" cy="326" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="677" y="330.5" font-size="13" fill="#1f2b38">Gravisauria</text>
-    <text x="770.8" y="330" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="682" cy="347" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="693" y="351.5" font-size="13" fill="#1f2b38">Eusauropoda</text>
-    <text x="786.8" y="351" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="698" cy="368" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="709" y="372.5" font-size="13" fill="#1f2b38">Neosauropoda</text>
-    <text x="810.6" y="372" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M846 384.5 L855 393.5 M846 393.5 L855 384.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="393" font-size="12" fill="#5b6773">Diplodocoidea</text>
-    <line x1="862" y1="389" x2="957.6" y2="389" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="965.6" y="393" font-size="11.5" fill="#52606e">◂ Diplodocus</text>
-    <circle cx="714" cy="410" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="725" y="414.5" font-size="13" fill="#1f2b38">Macronaria</text>
-    <text x="811" y="414" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="730" cy="431" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="741" y="435.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
-    <text x="881.6" y="435" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M846 447.5 L855 456.5 M846 456.5 L855 447.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="456" font-size="12" fill="#5b6773">Brachiosauridae</text>
-    <line x1="862" y1="452" x2="972" y2="452" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="980" y="456" font-size="11.5" fill="#52606e">◂ Brachiosaurus</text>
-    <circle cx="746" cy="473" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="757" y="477.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
-    <text x="874.2" y="477" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="762" cy="494" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="773" y="498.5" font-size="13" fill="#1f2b38">Titanosauria</text>
-    <text x="874.6" y="498" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M846 510.5 L855 519.5 M846 519.5 L855 510.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="519" font-size="12" fill="#5b6773">Eutitanosauria</text>
-    <line x1="862" y1="515" x2="964.8" y2="515" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="972.8" y="519" font-size="11.5" fill="#52606e">◂ Argentinosaurus</text>
-    <circle cx="778" cy="536" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="789" y="540.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
-    <text x="890.6" y="540" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="794" cy="557" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="805" y="561.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
-    <text x="922.2" y="561" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="810" cy="578" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="821" y="582.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
-    <text x="930.4" y="582" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="826" cy="599" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="837" y="603.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
-    <text x="946.4" y="603" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
-    <circle cx="842" cy="620" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
-    <circle cx="842" cy="620" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="857" y="624.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurinae</text>
-    <line x1="857" y1="628" x2="958.4" y2="628" stroke="#0f9d83" stroke-width="1.6"/>
-    <text x="966.4" y="624" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <text x="1010.9" y="624" font-size="10.5" fill="#0a7f66">deepest reached</text>
-    <path d="M846 636.5 L855 645.5 M846 645.5 L855 636.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="863" y="645" font-size="12" fill="#5b6773">Alamosaurus</text>
-    <line x1="862" y1="641" x2="943.2" y2="641" stroke="#5b6773" stroke-width="1.1"/>
-  <line x1="560" y1="697" x2="1240" y2="697" stroke="#dde5ea"/>
-  <text x="560" y="717" font-size="10.5" fill="#5b6773">measured: 25 rows · widest row 536 px · trunk indent 17 × 16 px = 272 px</text>
-  <text x="560" y="740" font-size="11" fill="#52606e" letter-spacing="2.2">SOLVED · DEPTH 20 — THE DEEPEST LINEAGE THE SNAPSHOT HOLDS</text>
-  <text x="560" y="755" font-size="9.5" fill="#5b6773" letter-spacing="0.6">REQ-005 · UX-001 — no label wraps, so no connector can break</text>
-    <path d="M570 780 V843 M586 843 V864 M602 864 V885 M618 885 V906 M634 906 V927 M650 927 V948 M666 948 V969 M682 969 V990 M698 990 V1032 M714 1032 V1053 M730 1053 V1095 M746 1095 V1116 M762 1116 V1158 M778 1158 V1179 M794 1179 V1200 M810 1200 V1221 M826 1221 V1242 M842 1242 V1284 M858 1284 V1305 M570 843 H586 M586 864 H602 M602 885 H618 M618 906 H634 M634 927 H650 M650 948 H666 M666 969 H682 M682 990 H698 M698 1032 H714 M714 1053 H730 M730 1095 H746 M746 1116 H762 M762 1158 H778 M778 1179 H794 M794 1200 H810 M810 1221 H826 M826 1242 H842 M842 1284 H858 M858 1305 H874" fill="none" stroke="#33424f" stroke-width="1.6"/>
-    <path d="M570 801 H877 M570 822 H877 M698 1011 H877 M730 1074 H877 M762 1137 H877 M842 1263 H877" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="4 3"/>
-    <circle cx="570" cy="780" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
-    <text x="581" y="784.5" font-size="13" fill="#1f2b38">Dinosauria</text>
-    <text x="667" y="784" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M878 796.5 L887 805.5 M878 805.5 L887 796.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="805" font-size="12" fill="#5b6773">Ornithischia</text>
-    <line x1="894" y1="801" x2="982.4" y2="801" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="990.4" y="805" font-size="11.5" fill="#52606e">◂ Triceratops</text>
-    <path d="M878 817.5 L887 826.5 M878 826.5 L887 817.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="826" font-size="12" fill="#5b6773">Theropoda</text>
-    <line x1="894" y1="822" x2="960.8" y2="822" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="968.8" y="826" font-size="11.5" fill="#52606e">◂ Allosaurus</text>
-    <circle cx="586" cy="843" r="4.2" fill="#cbb49b" stroke="#33424f" stroke-width="1"/>
-    <text x="597" y="847.5" font-size="13" fill="#1f2b38">Saurischia</text>
-    <text x="683" y="847" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="602" cy="864" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="613" y="868.5" font-size="13" fill="#1f2b38">Sauropodomorpha</text>
-    <text x="738" y="868" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="618" cy="885" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="629" y="889.5" font-size="13" fill="#1f2b38">Massopoda</text>
-    <text x="707.2" y="889" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="634" cy="906" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="645" y="910.5" font-size="13" fill="#1f2b38">Sauropodiformes</text>
-    <text x="770" y="910" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="650" cy="927" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="661" y="931.5" font-size="13" fill="#1f2b38">Sauropoda</text>
-    <text x="739.2" y="931" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="666" cy="948" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="677" y="952.5" font-size="13" fill="#1f2b38">Gravisauria</text>
-    <text x="770.8" y="952" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="682" cy="969" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="693" y="973.5" font-size="13" fill="#1f2b38">Eusauropoda</text>
-    <text x="786.8" y="973" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="698" cy="990" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="709" y="994.5" font-size="13" fill="#1f2b38">Neosauropoda</text>
-    <text x="810.6" y="994" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M878 1006.5 L887 1015.5 M878 1015.5 L887 1006.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="1015" font-size="12" fill="#5b6773">Diplodocoidea</text>
-    <line x1="894" y1="1011" x2="989.6" y2="1011" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="997.6" y="1015" font-size="11.5" fill="#52606e">◂ Diplodocus</text>
-    <circle cx="714" cy="1032" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="725" y="1036.5" font-size="13" fill="#1f2b38">Macronaria</text>
-    <text x="811" y="1036" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="730" cy="1053" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="741" y="1057.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
-    <text x="881.6" y="1057" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M878 1069.5 L887 1078.5 M878 1078.5 L887 1069.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="1078" font-size="12" fill="#5b6773">Brachiosauridae</text>
-    <line x1="894" y1="1074" x2="1004" y2="1074" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="1012" y="1078" font-size="11.5" fill="#52606e">◂ Brachiosaurus</text>
-    <circle cx="746" cy="1095" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="757" y="1099.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
-    <text x="874.2" y="1099" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="762" cy="1116" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="773" y="1120.5" font-size="13" fill="#1f2b38">Titanosauria</text>
-    <text x="874.6" y="1120" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M878 1132.5 L887 1141.5 M878 1141.5 L887 1132.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="1141" font-size="12" fill="#5b6773">Eutitanosauria</text>
-    <line x1="894" y1="1137" x2="996.8" y2="1137" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="1004.8" y="1141" font-size="11.5" fill="#52606e">◂ Argentinosaurus</text>
-    <circle cx="778" cy="1158" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="789" y="1162.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
-    <text x="890.6" y="1162" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="794" cy="1179" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="805" y="1183.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
-    <text x="922.2" y="1183" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="810" cy="1200" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="821" y="1204.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
-    <text x="930.4" y="1204" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="826" cy="1221" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="837" y="1225.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
-    <text x="946.4" y="1225" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
-    <circle cx="842" cy="1242" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="853" y="1246.5" font-size="13" fill="#1f2b38">Saltasaurinae</text>
-    <text x="962.4" y="1246" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M878 1258.5 L887 1267.5 M878 1267.5 L887 1258.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="895" y="1267" font-size="12" fill="#5b6773">Alamosaurus</text>
-    <line x1="894" y1="1263" x2="975.2" y2="1263" stroke="#5b6773" stroke-width="1.1"/>
-    <circle cx="858" cy="1284" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="869" y="1288.5" font-size="13" fill="#1f2b38">Saltasaurini</text>
-    <text x="970.6" y="1288" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="874" cy="1305" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
-    <circle cx="874" cy="1305" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="889" y="1309.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurus</text>
-    <line x1="889" y1="1313" x2="974.8" y2="1313" stroke="#0f9d83" stroke-width="1.6"/>
-    <text x="982.8" y="1309" font-size="9.5" fill="#5b6773" letter-spacing="1">GENUS</text>
-    <text x="1027.3" y="1309" font-size="10.5" fill="#0a7f66">the answer</text>
-  <text x="560" y="1348" font-size="10.5" fill="#5b6773">measured: 26 rows · widest row 558 px — wider than the 512 px column, so the pane scrolls</text>
-  <text x="40" y="444" font-size="11" fill="#52606e" letter-spacing="2.2">NARROW PANE · 360 PX</text>
-  <text x="40" y="459" font-size="9.5" fill="#5b6773" letter-spacing="0.6">UX-001 — the diagram scrolls, the trunk stays pinned</text>
-  <clipPath id="narrow"><rect x="40" y="480" width="360" height="400"/></clipPath>
+    <text x="667.0" y="162" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="858" cy="179" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="183" font-size="12" fill="#5b6773">Ornithischia</text>
+    <circle cx="874" cy="200" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="885" y="204" font-size="12" fill="#5b6773">Triceratops</text>
+    <circle cx="858" cy="221" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="225" font-size="12" fill="#5b6773">Theropoda</text>
+    <circle cx="874" cy="242" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="885" y="246" font-size="12" fill="#5b6773">Allosaurus</text>
+    <circle cx="586" cy="263" r="4.2" fill="#cbb49b" stroke="#33424f" stroke-width="1"/>
+    <text x="597" y="267.5" font-size="13" fill="#1f2b38">Saurischia</text>
+    <text x="683.0" y="267" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="602" cy="284" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="613" y="288.5" font-size="13" fill="#1f2b38">Sauropodomorpha</text>
+    <text x="738.0" y="288" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="618" cy="305" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="629" y="309.5" font-size="13" fill="#1f2b38">Massopoda</text>
+    <text x="707.2" y="309" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="634" cy="326" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="645" y="330.5" font-size="13" fill="#1f2b38">Sauropodiformes</text>
+    <text x="770.0" y="330" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="650" cy="347" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="661" y="351.5" font-size="13" fill="#1f2b38">Sauropoda</text>
+    <text x="739.2" y="351" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="666" cy="368" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="677" y="372.5" font-size="13" fill="#1f2b38">Gravisauria</text>
+    <text x="770.8" y="372" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="682" cy="389" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="693" y="393.5" font-size="13" fill="#1f2b38">Eusauropoda</text>
+    <text x="786.8" y="393" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="698" cy="410" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="709" y="414.5" font-size="13" fill="#1f2b38">Neosauropoda</text>
+    <text x="810.6" y="414" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="858" cy="431" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="435" font-size="12" fill="#5b6773">Diplodocoidea</text>
+    <circle cx="874" cy="452" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="885" y="456" font-size="12" fill="#5b6773">Diplodocus</text>
+    <circle cx="714" cy="473" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="725" y="477.5" font-size="13" fill="#1f2b38">Macronaria</text>
+    <text x="811.0" y="477" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="730" cy="494" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="741" y="498.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
+    <text x="881.6" y="498" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="858" cy="515" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="519" font-size="12" fill="#5b6773">Brachiosauridae</text>
+    <circle cx="874" cy="536" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="885" y="540" font-size="12" fill="#5b6773">Brachiosaurus</text>
+    <circle cx="746" cy="557" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="757" y="561.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
+    <text x="874.2" y="561" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="762" cy="578" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="773" y="582.5" font-size="13" fill="#1f2b38">Titanosauria</text>
+    <text x="874.6" y="582" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="858" cy="599" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="603" font-size="12" fill="#5b6773">Eutitanosauria</text>
+    <circle cx="874" cy="620" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="885" y="624" font-size="12" fill="#5b6773">Argentinosaurus</text>
+    <circle cx="778" cy="641" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="789" y="645.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
+    <text x="890.6" y="645" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="794" cy="662" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="805" y="666.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
+    <text x="922.2" y="666" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="810" cy="683" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="821" y="687.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
+    <text x="930.4" y="687" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="826" cy="704" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="837" y="708.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
+    <text x="946.4" y="708" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
+    <circle cx="842" cy="725" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
+    <circle cx="842" cy="725" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="857" y="729.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurinae</text>
+    <line x1="857" y1="732.5" x2="958.4" y2="732.5" stroke="#0f9d83" stroke-width="1.6"/>
+    <text x="966.4" y="729" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <text x="1010.9" y="729" font-size="10.5" fill="#0a7f66">deepest reached</text>
+    <circle cx="858" cy="746" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="869" y="750" font-size="12" fill="#5b6773">Alamosaurus</text>
+  <line x1="560" y1="791" x2="1240" y2="791" stroke="#dde5ea"/>
+  <text x="560" y="811" font-size="10.5" fill="#5b6773">measured: 29 rows · widest row 535 px · trunk indent 17 × 16 px = 272 px</text>
+  <text x="560" y="841" font-size="11" fill="#52606e" letter-spacing="2.2">SOLVED · DEPTH 20 — THE DEEPEST LINEAGE THE SNAPSHOT HOLDS</text>
+  <text x="560" y="856" font-size="9.5" fill="#5b6773" letter-spacing="0.6">REQ-005 · UX-001 — no label wraps, so no connector can break</text>
+    <path d="M570 881 V986 M570 986 H586 M586 986 V1007 M586 1007 H602 M602 1007 V1028 M602 1028 H618 M618 1028 V1049 M618 1049 H634 M634 1049 V1070 M634 1070 H650 M650 1070 V1091 M650 1091 H666 M666 1091 V1112 M666 1112 H682 M682 1112 V1133 M682 1133 H698 M698 1133 V1196 M698 1196 H714 M714 1196 V1217 M714 1217 H730 M730 1217 V1280 M730 1280 H746 M746 1280 V1301 M746 1301 H762 M762 1301 V1364 M762 1364 H778 M778 1364 V1385 M778 1385 H794 M794 1385 V1406 M794 1406 H810 M810 1406 V1427 M810 1427 H826 M826 1427 V1448 M826 1448 H842 M842 1448 V1490 M842 1490 H858 M858 1490 V1511 M858 1511 H874" fill="none" stroke="#33424f" stroke-width="1.6"/>
+    <path d="M570 902 H890 M570 944 H890 M698 1154 H890 M730 1238 H890 M762 1322 H890 M842 1469 H890 M890 902 V923 H906 M890 944 V965 H906 M890 1154 V1175 H906 M890 1238 V1259 H906 M890 1322 V1343 H906" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <circle cx="570" cy="881" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
+    <text x="581" y="885.5" font-size="13" fill="#1f2b38">Dinosauria</text>
+    <text x="667.0" y="885" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="890" cy="902" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="906" font-size="12" fill="#5b6773">Ornithischia</text>
+    <circle cx="906" cy="923" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="917" y="927" font-size="12" fill="#5b6773">Triceratops</text>
+    <circle cx="890" cy="944" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="948" font-size="12" fill="#5b6773">Theropoda</text>
+    <circle cx="906" cy="965" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="917" y="969" font-size="12" fill="#5b6773">Allosaurus</text>
+    <circle cx="586" cy="986" r="4.2" fill="#cbb49b" stroke="#33424f" stroke-width="1"/>
+    <text x="597" y="990.5" font-size="13" fill="#1f2b38">Saurischia</text>
+    <text x="683.0" y="990" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="602" cy="1007" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="613" y="1011.5" font-size="13" fill="#1f2b38">Sauropodomorpha</text>
+    <text x="738.0" y="1011" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="618" cy="1028" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="629" y="1032.5" font-size="13" fill="#1f2b38">Massopoda</text>
+    <text x="707.2" y="1032" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="634" cy="1049" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="645" y="1053.5" font-size="13" fill="#1f2b38">Sauropodiformes</text>
+    <text x="770.0" y="1053" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="650" cy="1070" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="661" y="1074.5" font-size="13" fill="#1f2b38">Sauropoda</text>
+    <text x="739.2" y="1074" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="666" cy="1091" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="677" y="1095.5" font-size="13" fill="#1f2b38">Gravisauria</text>
+    <text x="770.8" y="1095" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="682" cy="1112" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="693" y="1116.5" font-size="13" fill="#1f2b38">Eusauropoda</text>
+    <text x="786.8" y="1116" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="698" cy="1133" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="709" y="1137.5" font-size="13" fill="#1f2b38">Neosauropoda</text>
+    <text x="810.6" y="1137" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="890" cy="1154" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="1158" font-size="12" fill="#5b6773">Diplodocoidea</text>
+    <circle cx="906" cy="1175" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="917" y="1179" font-size="12" fill="#5b6773">Diplodocus</text>
+    <circle cx="714" cy="1196" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="725" y="1200.5" font-size="13" fill="#1f2b38">Macronaria</text>
+    <text x="811.0" y="1200" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="730" cy="1217" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="741" y="1221.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
+    <text x="881.6" y="1221" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="890" cy="1238" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="1242" font-size="12" fill="#5b6773">Brachiosauridae</text>
+    <circle cx="906" cy="1259" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="917" y="1263" font-size="12" fill="#5b6773">Brachiosaurus</text>
+    <circle cx="746" cy="1280" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="757" y="1284.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
+    <text x="874.2" y="1284" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="762" cy="1301" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="773" y="1305.5" font-size="13" fill="#1f2b38">Titanosauria</text>
+    <text x="874.6" y="1305" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="890" cy="1322" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="1326" font-size="12" fill="#5b6773">Eutitanosauria</text>
+    <circle cx="906" cy="1343" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="917" y="1347" font-size="12" fill="#5b6773">Argentinosaurus</text>
+    <circle cx="778" cy="1364" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="789" y="1368.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
+    <text x="890.6" y="1368" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="794" cy="1385" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="805" y="1389.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
+    <text x="922.2" y="1389" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="810" cy="1406" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="821" y="1410.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
+    <text x="930.4" y="1410" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="826" cy="1427" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="837" y="1431.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
+    <text x="946.4" y="1431" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
+    <circle cx="842" cy="1448" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="853" y="1452.5" font-size="13" fill="#1f2b38">Saltasaurinae</text>
+    <text x="962.4" y="1452" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="890" cy="1469" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="901" y="1473" font-size="12" fill="#5b6773">Alamosaurus</text>
+    <circle cx="858" cy="1490" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="869" y="1494.5" font-size="13" fill="#1f2b38">Saltasaurini</text>
+    <text x="970.6" y="1494" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="874" cy="1511" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
+    <circle cx="874" cy="1511" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="889" y="1515.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurus</text>
+    <line x1="889" y1="1518.5" x2="974.8" y2="1518.5" stroke="#0f9d83" stroke-width="1.6"/>
+    <text x="982.8" y="1515" font-size="9.5" fill="#5b6773" letter-spacing="1">GENUS</text>
+    <text x="1027.3" y="1515" font-size="10.5" fill="#0a7f66">the answer</text>
+  <text x="560" y="1553" font-size="10.5" fill="#5b6773">measured: 31 rows · widest row 520 px — still wider than the 512 px column basis, so the pane scrolls</text>
+  <text x="40" y="402" font-size="11" fill="#52606e" letter-spacing="2.2">NARROW PANE · 360 PX</text>
+  <text x="40" y="417" font-size="9.5" fill="#5b6773" letter-spacing="0.6">UX-001 — the diagram scrolls, the trunk stays pinned</text>
+  <clipPath id="narrow"><rect x="40" y="438" width="360" height="400"/></clipPath>
   <g clip-path="url(#narrow)">
-    <path d="M50 496 V559 M66 559 V580 M82 580 V601 M98 601 V622 M114 622 V643 M130 643 V664 M146 664 V685 M162 685 V706 M178 706 V748 M194 748 V769 M210 769 V811 M226 811 V832 M242 832 V874 M258 874 V895 M274 895 V916 M290 916 V937 M306 937 V958 M322 958 V979 M50 559 H66 M66 580 H82 M82 601 H98 M98 622 H114 M114 643 H130 M130 664 H146 M146 685 H162 M162 706 H178 M178 748 H194 M194 769 H210 M210 811 H226 M226 832 H242 M242 874 H258 M258 895 H274 M274 916 H290 M290 937 H306 M306 958 H322" fill="none" stroke="#33424f" stroke-width="1.6"/>
-    <path d="M50 517 H325 M50 538 H325 M178 727 H325 M210 790 H325 M242 853 H325 M322 979 H325" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="4 3"/>
-    <path d="M322 979 V1000 H344" fill="none" stroke="#33424f" stroke-width="1.4" stroke-dasharray="3 4"/>
-    <text x="351" y="1004" font-size="12" fill="#5b6773">?</text>
-    <text x="364" y="1004" font-size="12" fill="#5b6773">unresolved</text>
-    <circle cx="50" cy="496" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
-    <text x="61" y="500.5" font-size="13" fill="#1f2b38">Dinosauria</text>
-    <text x="147" y="500" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M326 512.5 L335 521.5 M326 521.5 L335 512.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="521" font-size="12" fill="#5b6773">Ornithischia</text>
-    <line x1="342" y1="517" x2="430.4" y2="517" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="438.4" y="521" font-size="11.5" fill="#52606e">◂ Triceratops</text>
-    <path d="M326 533.5 L335 542.5 M326 542.5 L335 533.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="542" font-size="12" fill="#5b6773">Theropoda</text>
-    <line x1="342" y1="538" x2="408.8" y2="538" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="416.8" y="542" font-size="11.5" fill="#52606e">◂ Allosaurus</text>
+    <path d="M50 454 V559 M50 559 H66 M66 559 V580 M66 580 H82 M82 580 V601 M82 601 H98 M98 601 V622 M98 622 H114 M114 622 V643 M114 643 H130 M130 643 V664 M130 664 H146 M146 664 V685 M146 685 H162 M162 685 V706 M162 706 H178 M178 706 V769 M178 769 H194 M194 769 V790 M194 790 H210 M210 790 V853 M210 853 H226 M226 853 V874 M226 874 H242 M242 874 V937 M242 937 H258 M258 937 V958 M258 958 H274 M274 958 V979 M274 979 H290 M290 979 V1000 M290 1000 H306 M306 1000 V1021 M306 1021 H322 M322 1021 V1042" fill="none" stroke="#33424f" stroke-width="1.6"/>
+    <path d="M50 475 H338 M50 517 H338 M178 727 H338 M210 811 H338 M242 895 H338 M322 1042 H338 M338 475 V496 H354 M338 517 V538 H354 M338 727 V748 H354 M338 811 V832 H354 M338 895 V916 H354" fill="none" stroke="#5b6773" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <circle cx="50" cy="454" r="4.2" fill="#b4bcc6" stroke="#33424f" stroke-width="1"/>
+    <text x="61" y="458.5" font-size="13" fill="#1f2b38">Dinosauria</text>
+    <text x="147.0" y="458" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="338" cy="475" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="479" font-size="12" fill="#5b6773">Ornithischia</text>
+    <circle cx="354" cy="496" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="365" y="500" font-size="12" fill="#5b6773">Triceratops</text>
+    <circle cx="338" cy="517" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="521" font-size="12" fill="#5b6773">Theropoda</text>
+    <circle cx="354" cy="538" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="365" y="542" font-size="12" fill="#5b6773">Allosaurus</text>
     <circle cx="66" cy="559" r="4.2" fill="#cbb49b" stroke="#33424f" stroke-width="1"/>
     <text x="77" y="563.5" font-size="13" fill="#1f2b38">Saurischia</text>
-    <text x="163" y="563" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <text x="163.0" y="563" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
     <circle cx="82" cy="580" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
     <text x="93" y="584.5" font-size="13" fill="#1f2b38">Sauropodomorpha</text>
-    <text x="218" y="584" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <text x="218.0" y="584" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
     <circle cx="98" cy="601" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
     <text x="109" y="605.5" font-size="13" fill="#1f2b38">Massopoda</text>
     <text x="187.2" y="605" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
     <circle cx="114" cy="622" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
     <text x="125" y="626.5" font-size="13" fill="#1f2b38">Sauropodiformes</text>
-    <text x="250" y="626" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <text x="250.0" y="626" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
     <circle cx="130" cy="643" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
     <text x="141" y="647.5" font-size="13" fill="#1f2b38">Sauropoda</text>
     <text x="219.2" y="647" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
@@ -249,72 +238,77 @@
     <circle cx="178" cy="706" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
     <text x="189" y="710.5" font-size="13" fill="#1f2b38">Neosauropoda</text>
     <text x="290.6" y="710" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M326 722.5 L335 731.5 M326 731.5 L335 722.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="731" font-size="12" fill="#5b6773">Diplodocoidea</text>
-    <line x1="342" y1="727" x2="437.6" y2="727" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="445.6" y="731" font-size="11.5" fill="#52606e">◂ Diplodocus</text>
-    <circle cx="194" cy="748" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="205" y="752.5" font-size="13" fill="#1f2b38">Macronaria</text>
-    <text x="291" y="752" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="210" cy="769" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="221" y="773.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
-    <text x="361.6" y="773" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M326 785.5 L335 794.5 M326 794.5 L335 785.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="794" font-size="12" fill="#5b6773">Brachiosauridae</text>
-    <line x1="342" y1="790" x2="452" y2="790" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="460" y="794" font-size="11.5" fill="#52606e">◂ Brachiosaurus</text>
-    <circle cx="226" cy="811" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="237" y="815.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
-    <text x="354.2" y="815" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="242" cy="832" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="253" y="836.5" font-size="13" fill="#1f2b38">Titanosauria</text>
-    <text x="354.6" y="836" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <path d="M326 848.5 L335 857.5 M326 857.5 L335 848.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="857" font-size="12" fill="#5b6773">Eutitanosauria</text>
-    <line x1="342" y1="853" x2="444.8" y2="853" stroke="#5b6773" stroke-width="1.1"/>
-    <text x="452.8" y="857" font-size="11.5" fill="#52606e">◂ Argentinosaurus</text>
-    <circle cx="258" cy="874" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="269" y="878.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
-    <text x="370.6" y="878" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="274" cy="895" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="285" y="899.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
-    <text x="402.2" y="899" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="290" cy="916" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="301" y="920.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
-    <text x="410.4" y="920" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <circle cx="306" cy="937" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="317" y="941.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
-    <text x="426.4" y="941" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
-    <circle cx="322" cy="958" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
-    <circle cx="322" cy="958" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
-    <text x="337" y="962.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurinae</text>
-    <line x1="337" y1="966" x2="438.4" y2="966" stroke="#0f9d83" stroke-width="1.6"/>
-    <text x="446.4" y="962" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
-    <text x="490.9" y="962" font-size="10.5" fill="#0a7f66">deepest reached</text>
-    <path d="M326 974.5 L335 983.5 M326 983.5 L335 974.5" stroke="#5b6773" stroke-width="1.4"/>
-    <text x="343" y="983" font-size="12" fill="#5b6773">Alamosaurus</text>
-    <line x1="342" y1="979" x2="423.2" y2="979" stroke="#5b6773" stroke-width="1.1"/>
+    <circle cx="338" cy="727" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="731" font-size="12" fill="#5b6773">Diplodocoidea</text>
+    <circle cx="354" cy="748" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="365" y="752" font-size="12" fill="#5b6773">Diplodocus</text>
+    <circle cx="194" cy="769" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="205" y="773.5" font-size="13" fill="#1f2b38">Macronaria</text>
+    <text x="291.0" y="773" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="210" cy="790" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="221" y="794.5" font-size="13" fill="#1f2b38">Titanosauriformes</text>
+    <text x="361.6" y="794" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="338" cy="811" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="815" font-size="12" fill="#5b6773">Brachiosauridae</text>
+    <circle cx="354" cy="832" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="365" y="836" font-size="12" fill="#5b6773">Brachiosaurus</text>
+    <circle cx="226" cy="853" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="237" y="857.5" font-size="13" fill="#1f2b38">Somphospondyli</text>
+    <text x="354.2" y="857" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="242" cy="874" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="253" y="878.5" font-size="13" fill="#1f2b38">Titanosauria</text>
+    <text x="354.6" y="878" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="338" cy="895" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="899" font-size="12" fill="#5b6773">Eutitanosauria</text>
+    <circle cx="354" cy="916" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="365" y="920" font-size="12" fill="#5b6773">Argentinosaurus</text>
+    <circle cx="258" cy="937" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="269" y="941.5" font-size="13" fill="#1f2b38">Lithostrotia</text>
+    <text x="370.6" y="941" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="274" cy="958" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="285" y="962.5" font-size="13" fill="#1f2b38">Saltasauroidea</text>
+    <text x="402.2" y="962" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="290" cy="979" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="301" y="983.5" font-size="13" fill="#1f2b38">Lohuecosauria</text>
+    <text x="410.4" y="983" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <circle cx="306" cy="1000" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="317" y="1004.5" font-size="13" fill="#1f2b38">Saltasauridae</text>
+    <text x="426.4" y="1004" font-size="9.5" fill="#5b6773" letter-spacing="1">FAMILY</text>
+    <circle cx="322" cy="1021" r="7.6" fill="none" stroke="#0a7f66" stroke-width="1.6"/>
+    <circle cx="322" cy="1021" r="4.2" fill="#82b6a7" stroke="#33424f" stroke-width="1"/>
+    <text x="337" y="1025.5" font-size="13" fill="#1f2b38" font-weight="700">Saltasaurinae</text>
+    <line x1="337" y1="1028.5" x2="438.4" y2="1028.5" stroke="#0f9d83" stroke-width="1.6"/>
+    <text x="446.4" y="1025" font-size="9.5" fill="#5b6773" letter-spacing="1">CLADE</text>
+    <text x="490.9" y="1025" font-size="10.5" fill="#0a7f66">deepest reached</text>
+    <circle cx="338" cy="1042" r="4.2" fill="#ffffff" stroke="#c0392b" stroke-width="1.6"/>
+    <text x="349" y="1046" font-size="12" fill="#5b6773">Alamosaurus</text>
   </g>
-  <line x1="400" y1="480" x2="400" y2="880" stroke="#cfd8de" stroke-dasharray="2 3"/>
-  <rect x="40" y="888" width="360" height="4" rx="2" fill="#dde5ea"/>
-  <rect x="40" y="888" width="259.2" height="4" rx="2" fill="#5b6773"/>
-  <text x="40" y="910" font-size="10.5" fill="#5b6773">the tip column continues past the right edge</text>
-  <text x="40" y="926" font-size="10.5" fill="#5b6773">trunk pinned · nothing wraps · no word is clipped</text>
-  <line x1="40" y1="938" x2="500" y2="938" stroke="#dde5ea"/>
-  <text x="40" y="968" font-size="11" fill="#52606e" letter-spacing="2.2">WHAT IS DRAWN, AND BY WHAT</text>
-  <text x="40" y="992" font-size="10.5" fill="#33424f">Connector layer</text>
-  <text x="168" y="992" font-size="10.5" fill="#5b6773">one aria-hidden &lt;svg>, geometry from (row, depth) integers only</text>
-  <text x="40" y="1010" font-size="10.5" fill="#33424f">Labels</text>
-  <text x="168" y="1010" font-size="10.5" fill="#5b6773">the &lt;ol>/&lt;li> the screen already ships, positioned on its row</text>
-  <text x="40" y="1028" font-size="10.5" fill="#33424f">Row pitch</text>
-  <text x="168" y="1028" font-size="10.5" fill="#5b6773">21 px, fixed — a label can never wrap, so an elbow can never break</text>
-  <text x="40" y="1046" font-size="10.5" fill="#33424f">Tip column</text>
-  <text x="168" y="1046" font-size="10.5" fill="#5b6773">(maxDepth + 1) × 18 px — every cut ends there, so cuts read as a column</text>
-  <text x="40" y="1064" font-size="10.5" fill="#33424f">Tint dot</text>
-  <text x="168" y="1064" font-size="10.5" fill="#5b6773">cladeMarkerForTaxon — the same hue this clade has on the map</text>
-  <text x="40" y="1082" font-size="10.5" fill="#33424f">Cuts carry no dot</text>
-  <text x="168" y="1082" font-size="10.5" fill="#5b6773">an eliminated branch is not a clade the player holds</text>
-  <line x1="40" y1="1374" x2="1240" y2="1374" stroke="#cfd8de"/>
-  <text x="40" y="1394" font-size="10" fill="#5b6773">Names, ranks and lineages read from public/data/reference.json (PBDB subset, retrieved 2026-07-26). Nothing here is invented.</text>
-  <text x="1240" y="1394" font-size="10" fill="#5b6773" text-anchor="end">docs/mockups/dinordle-cladogram.md</text>
+  <line x1="400" y1="438" x2="400" y2="838" stroke="#cfd8de" stroke-dasharray="2 3"/>
+  <rect x="40" y="846" width="360" height="4" rx="2" fill="#dde5ea"/>
+  <rect x="40" y="846" width="242.2" height="4" rx="2" fill="#5b6773"/>
+  <text x="40" y="868" font-size="10.5" fill="#5b6773">the two ringed columns continue past the right edge</text>
+  <text x="40" y="884" font-size="10.5" fill="#5b6773">trunk pinned · nothing wraps · no word is clipped</text>
+  <line x1="40" y1="896" x2="500" y2="896" stroke="#dde5ea"/>
+  <text x="40" y="926" font-size="11" fill="#52606e" letter-spacing="2.2">WHAT IS DRAWN, AND BY WHAT</text>
+  <text x="40" y="950" font-size="10.5" fill="#33424f">Connector layer</text>
+  <text x="200" y="950" font-size="10.5" fill="#5b6773">one aria-hidden &lt;svg>, drawn from (row, depth) only</text>
+  <text x="40" y="968" font-size="10.5" fill="#33424f">Labels</text>
+  <text x="200" y="968" font-size="10.5" fill="#5b6773">the &lt;ol>/&lt;li> the screen ships, positioned on its row</text>
+  <text x="40" y="986" font-size="10.5" fill="#33424f">Row pitch</text>
+  <text x="200" y="986" font-size="10.5" fill="#5b6773">21 px, fixed — a label can never wrap</text>
+  <text x="40" y="1004" font-size="10.5" fill="#33424f">Depth indent</text>
+  <text x="200" y="1004" font-size="10.5" fill="#5b6773">16 px — the shortest dashed lead is one indent</text>
+  <text x="40" y="1022" font-size="10.5" fill="#33424f">Dash pattern</text>
+  <text x="200" y="1022" font-size="10.5" fill="#5b6773">3 on, 2 off, 1.2 px stroke — 3 marks per 16 px</text>
+  <text x="40" y="1040" font-size="10.5" fill="#33424f">Ruled-out column</text>
+  <text x="200" y="1040" font-size="10.5" fill="#5b6773">(deepest depth + 1) × 16 px — every branch ends there</text>
+  <text x="40" y="1058" font-size="10.5" fill="#33424f">Guess column</text>
+  <text x="200" y="1058" font-size="10.5" fill="#5b6773">one indent further right — a leaf inside that branch</text>
+  <text x="40" y="1076" font-size="10.5" fill="#33424f">Tint dot</text>
+  <text x="200" y="1076" font-size="10.5" fill="#5b6773">cladeMarkerForTaxon — the clade's hue on the map</text>
+  <text x="40" y="1094" font-size="10.5" fill="#33424f">Ringed dot</text>
+  <text x="200" y="1094" font-size="10.5" fill="#5b6773">hollow, --color-error — no tint, it is not one held</text>
+  <line x1="40" y1="1574" x2="1240" y2="1574" stroke="#cfd8de"/>
+  <text x="40" y="1594" font-size="10" fill="#5b6773">Names, ranks and lineages read from public/data/reference.json (PBDB subset, retrieved 2026-07-26). Nothing here is invented.</text>
+  <text x="1240" y="1594" font-size="10" fill="#5b6773" text-anchor="end">docs/mockups/dinordle-cladogram.md</text>
 </svg>
