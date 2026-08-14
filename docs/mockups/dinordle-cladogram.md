@@ -153,8 +153,8 @@ keyboard-only player can reach the right-hand end of a wide diagram.
    eliminations on one node; a ruled-out branch that is the guessed genus; a pane
    narrower than the diagram; a solved round with no tail.
 5. **Which data is long or messy?** Clade names to 20 characters
-   (`Eupachycephalosauria`), lineages to 15 nodes, ranks that are mostly the
-   single word "clade".
+   (`Eupachycephalosauria`, `Titanosauriformes`), lineages to 20 nodes, ranks
+   that are mostly the single word "clade".
 6. **What is deprioritised?** Rank — small, faint, after the name. Nothing is
    collapsed or hidden: this region is the subject of the screen.
 
