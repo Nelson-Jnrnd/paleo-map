@@ -550,6 +550,37 @@ encodes nothing and cannot read as data (UX-002). No new asset, no network, and
   only at the default zoom — the treatment covers the whole polygon rather than
   fading with distance from the coastline.
 
+### AMEND-002: UX-002's second acceptance criterion follows the reconstruction-label disposition (via SPEC-021)
+
+- **Date:** 2026-08-14
+- **Reason:** UX-002's second acceptance criterion pins the standing
+  "Paleogeographic reconstruction" label as "present and unchanged". SPEC-021
+  removes that banner on the owner's instruction. The criterion was written to
+  stop this spec's richer basemap from eroding an existing provenance cue — it
+  was never intended to freeze the cue against a later, deliberate owner
+  decision.
+- **Changed requirements:** **UX-002** — the acceptance criterion "The standing
+  'Paleogeographic reconstruction' label remains present and unchanged" is
+  **replaced**, per the owner's FONC-300 / CONS-120 disposition recorded in
+  SPEC-021: under disposition A it is struck; under disposition B it becomes
+  "the map carries an always-visible statement that it is a paleogeographic
+  reconstruction, on the basemap attribution control"; under disposition C it is
+  unchanged and this amendment does not apply. **UX-002's statement is entirely
+  unchanged and still binds in full** — the depth gradation must never be
+  labelled, captioned, or legended as measured bathymetry, sea depth or
+  reconstructed sea level, and its first acceptance criterion (no depth scale, no
+  metre or fathom value, no depth legend anywhere in the UI) is untouched.
+- **Behavioral impact:** The floating banner over the map's top-left disappears
+  (or is replaced by a labelled attribution control). Nothing about the basemap
+  itself changes: ocean bands, graticule, equator emphasis, land edge, relief and
+  the interior stipple from AMEND-001 are all unaffected.
+- **Test impact:** In `test/ui/spec018-no-depth-claim.test.ts` the test "the
+  standing reconstruction label is untouched" is rewritten to assert the new
+  state rather than removed; the depth-claim tests in the same file are
+  untouched. `test/e2e/exploration.e2e.ts` follows the same disposition. No test
+  is deleted or skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

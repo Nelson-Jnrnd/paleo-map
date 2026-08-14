@@ -980,12 +980,124 @@ playtested; and the answer is in the client bundle by construction (SEC-001).
 
 ### AMEND-001
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-08-14
+- **Reason:** SPEC-021 deletes the screen footer that carried "Per PBDB snapshot
+  {date} — a placement is a sourced opinion, not a settled fact", on the owner's
+  instruction to delete rather than relocate. The snapshot date it carried is
+  moved into the answer reveal so the provenance is stated at the moment the game
+  asserts a placement.
+- **Changed requirements:** **UX-004** — the snapshot date is now shown **in the
+  answer reveal**, alongside `accepted per …`, rather than standing in the screen
+  footer for the whole round. Both acceptance criteria are still met literally:
+  the reveal opens by itself when the round finishes, so the date is behind
+  neither a hover nor a second click, and the reveal still shows `acceptedPer`.
+  The third criterion ("no copy asserts a placement without its source") is
+  unaffected. This amendment records the narrowing of *when* the date is on
+  screen; UX-004's statement is otherwise unchanged. The traceability row for
+  UX-004 already reads "snapshot date + `acceptedPer` in the reveal" and becomes
+  accurate for the first time.
+- **Behavioral impact:** During a round the snapshot date is no longer displayed;
+  it appears with the reveal. The "a placement is a sourced opinion, not a settled
+  fact" sentence is retired as copy — the reveal's `accepted per …` line remains
+  the mechanism that names whose classification is being played on. The screen
+  footer no longer renders at all unless the storage-blocked note is present. The
+  tree heading is separately renamed from "Established classification" to
+  "Taxonomic tree" (SPEC-021 UX-006); no requirement in this spec mandated that
+  string, so it needs no amendment.
+- **Test impact:** In `test/ui/spec019-daily-screen.test.tsx` the UX-004 test is
+  rewritten to play a round to completion and assert the date on the reveal; the
+  domain-language test's `"established classification"` expectation becomes
+  `"taxonomic tree"`. `test/e2e/spec019-daily.e2e.ts` moves its snapshot-date
+  assertion to the reveal and updates the heading probe. No test is deleted or
+  skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
+### AMEND-002 — the puzzle is named Dinordle, and its entry point is the global app bar
+
+- **Date:** 2026-08-14
+- **Reason:** The owner named the product **Dinordle** (chosen from Cladle /
+  Saurdle / Dinordle / Taxordle) and asked for a real app bar carrying Map /
+  Dinordle / Taxonomy on every screen (SPEC-022). "Daily Genus" was a
+  description, not a name, and the puzzle's only entry point was one button in
+  the map screen's context bar — invisible from the other three screens.
+- **Changed requirements:** **REQ-012** — the entry point is the **global app
+  bar** (SPEC-022 REQ-001/002), present on all four screens, and the control is
+  labelled **Dinordle**; the fragments `#daily` and `#practice` and their
+  meanings are **unchanged**, and no routing library is added. **REQ-011** — the
+  shared summary's leading label is the product name and therefore now begins
+  `Dinordle `; its spoiler-free content rules (no taxon name, rank, clade name,
+  depth or distance) and its storage behaviour are unchanged. Every other prose
+  use of "Daily Genus" in this spec, including the title, becomes "Dinordle". No
+  other requirement changes.
+- **Behavioral impact:** Display only, plus a better entry point. Explicitly
+  **unchanged**: the four URL fragments (SPEC-022 API-001), the local-storage
+  keys `paleo-map:daily-genus:round` / `:record` / `:track` and the stored
+  payload shapes (SPEC-022 DATA-001) — renaming them would silently zero every
+  player's record and streak and drop an in-progress round, because
+  `dailyGenusStorage.ts` has no migration path and reads a missing key as "no
+  stored state". Also unchanged: selection, pools, guess evaluation, the revealed
+  tree, the time clue, the hint, the countdown, rollover, and SEC-001/SEC-002.
+  The screen's own "← Back to map" button is removed; the app bar's **Map**
+  destination is the one-action return, so REQ-012's back contract still holds.
+- **Test impact:** `test/spec019-persistence.test.ts` (summary string),
+  `test/ui/spec019-states.test.tsx`, `test/ui/spec019-practice.test.tsx`,
+  `test/ui/spec019-entry-point.test.tsx` (label and the return control),
+  `test/e2e/spec019-daily.e2e.ts` and `test/e2e/a11y.e2e.ts` update their
+  expected strings and drive the app bar instead of the removed back button.
+  `test/ui/spec020-track-fragments.test.tsx` must pass **unmodified** — that is
+  the evidence the addresses did not move. New:
+  `test/spec022-rename-compatibility.test.ts` pins the literal storage keys and
+  fragments. No test is skipped or deleted.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
+### AMEND-003 — the time clue becomes a per-guess overlap verdict; the answer's period is no longer disclosed
+
+- **Date:** 2026-08-14
+- **Reason:** The owner reported that the Ma column is not understood in play
+  ("I don't understand how the Ma reveal work in the puzzle", 2026-08-14). As
+  built, every guess draws an identical teal bar and the only per-guess verdict —
+  older / younger / overlaps — exists solely in `visuallyHidden` text, so a
+  sighted player is told nothing per guess; the answer's period is disclosed by
+  raising one ICS band's opacity from 0.22 to 0.62, a change few players notice
+  and none can be expected to interpret. SPEC-024 replaces the mechanic with one
+  that is legible on the axis itself.
+- **Changed requirements:** REQ-006 (the time clue). The statement drops "and
+  disclosing the answer's geological period once a guess's span overlaps it" and
+  gains: each guess's span is drawn as one bar on the shared Ma axis, rendered
+  solid in a new overlap status token when it overlaps the answer's span and
+  hollow in a neutral token when it does not, with a visible direction mark on a miss showing
+  whether the answer is older or younger, every treatment named in words in a
+  key, and a guess with no recorded span rendering an explicit visible
+  missing-value mark and statement in place of a bar. The acceptance criterion
+  "The answer's period is disclosed only after a guess whose span overlaps it,
+  and never before" is **deleted** and replaced by "The answer's geological
+  period is never named during a round; the answer's time span continues to be
+  stated in the reveal (REQ-007)." The remaining criteria — the older / younger /
+  overlapping decision, the explicit "Not available", and inventing no value —
+  are unchanged. `timeVerdict()` and its four-member `TimeVerdict` type are
+  unchanged.
+- **Behavioral impact:** The game stops disclosing one aggregate fact (the
+  answer's geological period) mid-round, and starts showing two per-guess facts
+  that were previously invisible to sighted players (overlap-or-miss, and the
+  direction of the miss). No band changes weight at any point. The reveal at the
+  end of the round is unchanged and still states the answer's time span in Ma.
+  Answers, guess evaluation, the revealed tree, the eight-guess budget, the
+  stored round schema and the shared summary are all unchanged — `shareSummary`
+  never encoded the time verdict, so no shared result changes meaning. A guess
+  with no recorded time span stops being invisible.
+- **Test impact:** `test/ui/spec019-states.test.tsx` — the REQ-006 period test
+  (lines 101-126) is rewritten in place to assert the new bar treatments and that
+  no rendered text names the answer's period during a round; the no-span test
+  (lines 130-136) is extended with the visible mark and statement. Its
+  `visuallyHidden` assertions are kept.
+  `test/ui/spec019-daily-screen.test.tsx` gains an assertion that each bar's
+  verdict is carried by a non-colour attribute as well as its fill.
+  `test/spec019-clue-rows.test.ts` passes **unmodified** (the pure verdict logic
+  is untouched), as do `test/spec019-guess-evaluation.test.ts`,
+  `test/spec019-persistence.test.ts` and `test/spec020-share-track.test.ts`. No
+  test is skipped or deleted. `docs/mockups/daily-genus.md` and the two mockup
+  SVGs are updated in the same PR.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
 
 ## Review checklist
 

@@ -663,6 +663,37 @@ Delivered 2026-07-22. Decisions as built:
 - **Human approval reference:** Mechanism-level adjustment within the approved intent
   (disclose that a cluster counts records); flagged to the owner in the delivery summary.
 
+### AMEND-002: REQ-002 reverts to a per-cluster accessible name — AMEND-001's premise no longer holds
+
+- **Date:** 2026-08-14
+- **Reason:** AMEND-001 replaced REQ-002's per-cluster accessible name with a DOM
+  legend paragraph, on the grounds that "the map is a WebGL canvas with no
+  per-feature DOM … so a per-cluster accessible name is not achievable in this
+  architecture". That premise was true in 2026-07 and is not true now: SPEC-015
+  introduced an HTML overlay (`styles.mapOverlay`) that renders one real `<span>`
+  per rendered cluster carrying its count, currently `aria-hidden="true"`. Under
+  SPEC-021 the owner is deleting the legend paragraph, and the correct
+  replacement is the mechanism REQ-002 originally asked for.
+- **Changed requirements:** **REQ-002** acceptance — the "records, not diversity"
+  meaning is once again conveyed by **each cluster's own accessible name**
+  ("42 occurrence records" in Occurrence mode, "12 localities" in Locality mode),
+  not by a DOM legend. AMEND-001's legend mechanism is **withdrawn**. REQ-002's
+  statement, the SPEC-009 regression clause, and the "no colour-only signal"
+  clause are unchanged. As a consequence the cluster-count overlay must also
+  render in **Locality** mode, where SPEC-015 currently suppresses it; Taxon mode
+  is still excluded, since it does not collapse points into clusters.
+- **Behavioral impact:** The legend paragraph disappears from the map pane in
+  Occurrence and Locality mode. Cluster count badges gain a spoken name they did
+  not have before, and appear in Locality mode. The visible badge glyph is still
+  the bare integer. Clustering itself, marker rendering, the clade key and the
+  name labels are unchanged, and the clade key stays hidden in Locality mode.
+- **Test impact:** `test/ui/grouping-mode.test.tsx` replaces its legend assertion
+  with the per-cluster accessible-name assertion in both modes, and asserts the
+  paragraph is gone. `test/e2e/a11y.e2e.ts` needs no edit but must be re-run,
+  since previously `aria-hidden` elements become named. No test is deleted or
+  skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.
