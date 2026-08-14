@@ -784,10 +784,10 @@ has.
       popover, which is a secondary interaction. Reversing later means restoring
       two [MVP] requirements and finding a carrier again.
 
-- [ ] **BLOCKING — FONC-1130 also loses its carrier, and was not part of
+- [x] **RESOLVED — FONC-1130 also loses its carrier, and was not part of
       disposition A.** Discovered after the owner answered the FONC-300/CONS-120
-      question, so it is deliberately left open rather than folded into that
-      answer.
+      question, so it was put to the owner separately rather than folded into
+      that answer.
 
       **FONC-1130** [MVP] — "The system must indicate when a geographic position
       is reconstructed." Verified carrier chain: SPEC-007 (2026-07-21) retired
@@ -813,7 +813,21 @@ has.
       [MVP] "must" knowingly unsatisfied, which `/drift-check` should then fail
       on.
 
-      **Answer:** _______________
+      **Answer: A2 — retire FONC-1130 as well.** Recorded by the owner
+      (nelsonjeanrenaud@gmail.com) in session on 2026-08-14, after being shown
+      the trade-off above and the recommendation of B2. Consistent with
+      disposition A: the retirement note is added in the same change, and no
+      carrier is introduced anywhere.
+
+      Agent note, recorded for the file rather than to reopen the decision: with
+      A and A2 together, the atlas no longer states at any point of reading that
+      its plotted positions are plate-model reconstructions rather than modern
+      coordinates. That fact remains inspectable only inside the basemap
+      attribution popover. This is the third [MVP] requirement retired by this
+      spec and the point at which charter §2's "uncertainty and provenance are
+      first-class and always legible" no longer describes the map surface;
+      whoever next edits the charter should read §2 as a whole rather than
+      patching the one bullet.
 
 - [ ] **Confirm the SPEC-019 amendment is wanted.** AMEND-001 for SPEC-019 below
       records that the snapshot date becomes visible at the reveal rather than
@@ -874,6 +888,8 @@ retirement note on the same line.
 - **FONC-300** [MVP] — ~~The system must clearly indicate that the ancient map displayed is a paleogeographic reconstruction.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** the standing map label was removed; the reconstruction detail remains available in the basemap attribution popover.
 
 - **CONS-120** [MVP] — ~~The system must state that ancient maps are scientific reconstructions and not direct observations.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** see FONC-300.
+
+- **FONC-1130** [MVP] — ~~The system must indicate when a geographic position is reconstructed.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** its sole carrier was the standing map label retired above — SPEC-007 (2026-07-21) had already retired the per-occurrence "reconstructed" chip in favour of that label. Occurrence paleocoordinates are still derived from the recorded `rotationModel`, which remains inspectable in the basemap attribution popover; the product no longer marks them as reconstructed at the point of reading.
 ```
 
 Consequent edits in the same change, because they cite the retired mechanism by
@@ -881,16 +897,28 @@ name:
 
 - `docs/mockups/design-guidelines.md:38-42` — charter §2 states that reconstructed
   paleo positions "carry a standing map-level 'Paleogeographic reconstruction'
-  label". That sentence must be rewritten, not merely footnoted, since the
-  mechanism it describes no longer exists.
+  label" and cites FONC-1130/1140. That bullet must be **rewritten, not merely
+  footnoted**, since the mechanism it describes no longer exists and half its
+  requirement citation is retired. The `FONC-1140` half (time ranges that span
+  multiple stages are labelled as such) is untouched by this spec and must
+  survive the rewrite.
 - `docs/requirements/requirements-index.md` and
-  `docs/requirements/requirements-traceability.md` — mark both requirements
-  retired so the derived tables stop asserting live coverage.
+  `docs/requirements/requirements-traceability.md` — mark all three requirements
+  retired so the derived tables stop asserting live coverage. Note
+  `requirements-traceability.md:144` currently lists FONC-1130 against
+  "Occurrence panel, Taxon profile", which has been stale since SPEC-007; retire
+  the row rather than repointing it.
+- `docs/mockups/occurrence-panel.md:15,27` and `docs/mockups/taxon-profile.md:15,31`
+  cite FONC-1130 in their related-requirements lists. Drop the citation.
+- `docs/design/data-model.md:564` and `docs/product/out-of-scope.md:136` also cite
+  FONC-1130. Check each and update.
 
-**Unresolved and NOT covered by disposition A — see *Human decisions required*:**
-this retirement leaves **FONC-1130** [MVP] ("must indicate when a geographic
-position is reconstructed") without a carrier as well. It was not part of the
-question the owner answered, so it is not retired here.
+**Scope note.** Three [MVP] requirements are retired by this spec — FONC-300,
+CONS-120 and FONC-1130 — each on a separate owner decision recorded under *Human
+decisions required* (disposition A, 2026-08-14, and disposition A2, 2026-08-14).
+No other requirement was found to depend on the banner. `CONS-110` and
+`FONC-1140` (approximate/multi-stage time) have their own carriers and are
+unaffected.
 
 ---
 
