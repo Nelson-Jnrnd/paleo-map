@@ -442,36 +442,38 @@ rendered DOM and the accessible-name surface described in REQ-001/002.
 - **Verification method:** automated component test.
 - **Evidence location:** `test/ui/timeline-periods.test.tsx`.
 
-### UX-003: The map's reconstruction banner is removed — **gated**
+### UX-003: The map's reconstruction banner is removed — **ungated (disposition A)**
 
 - **Statement:** The `<span className={styles.reconstructionBanner}>` and its
   content "▲ Paleogeographic reconstruction" must be removed from
-  `src/app/components/ExplorationView.tsx:458-460`. **This requirement must not
-  be implemented until the owner has recorded a disposition for FONC-300 and
-  CONS-120 under *Human decisions required*.** Under disposition **B** the
-  requirement is implemented together with the compensating carrier named in that
-  decision; under disposition **C** the requirement is withdrawn from this spec.
-- **Rationale:** Owner decision, 2026-08-14, to delete. The gate exists because
+  `src/app/components/ExplorationView.tsx:458-460`, with **no compensating
+  carrier**. The owner recorded disposition **A** (retire FONC-300 and CONS-120)
+  on 2026-08-14 under *Human decisions required*, so this requirement is ungated
+  and implemented as written. Implementation is conditional only on the
+  functional-specification amendment below being applied in the same change —
+  the banner must not be deleted while FONC-300 and CONS-120 still stand, or the
+  repository is left in violation of its own tier-1 document.
+- **Rationale:** Owner decision, 2026-08-14, to delete. A gate existed because
   FONC-300 [MVP] and CONS-120 [MVP] are positive, visible-statement requirements
   in the tier-1 authoritative functional specification, and inspection found no
   other compliant carrier: the per-occurrence cue was removed by SPEC-007
   specifically because this label was kept, the map's `aria-label` is not
   visible, and the attribution popover is a secondary interaction that CONS-490
-  rules out for interpretation-changing information.
+  rules out for interpretation-changing information. The owner resolved the gate
+  by retiring both requirements rather than relocating the statement.
 - **Acceptance criteria:**
-  - The owner's disposition is recorded in this spec before implementation
-    begins.
-  - Under A or B: no rendered text matches `/Paleogeographic reconstruction/i`
-    in `ExplorationView.tsx`, and `.reconstructionBanner` is gone from the
+  - No rendered text matches `/Paleogeographic reconstruction/i` in
+    `ExplorationView.tsx`, and `.reconstructionBanner` is gone from the
     stylesheet.
-  - Under B additionally: the compensating carrier named by the owner is present,
-    visible without any interaction, and states that the map is a
-    reconstruction.
-  - Under C: no change is made at this site and this requirement is struck from
-    this spec's matrix and traceability rows.
-  - In every case the basemap attribution control and its popover are unchanged.
-- **Verification method:** automated component test + manual check against
-  FONC-300/CONS-120 + inspection of the recorded decision.
+  - FONC-300 and CONS-120 carry an owner-approved retirement note in
+    `docs/product/functional-specification.md`, and charter §2 and its status
+    table no longer cite the standing label as the mechanism — applied in the
+    same change as the deletion, never after it.
+  - No compensating carrier is added: the map states nothing about being a
+    reconstruction outside the attribution popover.
+  - The basemap attribution control and its popover are unchanged.
+- **Verification method:** automated component test + inspection of the retired
+  FONC-300/CONS-120 notes and the recorded decision.
 - **Evidence location:** `test/ui/spec018-no-depth-claim.test.ts`,
   `test/e2e/exploration.e2e.ts`.
 
@@ -731,7 +733,7 @@ has.
 
 ## Human decisions required
 
-- [ ] **BLOCKING — FONC-300 and CONS-120 have no carrier after UX-003.**
+- [x] **RESOLVED — FONC-300 and CONS-120 have no carrier after UX-003.**
       Deleting the map banner removes the only visible statement that the map is
       a paleogeographic reconstruction. Both requirements are **[MVP] "must"** in
       the functional specification, which outranks every spec in this repository.
@@ -758,6 +760,58 @@ has.
 
       **C — Keep the banner.** Withdraw UX-003 from this spec; the other five
       changes proceed unaffected.
+
+      **Answer: A — retire the requirements.** Recorded by the owner
+      (nelsonjeanrenaud@gmail.com) in session on 2026-08-14, after being shown
+      the trade-off above and the recommendation of B. The owner elected to
+      remove the on-screen reconstruction statement entirely rather than relocate
+      it onto the attribution control.
+
+      This disposition is the **only** part of this spec that changes a tier-1
+      document. It authorises the strikethrough note on FONC-300 and CONS-120 in
+      `docs/product/functional-specification.md` recorded under *Required
+      amendments to existing specs* below, following the SPEC-007 precedent, plus
+      the consequent edit to charter §2 and its status table. UX-003 is therefore
+      ungated and implemented as written: the banner is deleted with no
+      compensating carrier.
+
+      Agent note, recorded for the file rather than to reopen the decision: this
+      is a product concession, not a documentation tidy-up. After it, nothing on
+      the map states that the plate positions are a reconstruction of deep-time
+      geography rather than present-day coastlines, and charter §2 ("uncertainty
+      and provenance are first-class and always legible") loses its most
+      load-bearing instance. The information survives only inside the attribution
+      popover, which is a secondary interaction. Reversing later means restoring
+      two [MVP] requirements and finding a carrier again.
+
+- [ ] **BLOCKING — FONC-1130 also loses its carrier, and was not part of
+      disposition A.** Discovered after the owner answered the FONC-300/CONS-120
+      question, so it is deliberately left open rather than folded into that
+      answer.
+
+      **FONC-1130** [MVP] — "The system must indicate when a geographic position
+      is reconstructed." Verified carrier chain: SPEC-007 (2026-07-21) retired
+      the per-occurrence "reconstructed" chip **in favour of** the standing map
+      label — `docs/mockups/design-guidelines.md:38-42` states this explicitly,
+      and `src/app/components/OccurrencePanel.tsx:7` carries the matching code
+      comment ("SPEC-007 retired the reconstructed cue"). A search of
+      `OccurrencePanel`, `GroupedPanels`, `TaxonProfile` and `format.ts` finds no
+      other cue. So the banner is FONC-1130's sole carrier too.
+
+      This is a narrower and more concrete claim than FONC-300's: occurrence
+      coordinates are rotated by a plate model (`rotationModel`), so without any
+      cue a reader takes plotted points for literal modern positions. Choose one:
+
+      **A2 — Retire FONC-1130 as well.** Consistent with disposition A; add a
+      third strikethrough note in the same change.
+
+      **B2 — Keep FONC-1130 and give it a carrier.** The occurrence and locality
+      panels already exist and are where a position is actually read; a short
+      factual line there satisfies it without putting anything back on the map.
+
+      **C2 — Keep FONC-1130 with no carrier.** Not recommended: it leaves a live
+      [MVP] "must" knowingly unsatisfied, which `/drift-check` should then fail
+      on.
 
       **Answer:** _______________
 
@@ -800,9 +854,43 @@ introduces truth and neither needs an edit, since FONC-400 is unchanged.
 
 ## Required amendments to existing specs
 
-Five ready-to-transplant blocks, one per target document. **Do not edit the
+Six ready-to-transplant blocks, one per target document. **Do not edit the
 target specs from this spec** — the orchestrator transplants each block into its
 target's `## Spec amendments` section, under the number given.
+
+The first block below is not a spec amendment but a **tier-1 product change**,
+authorised by the owner's disposition A of 2026-08-14. It must be applied in the
+same change as UX-003, never after it.
+
+---
+
+### For `docs/product/functional-specification.md` — retirement notes, SPEC-007 format (no AMEND number; the functional specification does not carry an amendment log)
+
+Apply the SPEC-007 precedent exactly (see FONC-670 at line 219 and FONC-1110 at
+line 285): strike the requirement text through and append an owner-approved
+retirement note on the same line.
+
+```markdown
+- **FONC-300** [MVP] — ~~The system must clearly indicate that the ancient map displayed is a paleogeographic reconstruction.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** the standing map label was removed; the reconstruction detail remains available in the basemap attribution popover.
+
+- **CONS-120** [MVP] — ~~The system must state that ancient maps are scientific reconstructions and not direct observations.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** see FONC-300.
+```
+
+Consequent edits in the same change, because they cite the retired mechanism by
+name:
+
+- `docs/mockups/design-guidelines.md:38-42` — charter §2 states that reconstructed
+  paleo positions "carry a standing map-level 'Paleogeographic reconstruction'
+  label". That sentence must be rewritten, not merely footnoted, since the
+  mechanism it describes no longer exists.
+- `docs/requirements/requirements-index.md` and
+  `docs/requirements/requirements-traceability.md` — mark both requirements
+  retired so the derived tables stop asserting live coverage.
+
+**Unresolved and NOT covered by disposition A — see *Human decisions required*:**
+this retirement leaves **FONC-1130** [MVP] ("must indicate when a geographic
+position is reconstructed") without a carrier as well. It was not part of the
+question the owner answered, so it is not retired here.
 
 ---
 
