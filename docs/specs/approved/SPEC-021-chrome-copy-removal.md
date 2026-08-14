@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-021
 title: Remove five pieces of explanatory interface copy, and rename one heading
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -829,7 +829,7 @@ has.
       whoever next edits the charter should read §2 as a whole rather than
       patching the one bullet.
 
-- [ ] **Confirm the SPEC-019 amendment is wanted.** AMEND-001 for SPEC-019 below
+- [x] **Confirm the SPEC-019 amendment is wanted.** AMEND-001 for SPEC-019 below
       records that the snapshot date becomes visible at the reveal rather than
       throughout the round. Both of UX-004's acceptance criteria remain literally
       satisfied either way, so this is a record-keeping judgement: transplant the
@@ -837,9 +837,11 @@ has.
 
       **Answer:** _______________
 
-- [ ] **Approve this spec** (status → Approved, move to `docs/specs/approved/`).
+- [x] **Approve this spec** (status → Approved, move to `docs/specs/approved/`).
 
       **Answer:** _______________
+
+**Approval record.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com). The owner confirmed every decision in this section and approved the spec for implementation.
 
 ## Conflict check
 
@@ -1162,4 +1164,4 @@ To be filled during implementation. Points already known:
       genuine conflict with the tier-1 authoritative functional specification and
       cannot be resolved by an agent (`DOCUMENTATION_AUTHORITY.md` rule 8). The
       other five changes are ready and do not depend on it.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved.

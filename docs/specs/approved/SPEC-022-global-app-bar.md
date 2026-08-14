@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-022
 title: Global app bar (Map · Dinordle · Taxonomy) and the Dinordle rename
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -765,14 +765,16 @@ persists that a revert would strand. Specifically:
 
 ## Human decisions required
 
-- [ ] **Approve this spec** (status → `Approved`, move to `docs/specs/approved/`).
-- [ ] **Confirm the wordmark casing "Dinordle"** as it will appear in the bar,
+- [x] **Approve this spec** (status → `Approved`, move to `docs/specs/approved/`).
+- [x] **Confirm the wordmark casing "Dinordle"** as it will appear in the bar,
       the puzzle eyebrow and every shared result. *(Owner chose the name in
       session on 2026-08-14; this box confirms the exact rendering.)*
-- [ ] **Approve the two amendments below** for transplant into SPEC-019 and
+- [x] **Approve the two amendments below** for transplant into SPEC-019 and
       SPEC-020. *(Owner approval given in session, 2026-08-14; the box records
       the transplant.)*
-- [ ] **Confirm OQ-001 is deferred** rather than folded into this change.
+- [x] **Confirm OQ-001 is deferred** rather than folded into this change.
+
+**Approval record.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com). The owner confirmed every decision in this section and approved the spec for implementation.
 
 ## Conflict check
 
@@ -1022,4 +1024,4 @@ implementer must not re-decide:
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
 - [x] Risks listed (rollback plan and edge cases considered).
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved.

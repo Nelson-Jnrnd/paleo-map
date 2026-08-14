@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-024
 title: Dinordle — legible track choice and a readable Ma column
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -313,19 +313,20 @@ withheld from everyone else. A guess with no recorded span disappears entirely.
   bar in its own slot on the shared Ma axis, positioned and sized by its true
   span (oldest at the top), as today. Its treatment carries the verdict from
   `TimeVerdict`:
-  - `overlaps` → **solid fill in the teal accent**;
+  - `overlaps` → **solid fill in the new overlap status token** (NFR-001);
   - `older` or `younger` → **hollow: a hairline outline in a neutral token, no
     fill**.
   The bar's colour is never the only difference between the two: solid-versus-
   hollow is a shape difference legible with colour removed. No verdict chip,
   badge or pill is introduced, and no numeric distance in Ma is printed.
-- **Rationale:** The owner's decision, expressed in the product's own palette.
-  "Green" is the teal accent — it is already the accent for the data layer
-  (charter §4), so overlap-is-teal introduces no second accent and no new hue;
-  "grey" is the cool neutral family the rest of the column already uses. Fill
-  versus outline is the anti-slop checklist's rule applied ("carry state with
-  shape and word first, colour third") and is what makes the pair legible to a
-  colourblind player, which is why grey was chosen over red in the first place.
+- **Rationale:** The owner's decision, in the owner's own terms: green for
+  overlap, grey for a miss, with one new hue authorised for it (2026-08-14) —
+  see NFR-001, including the constraint that it must not read as the Cretaceous
+  band it will often sit on. "Grey" is the cool neutral family the rest of the
+  column already uses. Fill versus outline is the anti-slop checklist's rule
+  applied ("carry state with shape and word first, colour third") and is what
+  makes the pair legible to a colourblind player, which is why grey was chosen
+  over red in the first place.
   A distance in Ma would publish a closeness number, which SPEC-019 REQ-004
   forbids.
 - **Acceptance criteria:**
@@ -477,25 +478,43 @@ withheld from everyone else. A guess with no recorded span disappears entirely.
 
 ## Non-functional requirements
 
-### NFR-001: No new token, no new hue, no new dependency, no new data
+### NFR-001: Exactly one new status token, no new dependency, no new data
 
-- **Statement:** Every colour used comes from `src/app/styles/tokens.css` as
-  shipped. No token is added or changed, no second accent is introduced, teal
-  stays the only accent, and the ICS period hues keep their existing meaning. No
-  package is added — no tooltip, popover or animation library — and no file
-  under `public/data/` changes.
-- **Rationale:** Charter §4 and anti-slop rule 10 ("don't invent tokens"). A
-  verdict colour is exactly where a fourth hue creeps in; the point of choosing
-  teal-for-overlap and neutral-for-miss is that both already exist and already
-  mean what they are being used for.
+- **Statement:** The owner authorised one new hue (2026-08-14). Exactly **one**
+  token may be added to `src/app/styles/tokens.css` — a positive/overlap status
+  colour, named for its meaning (e.g. `--color-overlap`) and placed in the
+  existing "Provenance / status cues" block beside `--color-attention` and
+  `--color-error`. It is a **status** colour, not a second accent: teal stays the
+  only accent, and the ICS period hues keep their existing meaning. Every other
+  colour comes from `tokens.css` as shipped. No package is added — no tooltip,
+  popover or animation library — and no file under `public/data/` changes.
+- **Rationale:** The spec originally chose teal-for-overlap and
+  neutral-for-miss purely to avoid inventing a hue (charter §4, anti-slop rule
+  10). The owner has since authorised a real verdict colour, which reads more
+  immediately than an accent doing double duty. The one-token limit keeps the
+  authorisation from becoming an open door.
+- **Constraint — the new hue must not be the Cretaceous green.** The bars are
+  drawn **on top of the period bands**, and `--color-period-cretaceous` is
+  `#5fa96a`, a green. A green overlap bar over a green Cretaceous band is the
+  one combination this change must not produce, and it is also the most likely
+  band for a bar to sit on. The chosen hue must therefore be separated from
+  `#5fa96a` in both hue and luminance, and verified against the *lit band*
+  behind it (`.band` at 0.22 opacity, `.bandLit` at 0.62), not against the page
+  ground. If no green clears that bar, use a non-green positive hue rather than
+  weakening the test.
 - **Acceptance criteria:**
-  - `git diff` shows no change to `tokens.css` and no change under
-    `public/data/`.
+  - `tokens.css` gains exactly one token; `git diff` shows no other change to
+    it and no change under `public/data/`.
   - `package.json` gains no dependency.
   - Every colour in `dailyGenus.module.css` after the change is a `var(--…)`
-    reference to an existing token.
-- **Verification method:** inspection + `pnpm run check:budget`.
-- **Evidence location:** PR diff, `pnpm run check:budget` output.
+    reference to a token.
+  - The new token passes contrast against both band opacities over the ocean
+    ground, and is distinguishable from `--color-period-cretaceous` when
+    overlaid on it.
+  - Colour remains never-the-sole-carrier (UX-002 is unchanged by this).
+- **Verification method:** inspection + contrast check against the lit and
+  unlit Cretaceous band + `pnpm run check:budget`.
+- **Evidence location:** PR diff, contrast check output, `pnpm run check:budget`.
 
 ### NFR-002: The screen still makes no network request
 
@@ -836,10 +855,10 @@ answered better on paper than in the browser.
 
 ## Human decisions required
 
-- [ ] **Approve this spec** (status → Approved), including the two decisions
+- [x] **Approve this spec** (status → Approved), including the two decisions
       below, which are recorded here rather than taken silently.
       Answer:
-- [ ] **The answer's geological period is no longer disclosed during a round**
+- [x] **The answer's geological period is no longer disclosed during a round**
       (REQ-008, amending SPEC-019 REQ-006). Retiring the band-lighting mechanic
       retires the only thing it disclosed. Recommended, because the per-guess
       overlap verdict and direction mark that replace it are more specific and
@@ -848,11 +867,31 @@ answered better on paper than in the browser.
       guess overlaps it, with no band lighting — is available at the cost of one
       more line of copy on a screen the owner has just called too wordy.
       Answer:
-- [ ] **"Green" is realised as the product's teal accent, not a new green
+- [x] **"Green" is realised as the product's teal accent, not a new green
       token** (REQ-005, NFR-001). Teal is already the accent for the data layer,
       so no second hue enters the palette. A literal green would need a new
       token and a change to charter §4, which this spec does not propose.
       Answer:
+
+**Approval record.** Owner approval recorded in session, 2026-08-14
+(nelsonjeanrenaud@gmail.com). The owner approved the spec and answered both
+recorded decisions:
+
+1. **The answer's geological period is no longer disclosed during a round**
+   — owner's words: "Yes don't disclose it". REQ-008 stands as written and the
+   SPEC-019 REQ-006 amendment below is authorised. The reveal still states the
+   answer's span; nothing names its period before then.
+2. **One new hue is authorised for the overlap verdict** — owner's words: "We
+   can add a new hue to the palette". NFR-001 and REQ-005 were updated in place
+   before approval (not by amendment) to permit exactly one new status token
+   instead of reusing the teal accent.
+
+   Recorded consequence, found while making that change: the bars are drawn over
+   the period bands, and `--color-period-cretaceous` is already a green
+   (`#5fa96a`). The new hue must be separated from it in hue and luminance and
+   verified against the lit band behind it, or a non-green positive hue used
+   instead. This is a constraint on implementation, not a reopening of the
+   decision.
 
 ## Assumptions
 
@@ -1082,4 +1121,4 @@ above or to a new amendment here.
 - [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved.

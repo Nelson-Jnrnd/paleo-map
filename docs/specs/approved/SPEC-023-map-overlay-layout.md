@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-023
 title: Map overlay layout — corner rails, reserved map-control corner, and an automated non-overlap gate
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -675,15 +675,17 @@ to delete the assertions; deleting or skipping the gate is forbidden by
 
 ## Human decisions required
 
-- [ ] **Confirm the corner assignment (REQ-002).** The Wikipedia-gate toggle
+- [x] **Confirm the corner assignment (REQ-002).** The Wikipedia-gate toggle
       moves from the top-right to the **bottom-right** corner of the map, and the
       cluster-semantics note moves from the bottom-left to the **top-left**,
       under the reconstruction label. Everything else stays where it is.
-      Answer: ______________________
-- [ ] **Confirm the clade key becomes collapsible (UX-001)**, open by default.
-      Answer: ______________________
-- [ ] **Approval reference for Definition of Ready** (status → Approved).
-      Answer: ______________________
+      Answer: **Approved.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Confirm the clade key becomes collapsible (UX-001)**, open by default.
+      Answer: **Approved.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Approval reference for Definition of Ready** (status → Approved).
+      Answer: **Approved.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+
+**Approval record.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com). The owner confirmed every decision in this section and approved the spec for implementation.
 
 ## Conflict check
 
@@ -774,4 +776,4 @@ _None. The spec has not been approved yet._
 - [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved.
