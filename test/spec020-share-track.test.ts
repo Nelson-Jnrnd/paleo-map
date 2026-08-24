@@ -31,12 +31,12 @@ function play(track: Track, guessNames: readonly string[]): Round {
 
 test("REQ-006: the full track's summary is unchanged from SPEC-019", () => {
   const round = play("full", ["Triceratops", "Tyrannosaurus"]);
-  expect(shareSummary(round)).toBe("Daily Genus 1 · 2/8 · ▲▲");
+  expect(shareSummary(round)).toBe("Dinordle 1 · 2/8 · ▲▲");
 });
 
 test("REQ-006: the well-known track names itself", () => {
   const round = play("wellKnown", ["Triceratops", "Tyrannosaurus"]);
-  expect(shareSummary(round)).toBe("Daily Genus 1 · well-known · 2/8 · ▲▲");
+  expect(shareSummary(round)).toBe("Dinordle 1 · well-known · 2/8 · ▲▲");
 });
 
 test("REQ-006: naming the track leaks nothing about the answer", () => {

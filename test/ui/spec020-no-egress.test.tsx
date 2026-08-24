@@ -19,7 +19,7 @@ function forbidNetwork(): void {
   const boom = (what: string) => {
     return (...args: unknown[]): never => {
       attempts.push(`${what}:${String(args[0])}`);
-      throw new Error(`${what} is forbidden on the Daily Genus screen`);
+      throw new Error(`${what} is forbidden on the Dinordle screen`);
     };
   };
   vi.stubGlobal("fetch", boom("fetch"));
@@ -63,7 +63,6 @@ function renderTrack(track: "full" | "wellKnown") {
   return render(
     <DailyGenusScreen
       api={rankedApi()}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={clockOn("2026-08-11")}
       random={() => 0}

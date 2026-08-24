@@ -1,5 +1,5 @@
 /**
- * URL-fragment addressability for the Daily Genus screen (SPEC-019 REQ-012,
+ * URL-fragment addressability for the Dinordle screen (SPEC-019 REQ-012,
  * SPEC-020 REQ-007).
  *
  * The app has no router and neither spec introduces one: a fragment is enough to

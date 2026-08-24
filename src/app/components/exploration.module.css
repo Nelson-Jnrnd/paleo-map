@@ -9,6 +9,64 @@
 }
 
 /* --- Context bar (permanent age / group / count) --- */
+/* --- Global app bar (SPEC-022 REQ-001…REQ-003) --------------------------- */
+/* One row: wordmark, then the three destinations. It wraps to a second line on a
+   narrow viewport rather than collapsing into a hidden menu (UX-002) — three
+   destinations always fit somewhere, and a menu would hide the whole point. */
+.appBar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wordmark {
+  font-size: 16px;
+  color: var(--color-text-hi);
+  margin-right: auto;
+  /* A long wordmark wraps rather than clipping (UX-002). */
+  min-width: 0;
+}
+
+.appNav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.navLink {
+  padding: var(--space-2) 0;
+  min-height: var(--target-min);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  /* The current-destination rule is drawn as a transparent border at rest, so
+     marking it current changes only the colour and never the row's height. */
+  border-bottom: 2px solid transparent;
+}
+
+.navLink:hover {
+  color: var(--color-text-hi);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+/* Current destination: weight *and* a rule, never colour alone (PERF-250). */
+.navCurrent {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -111,13 +169,28 @@
   color: var(--color-accent-deep);
 }
 
+/* SPEC-022 REQ-006: a quiet text control, not a peer of the navigation. No
+   border, no filled chrome, small type — but still a real 24px target and still
+   the words "Reset view", never an icon. */
 .reset {
-  padding: var(--space-2) var(--space-3);
-  min-height: var(--target-min);
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: var(--space-2) 0;
+  min-height: 24px;
+  background: none;
+  color: var(--color-text-muted);
+  border: none;
+  font-size: var(--text-min);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reset:hover {
+  color: var(--color-text-hi);
+}
+
+.reset:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 .reset:hover {

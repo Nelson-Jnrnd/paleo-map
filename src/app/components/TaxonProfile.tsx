@@ -1,7 +1,7 @@
 /**
  * Taxon page (SPEC-014 REQ-005 as replaced by AMEND-005). The curated "spec
  * sheet" is retired: the page is now the taxon's **inline Wikipedia article** in
- * an `<iframe>`, under "← Back to map" and the taxonomy breadcrumb (retained for
+ * an `<iframe>`, under the taxonomy breadcrumb (retained for
  * lineage context and ancestor navigation, filtered by the same Wikipedia gate).
  *
  * The iframe loads the **build-time-resolved canonical URL** (`taxon.wikipedia`),
@@ -20,7 +20,6 @@ import styles from "./exploration.module.css";
 interface TaxonProfileProps {
   api: ReadApi;
   taxonId: string;
-  onBack: () => void;
   /** Open another taxon's page (AMEND-005: navigable, filtered ancestor links). */
   onOpenTaxon: (taxonId: string) => void;
 }
@@ -28,7 +27,6 @@ interface TaxonProfileProps {
 export function TaxonProfile({
   api,
   taxonId,
-  onBack,
   onOpenTaxon,
 }: TaxonProfileProps): ReactElement {
   const taxon = api.getTaxon(taxonId);
@@ -44,9 +42,6 @@ export function TaxonProfile({
   return (
     <section className={styles.profile} aria-label={`Taxon page: ${name}`}>
       <div className={styles.topbar}>
-        <button type="button" className={styles.back} onClick={onBack}>
-          ← Back to map
-        </button>
         {taxon && (
           <TaxonomyTree
             taxonId={taxonId}

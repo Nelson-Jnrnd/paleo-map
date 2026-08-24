@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-022
 title: Global app bar (Map · Dinordle · Taxonomy) and the Dinordle rename
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -948,21 +948,52 @@ for what **this change adds**.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | App bar | `src/app/components/AppBar.tsx` (new), `ExplorationView.tsx` (all four returns), `exploration.module.css` | `test/ui/spec022-app-bar.test.tsx` | Not started |
-| REQ-002 | App bar navigation | `AppBar.tsx`, `ExplorationView.tsx` dispatchers (`backToMap`, `openDaily`, `openTaxonomy`) | `test/ui/spec022-app-bar.test.tsx` | Not started |
-| REQ-003 | App bar navigation | `AppBar.tsx`, `exploration.module.css` (`.navCurrent`) | `test/ui/spec022-app-bar.test.tsx` | Not started |
-| REQ-004 | Screen headers | `TaxonProfile.tsx`, `TaxonomyScreen.tsx`, `DailyGenusScreen.tsx` | `test/ui/spec022-app-bar.test.tsx`, `test/ui/spec017-screen.test.tsx`, `test/ui/data-states.test.tsx`, `test/ui/locality-mode.test.tsx` | Not started |
-| REQ-005 | Context bar | `ContextBar.tsx` (props and brand/button removal) | `test/ui/exploration-context.test.tsx` | Not started |
-| REQ-006 | Reset control | `ContextBar.tsx`, `exploration.module.css` (`.resetQuiet`) | `test/ui/exploration-context.test.tsx` | Not started |
-| REQ-007 | Product name | `AppBar.tsx`, `DailyGenusScreen.tsx` (eyebrow), `dailyGenusStorage.ts` (`shareSummary`) | `test/spec019-persistence.test.ts`, `test/spec020-share-track.test.ts`, `test/ui/spec019-practice.test.tsx`, `test/ui/spec020-track-option.test.tsx` | Not started |
-| NFR-001 | Fragment effects | `ExplorationView.tsx:155–179` (unchanged), `screenFragment.ts` (unchanged) | `test/ui/spec022-app-bar.test.tsx`, `test/ui/spec019-entry-point.test.tsx` | Not started |
-| NFR-002 | Build + runtime | `package.json` (unchanged), `AppBar.tsx` | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Not started |
-| SEC-001 | App bar | `AppBar.tsx` | `test/ui/spec022-app-bar.test.tsx` | Not started |
-| DATA-001 | Puzzle persistence | `src/app/state/dailyGenusStorage.ts` (keys unchanged) | `test/spec022-rename-compatibility.test.ts` | Not started |
-| API-001 | Fragments | `src/app/state/screenFragment.ts` (unchanged) | `test/spec022-rename-compatibility.test.ts`, `test/ui/spec020-track-fragments.test.tsx` | Not started |
-| UX-001 | Visual system | `exploration.module.css`, `src/app/styles/tokens.css` (unchanged) | `test/ui/spec018-tokens.test.ts`, PR self-check | Not started |
-| UX-002 | App bar states | `AppBar.tsx`, `exploration.module.css` | `test/ui/spec022-app-bar.test.tsx` | Not started |
-| UX-003 | Accessibility | `AppBar.tsx` (`nav`, `aria-current`), `exploration.module.css` | `test/e2e/a11y.e2e.ts`, `test/ui/spec022-app-bar.test.tsx` | Not started |
+| REQ-001 | App bar | `AppBar.tsx` (new); `ExplorationView.tsx` `shell()` renders it inside the single `<header role="banner">` for all four screens | `test/ui/spec022-app-bar.test.tsx` | Implemented |
+| REQ-002 | Destinations | `AppBar.tsx` `DESTINATIONS`; `ExplorationView.tsx` `navigate()` — taxonomy focus seeded from the selection only from the map in taxon mode | `test/ui/spec022-app-bar.test.tsx` | Implemented |
+| REQ-003 | Current mark | `AppBar.tsx` `aria-current="page"` + `.navCurrent` (weight + rule, not colour alone); `profile` marks nothing | `test/ui/spec022-app-bar.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| REQ-004 | Back controls | Removed from `TaxonProfile.tsx`, `TaxonomyScreen.tsx` (both branches) and `DailyGenusScreen.tsx`; `onBack` props dropped | `test/ui/spec022-app-bar.test.tsx`, `test/ui/spec017-screen.test.tsx`, `test/ui/data-states.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| REQ-005 | Context row | `ContextBar.tsx` reduced — search + three stats + reset; no longer a `<header>` of its own | `test/ui/spec022-app-bar.test.tsx` | Implemented (see AMEND-001) |
+| REQ-006 | Reset control | `ContextBar.tsx` trailing control; `.reset` in `exploration.module.css` — no border, small type, 24px target, words kept | `test/ui/spec022-app-bar.test.tsx` | Implemented |
+| REQ-007 | Dinordle rename | `DailyGenusScreen.tsx` eyebrow; `dailyGenusStorage.ts` `shareSummary`; doc-comment headers in the four puzzle modules | `test/spec019-persistence.test.ts`, `test/spec020-share-track.test.ts`, `test/ui/spec019-practice.test.tsx`, `test/ui/spec019-entry-point.test.tsx`, `test/ui/spec020-track-option.test.tsx` | Implemented |
+| NFR-001 | Fragment contract | `ExplorationView.tsx` — both effects untouched; the bar dispatches the same actions the old buttons did | `test/ui/spec019-entry-point.test.tsx` ("leaving the puzzle clears the fragment", now driven through the bar) | Implemented |
+| NFR-002 | No new dependency | No `package.json` change; no network added | `pnpm test`, `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Implemented |
+| SEC-001 | Bar stores nothing | `AppBar.tsx` is pure presentation — no storage, no fetch | inspection; the no-egress suites | Implemented |
+| DATA-001 | Storage keys frozen | `dailyGenusStorage.ts` — keys untouched; only `shareSummary`'s output string changed | `test/spec019-persistence.test.ts`, `test/spec020-share-track.test.ts` | Implemented |
+| API-001 | Fragments frozen | `screenFragment.ts` untouched; no new fragment; map/taxonomy/profile stay non-addressable | `test/ui/spec019-entry-point.test.tsx` | Implemented |
+| UX-001 | Charter compliance | `.appBar`/`.navLink`/`.navCurrent`/`.reset` — no card, no chip, no icon-only control, one accent | `test/e2e/a11y.e2e.ts`; diff review | Implemented |
+| UX-002 | Real states | `shell()` renders the bar identically on loading, error and the Dinordle no-puzzle surface; the bar wraps rather than collapsing | `test/ui/spec022-app-bar.test.tsx` ("no-puzzle surface") | Implemented |
+| UX-003 | Accessibility | One `role="banner"`, one named `<nav>`, `aria-current="page"`, focus-visible outlines | `test/e2e/a11y.e2e.ts` (all four screens) | Implemented |
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 85 files, **481 tests**, all pass (before this change: 84 / 475) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **10 passed**, including all four a11y checks |
+
+Playwright again needed `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (environment ships browser build 1194; the pinned Playwright expects 1228).
+
+### Implementation notes
+
+- **REQ-001 vs REQ-006 on where the reset sits.** REQ-001 lists the reset among
+  the bar's contents; REQ-006 places it "at the trailing end of the
+  exploration-context row". REQ-006 is the more specific statement and was
+  followed. Both readings are satisfied structurally, because the bar and the
+  context row are children of the same single `<header role="banner">`.
+- **`ErrorState.onRetry` became optional.** REQ-004 removes the puzzle screen's
+  back control, and that screen's two data-error surfaces were passing `onBack`
+  as their "Retry". A retry that only navigates away duplicates the bar's Map
+  destination, so those surfaces now render no retry at all and rely on the bar,
+  which UX-002 requires to be present there. `App.tsx` and `ExplorationView`
+  still pass a real retry for genuine load failures, unchanged.
+- **OQ-040's coverage moved, not dropped.** "One action returns to the map" was
+  asserted in `spec017-screen.test.tsx` against the taxonomy screen's own back
+  button. The guarantee still holds but now belongs to the bar, so the assertion
+  moved to `spec022-app-bar.test.tsx`, which drives the real bar through the
+  shell; the taxonomy test now asserts only that the screen does not duplicate it.
+
 
 ## Implementation notes
 
@@ -1012,6 +1043,29 @@ implementer must not re-decide:
 - **Behavioral impact:**
 - **Test impact:**
 - **Human approval reference:**
+
+### AMEND-001 — REQ-005's FONC-400 clause is stale; the scope line no longer exists
+
+- **Date:** 2026-08-14
+- **Reason:** REQ-005 lists "the not-a-complete-atlas line (FONC-400)" among what
+  the reduced context bar keeps. That clause was written while SPEC-021 was being
+  drafted in parallel and before the owner's decision on it landed: SPEC-021
+  UX-001 **deletes** that line, and SPEC-003 REQ-005's disclaimer criterion was
+  retired with it (SPEC-003 AMEND-005). SPEC-021 is now Implemented, so the
+  clause describes something that no longer exists.
+- **Changed requirements:** REQ-005. The retained list drops the
+  not-a-complete-atlas line. Everything else in REQ-005 is unchanged: the context
+  bar keeps the taxon search, the three permanent stats and the reset control, and
+  loses the brand title and the Taxonomy / Daily Genus buttons.
+- **Behavioral impact:** None beyond what SPEC-021 already shipped. No behaviour
+  is added or removed by this amendment; it corrects a stale cross-reference so
+  the spec does not require a line the product deliberately deleted.
+- **Test impact:** None. `test/ui/exploration-context.test.tsx` already asserts
+  the line's absence (updated under SPEC-021 NFR-001).
+- **Human approval reference:** Owner decision of 2026-08-14 to delete the line
+  ("Remove this subtext…"), recorded in SPEC-021 UX-001 and approved with that
+  spec. This amendment records the consequence for SPEC-022 rather than making a
+  new decision.
 
 ## Review checklist
 

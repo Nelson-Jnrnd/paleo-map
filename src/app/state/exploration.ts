@@ -37,7 +37,7 @@ export const DEFAULT_GROUP = "Dinosaurs";
 
 export type Screen = "map" | "profile" | "taxonomy" | "daily";
 
-/** Which round the Daily Genus screen opens in (SPEC-019 REQ-010/012). */
+/** Which round the Dinordle screen opens in (SPEC-019 REQ-010/012). */
 export type DailyMode = "daily" | "practice";
 
 /** Which of the two parallel puzzles (SPEC-020 REQ-004/007). */
@@ -63,7 +63,7 @@ export interface ExplorationState {
   profileTaxonId: string | null;
   /** Taxon in focus on the taxonomy screen (SPEC-017). Null → the scope root. */
   taxonomyTaxonId: string | null;
-  /** Round the Daily Genus screen is playing (SPEC-019 REQ-010). */
+  /** Round the Dinordle screen is playing (SPEC-019 REQ-010). */
   dailyMode: DailyMode;
   /** Which parallel puzzle it is playing (SPEC-020 REQ-004). */
   dailyTrack: DailyTrack;

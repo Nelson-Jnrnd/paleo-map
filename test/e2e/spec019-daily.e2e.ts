@@ -47,10 +47,21 @@ test("REQ-005/REQ-007: a full round grows the tree and ends with a handoff", asy
   await expect(page.getByText(/PBDB snapshot/i)).toBeVisible();
   await expect(page.getByText(/sourced opinion/i)).toHaveCount(0);
 
+  // The reveal hands off to the taxon page, and the app bar carries the way back
+  // (SPEC-022 REQ-004) — the screen no longer has a back control of its own. The
+  // taxon page is a detail view, not a destination, so no destination is marked
+  // current there (REQ-003).
   await page.getByRole("button", { name: /open taxon page/i }).click();
-  await expect(
-    page.getByRole("button", { name: /back to map/i }),
-  ).toBeVisible();
+  const bar = page.getByRole("navigation", { name: /main/i });
+  await expect(bar.getByRole("button", { name: "Map" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /back to map/i })).toHaveCount(
+    0,
+  );
+  await expect(bar.locator("[aria-current='page']")).toHaveCount(0);
+  await bar.getByRole("button", { name: "Map" }).click();
+  await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({
+    timeout: 20_000,
+  });
 });
 
 test("UX-003: a round is playable with the keyboard alone", async ({

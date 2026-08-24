@@ -60,7 +60,7 @@ test("daily genus screen has no serious accessibility violations", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("navigation", { name: /timeline/i }).waitFor();
-  await page.getByRole("button", { name: "Daily Genus", exact: true }).click();
+  await page.getByRole("button", { name: "Dinordle", exact: true }).click();
   await page.getByLabel("Guess a genus").waitFor();
 
   await page.getByLabel("Guess a genus").fill("Triceratops");

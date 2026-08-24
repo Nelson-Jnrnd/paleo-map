@@ -23,13 +23,11 @@ async function guess(name: string): Promise<void> {
   await user.click(screen.getByRole("button", { name: /guess/i }));
 }
 
-test("Error handling: a pool too small to be fair refuses to start, with a retry", () => {
+test("Error handling: a pool too small to be fair refuses to start, and says why", () => {
   // The bare fixture holds six eligible genera — far below the floor.
-  const onBack = vi.fn();
   render(
     <DailyGenusScreen
       api={ReadApi.fromModel(fixtureModel())}
-      onBack={onBack}
       onOpenProfile={vi.fn()}
       now={clockOn("2026-08-11")}
       store={memoryStore()}
@@ -39,7 +37,12 @@ test("Error handling: a pool too small to be fair refuses to start, with a retry
   expect(alert.textContent).toContain("No puzzle today");
   expect(alert.textContent).toContain("below the 500 needed");
   expect(alert.textContent).toContain("a data problem, not a wrong guess");
-  expect(screen.getByRole("button", { name: /retry/i })).toBeTruthy();
+  // SPEC-022 REQ-004/UX-002: this is a bad snapshot, not a failed fetch, so there
+  // is nothing to retry. The screen states the problem and the app bar — rendered
+  // by the shell on every screen, including this one — is the way out, so the
+  // player is not trapped. A "Retry" that only navigated away would duplicate the
+  // bar's Map destination.
+  expect(screen.queryByRole("button", { name: /retry/i })).toBeNull();
 });
 
 test("UX-002: with storage blocked the round plays on and says progress is not kept", () => {
@@ -72,7 +75,7 @@ test("REQ-011: when the clipboard refuses, the result is shown as text", async (
     expect(
       screen.getByText(/Copy is unavailable — your result:/i),
     ).toBeTruthy();
-    expect(screen.getByText(/Daily Genus \d+ · 1\/8/)).toBeTruthy();
+    expect(screen.getByText(/Dinordle \d+ · 1\/8/)).toBeTruthy();
   } finally {
     Object.defineProperty(globalThis.navigator, "clipboard", {
       value: original,

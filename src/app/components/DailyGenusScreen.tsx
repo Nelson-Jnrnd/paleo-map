@@ -1,5 +1,6 @@
 /**
- * Daily Genus — the screen (SPEC-019). One hidden genus a day; every guess is a
+ * Dinordle — the screen (SPEC-019; named "Daily Genus" until SPEC-022). One
+ * hidden genus a day; every guess is a
  * genus, and what comes back is the deepest clade it shares with the answer plus
  * the branch that share rules out.
  *
@@ -81,7 +82,6 @@ import styles from "./dailyGenus.module.css";
 /** Injected so tests drive the clock and the draw (NFR-004, REQ-010). */
 export interface DailyGenusScreenProps {
   api: ReadApi;
-  onBack: () => void;
   onOpenProfile: (taxonId: string) => void;
   /** Which mode to open in (REQ-012 addressability). */
   mode?: RoundMode;
@@ -155,7 +155,6 @@ function rejectionMessage(r: Rejection): string {
 
 export function DailyGenusScreen({
   api,
-  onBack,
   onOpenProfile,
   mode = "daily",
   onModeChange,
@@ -400,7 +399,6 @@ export function DailyGenusScreen({
       <div className={styles.screen}>
         <ErrorState
           message={`No puzzle today. The classification snapshot yielded ${data.pool.length} usable genera, below the ${MIN_POOL_SIZE} needed to build a fair round, so no genus was chosen. This is a data problem, not a wrong guess.`}
-          onRetry={onBack}
         />
       </div>
     );
@@ -410,7 +408,6 @@ export function DailyGenusScreen({
       <div className={styles.screen}>
         <ErrorState
           message="No puzzle could be built from this snapshot."
-          onRetry={onBack}
         />
       </div>
     );
@@ -432,8 +429,8 @@ export function DailyGenusScreen({
         <div>
           <p className={styles.eyebrow}>
             {practice
-              ? "Daily Genus · practice"
-              : `Daily Genus · No. ${puzzleNumber(dateKey)}`}
+              ? "Dinordle · practice"
+              : `Dinordle · No. ${puzzleNumber(dateKey)}`}
             {track === "wellKnown" && " · well-known"}
           </p>
           <p className={styles.progress}>
@@ -448,9 +445,6 @@ export function DailyGenusScreen({
           <p className={styles.countdown}>{formatCountdown(remaining)}</p>
           <p className={styles.countdownLabel}>next puzzle · 00:00 UTC</p>
         </div>
-        <button type="button" className={styles.back} onClick={onBack}>
-          ← Back to map
-        </button>
       </header>
 
       {trackAvailable(data, "wellKnown") && (

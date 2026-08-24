@@ -44,6 +44,8 @@ import {
   indexTaxaById,
   resolveTierTaxon,
 } from "../state/grouping.js";
+import { AppBar } from "./AppBar.js";
+import type { BarScreen, Destination } from "./AppBar.js";
 import { ContextBar } from "./ContextBar.js";
 import { GroupingControls } from "./GroupingControls.js";
 import { TimelineControl } from "./TimelineControl.js";
@@ -348,61 +350,90 @@ export function ExplorationView({
     ? (occurrences.find((o) => o.id === state.selectedOccurrenceId) ?? null)
     : null;
 
-  // SPEC-017: the dedicated taxonomy screen. Reached from the context bar or
-  // from a selected taxon, and returning to the map in one action (OQ-040).
+  // SPEC-022 REQ-001/REQ-002: one bar, rendered by the shell for every screen,
+  // so the return path is the same object everywhere. `shell` wraps each screen
+  // rather than each screen rendering its own bar — that is what keeps the bar
+  // identical on the loading, error and "no puzzle today" surfaces (UX-002).
+  const navigate = (destination: Destination): void => {
+    if (destination === "map") {
+      dispatch({ type: "backToMap" });
+    } else if (destination === "daily") {
+      dispatch({ type: "openDaily", mode: "daily" });
+    } else {
+      // From the map in taxon mode the focus is seeded from the selection, as
+      // before; from anywhere else the screen keeps the focus it already has and
+      // is never silently reset to the root (REQ-002).
+      dispatch({
+        type: "openTaxonomy",
+        taxonId:
+          state.screen === "map" && state.mode === "taxon"
+            ? state.selectedTaxonKey
+            : state.taxonomyTaxonId,
+      });
+    }
+  };
+
+  const shell = (
+    barScreen: BarScreen,
+    content: ReactElement,
+    contextRow?: ReactElement,
+  ): ReactElement => (
+    <div className={styles.app}>
+      {/* The document's single banner: the bar, plus the exploration context on
+          the map screen (REQ-001, REQ-005). */}
+      <header role="banner">
+        <AppBar screen={barScreen} onNavigate={navigate} />
+        {contextRow}
+      </header>
+      {content}
+    </div>
+  );
+
+  // SPEC-017: the dedicated taxonomy screen. Reached from the app bar or from a
+  // selected taxon, and returning to the map in one action (OQ-040).
   if (state.screen === "taxonomy") {
-    return (
-      <div className={styles.app}>
-        <TaxonomyScreen
-          api={stageApi}
-          taxonId={state.taxonomyTaxonId}
-          onBack={() => dispatch({ type: "backToMap" })}
-          onSelectTaxon={(taxonId) =>
-            dispatch({ type: "openTaxonomy", taxonId })
-          }
-          {...(hasArticle(state.taxonomyTaxonId ?? "")
-            ? {
-                onOpenProfile: (taxonId: string) =>
-                  dispatch({ type: "openProfile", taxonId }),
-              }
-            : {})}
-        />
-      </div>
+    return shell(
+      "taxonomy",
+      <TaxonomyScreen
+        api={stageApi}
+        taxonId={state.taxonomyTaxonId}
+        onSelectTaxon={(taxonId) => dispatch({ type: "openTaxonomy", taxonId })}
+        {...(hasArticle(state.taxonomyTaxonId ?? "")
+          ? {
+              onOpenProfile: (taxonId: string) =>
+                dispatch({ type: "openProfile", taxonId }),
+            }
+          : {})}
+      />,
     );
   }
 
-  // SPEC-019: the Daily Genus puzzle. Same contract again — a screen in this
+  // SPEC-019: the Dinordle puzzle. Same contract again — a screen in this
   // shell, addressable by fragment (REQ-012), returning to the map in one action.
   if (state.screen === "daily") {
-    return (
-      <div className={styles.app}>
-        <DailyGenusScreen
-          api={stageApi}
-          mode={state.dailyMode}
-          onModeChange={(mode) => dispatch({ type: "openDaily", mode })}
-          track={state.dailyTrack}
-          onTrackChange={(track) =>
-            dispatch({ type: "openDaily", mode: state.dailyMode, track })
-          }
-          onBack={() => dispatch({ type: "backToMap" })}
-          onOpenProfile={(taxonId) =>
-            dispatch({ type: "openProfile", taxonId })
-          }
-        />
-      </div>
+    return shell(
+      "daily",
+      <DailyGenusScreen
+        api={stageApi}
+        mode={state.dailyMode}
+        onModeChange={(mode) => dispatch({ type: "openDaily", mode })}
+        track={state.dailyTrack}
+        onTrackChange={(track) =>
+          dispatch({ type: "openDaily", mode: state.dailyMode, track })
+        }
+        onOpenProfile={(taxonId) => dispatch({ type: "openProfile", taxonId })}
+      />,
     );
   }
 
   if (state.screen === "profile" && state.profileTaxonId) {
-    return (
-      <div className={styles.app}>
-        <TaxonProfile
-          api={stageApi}
-          taxonId={state.profileTaxonId}
-          onBack={() => dispatch({ type: "backToMap" })}
-          onOpenTaxon={(taxonId) => dispatch({ type: "openProfile", taxonId })}
-        />
-      </div>
+    return shell(
+      "profile",
+      <TaxonProfile
+        api={stageApi}
+        taxonId={state.profileTaxonId}
+        onOpenTaxon={(taxonId) => dispatch({ type: "openProfile", taxonId })}
+      />,
     );
   }
 
@@ -427,24 +458,9 @@ export function ExplorationView({
         ? spanRange(selectedLocality)
         : (selectedOccurrence?.timeRange.value ?? null);
 
-  return (
-    <div className={styles.app}>
-      <ContextBar
-        stage={stage}
-        stageName={state.stageName}
-        group={state.group}
-        count={occurrences.length}
-        searchIndex={searchIndex}
-        onSearchSelect={onSearchSelect}
-        onReset={() => dispatch({ type: "reset" })}
-        onOpenTaxonomy={() =>
-          dispatch({
-            type: "openTaxonomy",
-            taxonId: state.mode === "taxon" ? state.selectedTaxonKey : null,
-          })
-        }
-        onOpenDaily={() => dispatch({ type: "openDaily", mode: "daily" })}
-      />
+  return shell(
+    "map",
+    <>
       <TimelineControl
         stages={EXPLORATION_STAGES}
         periods={EXPLORATION_PERIODS}
@@ -599,6 +615,15 @@ export function ExplorationView({
           )}
         </aside>
       </div>
-    </div>
+    </>,
+    <ContextBar
+      stage={stage}
+      stageName={state.stageName}
+      group={state.group}
+      count={occurrences.length}
+      searchIndex={searchIndex}
+      onSearchSelect={onSearchSelect}
+      onReset={() => dispatch({ type: "reset" })}
+    />,
   );
 }

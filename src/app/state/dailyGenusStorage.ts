@@ -1,5 +1,7 @@
 /**
- * Daily Genus persistence and the shared summary (SPEC-019 REQ-011, SEC-002).
+ * Dinordle persistence and the shared summary (SPEC-019 REQ-011, SEC-002; the
+ * product was named "Daily Genus" until SPEC-022 — the storage keys below keep
+ * that spelling deliberately, see SPEC-022 DATA-001).
  *
  * Every read and write of browser storage in this feature goes through this
  * module, so SEC-002 ("the stored payload is ids, counts, dates and outcomes,
@@ -233,5 +235,5 @@ export function shareSummary(round: Round): string {
     return "·";
   });
   const hint = round.hintUsed ? " · hint" : "";
-  return `Daily Genus ${n}${track} · ${score}${hint} · ${marks.join("")}`;
+  return `Dinordle ${n}${track} · ${score}${hint} · ${marks.join("")}`;
 }

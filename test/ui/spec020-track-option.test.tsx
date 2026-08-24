@@ -63,7 +63,6 @@ function renderScreen(
     ...render(
       <DailyGenusScreen
         api={api}
-        onBack={vi.fn()}
         onOpenProfile={vi.fn()}
         now={clockOn("2026-08-11")}
         random={() => 0}
@@ -104,7 +103,7 @@ test("REQ-004: choosing a track persists and is reported to the shell", async ()
       .checked,
   ).toBe(true);
   // The header states which puzzle is being played.
-  expect(screen.getByText(/Daily Genus · No\. \d+ · well-known/i)).toBeTruthy();
+  expect(screen.getByText(/Dinordle · No\. \d+ · well-known/i)).toBeTruthy();
 });
 
 test("REQ-004: a stored choice is honoured on the next visit", () => {

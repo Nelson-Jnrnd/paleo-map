@@ -1,5 +1,6 @@
 /**
- * Daily Genus — the pure core (SPEC-019). No React, no clock, no storage, no
+ * Dinordle — the pure core (SPEC-019; named "Daily Genus" until SPEC-022). No
+ * React, no clock, no storage, no
  * network: every function here takes what it needs as an argument, so the whole
  * game is unit-testable without a DOM and CI never depends on the wall clock
  * (NFR-004).

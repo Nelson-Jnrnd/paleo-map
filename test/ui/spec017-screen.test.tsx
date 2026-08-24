@@ -49,18 +49,10 @@ const model = {
 
 const api = ReadApi.fromModel(model);
 
-function renderScreen(taxonId: string | null = "t:trex", onBack = vi.fn()) {
-  return {
-    onBack,
-    ...render(
-      <TaxonomyScreen
-        api={api}
-        taxonId={taxonId}
-        onBack={onBack}
-        onSelectTaxon={vi.fn()}
-      />,
-    ),
-  };
+function renderScreen(taxonId: string | null = "t:trex") {
+  return render(
+    <TaxonomyScreen api={api} taxonId={taxonId} onSelectTaxon={vi.fn()} />,
+  );
 }
 
 /* REQ-003 — comparison ----------------------------------------------------- */
@@ -149,11 +141,16 @@ test("a null focus opens at the scope root", () => {
 
 /* Navigation --------------------------------------------------------------- */
 
-test("one action returns to the map (OQ-040)", async () => {
-  const onBack = vi.fn();
-  renderScreen("t:trex", onBack);
-  await userEvent.click(screen.getByRole("button", { name: /back to map/i }));
-  expect(onBack).toHaveBeenCalledTimes(1);
+test("the screen carries no return control of its own (SPEC-022 REQ-004)", () => {
+  // OQ-040's "one action returns to the map" still holds, but the control is no
+  // longer here: the global app bar renders on every screen and owns the single
+  // return path. The one-action guarantee is exercised end-to-end in
+  // `test/ui/spec022-app-bar.test.tsx`, which drives the real bar through the
+  // shell; this asserts only that the screen does not duplicate it.
+  renderScreen("t:trex");
+  expect(
+    screen.queryByRole("button", { name: /back to map/i }),
+  ).not.toBeInTheDocument();
 });
 
 /* NFR-003 — accessibility -------------------------------------------------- */
