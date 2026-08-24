@@ -12,6 +12,8 @@
 | [Filters panel](filters-panel.md) | Period, group, dinosaurs-only, reset, result count | FONC-780, FONC-790, FONC-800, FONC-850, FONC-870, FONC-880 | [`assets/mockups/filters-panel.svg`](../assets/mockups/filters-panel.svg) | ✅ High-fidelity |
 | [Empty & error states](empty-error-states.md) | Empty/error/retry states shared across screens | FONC-860, FONC-1280…FONC-1340, PERF-320, PERF-330 | [`assets/mockups/empty-error-states.svg`](../assets/mockups/empty-error-states.svg) | ✅ High-fidelity |
 | [Daily Genus](daily-genus.md) | Daily genus puzzle; guesses reveal the classification tree | SPEC-019 REQ-001…REQ-014, UX-001…UX-004 | [`assets/mockups/daily-genus.svg`](../assets/mockups/daily-genus.svg) · [states](../assets/mockups/daily-genus-states.svg) | ✅ High-fidelity |
+| [Dinordle cladogram](dinordle-cladogram.md) | The puzzle's revealed classification, drawn as a horizontal cladogram | SPEC-025 REQ-001…REQ-005, UX-001…UX-003 | [`assets/mockups/dinordle-cladogram.svg`](../assets/mockups/dinordle-cladogram.svg) | ✅ High-fidelity (spec Draft) |
+| [Exploration sidebar](exploration-sidebar.md) | The sidebar's five-unit list and its detail view, at the real 360px width | SPEC-026 REQ-001…REQ-006, UX-001…UX-002 | [`assets/mockups/exploration-sidebar.svg`](../assets/mockups/exploration-sidebar.svg) | ✅ High-fidelity |
 
 ## State variants to capture
 

@@ -42,6 +42,12 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | Implemented | nelsonjeanrenaud@gmail.com | — | #20 | [`specs/implemented/SPEC-018-map-cartographic-styling.md`](specs/implemented/SPEC-018-map-cartographic-styling.md) |
 | SPEC-019 | Daily Genus — a daily taxonomic deduction puzzle | Implemented | nelsonjeanrenaud@gmail.com | — | #22 | [`specs/implemented/SPEC-019-daily-genus-puzzle.md`](specs/implemented/SPEC-019-daily-genus-puzzle.md) |
 | SPEC-020 | Daily Genus — a parallel well-known track, ranked by encyclopedic attention | Implemented | nelsonjeanrenaud@gmail.com | — | #23 | [`specs/implemented/SPEC-020-daily-genus-well-known-track.md`](specs/implemented/SPEC-020-daily-genus-well-known-track.md) |
+| SPEC-021 | Chrome copy removal — five interface lines retired, with compensating carriers | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-021-chrome-copy-removal.md`](specs/approved/SPEC-021-chrome-copy-removal.md) |
+| SPEC-022 | A global app bar — Map / Dinordle / Taxonomy, and the Dinordle rename | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-022-global-app-bar.md`](specs/approved/SPEC-022-global-app-bar.md) |
+| SPEC-023 | Map overlay layout — corner rails and an automated non-overlap gate | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-023-map-overlay-layout.md`](specs/approved/SPEC-023-map-overlay-layout.md) |
+| SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-024-puzzle-legibility.md`](specs/approved/SPEC-024-puzzle-legibility.md) |
+| SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Draft | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-025-cladogram-render.md`](specs/active/SPEC-025-cladogram-render.md) |
+| SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-026-sidebar-redesign.md`](specs/approved/SPEC-026-sidebar-redesign.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in
