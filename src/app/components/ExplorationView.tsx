@@ -470,23 +470,37 @@ export function ExplorationView({
         highlightRange={highlightRange}
       />
       <div className={styles.body}>
-        <div className={styles.mapPane}>
-          <label className={styles.wikiGateToggle}>
-            <input
-              type="checkbox"
-              checked={showAll}
-              onChange={(e) => setShowAll(e.target.checked)}
-            />
-            <span>
-              Show taxa without a Wikipedia article
-              {!showAll && hiddenCount > 0 && (
-                <span className={styles.wikiGateCount}>
-                  {" "}
-                  · {hiddenCount} hidden
-                </span>
-              )}
-            </span>
-          </label>
+        <div className={styles.mapPane} data-map-pane>
+          {/* SPEC-023 REQ-002: app controls acting on what is plotted live in the
+              bottom-right rail. The top-right corner is reserved for MapLibre's
+              own controls, which is where this toggle used to collide with them.
+              The top-left rail has no children since SPEC-021 removed the
+              reconstruction label and the cluster note, so it does not render at
+              all (REQ-001 — no empty box). */}
+          <div
+            className={`${styles.mapRail} ${styles.railBottomRight}`}
+            data-map-rail="bottom-right"
+          >
+            <label
+              className={styles.wikiGateToggle}
+              data-map-overlay="wikipedia-gate"
+            >
+              <input
+                type="checkbox"
+                checked={showAll}
+                onChange={(e) => setShowAll(e.target.checked)}
+              />
+              <span>
+                Show taxa without a Wikipedia article
+                {!showAll && hiddenCount > 0 && (
+                  <span className={styles.wikiGateCount}>
+                    {" "}
+                    · {hiddenCount} hidden
+                  </span>
+                )}
+              </span>
+            </label>
+          </div>
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}

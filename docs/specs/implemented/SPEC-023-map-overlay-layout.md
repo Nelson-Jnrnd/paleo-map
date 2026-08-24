@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-023
 title: Map overlay layout — corner rails, reserved map-control corner, and an automated non-overlap gate
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -722,16 +722,46 @@ No entry is required in `conflicts_with`.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Map pane overlay rails | `exploration.module.css` (rail classes), `ExplorationView.tsx`, `OccurrenceMap.tsx` | `spec023-overlay-structure.test.tsx`, `spec023-overlay-css.test.ts` | Not started |
-| REQ-002 | Corner ownership | `ExplorationView.tsx` (top-left, bottom-right), `OccurrenceMap.tsx` (bottom-left) | `map-overlays.e2e.ts`, `spec023-overlay-structure.test.tsx` | Not started |
-| REQ-003 | Rail child order | `OccurrenceMap.tsx` (ⓘ last), `exploration.module.css` | `map-overlays.e2e.ts`, `spec023-overlay-structure.test.tsx` | Not started |
-| REQ-004 | Rail bounds | `exploration.module.css` (rail max-width/height, key scroll) | `map-overlays.e2e.ts` | Not started |
-| REQ-005 | Paint + hit order | `exploration.module.css` (`.mapOverlay`, card and rail z-index) | `map-overlays.e2e.ts`, `spec023-overlay-css.test.ts` | Not started |
-| NFR-001 | Non-overlap gate | `test/e2e/map-overlays.e2e.ts`, CI `e2e` job | itself | Not started |
-| NFR-002 | Structural guard | `test/ui/spec023-overlay-*.test.*` | itself | Not started |
-| NFR-003 | Accessibility | `ExplorationView.tsx`, `OccurrenceMap.tsx` | `a11y.e2e.ts`, `map-overlays.e2e.ts` | Not started |
-| UX-001 | Collapsible clade key | `OccurrenceMap.tsx` (clade key), `exploration.module.css` | `spec023-clade-key-collapse.test.tsx` | Not started |
-| UX-002 | Visual restraint | diff-wide | `spec018-tokens.test.ts`, review | Not started |
+| REQ-001 | Rail system | `.mapRail` + `data-map-rail` / `data-map-overlay`; `[data-map-pane]` on the map pane | `test/ui/spec023-overlay-structure.test.tsx`, `test/e2e/map-overlays.e2e.ts` | Implemented |
+| REQ-002 | Corner ownership | Gate toggle moved top-right → `railBottomRight` (`ExplorationView`); ⓘ + clade key in `railBottomLeft` (`OccurrenceMap`); top-right left to MapLibre | `test/ui/spec023-overlay-structure.test.tsx` | Implemented |
+| REQ-003 | Stacking order | Bottom rails are `column-reverse`, so DOM order reads from the corner outward: ⓘ first (corner-most), clade key above it | `test/e2e/map-overlays.e2e.ts` | Implemented |
+| REQ-004 | Rail bounds | `max-width: calc(50% - gap)` on every rail; `max-height: 55%` on bottom rails; `.cladeKeyBody` scrolls in its own box | `test/e2e/map-overlays.e2e.ts` (five viewports, containment + non-overlap) | Implemented |
+| REQ-005 | Paint order | `.mapRail { z-index: 2 }` under `.mapOverlay { z-index: 3 }`, so pointer-anchored cards are never trapped below a rail | `test/ui/spec023-overlay-structure.test.tsx`, `test/e2e/map-overlays.e2e.ts` (`elementFromPoint`) | Implemented |
+| NFR-001 | Browser gate | `test/e2e/map-overlays.e2e.ts` — enumerates boxes, does not name them, so a later overlay is covered automatically | 7 Playwright tests | Implemented |
+| NFR-002 | Browser-free guard | `test/ui/spec023-overlay-structure.test.tsx` — rail uniqueness, naming, no self-anchoring children, paint order from CSS source | 7 Vitest tests | Implemented |
+| NFR-003 | No a11y regression | Clade key keeps `role="note"` + label; the toggle is a real button with `aria-expanded` | `test/e2e/a11y.e2e.ts` | Implemented |
+| UX-001 | Collapsible key | `cladeKeyOpen` (session state, no storage); `.cladeKeyToggle` / `.cladeKeyBody` | `test/e2e/map-overlays.e2e.ts`, `test/ui/spec023-overlay-structure.test.tsx` | Implemented |
+| UX-002 | Visual language | No new hue, no new container style; the key keeps its existing surface | diff review | Implemented |
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 86 files, **488 tests**, all pass (before this change: 85 / 481) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **17 passed** (10 before + the 7 new overlay tests), a11y included |
+
+### Implementation notes
+
+- **The gate caught a real defect in this very change, before review did.** The
+  first implementation set `data-map-rail` on both rails but never applied the
+  corner *class*, so both rails fell back to the pane's top-left corner and
+  stretched their children to the rail width. Every DOM assertion still passed —
+  the elements existed, were visible and were correctly named — and the browser
+  gate failed with `wikipedia-gate overlaps basemap-attribution` at all five
+  viewports. This is exactly the class of defect NFR-001 was written for, and it
+  is the reason the spec insisted on real geometry rather than a DOM test.
+- **The top-left rail is never rendered.** SPEC-021 deleted both of its declared
+  children (the reconstruction label and the cluster-semantics note), so REQ-001's
+  "a rail with no visible children must not render" resolves it away entirely.
+  The corner and its CSS class are kept, so restoring a standing statement later
+  is a one-line change rather than a re-derivation. SPEC-023 anticipated both
+  landing orders and needed no amendment for this.
+- **`disjoint()` is exported from the e2e spec** for SPEC-025's cladogram gate to
+  import, so the two suites cannot drift on what "not overlapping" means or on
+  the 0.5px tolerance.
+
 
 ## Implementation notes
 

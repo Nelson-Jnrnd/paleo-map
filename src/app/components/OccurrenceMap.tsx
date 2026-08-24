@@ -363,6 +363,9 @@ export function OccurrenceMap({
   const multiRef = useRef(multi);
   multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
+  // UX-001: open by default, remembered for the session only — no storage, and
+  // never collapsed automatically by viewport size.
+  const [cladeKeyOpen, setCladeKeyOpen] = useState(true);
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
   >([]);
@@ -964,6 +967,9 @@ export function OccurrenceMap({
     ? cladeMarkerForTaxon(carded.taxonId, taxaById)
     : null;
   const showCladeUi = mode !== "locality";
+  // The clade key renders only when the map is actually up and the mode uses
+  // clade identity; the rail it lives in is suppressed when nothing renders.
+  const cladeKeyVisible = available && mapLoaded && showCladeUi;
 
   return (
     <>
@@ -1059,24 +1065,23 @@ export function OccurrenceMap({
               />
             )}
           </div>
-          {showCladeUi && (
-          <div className={styles.mapLegend2} role="note" aria-label="Clade key">
-            {CLADE_MARKERS.map((m) => (
-              <span key={m.id} className={styles.legendItem}>
-                <span
-                  className={styles.legendSwatch}
-                  style={{ background: m.tint }}
-                />
-                <img className={styles.legendIcon} src={m.src} alt="" />
-                {m.label}
-              </span>
-            ))}
-          </div>
-          )}
         </>
       )}
-      {basemap && frame && (
-        <div className={styles.basemapAttribution}>
+      {/* SPEC-023 REQ-002/REQ-003: the bottom-left rail — reading the map and its
+          provenance. DOM order is the reading order from the corner outward, so
+          the ⓘ comes first (corner-most) and its popover, which opens upward,
+          paints over its rail siblings without needing a z-index. The rail is
+          suppressed entirely when neither child renders (REQ-001). */}
+      {(cladeKeyVisible || (basemap && frame)) && (
+        <div
+          className={`${styles.mapRail} ${styles.railBottomLeft}`}
+          data-map-rail="bottom-left"
+        >
+          {basemap && frame && (
+        <div
+          className={styles.basemapAttribution}
+          data-map-overlay="basemap-attribution"
+        >
           <button
             type="button"
             className={styles.attributionToggle}
@@ -1128,6 +1133,43 @@ export function OccurrenceMap({
                   Occurrences are reconstructed to this frame’s age, so each
                   point sits on the coastline shown (SPEC-016).
                 </>
+              )}
+            </div>
+          )}
+        </div>
+          )}
+          {cladeKeyVisible && (
+            <div
+              className={styles.mapLegend2}
+              role="note"
+              aria-label="Clade key"
+              data-map-overlay="clade-key"
+            >
+              {/* UX-001: the clade key is a reading aid, so it may be collapsed
+                  — by the reader, never automatically by viewport. Provenance
+                  and uncertainty overlays stay put. */}
+              <button
+                type="button"
+                className={styles.cladeKeyToggle}
+                aria-expanded={cladeKeyOpen}
+                onClick={() => setCladeKeyOpen((open) => !open)}
+              >
+                <span aria-hidden="true">{cladeKeyOpen ? "▾" : "▸"}</span> Clade
+                key
+              </button>
+              {cladeKeyOpen && (
+                <div className={styles.cladeKeyBody}>
+                  {CLADE_MARKERS.map((m) => (
+                    <span key={m.id} className={styles.legendItem}>
+                      <span
+                        className={styles.legendSwatch}
+                        style={{ background: m.tint }}
+                      />
+                      <img className={styles.legendIcon} src={m.src} alt="" />
+                      {m.label}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           )}

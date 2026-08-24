@@ -457,11 +457,10 @@
 /* Basemap provenance — a compact info button at the map's bottom-left corner; the
    full source/licence/reconstruction text opens in a popover anchored above it,
    so the disclosure never spills across the map. */
+/* SPEC-023: a bottom-left rail child. The rail owns the corner; this element
+   keeps only its own positioning context, for the popover anchored to it. */
 .basemapAttribution {
-  position: absolute;
-  bottom: var(--space-3);
-  left: var(--space-3);
-  z-index: 3;
+  position: relative;
 }
 
 .attributionToggle {
@@ -521,12 +520,10 @@
   filter: drop-shadow(0 1px 0 var(--color-border));
 }
 
-/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. */
+/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. SPEC-023 REQ-002
+   moved it out of the top-right corner, which is reserved for MapLibre's own
+   controls, into the bottom-right rail. */
 .wikiGateToggle {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -544,10 +541,70 @@
 }
 
 /* SPEC-015: map marker overlays (labels + hover card) in the map's pixel space. */
+/* --- Map overlay corner rails (SPEC-023 REQ-001…REQ-005) ------------------
+   The defect this replaces: six overlays each picked a corner in isolation, so
+   two of them collided in the bottom-left and a third sat under MapLibre's own
+   controls. A rail owns its corner offset; children never set their own.
+
+   Paint order (REQ-005): canvas and library controls, then map-space labels,
+   then rails, then transient pointer-anchored cards. */
+.mapRail {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* REQ-004: a rail can never grow into the opposite rail's half, and its
+     children wrap or scroll inside their own box rather than overflowing. */
+  max-width: calc(50% - var(--space-3));
+  /* The rail itself is a layout channel, not a surface: only its children are
+     hit-testable, so the rail never covers the canvas or a library control. */
+  pointer-events: none;
+}
+
+.mapRail > * {
+  pointer-events: auto;
+  /* REQ-001: the rail owns the corner. A child that sets its own offsets would
+     re-introduce exactly the defect this scheme removes. */
+  position: static;
+}
+
+.railTopLeft {
+  top: var(--space-3);
+  left: var(--space-3);
+  align-items: flex-start;
+}
+
+/* top-right is reserved for MapLibre's own controls (REQ-002) — no rail. */
+
+.railBottomLeft {
+  bottom: var(--space-3);
+  left: var(--space-3);
+  align-items: flex-start;
+  /* Bottom rails stack upward from the corner: the DOM order is the reading
+     order from the corner outward, so `column-reverse` puts the first child
+     (the ⓘ) nearest the corner (REQ-003). */
+  flex-direction: column-reverse;
+  /* REQ-004: capped so it cannot reach the top rails' band. */
+  max-height: 55%;
+}
+
+.railBottomRight {
+  bottom: var(--space-3);
+  right: var(--space-3);
+  align-items: flex-end;
+  flex-direction: column-reverse;
+  max-height: 55%;
+}
+
 .mapOverlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* SPEC-023 REQ-005: above the rails (z-index 2), so a hover or species card
+     anchored to a marker is never trapped under a corner rail. Map-space labels
+     and cluster badges live here too and are non-interactive, so a higher layer
+     costs the rails nothing. */
+  z-index: 3;
   pointer-events: none;
   overflow: hidden;
 }
@@ -751,11 +808,9 @@
   color: var(--color-text-muted);
 }
 
+/* SPEC-023: a bottom-left rail child, above the ⓘ. UX-001 makes it the one
+   collapsible overlay — it is a reading aid, not provenance. */
 .mapLegend2 {
-  position: absolute;
-  left: var(--space-3);
-  bottom: var(--space-3);
-  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -767,6 +822,40 @@
   color: var(--color-text-muted);
   max-height: 45%;
   overflow-y: auto;
+}
+
+/* SPEC-023 UX-001: the key's own disclosure control. Words, not an icon alone;
+   the caret is decorative. */
+.cladeKeyToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  min-height: 24px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  cursor: pointer;
+}
+
+.cladeKeyToggle:hover {
+  color: var(--color-text-hi);
+}
+
+.cladeKeyToggle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.cladeKeyBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  /* REQ-004: the key scrolls inside its own box rather than overflowing its
+     rail — the one overlay whose height grows with the data. */
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .legendItem {
