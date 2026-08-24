@@ -507,8 +507,7 @@
 
 .entryNote,
 .note,
-.record,
-.provenance {
+.record {
   font-size: var(--text-min);
   color: var(--color-text-faint);
 }

@@ -129,13 +129,21 @@ test("UX-004: the reveal names the reference the accepted name rests on", async 
   ).toBeTruthy();
 });
 
-test("UX-004: the snapshot date is visible without a hover or a second click", () => {
+test("UX-004: the snapshot date is visible without a hover or a second click", async () => {
+  // SPEC-021 UX-005 deleted the screen footer that carried this; REQ-003 moved the
+  // date onto the reveal's source line, which is where the game actually asserts a
+  // placement (SPEC-019 AMEND-001). So the date is no longer on screen during the
+  // round — it arrives with the reveal, unprompted, and is plain text there.
   renderGame();
-  expect(
-    screen.getByText(
-      /Per PBDB snapshot 2026-07-26 — a placement is a sourced opinion/i,
-    ),
-  ).toBeTruthy();
+  expect(screen.queryByText(/sourced opinion/i)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Per PBDB snapshot/i)).not.toBeInTheDocument();
+
+  await guess("Tyrannosaurus");
+  const source = screen.getByText(/PBDB snapshot 2026-07-26/i);
+  expect(source).toBeTruthy();
+  // Same line still names the authority the placement rests on, and neither half
+  // is behind a hover or a second click.
+  expect(source.textContent).toMatch(/accepted per|source not available/i);
 });
 
 test("REQ-007: eight misses lose the round and still reveal the whole descent", async () => {
@@ -218,7 +226,9 @@ test("UX-001: the copy uses domain language, not product-speak", () => {
   ]) {
     expect(text).not.toContain(banned);
   }
-  expect(text).toContain("established classification");
+  // SPEC-021 UX-006: renamed to plainer domain language.
+  expect(text).toContain("taxonomic tree");
+  expect(text).not.toContain("established classification");
 });
 
 test("NFR-002: the board renders without a linear scan per node", () => {

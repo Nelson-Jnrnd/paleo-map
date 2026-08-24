@@ -8,6 +8,7 @@ import { afterEach, expect, test } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ExplorationView } from "../../src/app/components/ExplorationView.js";
+import { clusterCountLabel } from "../../src/app/components/OccurrenceMap.js";
 import { fixtureApi } from "./app-harness.js";
 
 afterEach(cleanup);
@@ -33,10 +34,34 @@ test("defaults to Occurrences and offers the three modes", async () => {
   expect(
     screen.getByRole("region", { name: /occurrences on the map/i }),
   ).toBeInTheDocument();
-  // REQ-002: the cluster legend discloses that a cluster counts records, not taxa.
+  // SPEC-021 UX-004: the cluster legend paragraph is removed. SPEC-010 REQ-002's
+  // disclosure did not go with it — it moved onto the clusters themselves as an
+  // accessible name (SPEC-021 REQ-001, SPEC-010 AMEND-002), which is asserted
+  // below and, end-to-end, in the Playwright suite. The map needs WebGL, so a
+  // real cluster badge cannot render in jsdom.
   expect(
-    screen.getByText(/clusters count fossil records .* not distinct taxa/i),
-  ).toBeInTheDocument();
+    screen.queryByText(/clusters count fossil records .* not distinct taxa/i),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(/clusters count how many localities/i),
+  ).not.toBeInTheDocument();
+});
+
+// SPEC-021 REQ-001/REQ-002: a cluster names the unit it counts, so its number can
+// never be read as a count of distinct taxa. Locality mode counts localities;
+// every other mode plots one feature per occurrence record.
+test("a cluster badge names the unit it counts, per mode", () => {
+  expect(clusterCountLabel(42, "occurrence")).toBe("42 occurrence records");
+  expect(clusterCountLabel(12, "locality")).toBe("12 localities");
+  expect(clusterCountLabel(1, "locality")).toBe("1 locality");
+  expect(clusterCountLabel(1, "occurrence")).toBe("1 occurrence record");
+  // Taxon mode does not collapse into locality groups, so it counts records too.
+  expect(clusterCountLabel(7, "taxon")).toBe("7 occurrence records");
+  // The unit is always named — never a bare number, which is the defect
+  // SPEC-010 REQ-002 was written against.
+  for (const mode of ["occurrence", "locality", "taxon"] as const) {
+    expect(clusterCountLabel(3, mode)).toMatch(/\d+ \w/);
+  }
 });
 
 test("switching to Localities re-renders the list under the new unit", async () => {

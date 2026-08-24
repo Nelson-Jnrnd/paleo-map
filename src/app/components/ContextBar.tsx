@@ -2,8 +2,9 @@
  * Context bar (SPEC-003 REQ-001/005). Permanently displays the selected age (in
  * Ma), the selected group, and the visible-occurrence count, plus the reset
  * action — the persistent navigation context the loop depends on (FONC-040/050/
- * 060/080, CONS-450). It also states the app is not a complete atlas of all
- * Mesozoic life (FONC-400).
+ * 060/080, CONS-450). SPEC-021 removed the scope subtext that used to sit under
+ * the title; SPEC-003 REQ-005's disclaimer criterion was retired with it
+ * (SPEC-003 AMEND-005).
  */
 
 import type { ReactElement } from "react";
@@ -43,10 +44,6 @@ export function ContextBar({
     <header className={styles.header}>
       <div className={styles.brand}>
         <h1 className={styles.brandTitle}>Mesozoic Dinosaur Atlas</h1>
-        <span className={styles.brandSub}>
-          Non-avian dinosaurs · fossil occurrences · not a complete atlas of
-          Mesozoic life
-        </span>
       </div>
 
       <TaxonSearch index={searchIndex} onSelect={onSearchSelect} />

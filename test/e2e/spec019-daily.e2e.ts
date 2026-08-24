@@ -19,7 +19,7 @@ const MISSES = [
 
 test("REQ-012: #daily opens the puzzle directly", async ({ page }) => {
   await page.goto("/#daily");
-  await expect(page.getByText(/ESTABLISHED CLASSIFICATION/i)).toBeVisible();
+  await expect(page.getByText(/TAXONOMIC TREE/i)).toBeVisible();
   await expect(page.getByText("Dinosauria")).toBeVisible();
   await expect(page.getByText("0 of 8 guesses")).toBeVisible();
 });
@@ -41,8 +41,11 @@ test("REQ-005/REQ-007: a full round grows the tree and ends with a handoff", asy
   await expect(
     page.getByRole("button", { name: /open taxon page/i }),
   ).toBeVisible();
+  // SPEC-021 REQ-003/UX-005: the screen footer is gone; the snapshot date now
+  // rides on the reveal's source line beside the authority (SPEC-019 AMEND-001).
   await expect(page.getByText(/accepted per/i)).toBeVisible();
-  await expect(page.getByText(/Per PBDB snapshot/i)).toBeVisible();
+  await expect(page.getByText(/PBDB snapshot/i)).toBeVisible();
+  await expect(page.getByText(/sourced opinion/i)).toHaveCount(0);
 
   await page.getByRole("button", { name: /open taxon page/i }).click();
   await expect(

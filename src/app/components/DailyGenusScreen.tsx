@@ -515,7 +515,7 @@ export function DailyGenusScreen({
       <div className={styles.board}>
         <section className={styles.treeWrap} aria-labelledby={`${listId}-tree`}>
           <h2 className={styles.eyebrow} id={`${listId}-tree`}>
-            Established classification
+            Taxonomic tree
           </h2>
           <ol className={styles.trunk}>
             {tree.trunk.map((node, depth) => (
@@ -695,10 +695,15 @@ export function DailyGenusScreen({
               .map((t) => t.scientificName)
               .join(" › ")}
           </p>
+          {/* SPEC-021 REQ-003: the snapshot date joins the line that already
+              names the authority, so the reveal — the moment the game asserts a
+              placement — still says what that placement rests on (SPEC-019
+              UX-004). It used to sit in the screen footer, now deleted. */}
           <p className={styles.revealSource}>
             {answer.acceptedPer
               ? `accepted per ${answer.acceptedPer}`
               : "accepted name — source not available"}
+            {` · PBDB snapshot ${snapshotDate}`}
           </p>
           {answer.silhouette && (
             <img
@@ -874,18 +879,17 @@ export function DailyGenusScreen({
         </section>
       )}
 
-      <footer className={styles.foot}>
-        {!storage && (
+      {/* SPEC-021 UX-005: the provenance line moved to the reveal (REQ-003), so
+          the footer now has only a conditional child — it must not render at all
+          when storage works, or it leaves an empty bordered bar under the board. */}
+      {!storage && (
+        <footer className={styles.foot}>
           <span className={styles.note}>
             Progress will not be kept — this browser blocks local storage. You
             can finish this round, but a reload starts it over.
           </span>
-        )}
-        <span className={styles.provenance}>
-          Per PBDB snapshot {snapshotDate} — a placement is a sourced opinion,
-          not a settled fact
-        </span>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

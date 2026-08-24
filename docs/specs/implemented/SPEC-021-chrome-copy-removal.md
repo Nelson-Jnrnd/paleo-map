@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-021
 title: Remove five pieces of explanatory interface copy, and rename one heading
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -1113,17 +1113,28 @@ unaffected.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Map cluster overlay | `src/app/components/OccurrenceMap.tsx` (count-badge overlay, ~L976-988) | `test/ui/grouping-mode.test.tsx` | Not started |
-| REQ-002 | Map cluster overlay | `src/app/components/OccurrenceMap.tsx` (`showCladeUi` gating, L951/L971) | `test/ui/grouping-mode.test.tsx` | Not started |
-| REQ-003 | Puzzle reveal | `src/app/components/DailyGenusScreen.tsx` (reveal, ~L683-702) | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Not started |
-| UX-001 | Context bar brand | `src/app/components/ContextBar.tsx` L46-49 + header comment L5 | `test/ui/exploration-context.test.tsx` | Not started |
-| UX-002 | Timeline period row | `src/app/components/TimelineControl.tsx` L278-284 | `test/ui/timeline-periods.test.tsx` | Not started |
-| UX-003 | Map pane | `src/app/components/ExplorationView.tsx` L458-460 | `test/ui/spec018-no-depth-claim.test.ts`, `test/e2e/exploration.e2e.ts` | **Blocked on owner decision** |
-| UX-004 | Map pane | `src/app/components/ExplorationView.tsx` L477-483 | `test/ui/grouping-mode.test.tsx` | Not started |
-| UX-005 | Puzzle footer | `src/app/components/DailyGenusScreen.tsx` L877-888 | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Not started |
-| UX-006 | Puzzle tree heading | `src/app/components/DailyGenusScreen.tsx` L517-519 | `test/ui/spec019-daily-screen.test.tsx`, `test/ui/spec020-no-egress.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Not started |
-| NFR-001 | Test suite | `test/**` (ten call sites across seven files) | `pnpm test`; diff review | Not started |
-| NFR-002 | Stylesheets | `src/app/components/exploration.module.css` (L32, L190-195, L456, L1296-1315), `src/app/components/dailyGenus.module.css` (L508-513) | `test/ui/spec018-no-depth-claim.test.ts` | Not started |
+| REQ-001 | Map cluster overlay | `OccurrenceMap.tsx` — `clusterCountLabel()` (exported) + the badge span's `role="img"` / `aria-label`, `aria-hidden` removed | `test/ui/grouping-mode.test.tsx` ("a cluster badge names the unit it counts, per mode"); `test/e2e/a11y.e2e.ts` | Implemented |
+| REQ-002 | Map cluster overlay | `OccurrenceMap.tsx` — overlay `<div>` un-gated from `showCladeUi`; labels, hover cards and the clade key gated individually | `test/ui/grouping-mode.test.tsx` | Implemented |
+| REQ-003 | Puzzle reveal | `DailyGenusScreen.tsx` — `styles.revealSource` gains `· PBDB snapshot {date}` | `test/ui/spec019-daily-screen.test.tsx` (UX-004); `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| UX-001 | Context bar brand | `ContextBar.tsx` — `brandSub` span removed, header comment corrected | `test/ui/exploration-context.test.tsx` | Implemented |
+| UX-002 | Timeline period row | `TimelineControl.tsx` — caption `<p>` removed | `test/ui/timeline-periods.test.tsx` | Implemented |
+| UX-003 | Map pane | `ExplorationView.tsx` — `reconstructionBanner` span removed, no compensating carrier (owner disposition A) | `test/ui/spec018-no-depth-claim.test.ts`; `test/e2e/exploration.e2e.ts` | Implemented |
+| UX-004 | Map pane | `ExplorationView.tsx` — `mapLegend` paragraph removed | `test/ui/grouping-mode.test.tsx` | Implemented |
+| UX-005 | Puzzle footer | `DailyGenusScreen.tsx` — `provenance` span removed; `<footer>` now renders only when storage is blocked | `test/ui/spec019-daily-screen.test.tsx`; `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| UX-006 | Puzzle tree heading | `DailyGenusScreen.tsx` — heading reads "Taxonomic tree" | `test/ui/spec019-daily-screen.test.tsx`, `test/ui/spec020-no-egress.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| NFR-001 | Test suite | Seven test files updated in place; none deleted, skipped or weakened. Suite grew 474 → 475 (the new `clusterCountLabel` test) | `pnpm test`; diff review | Implemented |
+| NFR-002 | Stylesheets | `exploration.module.css` — `.brandSub`, `.reconstructionBanner`, `.mapLegend` blocks removed; `dailyGenus.module.css` — `.provenance` dropped from its shared selector, rule kept for `.entryNote/.note/.record` | Zero `styles.*` references remain for all four | Implemented |
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 84 files, **475 tests**, all pass (baseline before the change: 84 / 474) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **10 passed**, including all four a11y checks — relevant because REQ-001 un-hides elements that were `aria-hidden` |
+
+Playwright needed `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`: the pinned Playwright expects browser build 1228 and this environment ships 1194. The config already supports that override; no package change was made for it.
 
 ## Implementation notes
 

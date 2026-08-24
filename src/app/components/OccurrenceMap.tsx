@@ -72,6 +72,21 @@ function clusterDiscRadius(count: number): number {
   return 13;
 }
 
+/**
+ * The accessible name for a cluster badge (SPEC-021 REQ-001, restoring SPEC-010
+ * REQ-002's original criterion). A cluster's number is a count of *records* at a
+ * location — density — and never a count of distinct taxa; saying which unit is
+ * counted is the whole point of the name, so the unit follows the mode. Locality
+ * mode collapses collections, so it counts localities; every other mode plots one
+ * feature per occurrence record.
+ */
+export function clusterCountLabel(count: number, mode: GroupingMode): string {
+  if (mode === "locality") {
+    return `${count} ${count === 1 ? "locality" : "localities"}`;
+  }
+  return `${count} occurrence record${count === 1 ? "" : "s"}`;
+}
+
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
   selectedId: string | null;
@@ -968,10 +983,16 @@ export function OccurrenceMap({
           </p>
         </div>
       )}
-      {available && mapLoaded && showCladeUi && (
+      {available && mapLoaded && (
         <>
           {/* Labels + cluster counts share the map's pixel coordinate space; the
-              overlay is non-interactive except the pinned card (which opts in). */}
+              overlay is non-interactive except the pinned card (which opts in).
+
+              SPEC-021 REQ-002: the overlay itself is no longer gated on
+              `showCladeUi` — the count badges must exist in Locality mode too, so
+              that REQ-001's accessible name has a carrier wherever clusters do.
+              The clade key, the name labels and the cards stay gated, which is
+              what `showCladeUi` was actually protecting. */}
           <div className={styles.mapOverlay}>
             {clusterCounts.map((c) => {
               const r = clusterDiscRadius(c.count);
@@ -980,13 +1001,18 @@ export function OccurrenceMap({
                   key={c.key}
                   className={styles.clusterCount}
                   style={{ left: c.x + r * 0.62, top: c.y - r * 0.62 }}
-                  aria-hidden="true"
+                  /* SPEC-021 REQ-001: the badge states the unit it counts, on the
+                     cluster itself. The visible glyph stays the bare number; the
+                     unit rides in the accessible name, so a cluster can never be
+                     read as a count of distinct taxa. */
+                  role="img"
+                  aria-label={clusterCountLabel(c.count, mode)}
                 >
                   {c.count}
                 </span>
               );
             })}
-            {labels.map((l) => (
+            {showCladeUi && labels.map((l) => (
               <span
                 key={l.id}
                 className={`sciName ${styles.mapLabel}`}
@@ -996,7 +1022,7 @@ export function OccurrenceMap({
                 {l.taxon}
               </span>
             ))}
-            {!multi && cardAnchor && carded && cardedMarker && (
+            {showCladeUi && !multi && cardAnchor && carded && cardedMarker && (
               <MapHoverCard
                 content={hoverCardContent(carded, cardedMarker.label)}
                 x={cardAnchor.x}
@@ -1011,7 +1037,7 @@ export function OccurrenceMap({
                 onClose={() => setPinned(null)}
               />
             )}
-            {multi && (
+            {showCladeUi && multi && (
               <MapSpeciesCard
                 x={multi.x}
                 y={multi.y}
@@ -1033,6 +1059,7 @@ export function OccurrenceMap({
               />
             )}
           </div>
+          {showCladeUi && (
           <div className={styles.mapLegend2} role="note" aria-label="Clade key">
             {CLADE_MARKERS.map((m) => (
               <span key={m.id} className={styles.legendItem}>
@@ -1045,6 +1072,7 @@ export function OccurrenceMap({
               </span>
             ))}
           </div>
+          )}
         </>
       )}
       {basemap && frame && (

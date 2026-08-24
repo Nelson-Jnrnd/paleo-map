@@ -83,7 +83,7 @@ async function guess(name: string): Promise<void> {
 
 test("NFR-001: the well-known track opens and plays with no network at all", async () => {
   renderTrack("wellKnown");
-  expect(screen.getByText(/ESTABLISHED CLASSIFICATION/i)).toBeTruthy();
+  expect(screen.getByText(/TAXONOMIC TREE/i)).toBeTruthy();
   await guess("Triceratops");
   expect(screen.getByText("1 of 8 guesses")).toBeTruthy();
   expect(attempts).toEqual([]);

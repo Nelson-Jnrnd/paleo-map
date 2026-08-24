@@ -29,11 +29,6 @@
   font-size: 16px;
 }
 
-.brandSub {
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
-}
-
 .context {
   display: flex;
   align-items: center;
@@ -451,22 +446,6 @@
   border: 6px solid transparent;
   border-top-color: rgba(255, 255, 255, 0.97);
   filter: drop-shadow(0 1px 0 var(--color-border));
-}
-
-.reconstructionBanner {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
 }
 
 /* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. */
@@ -1292,25 +1271,6 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-}
-
-/* Cluster-semantics legend (SPEC-010 REQ-002): a persistent disclosure that a
-   cluster counts records / localities (density), not distinct taxa — the canvas
-   cannot carry per-cluster accessible names, so the meaning lives in the DOM. */
-.mapLegend {
-  position: absolute;
-  bottom: var(--space-3);
-  /* Clear the basemap info button that anchors the map's bottom-left corner. */
-  left: calc(var(--space-3) + 30px + var(--space-2));
-  z-index: 2;
-  max-width: 22rem;
-  margin: 0;
-  padding: var(--space-1) var(--space-3);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
 }
 
 /* --- Taxon enrichment (SPEC-014 REQ-005) --- */
