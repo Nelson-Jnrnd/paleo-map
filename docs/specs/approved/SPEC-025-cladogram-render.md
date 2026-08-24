@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-025
 title: Dinordle taxonomic tree — a real horizontal cladogram, drawn from row and depth integers
-status: Draft
+status: Approved
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -624,13 +624,18 @@ SPEC-023 REQ-001).
   the clade carries on the map and in the taxonomy fan (charter §4, SPEC-015,
   SPEC-017 AMEND-001); the name always carries identity first and the tint only
   reinforces. Teal remains the single accent and appears only on the
-  deepest-reached node's ring and rule. The ruled-out ring uses the existing
-  `--color-error` token (`#c0392b`) — no new hex, no new hue, no second accent —
-  which is a **broadening of that token's stated meaning** (`tokens.css`: "load
-  failure only"; charter §4 status table: "Error … load failure only") and is
-  therefore recorded as a human decision below rather than assumed. Contrast is
-  not the issue either way: `#c0392b` is 5.4:1 on `--color-surface` and 4.4:1 on
-  `--color-ground`, well past the 3:1 a non-text mark needs. Because ruled-out
+  deepest-reached node's ring and rule. The ruled-out ring uses a **new
+  ruled-out status token**, authorised by the owner on 2026-08-14 ("Authorize a
+  new one") as a hue distinct from and additional to the one SPEC-024 spent on
+  its overlap verdict. It is named for its meaning (e.g. `--color-ruled-out`) and
+  declared in the "Provenance / status cues" block of `tokens.css` beside
+  `--color-attention` and `--color-error`. `--color-error` keeps its existing
+  "load failure only" scope in both `tokens.css` and the charter §4 status table;
+  this spec does not broaden it. Teal remains the single accent. The new token
+  must clear 3:1 against `--color-surface` and `--color-ground` (the reference
+  point, `#c0392b`, measures 5.4:1 and 4.4:1), and must stay distinguishable from
+  `--color-error` itself, since a load-failure state can appear on the same
+  screen and both are likely to be red-family. Because ruled-out
   rows carry no clade tint, the red ring never encircles a tint and never has to
   be read against one. No new border radius, no shadow, no gradient,
   no container, card, chip or icon set is introduced; every colour used comes from
@@ -643,14 +648,16 @@ SPEC-023 REQ-001).
   The clade tint is also the one cross-screen code this product has, so a redraw
   that dropped it would cost more than it gained.
 - **Acceptance criteria:**
-  1. The diff introduces no new hex literal, `border-radius`, `box-shadow` or
-     font-family.
+  1. Apart from the single authorised ruled-out token, the diff introduces no
+     new hex literal, `border-radius`, `box-shadow` or font-family.
   2. Every trunk row renders a tint dot whose value equals
      `cladeMarkerForTaxon(node.id, …).tint`; no cut or guess row renders one.
   3. Teal appears only on the deepest-reached node's marks within this region,
      and red only on ruled-out and guess rings.
-  4. The red used is exactly `var(--color-error)`; no new hue is introduced, and
-     the ring is never drawn over a clade tint.
+  4. The red used is exactly `var(--color-ruled-out)` (the new token, whatever
+     its final name); `--color-error` is unchanged in value and in stated scope;
+     exactly one token is added to `tokens.css`; and the ring is never drawn over
+     a clade tint.
   5. At most two new custom properties, both scoped to the module.
 - **Verification method:** automated — Vitest tint assertion and a CSS-source
   scan; plus diff inspection against the charter at review.
@@ -861,20 +868,20 @@ response is to narrow the viewport matrix, never to skip or delete the assertion
 
 ## Human decisions required
 
-- [ ] **Confirm the shape.** The tree becomes a horizontal cladogram: root at the
+- [x] **Confirm the shape.** The tree becomes a horizontal cladogram: root at the
       left, one name per row, depth stepping right by a small indent, ruled-out
       branches drawn as red-ringed nodes in a column at the right, each with the
       guess that ruled it out below it. See
       `docs/mockups/dinordle-cladogram.md`.
-      Answer: ______________________
-- [ ] **Confirm the two columns.** Eliminated branches all sit at one x and the
+      Answer: **Confirmed.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Confirm the two columns.** Eliminated branches all sit at one x and the
       guesses inside them at one indent further right; both move right when a
       guess deepens the descent.
-      Answer: ______________________
-- [ ] **Confirm the scroll.** At the snapshot's deepest lineage the diagram is
+      Answer: **Confirmed.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Confirm the scroll.** At the snapshot's deepest lineage the diagram is
       520–535 px and a narrow pane scrolls horizontally rather than wrapping.
-      Answer: ______________________
-- [ ] **Decide the red.** The ruled-out ring needs a red. `--color-error`
+      Answer: **Confirmed.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Decide the red.** The ruled-out ring needs a red. `--color-error`
       (`#c0392b`) exists but is scoped by `tokens.css` and by charter §4 to
       **load failure only**, and a ruled-out branch is a verdict, not an error.
       Two options, and this spec does **not** pick one on the owner's behalf:
@@ -885,19 +892,41 @@ response is to narrow the viewport matrix, never to skip or delete the assertion
       therefore needs an explicit authorisation of its own (the single new hue
       the owner authorised in SPEC-024 was for that spec's overlap verdict and is
       spent; it does not extend here).
-      Answer: ______________________
-- [ ] **Confirm removing the unresolved continuation** — and with it the
+      Answer: **(b) — authorise a distinct ruled-out status token.** Owner
+      decision, 2026-08-14: "Authorize a new one". `--color-error` keeps its
+      existing "load failure only" scope; a second status token is added for the
+      ruled-out verdict. This is a **new hue**, authorised explicitly and
+      separately from the one SPEC-024 spent on its overlap verdict.
+
+      Consequences to carry into implementation: the token is named for its
+      meaning (e.g. `--color-ruled-out`), sits in the "Provenance / status cues"
+      block of `tokens.css` beside `--color-attention` and `--color-error`, and
+      must clear contrast on the surface it is drawn on. It must also stay
+      distinguishable from `--color-error` itself, since both may be red-family
+      and an error state can appear on the same screen. REQ-003, UX-003 and the
+      mockup are written against `#c0392b` and must be re-pointed at the new
+      token; if the chosen hue differs visibly from what the mockup draws, the
+      mockup is regenerated to match rather than left to drift.
+- [x] **Confirm removing the unresolved continuation** — and with it the
       statement that the descent continues below the deepest node reached. This
       follows from cutting the fourth key entry (owner, 2026-08-14). It is
       required by SPEC-019 REQ-005, so it needs the AMEND-005 block below, and it
       is a real loss against charter §2 (REQ-004 records the consequence).
-      Answer: ______________________
-- [ ] **Confirm the SPEC-019 amendments below** — AMEND-004 (the redraw) and
+      Answer: **Confirmed — amend SPEC-019 REQ-005.** Owner decision,
+      2026-08-14: "Yes ammend Req 005". The unresolved continuation is removed
+      from the diagram and from the accessible state names, and AMEND-005 below
+      is authorised. The consequence recorded in REQ-004 stands as written: the
+      diagram now ends at the deepest established clade with nothing after it,
+      and the disclosure is dropped for screen-reader users too rather than
+      quietly kept for them.
+- [x] **Confirm the SPEC-019 amendments below** — AMEND-004 (the redraw) and
       AMEND-005 (the unresolved continuation removed) — and their numbers, once
       the sibling specs land.
-      Answer: ______________________
-- [ ] **Approval reference for Definition of Ready** (status → Approved).
-      Answer: ______________________
+      Answer: **Confirmed.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+- [x] **Approval reference for Definition of Ready** (status → Approved).
+      Answer: **Confirmed.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com).
+
+**Approval record.** Owner approval recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com). The owner confirmed the shape, the two columns, the scroll, both SPEC-019 amendments, and answered the two open decisions above.
 
 ## Conflict check
 
@@ -1153,12 +1182,16 @@ Recorded during drafting, to be extended at implementation.
   drop is one row pitch less two dot radii, ≈ 12.6 px. Those are the two shortest
   strokes any layout can produce, which is why REQ-002 fixes 3-on/2-off at 1.2 px
   (three marks in 16 px) instead of leaving the pattern to CSS taste.
-- **Open decision carried, not assumed — the red.** REQ-003 and UX-003 are written
-  against `--color-error`, and the mockup draws it, because that introduces no new
-  hue. The token is charter-scoped to load failure, so broadening it is the
-  owner's call (Human decisions). If the owner instead authorises a distinct
-  ruled-out hue, only UX-003 criterion 4 and the token name change; no geometry,
-  no requirement statement and no test structure moves.
+- **Decision taken — the red is a new token.** UX-003 was originally written
+  against `--color-error` because that introduced no new hue, with broadening it
+  flagged as the owner's call. The owner authorised a **distinct ruled-out hue**
+  instead (2026-08-14), so `--color-error` keeps its "load failure only" scope and
+  one token is added. As anticipated, only UX-003's criterion 4 and the token name
+  moved: no geometry, no requirement statement and no test structure changed. Two
+  things follow for implementation — the new token must stay distinguishable from
+  `--color-error` (a load-failure state can appear on the same screen, and both are
+  likely red-family), and the mockup currently draws `#c0392b`, so if the chosen
+  hue differs visibly the mockup is regenerated rather than left to drift.
 - **Noted for a future spec, not folded in here (`CLAUDE.md`: no opportunistic
   refactors):** the tree region and the Ma column are laid out by `.board`'s
   `flex-wrap`, so on a narrow window the Ma column drops below the tree with no
@@ -1180,4 +1213,4 @@ _None. The spec has not been approved yet._
 - [x] Open questions are resolved or explicitly deferred.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved.
+- [x] Human approval recorded before status set to Approved.

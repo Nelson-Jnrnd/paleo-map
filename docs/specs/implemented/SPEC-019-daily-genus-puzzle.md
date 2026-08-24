@@ -1099,6 +1099,105 @@ playtested; and the answer is in the client bundle by construction (SEC-001).
   SVGs are updated in the same PR.
 - **Human approval reference:** Owner approval in session, 2026-08-14.
 
+### AMEND-004 — the revealed tree is drawn as a horizontal cladogram; its contents are unchanged
+
+- **Date:** 2026-08-14
+- **Reason:** The owner reported the tree's rendering as defective — "would be
+  better if the render of the tree was better it's wonky text here you think it's
+  easy to make a real horizontal tree?" (2026-08-14). As built, the tree is an
+  indented `<ol>` whose connectors are CSS pseudo-element elbows of a fixed `rem`
+  height hung off rows whose height is content-driven, so a wrapped clade name
+  leaves the elbow floating and the diagram visibly comes apart. SPEC-025
+  replaces the rendering with a real horizontal rectangular cladogram whose
+  connector geometry is computed from each label's row and depth.
+- **Changed requirements:** **REQ-005** only, and only in how the surface is
+  drawn — the unresolved continuation is handled separately, by AMEND-005. Its
+  statement — the trunk from `Dinosauria` to the deepest shared clade, the
+  ruled-out child branch per guess labelled with the guessed genus, only nodes a
+  guess has touched, no node marked confirmed unless it is an ancestor of the
+  answer — is **unchanged** by this block. What is added, by SPEC-025
+  REQ-001…REQ-004 and UX-001, is a constraint on the rendering: the tree is drawn
+  root-left with depth increasing rightward, exactly one label per row, branch
+  connectors drawn in an `aria-hidden` SVG layer from row and depth integers,
+  each ruled-out branch drawn as a ringed node in a shared column with the guess
+  that ruled it out as a ringed leaf one indent further right, and no label
+  wrapping — a diagram wider than its pane scrolls horizontally with the trunk
+  pinned. The guessed genus appearing as its own node is **not** new content: it
+  is the same string REQ-005 already requires the ruled-out branch to be
+  "labelled with", moved from a suffix to a row, and it is a node a guess has
+  touched by definition, so REQ-005's no-siblings rule is not weakened.
+  **UX-003 is preserved** except as amended by AMEND-005: the accessible
+  structure stays an ordered list in root-first order with the same
+  `visuallyHidden` state sentences, plus a nested item for the guess carrying its
+  own sentence, and nothing moves into the SVG. **UX-001 is unchanged**: the clade
+  tint keeps its cross-screen role, teal stays the only accent for the
+  deepest-reached marks, and every state stays legible in shape and in words.
+  **REQ-004 and REQ-014 are unchanged**: no depth, distance or out-of-subtree node
+  is rendered — the guess leaf is placed one schematic indent below its branch and
+  never states the real distance.
+- **Behavioral impact:** Visual only, plus a scroll affordance. The set of taxa
+  named, their order, their words, the deepest-reached and elimination marks and
+  the hidden annotations are all identical; `revealedTree()`, `TrunkNode` and
+  `RevealedTree` are not modified. Nothing about selection, guess evaluation, the
+  time clue, the hint, the budget, storage or the shared summary changes. The one
+  new user-visible behaviour is that at a very deep lineage in a narrow pane the
+  diagram scrolls sideways instead of wrapping.
+- **Test impact:** `test/spec019-revealed-tree.test.ts` must pass
+  **unmodified** — that is the evidence the model did not change. Selector-only
+  edits in `test/ui/spec019-daily-screen.test.tsx` (its deepest-node lookup uses
+  the hashed class name `[class*="frontier"]`, replaced by the `data-tree-*`
+  hooks) and `test/ui/spec019-states.test.tsx`; no assertion about content is
+  weakened.
+  New: `test/spec025-cladogram-layout.test.ts`,
+  `test/ui/spec025-cladogram-render.test.tsx`,
+  `test/ui/spec025-cladogram-css.test.ts` and the geometry gate
+  `test/e2e/cladogram.e2e.ts`. `test/e2e/a11y.e2e.ts` and
+  `test/ui/spec019-no-egress.test.tsx` pass unmodified. No test is skipped or
+  deleted.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
+### AMEND-005 — the unresolved continuation is removed from the revealed tree
+
+- **Date:** 2026-08-14
+- **Reason:** Reviewing the SPEC-025 mockup, the owner simplified the tree's key
+  to three entries and removed the fourth outright: *"the descent continues — how
+  far is not stated → nothing"* (2026-08-14). The key is the only place a mark is
+  defined in words, so a mark whose entry is gone has no word left; keeping the
+  drawn `?` would leave an undefined mark on the diagram, which is worse than
+  removing it. SPEC-025 REQ-004 therefore removes the mark itself.
+- **Changed requirements:** **REQ-005** and **UX-003**.
+  - REQ-005's statement currently requires the tree to show "an unresolved
+    continuation below the deepest confirmed ancestor". That clause is
+    **retired**. Its acceptance criterion "At no point does the tree render a node
+    that no guess has touched, **other than the unresolved continuation, which
+    carries no name, id, or silhouette**" is amended by deleting the exception:
+    the tree now renders only nodes a guess has touched, with no exception. Every
+    other clause and criterion of REQ-005 stands.
+  - UX-003's statement lists the states a tree node's accessible name must
+    describe as "confirmed ancestor / ruled out / **unresolved**". The third is
+    **retired**; the first two stand unchanged, and no other part of UX-003 —
+    keyboard operability, the live region, colour never being the sole carrier,
+    WCAG 2 AA — is touched.
+- **Behavioral impact:** A disclosure is removed, for sighted and screen-reader
+  players alike. Mid-round, the diagram and the list now end at the deepest
+  established clade with nothing after it; a fresh round is a single node,
+  `Dinosauria`, with nothing below it. The tree no longer states that the descent
+  continues below the deepest node reached, so a player may read the diagram as
+  ending the lineage there. That is a real cost against the design charter's
+  first-class-uncertainty rule (§2) and is accepted on the owner's instruction. No
+  node, name, id, silhouette or clue is added or withdrawn — the continuation
+  never carried any — and `revealedTree()`'s `unresolved` field is untouched in
+  the model; it simply stops being rendered.
+- **Test impact:** `test/spec019-revealed-tree.test.ts` passes **unmodified** (it
+  asserts the model's `unresolved` flag, not the rendering).
+  `test/ui/spec019-states.test.tsx` and `test/ui/spec019-daily-screen.test.tsx`
+  lose their assertions that the rendered tree shows the unresolved continuation;
+  those assertions are **replaced, not deleted** — by an assertion in
+  `test/ui/spec025-cladogram-render.test.tsx` that no unresolved mark, word or
+  hidden statement is rendered in any state, so the removal is itself gated.
+  `test/e2e/a11y.e2e.ts` passes unmodified.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

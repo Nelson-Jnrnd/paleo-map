@@ -183,7 +183,13 @@ is an owner decision, drafted as a SPEC-019 amendment in
 [SPEC-025](../specs/active/SPEC-025-cladogram-render.md); SPEC-019 REQ-005
 requires the continuation today, so it cannot be dropped without one.
 
-**The red is `--color-error`, and that token says "load failure only".** The
+**The red is a new ruled-out status token (owner-authorised, 2026-08-14).**
+The mockup draws `#c0392b` as its stand-in; if the token's final value differs
+visibly, this sheet is regenerated to match. `--color-error` keeps its own
+"load failure only" scope and is not broadened. What follows is the original
+note that raised the question.
+
+**Superseded note — the red was `--color-error`, and that token says "load failure only".** The
 ruled-out ring uses `#c0392b` from `src/app/styles/tokens.css` — no new hex, no
 second accent, no new hue (charter §4). But the token's comment and the charter's
 status table both scope it to load failure, and a ruled-out branch is not an

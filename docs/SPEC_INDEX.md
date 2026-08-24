@@ -46,7 +46,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-022 | A global app bar — Map / Dinordle / Taxonomy, and the Dinordle rename | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-022-global-app-bar.md`](specs/approved/SPEC-022-global-app-bar.md) |
 | SPEC-023 | Map overlay layout — corner rails and an automated non-overlap gate | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-023-map-overlay-layout.md`](specs/approved/SPEC-023-map-overlay-layout.md) |
 | SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-024-puzzle-legibility.md`](specs/approved/SPEC-024-puzzle-legibility.md) |
-| SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Draft | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-025-cladogram-render.md`](specs/active/SPEC-025-cladogram-render.md) |
+| SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-025-cladogram-render.md`](specs/approved/SPEC-025-cladogram-render.md) |
 | SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-026-sidebar-redesign.md`](specs/approved/SPEC-026-sidebar-redesign.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
