@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-024
 title: Dinordle — legible track choice and a readable Ma column
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -1083,23 +1083,71 @@ AMEND-001 and AMEND-002 are taken; this block is `AMEND-003`.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | header track control | `components/DailyGenusScreen.tsx` header; `dailyGenus.module.css` `.tracks*` | `test/ui/spec020-track-option.test.tsx` | Not started |
-| REQ-002 | disclosure split | `DailyGenusScreen.tsx` caveat line + detail slot | `test/ui/spec020-track-option.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Not started |
-| REQ-003 | detail slot | `DailyGenusScreen.tsx` hover/focus state + `aria-describedby` | `test/ui/spec020-track-option.test.tsx` | Not started |
-| REQ-004 | track switching | `DailyGenusScreen.tsx` · `chooseTrack` (unchanged) | `test/ui/spec020-track-option.test.tsx`, `test/ui/spec020-track-fragments.test.tsx` | Not started |
-| REQ-005 | Ma column bars | `DailyGenusScreen.tsx` `.bars`; `dailyGenus.module.css` `.bar` | `test/ui/spec019-states.test.tsx` | Not started |
-| REQ-006 | direction mark + key | `DailyGenusScreen.tsx` column key | `test/ui/spec019-states.test.tsx`, `test/ui/spec019-daily-screen.test.tsx` | Not started |
-| REQ-007 | missing-span state | `DailyGenusScreen.tsx` bar slot | `test/ui/spec019-states.test.tsx` | Not started |
-| REQ-008 | retirement | removal of `answerPeriod`/`periodDisclosed*`/`periodOf`/`.bandLit`/`.periodNote` | `test/ui/spec019-states.test.tsx` | Not started |
-| REQ-009 | pure core untouched | no change under `src/app/state/` | `test/spec019-clue-rows.test.ts`, `test/spec020-share-track.test.ts` | Not started |
-| NFR-001 | tokens | `dailyGenus.module.css` (existing tokens only) | PR diff, `pnpm run check:budget` | Not started |
-| NFR-002 | no egress | screen reads the loaded snapshot only | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Not started |
-| SEC-001 | storage | `state/dailyGenusStorage.ts` (unchanged) | `test/spec019-persistence.test.ts` | Not started |
-| API-001 | pure core | `state/dailyGenus.ts` (unchanged) | `pnpm test`, `pnpm run typecheck` | Not started |
-| UX-001 | header control styling | `dailyGenus.module.css` | `test/ui/spec020-track-option.test.tsx`, PR review | Not started |
-| UX-002 | contrast + greyscale | `dailyGenus.module.css` bar tokens | `test/e2e/a11y.e2e.ts` | Not started |
-| UX-003 | states | `DailyGenusScreen.tsx` branches | `test/ui/spec019-states.test.tsx`, `test/ui/spec020-track-option.test.tsx` | Not started |
-| UX-004 | accessibility | group semantics, `aria-describedby`, existing live region | `test/e2e/spec019-daily.e2e.ts`, `test/e2e/a11y.e2e.ts` | Not started |
+| REQ-001 | Track controls | `DailyGenusScreen.tsx` — `role="radiogroup"` + two `role="radio"` buttons in the header; `.trackButton`/`.trackButtonOn`; the `· well-known` suffix removed from the identity line | `test/ui/spec020-track-option.test.tsx`, `test/e2e/spec019-daily.e2e.ts` | Implemented |
+| REQ-002 | Caveat visibility | `.trackAbout` rendered unconditionally for both tracks; no `title` carries it | `test/ui/spec020-track-option.test.tsx` ("visible for both tracks, never on demand") | Implemented |
+| REQ-003 | Detail slot | `trackPreview` state driven by `onMouseEnter`/`onFocus` and cleared on leave/blur; `aria-describedby` to a real element; fixed-height slot, not a live region | `test/ui/spec020-track-option.test.tsx` (focus *and* hover paths) | Implemented |
+| REQ-004 | Behaviour unchanged | `chooseTrack` untouched; storage, fragments, practice and `onTrackChange` unchanged | `test/ui/spec020-track-option.test.tsx`, `test/ui/spec020-track-fragments.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Implemented |
+| REQ-005 | Bar treatment | `.barOverlaps` (solid, `--color-overlap`) vs `.barMisses` (hollow outline) | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| REQ-006 | Direction + key | `.barMark` ▲/▼ on misses only; `.timeKey` names all four treatments in words | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| REQ-007 | No-span guesses | `.barMissing` ✕ at the foot of the slot + `.noSpanNote` naming the guess; `visuallyHidden` sentence retained | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| REQ-008 | Period reveal retired | `answerPeriod`, `periodDisclosedBy`, `periodDisclosed`, `periodOf()`, `.bandLit` and `.periodNote` all deleted; bands, ticks and names kept | `test/ui/spec019-states.test.tsx`, `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| REQ-009 | Pure core untouched | No file under `src/app/state/` changed | `pnpm test` (the SPEC-019/020 core suites pass unmodified) | Implemented |
+| NFR-001 | One new token | `--color-overlap: #0e6b3e` added to `tokens.css`; no other token changed, no dependency, no data change | contrast computation below; `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| NFR-002 | No network | Screen still makes no request | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Implemented |
+| SEC-001 | No new stored data | No storage call added | `test/ui/spec020-track-option.test.tsx` (persistence unchanged) | Implemented |
+| API-001 | No exported change | No exported function or type signature changed | `pnpm run typecheck` | Implemented |
+| UX-001 | Charter compliance | No chip, badge, pill or card introduced; controls are text with a rule | diff review; anti-slop checklist | Implemented |
+| UX-002 | Never colour alone | Fill-vs-outline plus a direction glyph; all four treatments named in words | `test/ui/spec024-ma-verdict.test.tsx` ("survives with colour removed") | Implemented |
+| UX-003 | States designed | Overlap, miss, no-span, and the no-well-known-track case (controls absent) | `test/ui/spec024-ma-verdict.test.tsx`, `test/ui/spec020-track-option.test.tsx` | Implemented |
+| UX-004 | A11y parity | `radiogroup`/`radio` + `aria-checked`; `aria-describedby`; detail slot is not a live region | `test/e2e/a11y.e2e.ts` | Implemented |
+
+### The new hue, chosen by measurement (NFR-001)
+
+`--color-overlap: #0e6b3e`. The constraint recorded at approval was that the bars
+are drawn **over** the ICS period bands and `--color-period-cretaceous` (`#5fa96a`)
+is itself a green, so the overlap hue had to separate from it in hue *and*
+luminance — and be verified against the band, not the page ground.
+
+| Measured against | Result |
+| --- | --- |
+| Cretaceous band at its 0.22 weight over the surface | contrast **5.36:1** |
+| `--color-surface` | contrast **6.58:1** |
+| Hue distance from `--color-period-cretaceous` | **22°** |
+| Hue distance from `--color-accent` (teal) | **18°** |
+
+The teal check was added during implementation and is not in the spec: the
+accent is the product's single accent, so an overlap green that read as teal
+would have been a different failure from the one NFR-001 named. Candidates at
+3° and 12° from the Cretaceous hue were rejected; `#0e6b3e` is the only tested
+value clearing both separations while holding contrast over the band.
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 87 files, **496 tests**, all pass (before this change: 86 / 488) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **17 passed**, a11y included |
+
+### Implementation notes
+
+- **The track controls kept `role="radio"`, which changed how tests read them.**
+  They are now `<button role="radio">` rather than `<input type="radio">`, so
+  selection is carried by `aria-checked` and not by an input's `.checked`
+  property. Four existing SPEC-020 tests read `.checked` through an
+  `HTMLInputElement` cast and were updated to read the attribute; none was
+  weakened or removed, and the `radiogroup` name "Which puzzle" is unchanged.
+- **REQ-002 vs REQ-003 in practice.** The pool sizes moved behind hover/focus;
+  the attention caveat did not, and the test asserts it is visible for *both*
+  track selections and that no element in the region carries it in a `title`.
+  That split is the whole point of the requirement pair and is now guarded.
+- **REQ-008 removed a test, and replaced it with its inverse.** SPEC-019's "the
+  answer's period is withheld until a guess overlaps it" asserted the retired
+  mechanic. It is rewritten to assert the period is *never* disclosed during a
+  round — before a guess, after a miss, and after the overlap that used to be the
+  trigger — plus that the per-guess key took its place. The test was not deleted.
+
 
 ## Implementation notes
 

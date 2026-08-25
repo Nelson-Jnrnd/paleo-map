@@ -56,6 +56,14 @@
   /* Provenance / status cues (meaning-only, kept neutral) */
   --color-attention: #8a5a12; /* incomplete / note — muted amber, AA on ground */
   --color-error: #c0392b; /* load failure only — AA on ground/surface */
+  /* SPEC-024 NFR-001 (owner-authorised, 2026-08-14): the Dinordle overlap
+     verdict. A status colour, not a second accent. Chosen against the surface it
+     is drawn on rather than by eye: the bars sit over the ICS period bands, and
+     --color-period-cretaceous is itself a green, so this had to separate from it
+     in hue and luminance. Measured — 22° from the Cretaceous hue, 18° from the
+     teal accent, 5.36:1 over the Cretaceous band at its 0.22 weight and 6.58:1
+     over the surface. */
+  --color-overlap: #0e6b3e;
 
   /* Typography */
   /* Owner-directed (2026-07-27): a single standard monospace across the whole

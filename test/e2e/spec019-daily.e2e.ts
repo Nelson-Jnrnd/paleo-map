@@ -87,16 +87,31 @@ test("SPEC-020 REQ-004: the track option offers both puzzles and is honest about
   await page.goto("/#daily");
   await page.getByLabel("Guess a genus").waitFor();
 
-  await expect(
-    page.getByRole("group", { name: /which puzzle/i }),
-  ).toBeVisible();
+  // SPEC-024 REQ-001: two named controls in the header, exposed as a
+  // single-choice group, replacing the fieldset of stacked labels.
+  const group = page.getByRole("radiogroup", { name: /which puzzle/i });
+  await expect(group).toBeVisible();
+  await expect(group.getByRole("radio")).toHaveCount(2);
+
+  // REQ-002: the provenance caveat is rendered and visible with no interaction —
+  // it is what the ranking is and is not, so it may never sit behind a hover.
   await expect(page.getByText(/English Wikipedia/i).first()).toBeVisible();
   await expect(
     page.getByText(/attention, not of scientific importance/i),
   ).toBeVisible();
 
-  await page.getByRole("radio", { name: /well-known/i }).check();
-  await expect(page.getByText(/well-known/i).first()).toBeVisible();
+  // REQ-003: the selected track's pool size is visible without interaction.
+  await expect(page.getByText(/genera in the snapshot/i)).toBeVisible();
+
+  await group.getByRole("radio", { name: /well-known/i }).click();
+  await expect(
+    group.getByRole("radio", { name: /well-known/i }),
+  ).toHaveAttribute("aria-checked", "true");
+  // Still visible after switching, and the detail follows the selection.
+  await expect(
+    page.getByText(/attention, not of scientific importance/i),
+  ).toBeVisible();
+  await expect(page.getByText(/most read about/i)).toBeVisible();
 });
 
 test("SPEC-020 REQ-007: #daily-known opens the well-known track directly", async ({

@@ -45,7 +45,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-021 | Chrome copy removal — five interface lines retired, with compensating carriers | Implemented | nelsonjeanrenaud@gmail.com | — | — | [`specs/implemented/SPEC-021-chrome-copy-removal.md`](specs/implemented/SPEC-021-chrome-copy-removal.md) |
 | SPEC-022 | A global app bar — Map / Dinordle / Taxonomy, and the Dinordle rename | Implemented | nelsonjeanrenaud@gmail.com | — | — | [`specs/implemented/SPEC-022-global-app-bar.md`](specs/implemented/SPEC-022-global-app-bar.md) |
 | SPEC-023 | Map overlay layout — corner rails and an automated non-overlap gate | Implemented | nelsonjeanrenaud@gmail.com | — | — | [`specs/implemented/SPEC-023-map-overlay-layout.md`](specs/implemented/SPEC-023-map-overlay-layout.md) |
-| SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-024-puzzle-legibility.md`](specs/approved/SPEC-024-puzzle-legibility.md) |
+| SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Implemented | nelsonjeanrenaud@gmail.com | — | — | [`specs/implemented/SPEC-024-puzzle-legibility.md`](specs/implemented/SPEC-024-puzzle-legibility.md) |
 | SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-025-cladogram-render.md`](specs/approved/SPEC-025-cladogram-render.md) |
 | SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Approved | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-026-sidebar-redesign.md`](specs/approved/SPEC-026-sidebar-redesign.md) |
 

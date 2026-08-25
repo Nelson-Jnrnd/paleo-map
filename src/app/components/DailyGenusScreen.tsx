@@ -26,7 +26,6 @@ import {
 import type { KeyboardEvent, ReactElement } from "react";
 import type { ReadApi } from "../../read/api.js";
 import { MESOZOIC_PERIODS, MESOZOIC_STAGES } from "../../domain/index.js";
-import type { TimeRange } from "../../domain/index.js";
 import { buildTaxonomyIndex } from "../state/taxonomy.js";
 import {
   HINT_AFTER_GUESSES,
@@ -118,14 +117,6 @@ function depthPercent(ma: number): number {
   return ((COLUMN_MAX_MA - ma) / span) * 100;
 }
 
-function periodOf(span: TimeRange | null): string | null {
-  if (!span) return null;
-  for (const period of MESOZOIC_PERIODS) {
-    const { startMa, endMa } = periodBounds(period);
-    if (span.minMa < startMa && endMa < span.maxMa) return period;
-  }
-  return null;
-}
 
 const TIME_WORDS: Readonly<Record<TimeVerdict, string>> = {
   older: "the answer is older",
@@ -194,6 +185,9 @@ export function DailyGenusScreen({
   const [copied, setCopied] = useState<"idle" | "copied" | "unavailable">(
     "idle",
   );
+  // REQ-003: which track's pool size the detail slot is previewing, if any.
+  // Hover *and* focus drive it, so it is reachable without a pointer.
+  const [trackPreview, setTrackPreview] = useState<Track | null>(null);
   const listId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -414,11 +408,10 @@ export function DailyGenusScreen({
   }
 
   const tree = revealedTree(round, data);
-  const answerPeriod = periodOf(answer.timeSpan);
-  const periodDisclosedBy = round.guesses.findIndex(
-    (g) => g.time === "overlaps",
-  );
-  const periodDisclosed = periodDisclosedBy >= 0 || finished;
+  // REQ-007: the guesses the column cannot plot, named once beneath it.
+  const noSpanGuesses = round.guesses
+    .filter((g) => !data.guessableById.get(g.taxonId)?.timeSpan)
+    .map((g) => g.scientificName);
   const snapshotDate = api.metadata().retrievedOn;
   const popularityWindow = api.metadata().popularity?.window ?? null;
   const practice = round.mode === "practice";
@@ -431,7 +424,6 @@ export function DailyGenusScreen({
             {practice
               ? "Dinordle · practice"
               : `Dinordle · No. ${puzzleNumber(dateKey)}`}
-            {track === "wellKnown" && " · well-known"}
           </p>
           <p className={styles.progress}>
             {finished
@@ -448,34 +440,53 @@ export function DailyGenusScreen({
       </header>
 
       {trackAvailable(data, "wellKnown") && (
-        <fieldset className={styles.tracks}>
-          <legend className={styles.tracksLegend}>Which puzzle</legend>
-          {TRACKS.map((option) => (
-            <label key={option} className={styles.trackChoice}>
-              <input
-                type="radio"
-                name="daily-genus-track"
-                value={option}
-                checked={track === option}
-                onChange={() => chooseTrack(option)}
-              />
-              <span className={styles.trackName}>
+        <div className={styles.tracks}>
+          {/* REQ-001: two controls, the domain names, single-choice. `radio`
+              roles rather than a fieldset of labels: the same semantics in a
+              third of the copy. */}
+          <div
+            className={styles.trackGroup}
+            role="radiogroup"
+            aria-label="Which puzzle"
+          >
+            {TRACKS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                role="radio"
+                aria-checked={track === option}
+                aria-describedby={`${listId}-track-detail`}
+                className={`${styles.trackButton} ${track === option ? styles.trackButtonOn : ""}`}
+                onClick={() => chooseTrack(option)}
+                onMouseEnter={() => setTrackPreview(option)}
+                onMouseLeave={() => setTrackPreview(null)}
+                onFocus={() => setTrackPreview(option)}
+                onBlur={() => setTrackPreview(null)}
+              >
                 {option === "full" ? "Every genus" : "Well-known"}
-              </span>
-              <span className={styles.trackNote}>
-                {option === "full"
-                  ? `all ${data.pool.length.toLocaleString("en-GB")} in the snapshot`
-                  : `the ${data.wellKnownPool.length} most read about`}
-              </span>
-            </label>
-          ))}
+              </button>
+            ))}
+          </div>
+          {/* REQ-003: the pool size for the selected track is always rendered
+              here; hovering or focusing the other control previews its size in
+              the same slot. Not a live region — this must not be announced on
+              every hover — and the slot's height does not change with content. */}
+          <p className={styles.trackDetail} id={`${listId}-track-detail`}>
+            {(trackPreview ?? track) === "full"
+              ? `all ${data.pool.length.toLocaleString("en-GB")} genera in the snapshot`
+              : `the ${data.wellKnownPool.length} most read about`}
+          </p>
+          {/* REQ-002: this is provenance, not detail. It states what the ranking
+              is built from and what it is not, so the charter forbids putting it
+              behind a hover, a title or a disclosure. It stays visible for both
+              tracks, in every state. */}
           <p className={styles.trackAbout}>
             “Well-known” ranks genera by how often people read their article on
             English Wikipedia
             {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure of
             attention, not of scientific importance.
           </p>
-        </fieldset>
+        </div>
       )}
 
       {practice && (
@@ -614,11 +625,10 @@ export function DailyGenusScreen({
               {MESOZOIC_PERIODS.map((period) => {
                 const { startMa, endMa } = periodBounds(period);
                 const top = depthPercent(startMa);
-                const lit = periodDisclosed && answerPeriod === period;
                 return (
                   <span
                     key={period}
-                    className={`${styles.band} ${lit ? styles.bandLit : ""}`}
+                    className={styles.band}
                     style={{
                       top: `${top}%`,
                       height: `${depthPercent(endMa) - top}%`,
@@ -649,14 +659,33 @@ export function DailyGenusScreen({
                   data.guessableById.get(g.taxonId)?.timeSpan ?? null;
                 const top = span ? depthPercent(span.maxMa) : 0;
                 const height = span ? depthPercent(span.minMa) - top : 0;
+                // REQ-005: overlap is solid, a miss is hollow. The difference is
+                // a shape, not just a colour, so it survives with colour removed.
+                const overlaps = g.time === "overlaps";
                 return (
                   <li key={g.taxonId} className={styles.barSlot}>
                     {span && (
                       <span
-                        className={styles.bar}
+                        className={`${styles.bar} ${overlaps ? styles.barOverlaps : styles.barMisses}`}
                         style={{ top: `${top}%`, height: `${height}%` }}
                         aria-hidden="true"
-                      />
+                      >
+                        {/* REQ-006: a miss points along the axis toward where the
+                            answer actually lies. An overlap has nowhere to point. */}
+                        {!overlaps && (
+                          <span className={styles.barMark}>
+                            {g.time === "older" ? "▲" : "▼"}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {/* REQ-007: no span means no bar — there is no extent to plot
+                        and none may be invented — but the slot is still marked, so
+                        the guess never silently vanishes from the column. */}
+                    {!span && (
+                      <span className={styles.barMissing} aria-hidden="true">
+                        ✕
+                      </span>
                     )}
                     <span className="visuallyHidden">
                       {`Guess ${i + 1}, ${g.scientificName}: ${TIME_WORDS[g.time]}.`}
@@ -666,11 +695,26 @@ export function DailyGenusScreen({
               })}
             </ul>
           </div>
-          <p className={styles.periodNote}>
-            {periodDisclosed && answerPeriod
-              ? `${answerPeriod} — the answer’s period`
-              : "The answer’s period appears once a guess overlaps it."}
+          {/* REQ-006: one entry per treatment, in words — the same
+              three-marks-three-words shape the tree's key uses. */}
+          <p className={styles.timeKey}>
+            <span className={`${styles.keyBar} ${styles.barOverlaps}`} aria-hidden="true" />{" "}
+            overlaps
+            <span className={styles.keySep} aria-hidden="true" />
+            <span className={`${styles.keyBar} ${styles.barMisses}`} aria-hidden="true" />▲
+            answer older
+            <span className={styles.keySep} aria-hidden="true" />
+            <span className={`${styles.keyBar} ${styles.barMisses}`} aria-hidden="true" />▼
+            answer younger
+            <span className={styles.keySep} aria-hidden="true" />✕ no span recorded
           </p>
+          {noSpanGuesses.length > 0 && (
+            <p className={styles.noSpanNote}>
+              {noSpanGuesses.length === 1
+                ? `${noSpanGuesses[0]} has no time span recorded, so it is not plotted.`
+                : `${noSpanGuesses.join(", ")} have no time span recorded, so they are not plotted.`}
+            </p>
+          )}
         </section>
       </div>
 

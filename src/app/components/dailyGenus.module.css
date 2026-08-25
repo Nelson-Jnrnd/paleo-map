@@ -107,47 +107,63 @@
  * carry it.
  */
 .tracks {
-  border: none;
-  border-left: 2px solid var(--color-divider);
-  margin: 0;
-  padding: var(--space-1) 0 var(--space-1) var(--space-3);
   display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-5);
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
 }
 
-.tracksLegend {
-  padding: 0;
-  font-size: var(--text-min);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.trackChoice {
+.trackGroup {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
-  cursor: pointer;
+  gap: var(--space-3);
+}
+
+/* SPEC-024 REQ-001: selection is carried by weight and a rule as well as by
+   colour, and by aria-checked for assistive technology. */
+.trackButton {
+  padding: var(--space-1) 0;
   min-height: var(--target-min);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
   font-size: 0.8125rem;
-  color: var(--color-text);
+  cursor: pointer;
 }
 
-.trackChoice input {
-  accent-color: var(--color-accent-deep);
-}
-
-.trackName {
+.trackButton:hover {
   color: var(--color-text-hi);
 }
 
-.trackNote,
-.trackAbout {
+.trackButton:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.trackButtonOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
+/* REQ-003: a fixed slot, so previewing the other track's size on hover or focus
+   never reflows the header. */
+.trackDetail {
+  margin: 0;
+  min-height: 1.2em;
   font-size: var(--text-min);
   color: var(--color-text-faint);
 }
+
+.trackAbout {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
 
 .trackAbout {
   flex-basis: 100%;
@@ -387,9 +403,6 @@
   opacity: 0.22;
 }
 
-.bandLit {
-  opacity: 0.62;
-}
 
 .bars {
   position: relative;
@@ -409,20 +422,70 @@
   height: 100%;
 }
 
+/* SPEC-024 REQ-005: the verdict is carried by fill-versus-outline first and by
+   colour second, so it survives with colour removed. */
 .bar {
   position: absolute;
   left: 0;
   width: 100%;
-  background: var(--color-accent);
-  opacity: 0.5;
+  border-radius: 1px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.periodNote {
-  margin: var(--space-3) 0 0;
+.barOverlaps {
+  background: var(--color-overlap);
+}
+
+.barMisses {
+  background: none;
+  border: 1px solid var(--color-text-faint);
+}
+
+/* REQ-006: the direction mark sits at the bar and points along the axis toward
+   where the answer lies. */
+.barMark {
+  position: absolute;
+  top: -0.85em;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+/* REQ-007: a guess with no recorded span is marked at the foot of its slot,
+   outside the plotting area — never a zero-height or full-height bar. */
+.barMissing {
+  position: absolute;
+  bottom: -1.1em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-faint);
+}
+
+/* REQ-006: the treatment key, in the shape the tree's key already uses. */
+.timeKey {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.keyBar {
+  display: inline-block;
+  width: 6px;
+  height: 10px;
+  vertical-align: -1px;
+  border-radius: 1px;
+}
+
+.noSpanNote {
+  margin: var(--space-2) 0 0;
   font-size: var(--text-min);
   color: var(--color-text-muted);
-  max-width: 20rem;
 }
+
 
 /* ── the guess line: a rule, not a boxed field ──────────────────────────── */
 

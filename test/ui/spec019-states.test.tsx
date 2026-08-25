@@ -101,21 +101,25 @@ test("REQ-011: a copied result reports success and names no taxon", async () => 
   expect(shared).not.toContain("Dinosauria");
 });
 
-test("REQ-006: the answer's period is withheld until a guess overlaps it", async () => {
+test("SPEC-024 REQ-008: the answer's period is never disclosed during a round", async () => {
+  // The band-lighting mechanic is retired in full (owner: "Yes don't disclose
+  // it"), so the period is not named at any point in the round — before a
+  // guess, after a miss, or after an overlap. The answer's span is still stated
+  // in the reveal at the end (SPEC-019 REQ-007), which this test does not reach.
   renderGame();
-  expect(
-    screen.getByText(/The answer’s period appears once a guess overlaps it/i),
-  ).toBeTruthy();
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
 
-  // Nyasasaurus is Triassic; the answer is Cretaceous, so nothing is disclosed.
-  await guess("Nyasasaurus");
-  expect(screen.queryByText(/the answer’s period/i)?.textContent).not.toContain(
-    "Cretaceous",
-  );
+  await guess("Nyasasaurus"); // Triassic — a miss against a Cretaceous answer.
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
 
-  // Triceratops overlaps the answer's range, which discloses the period.
-  await guess("Triceratops");
-  expect(screen.getByText(/Cretaceous — the answer’s period/i)).toBeTruthy();
+  await guess("Triceratops"); // Overlaps: previously the disclosure trigger.
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
+  expect(screen.queryByText(/Cretaceous — /i)).toBeNull();
+
+  // What replaced it: the per-guess verdict, named in words in the key.
+  expect(screen.getByText(/overlaps/i)).toBeTruthy();
+  expect(screen.getByText(/answer older/i)).toBeTruthy();
+  expect(screen.getByText(/answer younger/i)).toBeTruthy();
 });
 
 test("REQ-006: each guess's range is stated in words for assistive technology", async () => {
