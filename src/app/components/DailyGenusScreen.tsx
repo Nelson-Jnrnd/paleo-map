@@ -74,6 +74,11 @@ import type {
   KeyValueStore,
   StoredRecord,
 } from "../state/dailyGenusStorage.js";
+import { layoutCladogram } from "../state/cladogramLayout.js";
+import type {
+  CladogramLayout,
+  CladogramRow,
+} from "../state/cladogramLayout.js";
 import { cladeMarkerForTaxon } from "./mapCladeMarkers.js";
 import { ErrorState } from "./states.js";
 import styles from "./dailyGenus.module.css";
@@ -117,6 +122,147 @@ function depthPercent(ma: number): number {
   return ((COLUMN_MAX_MA - ma) / span) * 100;
 }
 
+
+/**
+ * The diagram's two integers (SPEC-025 REQ-002). Both the labels and the SVG
+ * connectors are derived from these, so the two can never describe different
+ * pictures — which is the defect this render replaces. They are declared here
+ * and pushed *into* CSS as custom properties rather than read back out of it:
+ * reading computed style would be a measurement, and REQ-002/NFR-003 forbid the
+ * render depending on one.
+ */
+const ROW_PITCH = 21;
+const DEPTH_INDENT = 16;
+/** Reserve for the longest label, so the scroll region has a real width. */
+const MAX_LABEL_PX = 260;
+/** REQ-002: one dash pattern everywhere, chosen so the shortest possible lead —
+ *  a single indent — still shows three marks. */
+const DASH = "3 2";
+const STROKE = 1.2;
+
+/** Where a row sits, in the coordinate system both layers share. */
+function rowStyle(row: number): Record<string, string> {
+  return { top: `${row * ROW_PITCH}px` };
+}
+
+function rowOf(
+  layout: CladogramLayout,
+  kind: CladogramRow["kind"],
+  id: string,
+): number {
+  return layout.rows.find((r) => r.kind === kind && r.id === id)?.row ?? 0;
+}
+
+/** Centre of a row's dot, in diagram coordinates. */
+const cx = (depth: number): number => depth * DEPTH_INDENT + 4;
+const cy = (row: number): number => row * ROW_PITCH + ROW_PITCH / 2;
+
+/**
+ * Every connector, in one `aria-hidden` layer (SPEC-025 REQ-002). No text, no
+ * measurement — each command is arithmetic on a row's `(row, depth)` pair.
+ */
+function CladogramConnectors({
+  layout,
+}: {
+  layout: CladogramLayout;
+}): ReactElement {
+  const nodes = layout.rows.filter((r) => r.kind === "node");
+  const paths: ReactElement[] = [];
+
+  nodes.forEach((node, i) => {
+    // The spine: a solid bar from this node down to its last child's row.
+    const children = layout.rows.filter(
+      (r) => r.kind === "cut" && r.parentRow === node.row,
+    );
+    const next = nodes[i + 1];
+    const lastRow = Math.max(
+      node.row,
+      next?.row ?? node.row,
+      ...children.map((c) => c.row),
+    );
+    if (lastRow > node.row) {
+      paths.push(
+        <line
+          key={`spine-${node.row}`}
+          x1={cx(node.depth)}
+          y1={cy(node.row)}
+          x2={cx(node.depth)}
+          y2={cy(lastRow)}
+          stroke="currentColor"
+          strokeWidth={STROKE}
+        />,
+      );
+    }
+    // Solid lead across to the next established node.
+    if (next) {
+      paths.push(
+        <line
+          key={`lead-${node.row}`}
+          x1={cx(node.depth)}
+          y1={cy(next.row)}
+          x2={cx(next.depth)}
+          y2={cy(next.row)}
+          stroke="currentColor"
+          strokeWidth={STROKE}
+        />,
+      );
+    }
+    // Dashed lead out to each branch this node ruled out.
+    for (const cut of children) {
+      paths.push(
+        <line
+          key={`cut-${cut.row}`}
+          x1={cx(node.depth)}
+          y1={cy(cut.row)}
+          x2={cx(cut.depth)}
+          y2={cy(cut.row)}
+          stroke="currentColor"
+          strokeWidth={STROKE}
+          strokeDasharray={DASH}
+        />,
+      );
+    }
+  });
+
+  // The guess inside each ruled-out branch: a dashed drop, then a dashed lead.
+  for (const guess of layout.rows.filter((r) => r.kind === "guess")) {
+    const from = guess.cutRow ?? guess.row;
+    paths.push(
+      <line
+        key={`drop-${guess.row}`}
+        x1={cx(layout.tipDepth)}
+        y1={cy(from)}
+        x2={cx(layout.tipDepth)}
+        y2={cy(guess.row)}
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        strokeDasharray={DASH}
+      />,
+      <line
+        key={`gl-${guess.row}`}
+        x1={cx(layout.tipDepth)}
+        y1={cy(guess.row)}
+        x2={cx(guess.depth)}
+        y2={cy(guess.row)}
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        strokeDasharray={DASH}
+      />,
+    );
+  }
+
+  return (
+    <svg
+      className={styles.connectors}
+      aria-hidden="true"
+      focusable="false"
+      width="100%"
+      height={layout.rows.length * ROW_PITCH}
+    >
+      {paths}
+    </svg>
+  );
+}
 
 const TIME_WORDS: Readonly<Record<TimeVerdict, string>> = {
   older: "the answer is older",
@@ -408,6 +554,7 @@ export function DailyGenusScreen({
   }
 
   const tree = revealedTree(round, data);
+  const layout = layoutCladogram(tree);
   // REQ-007: the guesses the column cannot plot, named once beneath it.
   const noSpanGuesses = round.guesses
     .filter((g) => !data.guessableById.get(g.taxonId)?.timeSpan)
@@ -522,81 +669,154 @@ export function DailyGenusScreen({
           <h2 className={styles.eyebrow} id={`${listId}-tree`}>
             Taxonomic tree
           </h2>
-          <ol className={styles.trunk}>
-            {tree.trunk.map((node, depth) => (
-              <li
-                key={node.id}
-                className={`${styles.node} ${node.frontier ? styles.frontier : ""}`}
-                style={{ "--depth": depth } as Record<string, number>}
-              >
-                <span className={styles.nodeRow}>
-                  {/* Tint reinforces the clade the same way it does on the map
-                      (charter §4); the name always carries identity first. */}
-                  <span
-                    className={styles.dot}
-                    style={
-                      {
-                        "--clade-tint": cladeMarkerForTaxon(
-                          node.id,
-                          data.index.byId,
-                        ).tint,
-                      } as Record<string, string>
-                    }
-                    aria-hidden="true"
-                  />
-                  <span className={styles.nodeName}>{node.name}</span>
-                  <span className={styles.rank}>{node.rank.toLowerCase()}</span>
-                  {/* The guess that reached this depth, unless one of this
-                      node's own eliminations already names it — the branch a
-                      guess ruled out hangs from the very clade it established,
-                      so labelling both prints the same name twice on one row. */}
-                  {node.frontier &&
-                    node.reachedBy &&
-                    !node.ruledOut.some((cut) => cut.by === node.reachedBy) && (
-                      <span className={styles.reached}>◂ {node.reachedBy}</span>
-                    )}
-                  <span className="visuallyHidden">
-                    {node.frontier
-                      ? " — established ancestor, the deepest reached so far"
-                      : " — established ancestor"}
-                  </span>
-                </span>
-                {node.ruledOut.length > 0 && (
-                  <ul className={styles.cuts}>
-                    {node.ruledOut.map((cut) => (
-                      <li key={cut.id} className={styles.cut}>
-                        <span className={styles.cutMark} aria-hidden="true">
-                          ✕
-                        </span>
-                        <s className={styles.cutName}>{cut.name}</s>
-                        {cut.name !== cut.by && (
-                          <span className={styles.cutBy}>◂ {cut.by}</span>
+          {/* UX-001: one line per label, never wrapped or truncated; the region
+              scrolls horizontally with the trunk's origin at its left edge, so
+              the spine stays visible while the eliminations scroll into view. */}
+          <div
+            className={styles.diagram}
+            role="region"
+            aria-label="Cladogram"
+            // A scrollable region must be keyboard-reachable or its content is
+            // unreachable without a pointer (WCAG 2.1.1); a focusable region
+            // with an accessible name is the standard pattern for that, and the
+            // rule does not model it.
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            style={
+              {
+                "--row-pitch": `${ROW_PITCH}px`,
+                "--depth-indent": `${DEPTH_INDENT}px`,
+                height: `${layout.rows.length * ROW_PITCH}px`,
+                width: `${(layout.guessDepth + 1) * DEPTH_INDENT + MAX_LABEL_PX}px`,
+              } as Record<string, string | number>
+            }
+          >
+            <CladogramConnectors layout={layout} />
+            {/* UX-002: the accessible structure is the one the screen already
+                shipped — trunk nodes root-first, each with the branches ruled out
+                at it nested under it, and the guess nested under its branch. Rows
+                are *positioned* by CSS; DOM order is still reading order. */}
+            <ol className={styles.trunk}>
+              {tree.trunk.map((node) => {
+                const nodeRow = rowOf(layout, "node", node.id);
+                return (
+                  <li key={node.id} className={styles.trunkItem}>
+                    <span
+                      className={`${styles.row} ${node.frontier ? styles.frontier : ""}`}
+                      style={rowStyle(nodeRow)}
+                    >
+                      {/* Tint reinforces the clade the same way it does on the
+                          map (charter §4); the name carries identity first. */}
+                      <span
+                        className={styles.dot}
+                        style={
+                          {
+                            "--clade-tint": cladeMarkerForTaxon(
+                              node.id,
+                              data.index.byId,
+                            ).tint,
+                          } as Record<string, string>
+                        }
+                        aria-hidden="true"
+                      />
+                      <span className={styles.nodeName}>{node.name}</span>
+                      <span className={styles.rank}>
+                        {node.rank.toLowerCase()}
+                      </span>
+                      {node.frontier && (
+                        <span className={styles.deepest}>deepest reached</span>
+                      )}
+                      {/* The guess that reached this depth, unless one of this
+                          node's own eliminations already names it. */}
+                      {node.frontier &&
+                        node.reachedBy &&
+                        !node.ruledOut.some(
+                          (cut) => cut.by === node.reachedBy,
+                        ) && (
+                          <span className={styles.reached}>
+                            ◂ {node.reachedBy}
+                          </span>
                         )}
-                        <span className="visuallyHidden">
-                          {` — ruled out by the guess ${cut.by}`}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ol>
+                      <span className="visuallyHidden">
+                        {node.frontier
+                          ? " — established ancestor, the deepest reached so far"
+                          : " — established ancestor"}
+                      </span>
+                    </span>
+                    {node.ruledOut.length > 0 && (
+                      <ul className={styles.cuts}>
+                        {node.ruledOut.map((cut) => {
+                          const cutRow = rowOf(layout, "cut", cut.id);
+                          const ownGuess = cut.name === cut.by;
+                          return (
+                            <li key={cut.id} className={styles.cutItem}>
+                              <span
+                                className={`${styles.row} ${styles.ruledOut}`}
+                                style={rowStyle(cutRow)}
+                              >
+                                <span
+                                  className={styles.ringDot}
+                                  aria-hidden="true"
+                                />
+                                <span className={styles.nodeName}>
+                                  {cut.name}
+                                </span>
+                                <span className="visuallyHidden">
+                                  {` — ruled out by the guess ${cut.by}`}
+                                </span>
+                              </span>
+                              {/* REQ-003: the guess is a leaf inside the branch
+                                  it eliminated — taxonomically true, since the
+                                  branch is an ancestor-or-self of the guess. When
+                                  they are the same taxon the row above already is
+                                  the guess, so there is no second row. */}
+                              {!ownGuess && (
+                                <ul className={styles.cuts}>
+                                  <li className={styles.cutItem}>
+                                    <span
+                                      className={`${styles.row} ${styles.ruledOut}`}
+                                      style={rowStyle(
+                                        rowOf(
+                                          layout,
+                                          "guess",
+                                          `${cut.id}:${cut.by}`,
+                                        ),
+                                      )}
+                                    >
+                                      <span
+                                        className={styles.ringDot}
+                                        aria-hidden="true"
+                                      />
+                                      <span className={styles.nodeName}>
+                                        {cut.by}
+                                      </span>
+                                      <span className="visuallyHidden">
+                                        {" — your guess, inside the branch it ruled out"}
+                                      </span>
+                                    </span>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
 
-          {tree.unresolved && (
-            <p
-              className={styles.unresolved}
-              style={{ "--depth": tree.trunk.length } as Record<string, number>}
-            >
-              <span aria-hidden="true">?</span> the descent continues — how far
-              is not stated
-            </p>
-          )}
-
+          {/* REQ-004: exactly three entries, always visible, worded as the owner
+              asked. The unresolved continuation and its entry are both gone. */}
           <p className={styles.key}>
-            <span className={styles.keyDot} aria-hidden="true" /> established
-            <span className={styles.keySep} aria-hidden="true" />✕ ruled out
-            <span className={styles.keySep} aria-hidden="true" />⋯ unresolved
+            <span className={styles.keyDot} aria-hidden="true" /> ancestor
+            <span className={styles.keySep} aria-hidden="true" />
+            <span className={styles.keyRingTeal} aria-hidden="true" /> closest
+            relative
+            <span className={styles.keySep} aria-hidden="true" />
+            <span className={styles.keyRing} aria-hidden="true" /> guess
           </p>
         </section>
 

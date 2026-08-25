@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-025
 title: Dinordle taxonomic tree — a real horizontal cladogram, drawn from row and depth integers
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -1111,17 +1111,67 @@ and renumber these blocks if the siblings have not all landed.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Row/depth layout model | `src/app/state/cladogramLayout.ts` (`layoutCladogram`) | `spec025-cladogram-layout.test.ts` | Not started |
-| REQ-002 | Connector layer | `DailyGenusScreen.tsx` (tree region), `dailyGenus.module.css` | `spec025-cladogram-render.test.tsx`, `spec025-cladogram-css.test.ts` | Not started |
-| REQ-003 | Ruled-out and guess columns, ringed dots | `DailyGenusScreen.tsx`, `dailyGenus.module.css` | `spec025-cladogram-render.test.tsx`, `cladogram.e2e.ts` | Not started |
-| REQ-004 | Deepest-reached marks, the three-entry key, no continuation | `DailyGenusScreen.tsx` | `spec025-cladogram-render.test.tsx` | Not started |
-| REQ-005 | Content unchanged | `src/app/state/dailyGenus.ts` (untouched) | `spec019-revealed-tree.test.ts` | Not started |
-| NFR-001 | Non-overlap gate | `test/e2e/cladogram.e2e.ts`, CI `e2e` job | itself | Not started |
-| NFR-002 | Browser-free guard | `test/spec025-cladogram-layout.test.ts` | itself | Not started |
-| NFR-003 | Synchronous render | `DailyGenusScreen.tsx`, `dailyGenus.module.css` | `spec025-cladogram-css.test.ts` | Not started |
-| UX-001 | No wrap, scroll region | `dailyGenus.module.css` | `cladogram.e2e.ts` | Not started |
-| UX-002 | Accessibility parity | `DailyGenusScreen.tsx` | `spec025-cladogram-render.test.tsx`, `a11y.e2e.ts` | Not started |
-| UX-003 | Charter compliance | `DailyGenusScreen.tsx`, `dailyGenus.module.css` | `spec025-cladogram-render.test.tsx`, `spec025-cladogram-css.test.ts` | Not started |
+| REQ-001 | Layout | `src/app/state/cladogramLayout.ts` — `layoutCladogram()`, pure, DOM-free | `test/spec025-cladogram-layout.test.ts` (8 tests) | Implemented |
+| REQ-002 | Connectors | `DailyGenusScreen.tsx` — `CladogramConnectors`, one `aria-hidden` `<svg>`, coordinates from `(row, depth)` only; the `.nodeRow::before` / `.cut::before` / `.unresolved::before` rules are deleted | `test/e2e/cladogram.e2e.ts` | Implemented |
+| REQ-003 | Ringed leaves | `.ruledOut` + `.ringDot` (unfilled dot, ruled-out ring, no clade tint); the guess renders as its own row one indent right | `test/ui/spec019-daily-screen.test.tsx`, `test/spec025-cladogram-layout.test.ts` | Implemented |
+| REQ-004 | Frontier + retirement | `.frontier` keeps the teal ring, weight and rule, plus the visible words "deepest reached"; nothing is emitted for `tree.unresolved`; the key carries exactly `ancestor` / `closest relative` / `guess` | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/cladogram.e2e.ts` | Implemented |
+| REQ-005 | Content unchanged | `revealedTree()`, `TrunkNode`, `RevealedTree` untouched | `test/spec019-revealed-tree.test.ts` — **passes unmodified**, which is the evidence | Implemented |
+| NFR-001 | Geometry gate | `test/e2e/cladogram.e2e.ts`, sharing `disjoint()` with SPEC-023 via `test/e2e/geometry.ts` | 5 Playwright tests across 3 viewports | Implemented |
+| NFR-002 | Browser-free guard | `test/spec025-cladogram-layout.test.ts` — one label per row, column alignment, row bounds | 8 Vitest tests | Implemented |
+| NFR-003 | Synchronous render | No measurement API, no observer, no rAF; rows bounded by `trunk + 2 × eliminations` | `test/spec025-cladogram-layout.test.ts` ("rows are bounded"), `test/ui/spec019-daily-screen.test.tsx` (NFR-002 render budget) | Implemented |
+| UX-001 | No wrap, scroll instead | `.diagram` is an `overflow-x: auto` region with `tabIndex={0}` and an accessible name; `.row` is `white-space: nowrap` | `test/e2e/cladogram.e2e.ts` ("no label wraps or is truncated") | Implemented |
+| UX-002 | A11y parity | The `<ol>`/`<ul>` structure and every `visuallyHidden` sentence are retained; the guess becomes a nested item under its branch with its own sentence; positioning is CSS-only and DOM order equals reading order | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/a11y.e2e.ts` | Implemented |
+| UX-003 | Charter compliance | One new token (below); teal reserved for the frontier; ruled-out rows carry no tint | diff review; `test/e2e/a11y.e2e.ts` | Implemented |
+
+### The ruled-out hue, and a correction made during implementation
+
+The owner authorised a **distinct** ruled-out token rather than broadening
+`--color-error` (disposition of 2026-08-14). The obvious near-red — `#b03a2e` —
+was written first and then measured: **1.11:1 against `--color-error`, at the
+same hue (6°)**. That is indistinguishable, which would have made the separate
+token pointless and left the spec's "must stay distinguishable" criterion
+unmet in fact while appearing met in the diff.
+
+Shipped instead: `--color-ruled-out: #7d2140`.
+
+| Measured against | Result |
+| --- | --- |
+| `--color-error` (`#c0392b`) | contrast **1.78:1**, hue distance **26°** |
+| `--color-surface` | contrast **9.71:1** |
+| `--color-ground` | contrast **8.31:1** |
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 88 files, **504 tests**, all pass (before this change: 87 / 496) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **22 passed** (17 before + 5 new cladogram tests), a11y included |
+
+### Implementation notes
+
+- **The geometry gate caught a real collision immediately.** With the pitch at
+  21px and the label's line box measuring **21.8px**, every pair of consecutive
+  trunk rows overlapped by 0.8px — over the 0.5px tolerance. The rows' origins
+  were exactly one pitch apart, so the layout was correct and the *type* was
+  wrong: one-label-per-row is only true if the label's line box fits the pitch.
+  Fixed by constraining `line-height` on `.row`, and recorded in the CSS so the
+  constraint is not silently removed later.
+- **`disjoint()` moved to `test/e2e/geometry.ts`.** SPEC-023 exported it from its
+  own e2e spec, but Playwright refuses to let one test file import another. The
+  helper is now a plain module both suites import — the same single definition
+  the two specs intended, in a place the runner allows.
+- **Two CSS custom properties are pushed into CSS, not read back out of it.**
+  REQ-002 describes the pitch and indent as "read as numbers by the component";
+  reading computed style is a measurement, which the same requirement and NFR-003
+  forbid. They are therefore declared once in TS (`ROW_PITCH`, `DEPTH_INDENT`)
+  and set as custom properties on the diagram, which satisfies the single-source
+  intent without a measurement.
+- **"Closest relative" is the owner's wording and is imprecise.** The frontier is
+  an ancestor clade, not a relative, and a player may read it as naming a genus.
+  Implemented verbatim as instructed; recorded here so it is a known choice.
+
 
 ## Implementation notes
 

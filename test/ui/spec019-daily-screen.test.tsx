@@ -25,24 +25,35 @@ test("REQ-005: a fresh round shows the root and an unresolved descent, nothing e
   // The trunk is the ordered list; one node on it before any guess.
   expect(container.querySelectorAll("ol > li")).toHaveLength(1);
   expect(screen.getByText("Dinosauria")).toBeTruthy();
-  expect(screen.getByText(/the descent continues/i)).toBeTruthy();
+  // SPEC-025 REQ-004 (owner, 2026-08-14): the unresolved continuation is
+  // removed — for everyone at once, sighted and screen-reader alike — so the
+  // diagram simply ends at its last row. A fresh round is a single root row.
+  expect(screen.queryByText(/the descent continues/i)).toBeNull();
+  expect(screen.queryByText(/unresolved/i)).toBeNull();
   // No other clade is on screen before a guess.
   expect(screen.queryByText("Theropoda")).toBeNull();
   expect(screen.queryByText("Coelurosauria")).toBeNull();
 });
 
-test("REQ-004/REQ-005: a guess establishes the trunk and strikes its branch", async () => {
+test("REQ-004/REQ-005: a guess establishes the trunk and rules out its branch", async () => {
   renderGame();
   await guess("Velociraptor");
 
   expect(screen.getByText("Theropoda")).toBeTruthy();
   expect(screen.getByText("Coelurosauria")).toBeTruthy();
-  // The eliminated branch is struck through and carries the guess that did it.
+  // SPEC-025 REQ-003: the eliminated branch is no longer struck through — it is
+  // a ringed leaf off the spine, with its name in full.
   const cut = screen.getByText("Maniraptora");
-  expect(cut.tagName.toLowerCase()).toBe("s");
-  // The guess is named once, on the branch it eliminated — not again on the
-  // node that same guess established.
-  expect(screen.getAllByText("◂ Velociraptor")).toHaveLength(1);
+  expect(cut.tagName.toLowerCase()).toBe("span");
+  expect(cut.closest("s")).toBeNull();
+  // The guess that ruled it out is drawn as its own row inside that branch,
+  // rather than as a "◂ name" suffix on it — named once either way.
+  expect(screen.queryByText("◂ Velociraptor")).toBeNull();
+  expect(screen.getAllByText("Velociraptor")).toHaveLength(1);
+  // And it still says, in words, which guess did the ruling out.
+  expect(
+    screen.getByText(/— ruled out by the guess Velociraptor/i),
+  ).toBeTruthy();
 });
 
 test("REQ-005: the guesses are the branches — there is no separate guess list", async () => {
@@ -52,9 +63,11 @@ test("REQ-005: the guesses are the branches — there is no separate guess list"
 
   expect(screen.getByText("Ornithischia")).toBeTruthy();
   expect(screen.getByText("Saurischia")).toBeTruthy();
-  // Each guess appears exactly once on the board: as its own eliminated branch.
-  expect(screen.getAllByText("◂ Triceratops")).toHaveLength(1);
-  expect(screen.getAllByText("◂ Diplodocus")).toHaveLength(1);
+  // SPEC-025 REQ-003: each guess appears exactly once on the board, now as a
+  // ringed leaf inside the branch it eliminated rather than as a suffix on it.
+  // There is still no separate guess list.
+  expect(screen.getAllByText("Triceratops")).toHaveLength(1);
+  expect(screen.getAllByText("Diplodocus")).toHaveLength(1);
 });
 
 test("REQ-005: only branches a guess has touched appear — no siblings", async () => {
@@ -96,13 +109,22 @@ test("REQ-005: the deepest node is the frontier and names the guess that reached
   await guess("Triceratops");
   await guess("Gorgosaurus");
 
+  // SPEC-025 REQ-004: the frontier is a row, not a nested block — it keeps its
+  // teal ring, its weight and the visible words "deepest reached".
   const frontier = container.querySelector('[class*="frontier"]');
   expect(frontier).toBeTruthy();
   const node = frontier as HTMLElement;
   expect(within(node).getByText("Tyrannosauridae")).toBeTruthy();
   expect(within(node).getByText(/deepest reached so far/i)).toBeTruthy();
-  // The guess that got here is named on the branch it ruled out, under the node.
-  expect(within(node).getByText("◂ Gorgosaurus")).toBeTruthy();
+  expect(within(node).getByText(/^deepest reached$/i)).toBeTruthy();
+
+  // REQ-003: the guess that got here is its own ringed row inside the branch it
+  // ruled out, one indent further right — no longer a suffix on the node.
+  expect(screen.getAllByText("Gorgosaurus")).toHaveLength(1);
+  expect(screen.queryByText("◂ Gorgosaurus")).toBeNull();
+  expect(
+    screen.getByText(/— ruled out by the guess Gorgosaurus/i),
+  ).toBeTruthy();
 });
 
 test("REQ-007: a correct guess wins, reveals the answer, and offers the taxon page", async () => {

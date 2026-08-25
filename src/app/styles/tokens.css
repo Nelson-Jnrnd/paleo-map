@@ -64,6 +64,15 @@
      teal accent, 5.36:1 over the Cretaceous band at its 0.22 weight and 6.58:1
      over the surface. */
   --color-overlap: #0e6b3e;
+  /* SPEC-025 UX-003 (owner-authorised, 2026-08-14, a second and separate new
+     hue): the Dinordle ruled-out verdict. --color-error keeps its "load failure
+     only" scope — a load failure can appear on the same screen, and a branch you
+     eliminated is not an error — so this had to be visibly *not* that red. The
+     obvious near-red (#b03a2e) measured 1.11:1 against --color-error at the same
+     hue, i.e. indistinguishable, which would have made the separate token
+     pointless. Measured: 26° of hue separation from --color-error, 1.78:1
+     against it, 9.71:1 on surface and 8.31:1 on ground. */
+  --color-ruled-out: #7d2140;
 
   /* Typography */
   /* Owner-directed (2026-07-27): a single standard monospace across the whole

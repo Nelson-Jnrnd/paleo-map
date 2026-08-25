@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
+import { contains, disjoint } from "./geometry.js";
+import type { Box } from "./geometry.js";
 
 /**
  * SPEC-023 NFR-001 — the automated non-overlap gate.
@@ -10,33 +12,10 @@ import type { Locator, Page } from "@playwright/test";
  * boxes rather than naming elements — an overlay added later is covered the
  * moment it becomes a rail child, without anyone remembering to extend a list.
  *
- * `disjoint()` is deliberately exported-by-copy for SPEC-025's cladogram gate:
- * the same 0.5px tolerance and the same viewport matrix, so the two suites agree
- * on what "not overlapping" means.
+ * `disjoint()` lives in `./geometry.ts` and is shared with SPEC-025's cladogram
+ * gate — one definition, one tolerance, so the two suites cannot drift on what
+ * "not overlapping" means.
  */
-
-interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-/** Sub-pixel tolerance: sub-pixel layout rounding is not a collision. */
-export function disjoint(a: Box, b: Box): boolean {
-  const w = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
-  const h = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
-  return w <= 0.5 || h <= 0.5;
-}
-
-function contains(outer: Box, inner: Box): boolean {
-  return (
-    inner.x >= outer.x - 0.5 &&
-    inner.y >= outer.y - 0.5 &&
-    inner.x + inner.width <= outer.x + outer.width + 0.5 &&
-    inner.y + inner.height <= outer.y + outer.height + 0.5
-  );
-}
 
 /** The viewport matrix. The last two give a genuinely narrow map pane, because
  *  the sidebar takes 360px or 42vw, whichever is smaller. */
