@@ -5,7 +5,7 @@ title: Map overlay layout — corner rails, reserved map-control corner, and an 
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components: [app-frontend, exploration-view, occurrence-map, styling, e2e-tests]
 affected_interfaces: [ExplorationView, OccurrenceMap, exploration.module.css]
 supersedes: []

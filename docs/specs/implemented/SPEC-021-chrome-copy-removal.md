@@ -5,7 +5,7 @@ title: Remove five pieces of explanatory interface copy, and rename one heading
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components:
   [
     src/app/components/ContextBar.tsx,

@@ -5,7 +5,7 @@ title: Dinordle taxonomic tree — a real horizontal cladogram, drawn from row a
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components: [app-frontend, dinordle-screen, styling, unit-tests, e2e-tests]
 affected_interfaces: [DailyGenusScreen, dailyGenus.module.css, cladogramLayout]
 supersedes: []

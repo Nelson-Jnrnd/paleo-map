@@ -5,7 +5,7 @@ title: Exploration sidebar redesign — one unit selector, one list, one detail
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components:
   [
     src/app/components/ExplorationView.tsx,

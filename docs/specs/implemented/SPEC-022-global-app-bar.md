@@ -5,7 +5,7 @@ title: Global app bar (Map · Dinordle · Taxonomy) and the Dinordle rename
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components: [app-frontend, app-shell, exploration-view, daily-genus, taxonomy-screen, taxon-page, styling]
 affected_interfaces: [url-fragments, local-storage]
 supersedes: []

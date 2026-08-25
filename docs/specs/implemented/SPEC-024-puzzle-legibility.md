@@ -5,7 +5,7 @@ title: Dinordle — legible track choice and a readable Ma column
 status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [25]
 affected_components: [app-frontend, styling]
 affected_interfaces: []
 supersedes: []
