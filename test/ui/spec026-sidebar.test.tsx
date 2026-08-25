@@ -43,9 +43,7 @@ test("REQ-004: no not-classified row exists at any taxon unit", async () => {
 test("REQ-004: the same filter drives the list, the count and the map", async () => {
   const { api } = await renderApp();
   const occurrences = api.listOccurrences();
-  const taxa = new Map<string, ReadTaxon>(
-    api.listTaxa().map((t) => [t.id, t]),
-  );
+  const taxa = new Map<string, ReadTaxon>(api.listTaxa().map((t) => [t.id, t]));
 
   const classified = occurrences.filter((o: ReadOccurrence) =>
     classifiesAt(o, "genus", taxa),
@@ -81,9 +79,7 @@ test("REQ-004: those records are still present under Occurrence and Locality", a
 
 test("REQ-005: rows are ordered by count descending, deterministically", async () => {
   const { api } = await renderApp();
-  const taxa = new Map<string, ReadTaxon>(
-    api.listTaxa().map((t) => [t.id, t]),
-  );
+  const taxa = new Map<string, ReadTaxon>(api.listTaxa().map((t) => [t.id, t]));
   const groups = groupByTaxon(api.listOccurrences(), "genus", taxa);
   const counts = groups.map((g) => g.count);
   expect([...counts].sort((a, b) => b - a)).toEqual(counts);
@@ -113,8 +109,9 @@ test("REQ-002: a locality row states where it is today, and carries no clade tin
   const groups = groupByLocality(api.listOccurrences());
   const withRegion = groups.find((g) => g.region);
   if (withRegion) {
-    expect(within(region).getAllByText(new RegExp(withRegion.region!, "i")).length)
-      .toBeGreaterThan(0);
+    expect(
+      within(region).getAllByText(new RegExp(withRegion.region!, "i")).length,
+    ).toBeGreaterThan(0);
   }
   // UX-002: a locality is a place, not a clade — no tint rule on its rows.
   for (const row of rows) expect(row.getAttribute("data-clade")).toBeNull();

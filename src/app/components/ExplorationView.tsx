@@ -403,10 +403,7 @@ export function ExplorationView({
         scientific: false,
         // REQ-002: the distinct-taxon count survives; the present-day region
         // replaces the formation and Ma range, which move to the detail.
-        meta: [
-          `${g.taxonCount} taxa`,
-          g.region ?? "Region not recorded",
-        ],
+        meta: [`${g.taxonCount} taxa`, g.region ?? "Region not recorded"],
         // A locality is a place, not a clade — no tint (UX-002).
         cladeTint: null,
         accessibleName: `${g.name}, ${g.taxonCount} distinct taxa, ${g.region ?? "region not recorded"}`,
@@ -466,9 +463,8 @@ export function ExplorationView({
       : highlightedId === null
         ? null
         : unit === "locality"
-          ? (listLocalities.find((g) =>
-              g.occurrenceIds.includes(highlightedId),
-            )?.collectionId ?? null)
+          ? (listLocalities.find((g) => g.occurrenceIds.includes(highlightedId))
+              ?.collectionId ?? null)
           : (taxonGroups.find((g) => g.occurrenceIds.includes(highlightedId))
               ?.key ?? null);
 
@@ -530,7 +526,6 @@ export function ExplorationView({
         clade={cladeMarkerForTaxon(selectedTaxonGroup.taxonId, taxaById).label}
       />
     ) : null;
-
 
   // SPEC-022 REQ-001/REQ-002: one bar, rendered by the shell for every screen,
   // so the return path is the same object everywhere. `shell` wraps each screen
@@ -724,7 +719,9 @@ export function ExplorationView({
             <>
               <GroupingControls
                 unit={unit}
-                onSelectUnit={(next) => dispatch({ type: "setUnit", unit: next })}
+                onSelectUnit={(next) =>
+                  dispatch({ type: "setUnit", unit: next })
+                }
               />
 
               {/* REQ-003: a selection *replaces* the list in the same column

@@ -23,7 +23,9 @@ test("boots from the static bundle and renders the paleogeographic map", async (
   // absence so the label cannot creep back in.
   // Allow generous headroom: first WebGL paint of the full real dataset is
   // heavier than the fixture (a scale signal, tracked as a follow-up).
-  await expect(page.getByText(/Paleogeographic reconstruction/i)).toHaveCount(0);
+  await expect(page.getByText(/Paleogeographic reconstruction/i)).toHaveCount(
+    0,
+  );
   await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({
     timeout: 20_000,
   });

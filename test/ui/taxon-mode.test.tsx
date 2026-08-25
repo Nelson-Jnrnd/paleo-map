@@ -61,7 +61,9 @@ test("SPEC-026 REQ-003: selecting a taxon replaces the list with its detail", as
     screen.queryByRole("region", { name: /genus on the map/i }),
   ).not.toBeInTheDocument();
   // And the way back names what it returns to, so the cost of leaving is legible.
-  const back = within(panel).getByRole("button", { name: /back to \d+ genera/i });
+  const back = within(panel).getByRole("button", {
+    name: /back to \d+ genera/i,
+  });
   await user.click(back);
   expect(
     screen.getByRole("region", { name: /genus on the map/i }),

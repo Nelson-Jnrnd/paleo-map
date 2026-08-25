@@ -45,13 +45,9 @@ export function LocalityPanel({
   return (
     <section className={styles.panel} aria-label={`Locality: ${group.name}`}>
       {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
-        <button
-          type="button"
-          className={styles.panelBack}
-          onClick={onClose}
-        >
-          ← {backLabel}
-        </button>
+      <button type="button" className={styles.panelBack} onClick={onClose}>
+        ← {backLabel}
+      </button>
       <div className={styles.panelHead}>
         <h2>{group.name}</h2>
       </div>
@@ -134,19 +130,17 @@ export function TaxonPanel({
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
       {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
-        <button
-          type="button"
-          className={styles.panelBack}
-          onClick={onClose}
-        >
-          ← {backLabel}
-        </button>
+      <button type="button" className={styles.panelBack} onClick={onClose}>
+        ← {backLabel}
+      </button>
       <div className={styles.panelHead}>
         <h2 className="sciName">{group.name}</h2>
       </div>
       {/* UX-002: the clade the row's tint stood for, in visible words — so the
           tint never carries a meaning that has no worded form. */}
-      <p className={styles.panelClade}>{clade} · {unitWord}</p>
+      <p className={styles.panelClade}>
+        {clade} · {unitWord}
+      </p>
 
       <dl className={styles.fieldGrid}>
         <dt className={styles.fieldLabel}>Occurrences in view</dt>

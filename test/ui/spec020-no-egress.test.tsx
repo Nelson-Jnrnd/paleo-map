@@ -94,7 +94,9 @@ test("NFR-001: switching track issues no request either", async () => {
     .setup()
     .click(screen.getByRole("radio", { name: /well-known/i }));
   expect(
-    screen.getByRole("radio", { name: /well-known/i }).getAttribute("aria-checked"),
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
   ).toBe("true");
   expect(attempts).toEqual([]);
 });

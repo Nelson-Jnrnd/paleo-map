@@ -1018,16 +1018,17 @@ export function OccurrenceMap({
                 </span>
               );
             })}
-            {showCladeUi && labels.map((l) => (
-              <span
-                key={l.id}
-                className={`sciName ${styles.mapLabel}`}
-                style={{ left: l.x, top: l.y }}
-                aria-hidden="true"
-              >
-                {l.taxon}
-              </span>
-            ))}
+            {showCladeUi &&
+              labels.map((l) => (
+                <span
+                  key={l.id}
+                  className={`sciName ${styles.mapLabel}`}
+                  style={{ left: l.x, top: l.y }}
+                  aria-hidden="true"
+                >
+                  {l.taxon}
+                </span>
+              ))}
             {showCladeUi && !multi && cardAnchor && carded && cardedMarker && (
               <MapHoverCard
                 content={hoverCardContent(carded, cardedMarker.label)}
@@ -1078,65 +1079,65 @@ export function OccurrenceMap({
           data-map-rail="bottom-left"
         >
           {basemap && frame && (
-        <div
-          className={styles.basemapAttribution}
-          data-map-overlay="basemap-attribution"
-        >
-          <button
-            type="button"
-            className={styles.attributionToggle}
-            aria-expanded={attributionOpen}
-            aria-label="Basemap source and reconstruction details"
-            onClick={() => setAttributionOpen((open) => !open)}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              focusable="false"
+            <div
+              className={styles.basemapAttribution}
+              data-map-overlay="basemap-attribution"
             >
-              <circle
-                cx="8"
-                cy="8"
-                r="7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-              <circle cx="8" cy="4.4" r="1" fill="currentColor" />
-              <rect
-                x="7.15"
-                y="6.6"
-                width="1.7"
-                height="5.2"
-                rx="0.5"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-          {attributionOpen && (
-            <div className={styles.attributionPopover} role="note">
-              <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
-              {basemap.meta.licence}
-              <br />
-              {!frameExact && (
-                <>
-                  Nearest available reconstruction ({basemap.meta.targetAgeMa}{" "}
-                  Ma) shown for {stageName}.{" "}
-                </>
-              )}
-              {frame.note} {basemap.meta.note}
-              {reconstructedToFrame && (
-                <>
-                  {" "}
-                  Occurrences are reconstructed to this frame’s age, so each
-                  point sits on the coastline shown (SPEC-016).
-                </>
+              <button
+                type="button"
+                className={styles.attributionToggle}
+                aria-expanded={attributionOpen}
+                aria-label="Basemap source and reconstruction details"
+                onClick={() => setAttributionOpen((open) => !open)}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  />
+                  <circle cx="8" cy="4.4" r="1" fill="currentColor" />
+                  <rect
+                    x="7.15"
+                    y="6.6"
+                    width="1.7"
+                    height="5.2"
+                    rx="0.5"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+              {attributionOpen && (
+                <div className={styles.attributionPopover} role="note">
+                  <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
+                  {basemap.meta.licence}
+                  <br />
+                  {!frameExact && (
+                    <>
+                      Nearest available reconstruction (
+                      {basemap.meta.targetAgeMa} Ma) shown for {stageName}.{" "}
+                    </>
+                  )}
+                  {frame.note} {basemap.meta.note}
+                  {reconstructedToFrame && (
+                    <>
+                      {" "}
+                      Occurrences are reconstructed to this frame’s age, so each
+                      point sits on the coastline shown (SPEC-016).
+                    </>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
           )}
           {cladeKeyVisible && (
             <div

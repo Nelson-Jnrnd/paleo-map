@@ -122,7 +122,6 @@ function depthPercent(ma: number): number {
   return ((COLUMN_MAX_MA - ma) / span) * 100;
 }
 
-
 /**
  * The diagram's two integers (SPEC-025 REQ-002). Both the labels and the SVG
  * connectors are derived from these, so the two can never describe different
@@ -546,9 +545,7 @@ export function DailyGenusScreen({
   if (!round || !answer) {
     return (
       <div className={styles.screen}>
-        <ErrorState
-          message="No puzzle could be built from this snapshot."
-        />
+        <ErrorState message="No puzzle could be built from this snapshot." />
       </div>
     );
   }
@@ -791,7 +788,9 @@ export function DailyGenusScreen({
                                         {cut.by}
                                       </span>
                                       <span className="visuallyHidden">
-                                        {" — your guess, inside the branch it ruled out"}
+                                        {
+                                          " — your guess, inside the branch it ruled out"
+                                        }
                                       </span>
                                     </span>
                                   </li>
@@ -918,15 +917,25 @@ export function DailyGenusScreen({
           {/* REQ-006: one entry per treatment, in words — the same
               three-marks-three-words shape the tree's key uses. */}
           <p className={styles.timeKey}>
-            <span className={`${styles.keyBar} ${styles.barOverlaps}`} aria-hidden="true" />{" "}
+            <span
+              className={`${styles.keyBar} ${styles.barOverlaps}`}
+              aria-hidden="true"
+            />{" "}
             overlaps
             <span className={styles.keySep} aria-hidden="true" />
-            <span className={`${styles.keyBar} ${styles.barMisses}`} aria-hidden="true" />▲
-            answer older
+            <span
+              className={`${styles.keyBar} ${styles.barMisses}`}
+              aria-hidden="true"
+            />
+            ▲ answer older
             <span className={styles.keySep} aria-hidden="true" />
-            <span className={`${styles.keyBar} ${styles.barMisses}`} aria-hidden="true" />▼
-            answer younger
-            <span className={styles.keySep} aria-hidden="true" />✕ no span recorded
+            <span
+              className={`${styles.keyBar} ${styles.barMisses}`}
+              aria-hidden="true"
+            />
+            ▼ answer younger
+            <span className={styles.keySep} aria-hidden="true" />✕ no span
+            recorded
           </p>
           {noSpanGuesses.length > 0 && (
             <p className={styles.noSpanNote}>

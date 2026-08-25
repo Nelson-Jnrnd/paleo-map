@@ -99,7 +99,9 @@ test("REQ-004: choosing a track persists and is reported to the shell", async ()
   expect(onTrackChange).toHaveBeenCalledWith("wellKnown");
   expect(loadTrack(store)).toBe("wellKnown");
   expect(
-    screen.getByRole("radio", { name: /well-known/i }).getAttribute("aria-checked"),
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
   ).toBe("true");
   // SPEC-024 REQ-001: the header states the chosen track exactly once — on the
   // selected control — so the `· well-known` suffix is gone from the identity
@@ -116,7 +118,9 @@ test("REQ-004: a stored choice is honoured on the next visit", () => {
   );
   renderScreen(rankedModel(), {}, store);
   expect(
-    screen.getByRole("radio", { name: /well-known/i }).getAttribute("aria-checked"),
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
   ).toBe("true");
 });
 
@@ -188,7 +192,9 @@ test("REQ-004: practice honours the chosen track", async () => {
   expect(screen.getByText(/Practice — not today’s puzzle/i)).toBeTruthy();
   expect(screen.getByLabelText("Guess a genus")).toBeTruthy();
   expect(
-    screen.getByRole("radio", { name: /well-known/i }).getAttribute("aria-checked"),
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
   ).toBe("true");
 });
 

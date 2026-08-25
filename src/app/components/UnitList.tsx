@@ -108,7 +108,9 @@ export function UnitList({
         </span>
         <p className={styles.listCount}>
           <span className={`${styles.countValue} mono`}>{rows.length}</span>{" "}
-          {viewportActive ? `${noun} in the current map view` : `${noun} at this age`}
+          {viewportActive
+            ? `${noun} in the current map view`
+            : `${noun} at this age`}
         </p>
         {overflow > 0 && (
           <p className={styles.source}>

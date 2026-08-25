@@ -48,11 +48,7 @@ export const DEFAULT_RANK_TIER: RankTier = "genus";
  * contract; these two total mappings are the only bridge.
  */
 export type ListUnit =
-  | "occurrence"
-  | "locality"
-  | "genus"
-  | "family"
-  | "majorGroup";
+  "occurrence" | "locality" | "genus" | "family" | "majorGroup";
 
 export const LIST_UNITS: readonly ListUnit[] = [
   "occurrence",

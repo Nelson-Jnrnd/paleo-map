@@ -43,13 +43,9 @@ export function OccurrencePanel({
     >
       {/* SPEC-026 REQ-003: the close control becomes a back control that names
           the list it returns to, because the detail now *replaces* that list. */}
-        <button
-          type="button"
-          className={styles.panelBack}
-          onClick={onClose}
-        >
-          ← {backLabel}
-        </button>
+      <button type="button" className={styles.panelBack} onClick={onClose}>
+        ← {backLabel}
+      </button>
       <div className={styles.panelHead}>
         <h2 className="sciName">{occurrence.taxonName}</h2>
       </div>

@@ -19,7 +19,9 @@ const VIEWPORTS = [
   { width: 820, height: 640 },
 ];
 
-async function openPuzzle(page: import("@playwright/test").Page): Promise<void> {
+async function openPuzzle(
+  page: import("@playwright/test").Page,
+): Promise<void> {
   await page.goto("/#daily");
   await page.getByLabel("Guess a genus").waitFor();
 }
