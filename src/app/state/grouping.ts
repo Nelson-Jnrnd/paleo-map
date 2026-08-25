@@ -39,6 +39,61 @@ export const RANK_TIER_LABEL: Readonly<Record<RankTier, string>> = {
 export const DEFAULT_RANK_TIER: RankTier = "genus";
 
 /**
+ * The list's row unit (SPEC-026 API-001). One flat set replacing the mode +
+ * rank pair in the *view*: mode and rank were two controls answering one
+ * question — "what is a row?" — and the third mode secretly spawned a dropdown.
+ *
+ * `mode` and `rank` stay in state unchanged, so every existing consumer
+ * (`OccurrenceMap`'s `mode` prop, `groupByTaxon(occurrences, rank, …)`) keeps its
+ * contract; these two total mappings are the only bridge.
+ */
+export type ListUnit =
+  | "occurrence"
+  | "locality"
+  | "genus"
+  | "family"
+  | "majorGroup";
+
+export const LIST_UNITS: readonly ListUnit[] = [
+  "occurrence",
+  "locality",
+  "genus",
+  "family",
+  "majorGroup",
+];
+
+export const LIST_UNIT_LABEL: Readonly<Record<ListUnit, string>> = {
+  occurrence: "Occurrence",
+  locality: "Locality",
+  genus: "Genus",
+  family: "Family",
+  majorGroup: "Major group",
+};
+
+/** The unit a (mode, rank) pair represents. Total. */
+export function unitOf(mode: GroupingMode, rank: RankTier): ListUnit {
+  if (mode === "occurrence") return "occurrence";
+  if (mode === "locality") return "locality";
+  return rank;
+}
+
+/** The (mode, rank) pair a unit represents. Total; rank is preserved for the
+ *  non-taxon units so returning to a taxon unit keeps the tier it had. */
+export function modeAndRankOf(
+  unit: ListUnit,
+  currentRank: RankTier = DEFAULT_RANK_TIER,
+): { mode: GroupingMode; rank: RankTier } {
+  if (unit === "occurrence") return { mode: "occurrence", rank: currentRank };
+  if (unit === "locality") return { mode: "locality", rank: currentRank };
+  return { mode: "taxon", rank: unit };
+}
+
+/** True for the three taxonomic units, which REQ-004 filters. */
+export function isTaxonUnit(unit: ListUnit): boolean {
+  return unit === "genus" || unit === "family" || unit === "majorGroup";
+}
+
+/**
  * The curated set of dinosaur clades that read as an intuitive "major group"
  * (SPEC-010 REQ-005). Below Family, dinosaur clades do not follow a single
  * Linnaean rank, so the Major-group tier is resolved by name against this set
@@ -64,9 +119,6 @@ export const MAJOR_GROUP_NAMES: ReadonlySet<string> = new Set([
   "Ceratopsia",
   "Pachycephalosauria",
 ]);
-
-/** Stable key for the bucket of records that don't classify at the chosen tier. */
-export const NOT_CLASSIFIED_KEY = "__not_classified__";
 
 /** Does a taxon sit at the requested tier? */
 function matchesTier(taxon: ReadTaxon, tier: RankTier): boolean {
@@ -112,6 +164,12 @@ export interface LocalityGroup {
   collectionId: string;
   name: string;
   formation: string | null;
+  /**
+   * Present-day region as the snapshot records it — "Wyoming, US",
+   * "Omnogov, MN": a sub-national area plus an ISO-2 country code, rendered
+   * verbatim (SPEC-026 REQ-002). Null when the snapshot has none.
+   */
+  region: string | null;
   /** The collection's own reconstructed paleocoordinate (never averaged). */
   paleo: PaleogeographicPosition | null;
   occurrenceIds: string[];
@@ -124,16 +182,14 @@ export interface LocalityGroup {
 
 /** A taxon group at the chosen tier (SPEC-010 REQ-004/005). */
 export interface TaxonGroup {
-  /** Group key: the rolled-up taxon id, or NOT_CLASSIFIED_KEY. */
+  /** Group key — always a real taxon id since SPEC-026 REQ-004. */
   key: string;
-  /** The rolled-up taxon id (null for the not-classified bucket). */
-  taxonId: string | null;
+  taxonId: string;
   name: string;
   occurrenceIds: string[];
   count: number;
   minMa: number | null;
   maxMa: number | null;
-  notClassified: boolean;
 }
 
 interface MaSpan {
@@ -167,6 +223,7 @@ export function groupByLocality(
         collectionId: o.collectionId,
         name: o.collectionName,
         formation: o.formation,
+        region: o.modernPosition.value?.region ?? null,
         paleo: o.paleoPosition.value,
         occurrenceIds: [],
         taxonIds: [],
@@ -182,13 +239,19 @@ export function groupByLocality(
   }
   const groups = [...byId.values()];
   for (const g of groups) g.taxonCount = g.taxonIds.length;
-  return groups.sort((a, b) =>
-    a.collectionId < b.collectionId
-      ? -1
-      : a.collectionId > b.collectionId
-        ? 1
-        : 0,
+  // SPEC-026 REQ-005: with a 300-row render cap, the order decides what is *not*
+  // shown — so it is the busiest localities, not an arbitrary id order.
+  return groups.sort(
+    (a, b) =>
+      b.taxonCount - a.taxonCount ||
+      compareText(a.name, b.name) ||
+      compareText(a.collectionId, b.collectionId),
   );
+}
+
+/** Locale-independent, so the order is identical wherever the test runs. */
+function compareText(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /**
@@ -205,18 +268,22 @@ export function groupByTaxon(
   const byKey = new Map<string, TaxonGroup>();
   for (const o of occurrences) {
     const resolved = resolveTierTaxon(o.taxonId, tier, taxaById);
-    const key = resolved ? resolved.id : NOT_CLASSIFIED_KEY;
+    // SPEC-026 REQ-004 (owner instruction, 2026-08-14): a record that does not
+    // classify at this tier is not a row here. It is not dropped from the atlas
+    // — it is listed, counted, mapped and openable under the Occurrence and
+    // Locality units — but at a taxon unit it has no taxon to be a row for.
+    if (!resolved) continue;
+    const key = resolved.id;
     let group = byKey.get(key);
     if (!group) {
       group = {
         key,
-        taxonId: resolved ? resolved.id : null,
-        name: resolved ? resolved.scientificName : notClassifiedLabel(tier),
+        taxonId: resolved.id,
+        name: resolved.scientificName,
         occurrenceIds: [],
         count: 0,
         minMa: null,
         maxMa: null,
-        notClassified: resolved === null,
       };
       byKey.set(key, group);
     }
@@ -225,15 +292,27 @@ export function groupByTaxon(
   }
   const groups = [...byKey.values()];
   for (const g of groups) g.count = g.occurrenceIds.length;
-  return groups.sort((a, b) => {
-    if (a.notClassified !== b.notClassified) return a.notClassified ? 1 : -1;
-    return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-  });
+  // REQ-005: busiest first, then name, then id — fully deterministic, because
+  // the render cap makes the order decide what is not shown.
+  return groups.sort(
+    (a, b) =>
+      b.count - a.count ||
+      compareText(a.name, b.name) ||
+      compareText(a.key, b.key),
+  );
 }
 
-/** The disclosed label for the not-classified bucket at a given tier. */
-export function notClassifiedLabel(tier: RankTier): string {
-  return `Not classified at ${RANK_TIER_LABEL[tier].toLowerCase()} level`;
+/**
+ * REQ-004: the predicate the taxon units filter their occurrence set by, applied
+ * once so the list, the count and the map all derive from the same records — a
+ * point on the map always has a row behind it.
+ */
+export function classifiesAt(
+  occurrence: ReadOccurrence,
+  tier: RankTier,
+  taxaById: ReadonlyMap<string, ReadTaxon>,
+): boolean {
+  return resolveTierTaxon(occurrence.taxonId, tier, taxaById) !== null;
 }
 
 /** Index a taxa array by id for the resolver (built once per reference load). */

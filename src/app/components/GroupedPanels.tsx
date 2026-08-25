@@ -24,6 +24,8 @@ interface LocalityPanelProps {
   /** SPEC-014 AMEND-005: whether a taxon has a Wikipedia article (→ a page). */
   hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
+  /** Names the list this detail replaced (SPEC-026 REQ-003). */
+  backLabel: string;
 }
 
 export function LocalityPanel({
@@ -32,6 +34,7 @@ export function LocalityPanel({
   onOpenProfile,
   hasArticle,
   onClose,
+  backLabel,
 }: LocalityPanelProps): ReactElement {
   // Distinct taxa recorded here, in stable name order.
   const seen = new Map<string, string>();
@@ -41,16 +44,16 @@ export function LocalityPanel({
 
   return (
     <section className={styles.panel} aria-label={`Locality: ${group.name}`}>
-      <div className={styles.panelHead}>
-        <h2>{group.name}</h2>
+      {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
         <button
           type="button"
-          className={styles.panelClose}
+          className={styles.panelBack}
           onClick={onClose}
-          aria-label="Close locality panel"
         >
-          ✕
+          ← {backLabel}
         </button>
+      <div className={styles.panelHead}>
+        <h2>{group.name}</h2>
       </div>
 
       <dl className={styles.fieldGrid}>
@@ -113,6 +116,10 @@ interface TaxonPanelProps {
   /** SPEC-014 AMEND-005: whether this taxon has a Wikipedia article (→ a page). */
   hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
+  /** Names the list this detail replaced (SPEC-026 REQ-003). */
+  backLabel: string;
+  /** The clade the row's tint stood for, named in words (SPEC-026 UX-002). */
+  clade: string;
 }
 
 export function TaxonPanel({
@@ -120,22 +127,26 @@ export function TaxonPanel({
   onOpenProfile,
   hasArticle,
   onClose,
+  backLabel,
+  clade,
 }: TaxonPanelProps): ReactElement {
+  const unitWord = "taxon";
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
-      <div className={styles.panelHead}>
-        <h2 className={group.notClassified ? undefined : "sciName"}>
-          {group.name}
-        </h2>
+      {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
         <button
           type="button"
-          className={styles.panelClose}
+          className={styles.panelBack}
           onClick={onClose}
-          aria-label="Close taxon panel"
         >
-          ✕
+          ← {backLabel}
         </button>
+      <div className={styles.panelHead}>
+        <h2 className="sciName">{group.name}</h2>
       </div>
+      {/* UX-002: the clade the row's tint stood for, in visible words — so the
+          tint never carries a meaning that has no worded form. */}
+      <p className={styles.panelClade}>{clade} · {unitWord}</p>
 
       <dl className={styles.fieldGrid}>
         <dt className={styles.fieldLabel}>Occurrences in view</dt>

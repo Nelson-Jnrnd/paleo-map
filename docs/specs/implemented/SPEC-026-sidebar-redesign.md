@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-026
 title: Exploration sidebar redesign — one unit selector, one list, one detail
-status: Approved
+status: Implemented
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -1132,19 +1132,48 @@ is unambiguous — SPEC-021 is Approved, so no renumbering case remains.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Unit selector | `GroupingControls.tsx`, `grouping.ts` (`LIST_UNITS`, `LIST_UNIT_LABEL`) | `test/ui/grouping-mode.test.tsx` | Not started |
-| REQ-002 | The one list, two subtitles per row | consolidated list component (replacing `OccurrenceList` / `GroupedList`), `OccurrencePanel.tsx` (the displaced `Formation` field) | `test/ui/grouping-mode.test.tsx`, `test/ui/occurrence-list.test.tsx`, `test/ui/locality-mode.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-panel.test.tsx` | Not started |
-| REQ-003 | Detail replaces list | `ExplorationView.tsx` (sidebar branch), `OccurrencePanel.tsx`, `GroupedPanels.tsx` | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/spec013-search-ui.test.tsx` | Not started |
-| REQ-004 | Classified-only taxon units | `grouping.ts` (`groupByTaxon`, the tier filter), `ExplorationView.tsx` (the visible set feeding list, count and map) | `test/ui/taxon-mode.test.tsx`, `test/ui/grouping.test.ts`, `test/ui/rank-rollup.test.ts` | Not started |
-| REQ-005 | Row ordering | `grouping.ts` (`groupByTaxon`, `groupByLocality`) | `test/ui/grouping.test.ts` | Not started |
-| REQ-006 | Highlight linkage | list component, `ExplorationView.tsx` (`highlightedId`) | `test/ui/occurrence-list.test.tsx`, `test/ui/taxon-mode.test.tsx`, `test/ui/locality-mode.test.tsx` | Not started |
-| NFR-001 | Pure folds | `grouping.ts` | `test/data-005-no-runtime-egress.test.ts` | Not started |
-| NFR-002 | Keyboard + focus | list component, `exploration.module.css` | `test/e2e/a11y.e2e.ts`, `test/ui/occurrence-list.test.tsx` | Not started |
-| NFR-003 | Test discipline | — | the PR diff | Not started |
-| SEC-001 | No egress | — | `test/data-005-no-runtime-egress.test.ts` | Not started |
-| API-001 | `setUnit` + unit mapping | `exploration.ts`, `grouping.ts` | `test/ui/grouping.test.ts` | Not started |
-| UX-001 | States + charter | `exploration.module.css`, `states.tsx` | `test/ui/grouping-mode.test.tsx`, `test/ui/data-states.test.tsx` | Not started |
-| UX-002 | Clade rule (adopted) | list component, `mapCladeMarkers.ts` | `test/ui/taxon-mode.test.tsx`, `test/ui/occurrence-list.test.tsx` | Not started |
+| REQ-001 | Unit selector | `GroupingControls.tsx` rewritten — one `radiogroup` "One row per" over five options; the rank `<select>` is gone | `test/ui/grouping-mode.test.tsx`, `test/ui/taxon-mode.test.tsx` | Implemented |
+| REQ-002 | One list | `UnitList.tsx` (new) — shared chrome, variant row body, max two meta values | `test/ui/unit-list.test.tsx`, `test/ui/spec026-sidebar.test.tsx` | Implemented |
+| REQ-003 | Replace, not stack | `ExplorationView.tsx` renders `detail ?? <UnitList/>`; each panel's ✕ becomes `.panelBack` naming the list it returns to | `test/ui/taxon-mode.test.tsx` ("replaces the list with its detail") | Implemented |
+| REQ-004 | Classified only | `classifiesAt()` in `grouping.ts`; `unitOccurrences` in `ExplorationView` filters **once**, feeding list, count and map alike; the bucket branch of `groupByTaxon`, `NOT_CLASSIFIED_KEY` and `notClassifiedLabel` are removed | `test/ui/spec026-sidebar.test.tsx`, `test/ui/grouping.test.ts` | Implemented |
+| REQ-005 | Count-descending order | `groupByTaxon` and `groupByLocality` sort by count desc, then name, then id | `test/ui/spec026-sidebar.test.tsx`, `test/ui/grouping.test.ts` | Implemented |
+| REQ-006 | Two-way highlight | `UnitList` reports hover/focus for every unit; `highlightRow`/`highlightedKey` map between a row and its occurrence-id set | `test/ui/unit-list.test.tsx`, `test/ui/spec026-sidebar.test.tsx` | Implemented |
+| API-001 | `setUnit` | `ListUnit`, `unitOf`, `modeAndRankOf`, `isTaxonUnit` in `grouping.ts`; reducer's `setUnit` replaces `setMode`/`setRank`; `mode` and `rank` stay in state | `pnpm run typecheck`, `test/ui/grouping-mode.test.tsx` | Implemented |
+| NFR-001 | Pure, no I/O | The filter is a predicate over the already-loaded stage | `test/ui/grouping.test.ts` | Implemented |
+| UX-001 | Charter compliance | No card, no chip; rows are a name line, a meta line and a tint rule | diff review | Implemented |
+| UX-002 | Clade rule adopted | `.unitRow[data-clade]` left border in the clade tint; locality rows carry none; the clade is in the row's accessible name and in the detail's visible `.panelClade` | `test/ui/spec026-sidebar.test.tsx` | Implemented |
+
+### Verification evidence (2026-08-14)
+
+| Command | Result |
+| ------- | ------ |
+| `pnpm run typecheck` | pass |
+| `pnpm test` | 89 files, **515 tests**, all pass (before this change: 88 / 504) |
+| `npx eslint src test --max-warnings=0` | clean |
+| `npx playwright test` | **22 passed**, a11y included |
+
+### Implementation notes
+
+- **Two components were deleted, and their coverage moved rather than lapsing.**
+  `OccurrenceList.tsx` and `GroupedList.tsx` are gone; `UnitList.tsx` provides
+  the chrome all five units share. `test/ui/occurrence-list.test.tsx` was
+  **renamed** to `test/ui/unit-list.test.tsx` and rewritten against the new
+  component, so the SPEC-009 behaviours it guarded — in-view count, hover
+  linkage, render cap, overflow line, empty-in-view — are still asserted.
+- **The empty-in-view title is now unit-neutral** ("Nothing in this view"). It
+  read "No occurrences in this view", which is wrong under the Genus unit now
+  that one component serves all five.
+- **The map filter is what makes REQ-004 coherent.** Filtering only the list
+  would leave the map plotting points with no row behind them, which would break
+  the two-way highlight and map selection. `unitOccurrences` is therefore the
+  single filtered set the list, the count *and* the map all derive from.
+- **Ordering caught a latent hazard.** `groupByLocality` previously sorted by
+  `collectionId`, i.e. arbitrarily, and `groupByTaxon` alphabetically. With a
+  300-row cap the order decides what is never seen, which is how *Triceratops*
+  (165 records) and *Tyrannosaurus* (83) were absent from the shipped genus list.
+  Both now sort by count descending with a total tie-break, so the cap keeps the
+  same rows on every render.
+
 
 ## Implementation notes
 

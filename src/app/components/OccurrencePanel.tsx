@@ -20,6 +20,8 @@ interface OccurrencePanelProps {
   occurrence: ReadOccurrence;
   onOpenProfile: (taxonId: string) => void;
   onClose: () => void;
+  /** Names the list this detail replaced (SPEC-026 REQ-003). */
+  backLabel: string;
 }
 
 export function OccurrencePanel({
@@ -27,6 +29,7 @@ export function OccurrencePanel({
   occurrence,
   onOpenProfile,
   onClose,
+  backLabel,
 }: OccurrencePanelProps): ReactElement {
   const modern = occurrence.modernPosition.value;
   const paleo = occurrence.paleoPosition.value;
@@ -38,16 +41,17 @@ export function OccurrencePanel({
       className={styles.panel}
       aria-label={`Occurrence: ${occurrence.taxonName}`}
     >
-      <div className={styles.panelHead}>
-        <h2 className="sciName">{occurrence.taxonName}</h2>
+      {/* SPEC-026 REQ-003: the close control becomes a back control that names
+          the list it returns to, because the detail now *replaces* that list. */}
         <button
           type="button"
-          className={styles.panelClose}
+          className={styles.panelBack}
           onClick={onClose}
-          aria-label="Close occurrence panel"
         >
-          ✕
+          ← {backLabel}
         </button>
+      <div className={styles.panelHead}>
+        <h2 className="sciName">{occurrence.taxonName}</h2>
       </div>
 
       <dl className={styles.fieldGrid}>

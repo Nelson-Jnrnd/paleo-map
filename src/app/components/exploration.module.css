@@ -891,6 +891,52 @@
 }
 
 /* --- Occurrence list (SPEC-009: viewport-linked, cross-highlighted) --- */
+/* --- One list row (SPEC-026 REQ-002, UX-002) ------------------------------ */
+.unitRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* UX-002: the clade tint reinforces which clade a row belongs to; the row's
+   identity is its name, and the clade is named in the row's accessible name and
+   in the detail it opens — so the tint never carries a meaning without words. */
+.unitRow[data-clade="true"] {
+  border-left-color: var(--clade-tint);
+}
+
+.unitRow:hover,
+.unitRow[data-highlighted="true"] {
+  background: var(--color-ground);
+}
+
+.unitRow:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.unitRow[aria-current="true"] {
+  background: var(--color-ground);
+  font-weight: 700;
+}
+
+.unitRowName {
+  font-size: 0.875rem;
+  color: var(--color-text-hi);
+}
+
+.unitRowMeta {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
 .listPane {
   display: flex;
   flex-direction: column;
@@ -915,6 +961,59 @@
 }
 
 /* --- Grouped / aggregated list (SPEC-005) --- */
+/* --- Unit selector (SPEC-026 REQ-001) ------------------------------------- */
+.unitBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.unitLabel {
+  font-size: var(--text-min);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.unitGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+.unitOption {
+  padding: var(--space-1) 0;
+  min-height: 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.unitOption:hover:not(:disabled) {
+  color: var(--color-text-hi);
+}
+
+.unitOption:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.unitOption:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.unitOptionOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
 .listHeaderTop {
   display: flex;
   align-items: center;
@@ -1133,6 +1232,36 @@
   padding: var(--space-4);
   border-bottom: 2px solid var(--color-divider);
   background: color-mix(in srgb, var(--color-accent) 4%, var(--color-surface));
+}
+
+/* SPEC-026 REQ-003: the detail replaces the list, so its first control is a
+   back control that names what it returns to — not a bare ✕. */
+.panelBack {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panelBack:hover {
+  color: var(--color-text-hi);
+}
+
+.panelBack:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.panelClade {
+  margin: 0 var(--space-4);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
 }
 
 .panelHead {

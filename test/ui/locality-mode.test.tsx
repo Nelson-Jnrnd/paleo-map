@@ -17,9 +17,9 @@ async function enterLocalityMode() {
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
   const group = within(
-    await screen.findByRole("group", { name: /group occurrences by/i }),
+    await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
-  await user.click(group.getByRole("button", { name: "Localities" }));
+  await user.click(group.getByRole("radio", { name: "Locality" }));
   return user;
 }
 
