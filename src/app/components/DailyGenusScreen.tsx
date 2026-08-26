@@ -8,8 +8,14 @@
  * `docs/mockups/daily-genus.md`, charter + anti-slop checklist). The established
  * trunk descends from `Dinosauria`, each ruled-out branch hangs off the node
  * where the guess and the answer parted, and the guess that eliminated it labels
- * the terminal — so there is no separate guess list, because the guesses *are*
- * the branches. Time is a stratigraphic column rather than a badge per guess.
+ * the terminal — the clade verdict needs no list, because the guesses *are* the
+ * branches. Time is a stratigraphic column rather than a badge per guess.
+ *
+ * The two SPEC-028 channels — shared countries and occurrence count — are the
+ * exception, and a deliberate one (SPEC-028 AMEND-001): the tree positions a
+ * guess by clade, so it cannot place a geographic or abundance fact meaningfully,
+ * and marks crammed onto its rows overflowed the diagram. They live in their own
+ * table beneath the board.
  *
  * All game logic lives in `../state/dailyGenus.js`; this file is presentation,
  * the injected clock, and the storage adapter. No network (NFR-001).
@@ -296,15 +302,22 @@ const TIME_WORDS: Readonly<Record<TimeVerdict, string>> = {
 };
 
 /**
- * The two SPEC-028 clue channels, drawn on the guess's own row (REQ-004).
+ * The two SPEC-028 clue channels (REQ-004 as amended 2026-08-26).
  *
- * Marks on the object, not badges beside it: a guess already has a row on this
- * screen, so two facts about that guess belong on it rather than in a second
- * aligned panel (`docs/mockups/anti-slop-checklist.md`, worked example — "No
- * guess list: each guess *is* the branch it ruled out").
+ * They live in a table of their own, beneath the board — **not** on the tree.
+ * The first design put them on each guess's cladogram row, and two things were
+ * wrong with that. The marks pushed guess rows past the diagram's label reserve,
+ * which put the region into horizontal overflow; because `.diagram` carried an
+ * inline height equal to its own content, the scrollbar was laid out inside that
+ * height and clipped the last row. And the tree positions a guess by *clade*, so
+ * comparing one channel across guesses meant scanning a diagonal.
+ *
+ * A table is what "let the data structure the layout" means for a per-guess
+ * comparison: the tree still owns the clade verdict and the Ma column still owns
+ * the time verdict, so nothing here is a restatement.
  *
  * Every verdict is carried by a glyph and by words before it is carried by
- * colour (UX-001), so the row survives with colour removed.
+ * colour (UX-001), so each row survives with colour removed.
  */
 
 /** Glyph per occurrence verdict: direction by arrow, distance by doubling. */
@@ -318,69 +331,103 @@ const OCCURRENCE_MARKS: Readonly<Record<OccurrenceVerdict, string>> = {
 };
 
 /**
- * The spoken form of each verdict (UX-002: a count of records in this snapshot,
+ * The written form of each verdict (UX-002: a count of records in this snapshot,
  * never a claim that the animal was common or rare).
  */
 const OCCURRENCE_WORDS: Readonly<Record<OccurrenceVerdict, string>> = {
-  same: "same number of recorded occurrences",
-  "more-close": "the answer has somewhat more recorded occurrences",
-  "more-far": "the answer has far more recorded occurrences",
-  "fewer-close": "the answer has somewhat fewer recorded occurrences",
-  "fewer-far": "the answer has far fewer recorded occurrences",
-  unavailable: "occurrences not recorded",
+  same: "same",
+  "more-close": "somewhat more",
+  "more-far": "far more",
+  "fewer-close": "somewhat fewer",
+  "fewer-far": "far fewer",
+  unavailable: "not recorded",
+};
+
+/**
+ * The spoken form, for the live region (UX-004). Longer than the table's column
+ * values on purpose: the table has a column heading to supply the noun, and a
+ * sentence read aloud does not. Still a count of records, never a claim about
+ * the animal (UX-002).
+ */
+const OCCURRENCE_SPOKEN: Readonly<Record<OccurrenceVerdict, string>> = {
+  same: "the same number of recorded occurrences",
+  "more-close": "somewhat more recorded occurrences",
+  "more-far": "far more recorded occurrences",
+  "fewer-close": "somewhat fewer recorded occurrences",
+  "fewer-far": "far fewer recorded occurrences",
+  // Phrased to follow "The answer has …" — except the absent case, which is not
+  // a fact about the answer at all and gets its own sentence below.
+  unavailable: "",
 };
 
 function occurrenceClass(verdict: OccurrenceVerdict): string {
   if (verdict === "same") return styles.markSame ?? "";
-  if (verdict === "unavailable") return "";
-  return verdict.endsWith("-close") ? (styles.markClose ?? "") : "";
+  if (verdict === "unavailable") return styles.markMuted ?? "";
+  return verdict.endsWith("-close")
+    ? (styles.markClose ?? "")
+    : (styles.markFar ?? "");
 }
 
-/** Both marks for one guess, or nothing when the guess is not yet evaluated. */
-function GuessMarks({
-  guess,
+/** One guess's countries cell: the shared codes, or why there are none. */
+function CountryCell({ guess }: { guess: Guess }): ReactElement {
+  if (guess.countryVerdict === "shared") {
+    // Plain middot-separated codes — the idiom the map sidebar already uses for
+    // locality data. Not chips.
+    return <>{guess.sharedCountries.join(" · ")}</>;
+  }
+  return (
+    <span className={styles.markMuted}>
+      {guess.countryVerdict === "none" ? "none shared" : "not recorded"}
+    </span>
+  );
+}
+
+/**
+ * The per-guess clue table (REQ-004). Renders nothing at all before the first
+ * guess — an empty table with headings would be chrome describing an absence.
+ */
+function ClueTable({
+  guesses,
   geographyAvailable,
 }: {
-  guess: Guess | undefined;
+  guesses: readonly Guess[];
   geographyAvailable: boolean;
 }): ReactElement | null {
-  if (!guess) return null;
-  const occurrence = guess.occurrences;
+  if (guesses.length === 0) return null;
   return (
-    <>
-      {/* REQ-002. The codes are plain middot-separated text, the idiom the map
-          sidebar already uses for locality data — not chips. */}
-      {geographyAvailable &&
-        (guess.countryVerdict === "shared" ? (
-          <span className={styles.mark}>
-            {/* "also in" rather than a bare list of codes: the codes cannot say
-                what they are, and two words are cheaper than a key entry for a
-                mark that would otherwise be undefined on the diagram. */}
-            <span className={styles.markMuted}>also in </span>
-            {guess.sharedCountries.join(" · ")}
-          </span>
-        ) : (
-          <span className={`${styles.mark} ${styles.markMuted}`}>
-            {guess.countryVerdict === "none"
-              ? "no shared country"
-              : "countries not recorded"}
-          </span>
+    <table className={styles.clues}>
+      <caption className={styles.cluesCaption}>
+        Each guess against the answer
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Guess</th>
+          {geographyAvailable && <th scope="col">Shared countries</th>}
+          {/* UX-002: the heading is where the table says what it counts —
+              records in this snapshot, never how common the animal was. */}
+          <th scope="col">Occurrence records in this snapshot</th>
+        </tr>
+      </thead>
+      <tbody>
+        {guesses.map((g) => (
+          <tr key={g.taxonId}>
+            <th scope="row" className={styles.clueName}>
+              {g.scientificName}
+            </th>
+            {geographyAvailable && (
+              <td className={styles.clueCountries}>
+                <CountryCell guess={g} />
+              </td>
+            )}
+            <td className={occurrenceClass(g.occurrences)}>
+              <span aria-hidden="true">{OCCURRENCE_MARKS[g.occurrences]}</span>
+              {g.occurrences !== "unavailable" && " "}
+              {OCCURRENCE_WORDS[g.occurrences]}
+            </td>
+          </tr>
         ))}
-      {/* REQ-003. Direction by arrow, distance by doubling, so the verdict is
-          legible with colour removed (UX-001). */}
-      {occurrence === "unavailable" ? (
-        <span className={`${styles.mark} ${styles.markMuted}`}>
-          occurrences not recorded
-        </span>
-      ) : (
-        <span className={`${styles.mark} ${occurrenceClass(occurrence)}`}>
-          <span aria-hidden="true">{OCCURRENCE_MARKS[occurrence]}</span>
-          <span className="visuallyHidden">
-            {` — ${OCCURRENCE_WORDS[occurrence]}`}
-          </span>
-        </span>
-      )}
-    </>
+      </tbody>
+    </table>
   );
 }
 
@@ -453,6 +500,9 @@ export function DailyGenusScreen({
   // REQ-003: which track's pool size the detail slot is previewing, if any.
   // Hover *and* focus drive it, so it is reachable without a pointer.
   const [trackPreview, setTrackPreview] = useState<Track | null>(null);
+  // SPEC-020 AMEND-006: whether the ranking caveat's disclosure is open. Closed
+  // on load — the control, not the caveat, is what is always on the surface.
+  const [aboutOpen, setAboutOpen] = useState(false);
   const listId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -679,9 +729,6 @@ export function DailyGenusScreen({
   const snapshotDate = api.metadata().retrievedOn;
   const popularityWindow = api.metadata().popularity?.window ?? null;
   const practice = round.mode === "practice";
-  // SPEC-028 REQ-004: a guess's marks hang off its row in the tree, and the tree
-  // knows a guess only by name, so index the evaluated guesses by name.
-  const guessByName = new Map(round.guesses.map((g) => [g.scientificName, g]));
   // UX-003: with no index loaded there is no country channel to draw, and the
   // screen says so rather than rendering "not recorded" against every guess.
   const geographyAvailable = api.hasGeography();
@@ -703,60 +750,84 @@ export function DailyGenusScreen({
               : `${round.guesses.length} of ${MAX_GUESSES} guesses`}
           </p>
         </div>
+        {/* SPEC-020 AMEND-006: the track option sits on the header row, which
+            is where the owner asked for it and what recovers the vertical space
+            the old block cost above the board. */}
+        {trackAvailable(data, "wellKnown") && (
+          <div className={styles.tracks}>
+            {/* REQ-001: two controls, the domain names, single-choice. `radio`
+                roles rather than a fieldset of labels: the same semantics in a
+                third of the copy. */}
+            <div
+              className={styles.trackGroup}
+              role="radiogroup"
+              aria-label="Which puzzle"
+            >
+              {TRACKS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={track === option}
+                  aria-describedby={`${listId}-track-detail`}
+                  className={`${styles.trackButton} ${track === option ? styles.trackButtonOn : ""}`}
+                  onClick={() => chooseTrack(option)}
+                  onMouseEnter={() => setTrackPreview(option)}
+                  onMouseLeave={() => setTrackPreview(null)}
+                  onFocus={() => setTrackPreview(option)}
+                  onBlur={() => setTrackPreview(null)}
+                >
+                  {option === "full" ? "Every genus" : "Well-known"}
+                </button>
+              ))}
+            </div>
+            {/* SPEC-020 AMEND-006: the ranking caveat now sits behind this
+                control. A real `button` toggling a real element — never a
+                `title`, never hover-only — so it is reachable by keyboard and on
+                a touch device with no hover. The control is rendered in every
+                state the track option is, so the caveat is always one deliberate
+                action away. */}
+            <button
+              type="button"
+              className={styles.aboutToggle}
+              aria-expanded={aboutOpen}
+              aria-controls={`${listId}-track-about`}
+              onClick={() => setAboutOpen((open) => !open)}
+            >
+              <span aria-hidden="true">ⓘ</span>
+              <span className="visuallyHidden">
+                About the “well-known” ranking
+              </span>
+            </button>
+            {/* REQ-003: the pool size for the selected track is always rendered
+                here; hovering or focusing the other control previews its size in
+                the same slot. Not a live region — this must not be announced on
+                every hover — and the slot's height does not change with
+                content. */}
+            <p className={styles.trackDetail} id={`${listId}-track-detail`}>
+              {(trackPreview ?? track) === "full"
+                ? `all ${data.pool.length.toLocaleString("en-GB")} genera in the snapshot`
+                : `the ${data.wellKnownPool.length} most read about`}
+            </p>
+          </div>
+        )}
         <div className={styles.headRight}>
           <p className={styles.countdown}>{formatCountdown(remaining)}</p>
           <p className={styles.countdownLabel}>next puzzle · 00:00 UTC</p>
         </div>
       </header>
 
-      {trackAvailable(data, "wellKnown") && (
-        <div className={styles.tracks}>
-          {/* REQ-001: two controls, the domain names, single-choice. `radio`
-              roles rather than a fieldset of labels: the same semantics in a
-              third of the copy. */}
-          <div
-            className={styles.trackGroup}
-            role="radiogroup"
-            aria-label="Which puzzle"
-          >
-            {TRACKS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={track === option}
-                aria-describedby={`${listId}-track-detail`}
-                className={`${styles.trackButton} ${track === option ? styles.trackButtonOn : ""}`}
-                onClick={() => chooseTrack(option)}
-                onMouseEnter={() => setTrackPreview(option)}
-                onMouseLeave={() => setTrackPreview(null)}
-                onFocus={() => setTrackPreview(option)}
-                onBlur={() => setTrackPreview(null)}
-              >
-                {option === "full" ? "Every genus" : "Well-known"}
-              </button>
-            ))}
-          </div>
-          {/* REQ-003: the pool size for the selected track is always rendered
-              here; hovering or focusing the other control previews its size in
-              the same slot. Not a live region — this must not be announced on
-              every hover — and the slot's height does not change with content. */}
-          <p className={styles.trackDetail} id={`${listId}-track-detail`}>
-            {(trackPreview ?? track) === "full"
-              ? `all ${data.pool.length.toLocaleString("en-GB")} genera in the snapshot`
-              : `the ${data.wellKnownPool.length} most read about`}
-          </p>
-          {/* REQ-002: this is provenance, not detail. It states what the ranking
-              is built from and what it is not, so the charter forbids putting it
-              behind a hover, a title or a disclosure. It stays visible for both
-              tracks, in every state. */}
-          <p className={styles.trackAbout}>
-            “Well-known” ranks genera by how often people read their article on
-            English Wikipedia
-            {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure of
-            attention, not of scientific importance.
-          </p>
-        </div>
+      {/* The disclosure itself. Its wording is unchanged from the always-visible
+          version SPEC-020 UX-001/UX-002 require: English Wikipedia, the window,
+          how often people read the article, and attention rather than scientific
+          importance. Only its reachability changed (AMEND-006). */}
+      {trackAvailable(data, "wellKnown") && aboutOpen && (
+        <p className={styles.trackAbout} id={`${listId}-track-about`}>
+          “Well-known” ranks genera by how often people read their article on
+          English Wikipedia
+          {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure of
+          attention, not of scientific importance.
+        </p>
       )}
 
       {practice && (
@@ -805,144 +876,144 @@ export function DailyGenusScreen({
             // rule does not model it.
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
-            style={
-              {
-                "--row-pitch": `${ROW_PITCH}px`,
-                "--depth-indent": `${DEPTH_INDENT}px`,
-                height: `${layout.rows.length * ROW_PITCH}px`,
-                width: `${(layout.guessDepth + 1) * DEPTH_INDENT + MAX_LABEL_PX}px`,
-              } as Record<string, string | number>
-            }
           >
-            <CladogramConnectors layout={layout} />
-            {/* UX-002: the accessible structure is the one the screen already
+            {/* The sized canvas is an *inner* element, so a horizontal scrollbar
+                is laid out under it rather than inside its height. With the
+                height on the scrolling element itself, any overflow put the
+                scrollbar inside the content box and `overflow-y: hidden` clipped
+                the last row — the tree was cut off vertically by its own
+                scrollbar (SPEC-028 AMEND-001's Reason). */}
+            <div
+              className={styles.canvas}
+              style={
+                {
+                  "--row-pitch": `${ROW_PITCH}px`,
+                  "--depth-indent": `${DEPTH_INDENT}px`,
+                  height: `${layout.rows.length * ROW_PITCH}px`,
+                  width: `${(layout.guessDepth + 1) * DEPTH_INDENT + MAX_LABEL_PX}px`,
+                } as Record<string, string | number>
+              }
+            >
+              <CladogramConnectors layout={layout} />
+              {/* UX-002: the accessible structure is the one the screen already
                 shipped — trunk nodes root-first, each with the branches ruled out
                 at it nested under it, and the guess nested under its branch. Rows
                 are *positioned* by CSS; DOM order is still reading order. */}
-            <ol className={styles.trunk}>
-              {tree.trunk.map((node) => {
-                const nodePlace = placeOf(layout, "node", node.id);
-                return (
-                  <li key={node.id} className={styles.trunkItem}>
-                    <span
-                      className={`${styles.row} ${node.frontier ? styles.frontier : ""}`}
-                      style={rowStyle(nodePlace)}
-                    >
-                      {/* Tint reinforces the clade the same way it does on the
-                          map (charter §4); the name carries identity first. */}
+              <ol className={styles.trunk}>
+                {tree.trunk.map((node) => {
+                  const nodePlace = placeOf(layout, "node", node.id);
+                  return (
+                    <li key={node.id} className={styles.trunkItem}>
                       <span
-                        className={styles.dot}
-                        style={
-                          {
-                            "--clade-tint": cladeMarkerForTaxon(
-                              node.id,
-                              data.index.byId,
-                            ).tint,
-                          } as Record<string, string>
-                        }
-                        aria-hidden="true"
-                      />
-                      <span className={styles.nodeName}>{node.name}</span>
-                      <span className={styles.rank}>
-                        {node.rank.toLowerCase()}
-                      </span>
-                      {node.frontier && (
-                        <span className={styles.deepest}>deepest reached</span>
-                      )}
-                      {/* The guess that reached this depth, unless one of this
-                          node's own eliminations already names it. */}
-                      {node.frontier &&
-                        node.reachedBy &&
-                        !node.ruledOut.some(
-                          (cut) => cut.by === node.reachedBy,
-                        ) && (
-                          <span className={styles.reached}>
-                            ◂ {node.reachedBy}
+                        className={`${styles.row} ${node.frontier ? styles.frontier : ""}`}
+                        style={rowStyle(nodePlace)}
+                      >
+                        {/* Tint reinforces the clade the same way it does on the
+                          map (charter §4); the name carries identity first. */}
+                        <span
+                          className={styles.dot}
+                          style={
+                            {
+                              "--clade-tint": cladeMarkerForTaxon(
+                                node.id,
+                                data.index.byId,
+                              ).tint,
+                            } as Record<string, string>
+                          }
+                          aria-hidden="true"
+                        />
+                        <span className={styles.nodeName}>{node.name}</span>
+                        <span className={styles.rank}>
+                          {node.rank.toLowerCase()}
+                        </span>
+                        {node.frontier && (
+                          <span className={styles.deepest}>
+                            deepest reached
                           </span>
                         )}
-                      <span className="visuallyHidden">
-                        {node.frontier
-                          ? " — established ancestor, the deepest reached so far"
-                          : " — established ancestor"}
+                        {/* The guess that reached this depth, unless one of this
+                          node's own eliminations already names it. */}
+                        {node.frontier &&
+                          node.reachedBy &&
+                          !node.ruledOut.some(
+                            (cut) => cut.by === node.reachedBy,
+                          ) && (
+                            <span className={styles.reached}>
+                              ◂ {node.reachedBy}
+                            </span>
+                          )}
+                        <span className="visuallyHidden">
+                          {node.frontier
+                            ? " — established ancestor, the deepest reached so far"
+                            : " — established ancestor"}
+                        </span>
                       </span>
-                    </span>
-                    {node.ruledOut.length > 0 && (
-                      <ul className={styles.cuts}>
-                        {node.ruledOut.map((cut) => {
-                          const cutPlace = placeOf(layout, "cut", cut.id);
-                          const ownGuess = cut.name === cut.by;
-                          return (
-                            <li key={cut.id} className={styles.cutItem}>
-                              <span
-                                className={`${styles.row} ${styles.ruledOut}`}
-                                style={rowStyle(cutPlace)}
-                              >
+                      {node.ruledOut.length > 0 && (
+                        <ul className={styles.cuts}>
+                          {node.ruledOut.map((cut) => {
+                            const cutPlace = placeOf(layout, "cut", cut.id);
+                            const ownGuess = cut.name === cut.by;
+                            return (
+                              <li key={cut.id} className={styles.cutItem}>
                                 <span
-                                  className={styles.ringDot}
-                                  aria-hidden="true"
-                                />
-                                <span className={styles.nodeName}>
-                                  {cut.name}
-                                </span>
-                                <span className="visuallyHidden">
-                                  {` — ruled out by the guess ${cut.by}`}
-                                </span>
-                                {/* This row *is* the guess, so it carries the
-                                    marks (SPEC-028 REQ-004). */}
-                                {ownGuess && (
-                                  <GuessMarks
-                                    guess={guessByName.get(cut.by)}
-                                    geographyAvailable={geographyAvailable}
+                                  className={`${styles.row} ${styles.ruledOut}`}
+                                  style={rowStyle(cutPlace)}
+                                >
+                                  <span
+                                    className={styles.ringDot}
+                                    aria-hidden="true"
                                   />
-                                )}
-                              </span>
-                              {/* REQ-003: the guess is a leaf inside the branch
+                                  <span className={styles.nodeName}>
+                                    {cut.name}
+                                  </span>
+                                  <span className="visuallyHidden">
+                                    {` — ruled out by the guess ${cut.by}`}
+                                  </span>
+                                </span>
+                                {/* REQ-003: the guess is a leaf inside the branch
                                   it eliminated — taxonomically true, since the
                                   branch is an ancestor-or-self of the guess. When
                                   they are the same taxon the row above already is
                                   the guess, so there is no second row. */}
-                              {!ownGuess && (
-                                <ul className={styles.cuts}>
-                                  <li className={styles.cutItem}>
-                                    <span
-                                      className={`${styles.row} ${styles.ruledOut}`}
-                                      style={rowStyle(
-                                        placeOf(
-                                          layout,
-                                          "guess",
-                                          `${cut.id}:${cut.by}`,
-                                        ),
-                                      )}
-                                    >
+                                {!ownGuess && (
+                                  <ul className={styles.cuts}>
+                                    <li className={styles.cutItem}>
                                       <span
-                                        className={styles.ringDot}
-                                        aria-hidden="true"
-                                      />
-                                      <span className={styles.nodeName}>
-                                        {cut.by}
+                                        className={`${styles.row} ${styles.ruledOut}`}
+                                        style={rowStyle(
+                                          placeOf(
+                                            layout,
+                                            "guess",
+                                            `${cut.id}:${cut.by}`,
+                                          ),
+                                        )}
+                                      >
+                                        <span
+                                          className={styles.ringDot}
+                                          aria-hidden="true"
+                                        />
+                                        <span className={styles.nodeName}>
+                                          {cut.by}
+                                        </span>
+                                        <span className="visuallyHidden">
+                                          {
+                                            " — your guess, inside the branch it ruled out"
+                                          }
+                                        </span>
                                       </span>
-                                      <span className="visuallyHidden">
-                                        {
-                                          " — your guess, inside the branch it ruled out"
-                                        }
-                                      </span>
-                                      <GuessMarks
-                                        guess={guessByName.get(cut.by)}
-                                        geographyAvailable={geographyAvailable}
-                                      />
-                                    </span>
-                                  </li>
-                                </ul>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+                                    </li>
+                                  </ul>
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
           </div>
 
           {/* REQ-004: exactly three entries, always visible, worded as the owner
@@ -953,27 +1024,6 @@ export function DailyGenusScreen({
             relative
             <span className={styles.keyRing} aria-hidden="true" /> guess
           </p>
-          {/* SPEC-028 REQ-004: the guess rows carry two more marks, so the key
-              names them — the same marks-and-words shape the key above uses. The
-              wording says "recorded occurrences", never common or rare
-              (UX-002). */}
-          <p className={styles.key}>
-            <span className={styles.markSame} aria-hidden="true">
-              =
-            </span>{" "}
-            same recorded occurrences
-            <span className={styles.markClose} aria-hidden="true">
-              ▲▼
-            </span>{" "}
-            within a factor of two
-            <span aria-hidden="true">▲▲▼▼</span> further off
-          </p>
-          {!geographyAvailable && (
-            <p className={styles.noSpanNote}>
-              Countries of occurrence are unavailable — the geography index did
-              not load, so that clue is withheld rather than guessed at.
-            </p>
-          )}
         </section>
 
         <section className={styles.column} aria-labelledby={`${listId}-time`}>
@@ -1106,6 +1156,21 @@ export function DailyGenusScreen({
           )}
         </section>
       </div>
+
+      {/* SPEC-028 REQ-004 (amended): the two clue channels, in their own table.
+          Deliberately outside `.board` — they are per-guess facts, not part of
+          the tree or the Ma column, and keeping them off the diagram is what
+          restores the row widths SPEC-025 sized. */}
+      <ClueTable
+        guesses={round.guesses}
+        geographyAvailable={geographyAvailable}
+      />
+      {!geographyAvailable && round.guesses.length > 0 && (
+        <p className={styles.noSpanNote}>
+          Countries of occurrence are unavailable — the geography index did not
+          load, so that clue is withheld rather than guessed at.
+        </p>
+      )}
 
       {finished ? (
         <section className={styles.reveal} aria-live="polite">
@@ -1285,7 +1350,11 @@ export function DailyGenusScreen({
                   last.ruledOutName && last.ruledOutName !== last.scientificName
                     ? `${last.ruledOutName} is ruled out. `
                     : ""
-                }${TIME_WORDS[last.time]}.${countries} ${OCCURRENCE_WORDS[last.occurrences]}.`;
+                }${TIME_WORDS[last.time]}.${countries}${
+                  last.occurrences === "unavailable"
+                    ? " Occurrences not recorded."
+                    : ` The answer has ${OCCURRENCE_SPOKEN[last.occurrences]}.`
+                }`;
               })()}
           </p>
         </section>

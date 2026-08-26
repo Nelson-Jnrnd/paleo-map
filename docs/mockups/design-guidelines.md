@@ -33,6 +33,14 @@ This product's credibility *is* the product. The interface must make provenance
 and uncertainty legible at a glance, never buried behind a hover or a secondary
 click (CONS-490):
 
+> **One recorded exception, owner-authorised 2026-08-26.** Dinordle's "well-known"
+> ranking caveat sits behind an information control on the puzzle screen — see
+> SPEC-020 AMEND-006, which states the reasoning and the constraints the
+> disclosure must still meet. It is scoped to that one caveat on that one screen
+> and is **not** precedent: every other provenance and uncertainty disclosure in
+> the product stays on the surface.
+
+
 - Fossil points are **discovery evidence**, never a distribution range or an
   exact life position (FONC-1150, CONS-130/140).
 - Time ranges that **span multiple stages** are labeled as such (FONC-1140).

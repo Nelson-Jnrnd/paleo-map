@@ -844,6 +844,70 @@ will fill most of them in.
   track segment, not the hint segment.
 - **Human approval reference:** Owner decision in session, 2026-08-26.
 
+### AMEND-006 — the ranking caveat moves behind an information disclosure
+
+- **Date:** 2026-08-26
+- **Reason:** The owner reviewed the shipped header and asked for the two track
+  controls to read as buttons, to sit on the same row as the puzzle identity, and
+  for "the helper text definition [to] be simply a information icon pop-up when
+  clicking on it" (2026-08-26). Asked to choose between keeping the provenance
+  line visible and moving only the interpretive clause, moving all of it, or
+  keeping a short line with no icon, the owner chose **all of it behind the
+  icon** and directed this amendment explicitly (2026-08-26).
+- **Changed requirements:** **REQ-004**, as previously amended by AMEND-004.
+  AMEND-004's clause "The **ranking caveat required by UX-001 and UX-002** — English
+  Wikipedia, the stated window, how often people read the article, and 'a measure
+  of attention, not of scientific importance' — must remain rendered and visible
+  whenever the control is rendered and must never move behind a hover or any
+  other on-demand disclosure" is **retired and replaced** by:
+
+  > The ranking caveat is reachable from a persistent **information control**
+  > rendered beside the track options and labelled for assistive technology. The
+  > control is a real `button`, operable by pointer and by keyboard, and the
+  > caveat it discloses is a real element in the document — never a `title`
+  > attribute, never hover-only, and reachable on a touch device with no hover.
+  > The caveat's **wording is unchanged**: it still names English Wikipedia, the
+  > stated window, that the ranking counts how often people read the article, and
+  > that it is a measure of attention and not of scientific importance. The
+  > control itself must be visible in every state in which the track option is
+  > rendered, so the caveat is always one deliberate action away.
+
+  AMEND-004's other clauses stand: two controls, the domain names "Every genus"
+  and "Well-known", the accessible group name "Which puzzle", the pool sizes on
+  demand and reachable without a pointer, and the header naming the chosen track
+  exactly once.
+- **UX-001 and UX-002 are narrowed, not retired.** Both require the caveat's
+  *wording*, and that wording is unchanged. UX-001's "Wherever the track is
+  explained" and UX-002's "The track's description must say" are now satisfied
+  inside the disclosure rather than on the surface. UX-001's other criteria —
+  no per-taxon view count on any screen, and no copy calling a genus important on
+  this basis — are untouched and still hold.
+- **Charter exception, recorded rather than assumed.** `docs/mockups/design-guidelines.md`
+  §2 requires uncertainty and provenance to be legible at a glance, "never buried
+  behind a hover or a secondary click", and this amendment puts the caveat behind
+  exactly such a click. The charter is a set of **design conventions, not
+  product requirements** (CLAUDE.md), and the owner is its author; this is an
+  owner-authorised, single, recorded exception scoped to **this one caveat on
+  this one screen**. It does not generalise: every other provenance and
+  uncertainty disclosure in the product stays on the surface, and the charter is
+  annotated with a pointer to this amendment so the exception cannot be cited as
+  precedent by accident.
+- **Behavioral impact:** The caveat is no longer read without an action. Nothing
+  changes about which puzzle is played, the pools, the answer sequences, the
+  per-track records and streaks, the non-destructive track switch, persistence,
+  practice, or the four fragments. The header loses two lines of standing copy.
+- **Test impact:** `test/ui/spec020-track-option.test.tsx` — the assertion that
+  the caveat is present with no interaction becomes an assertion that the
+  information control is present with no interaction, that activating it reveals
+  the caveat with its wording intact, that the disclosure is a real element and
+  not a `title` attribute, and that it is keyboard-operable. The accessible
+  description resolving to the pool size, the keyboard-focus preview, and the
+  `getByRole("radio", …)` / `getByRole("group", { name: /which puzzle/i })`
+  queries are unaffected. `test/e2e/a11y.e2e.ts` is the gate and must stay green
+  on both tracks, with the disclosure both closed and open.
+- **Human approval reference:** Owner decision in session, 2026-08-26 — "On the
+  caveat i -> Amendment spec 020 -> B all of it behind the I."
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

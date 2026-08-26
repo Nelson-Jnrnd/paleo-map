@@ -166,7 +166,7 @@ pointer, with or without colour vision.
   - The verdict is a pure function of the two country sets.
 - **Verification method:** automated test (pure function + rendered screen).
 - **Evidence location:** `test/spec028-clue-channels.test.ts`,
-  `test/ui/spec028-clue-ledger.test.tsx`
+  `test/ui/spec028-clue-table.test.tsx`
 
 ### REQ-003: Each guess reports how its occurrence count compares to the answer's
 
@@ -245,7 +245,7 @@ pointer, with or without colour vision.
   - Nothing restates the shared clade, the ruled-out branch, or the time verdict.
 - **Verification method:** automated test (rendered screen) plus the existing
   SPEC-025 geometry gate.
-- **Evidence location:** `test/ui/spec028-clue-ledger.test.tsx`,
+- **Evidence location:** `test/ui/spec028-clue-table.test.tsx`,
   `test/e2e/cladogram.e2e.ts`
 - **Open risk, to be judged in the browser before this requirement is closed:**
   the marks lengthen guess rows, and SPEC-025 UX-001 measured the deepest
@@ -274,7 +274,7 @@ pointer, with or without colour vision.
   - The reveal still shows the answer's silhouette when it has one.
   - A stored round written by the previous version still loads (see Edge cases).
 - **Verification method:** automated test (rendered screen + storage round-trip).
-- **Evidence location:** `test/ui/spec028-clue-ledger.test.tsx`,
+- **Evidence location:** `test/ui/spec028-clue-table.test.tsx`,
   `test/spec019-persistence.test.ts`
 
 ## Non-functional requirements
@@ -405,7 +405,7 @@ pointer, with or without colour vision.
   - No new colour token is introduced.
   - The amber and green both meet 4.5:1 against the surface they are drawn on.
 - **Verification method:** automated test + the standing axe gate.
-- **Evidence location:** `test/ui/spec028-clue-ledger.test.tsx`,
+- **Evidence location:** `test/ui/spec028-clue-table.test.tsx`,
   `test/e2e/a11y.e2e.ts`
 
 ### UX-002: An occurrence count is a record count, never an abundance
@@ -423,7 +423,7 @@ pointer, with or without colour vision.
     basis.
   - The heading or caption names the snapshot as what is being counted.
 - **Verification method:** automated copy check.
-- **Evidence location:** `test/ui/spec028-clue-ledger.test.tsx`
+- **Evidence location:** `test/ui/spec028-clue-table.test.tsx`
 
 ### UX-003: Every state is designed
 
@@ -437,7 +437,7 @@ pointer, with or without colour vision.
   missing artifact is disclosed rather than hidden.
 - **Acceptance criteria:** each state renders a distinct, labelled surface.
 - **Verification method:** automated test.
-- **Evidence location:** `test/ui/spec028-clue-ledger.test.tsx`
+- **Evidence location:** `test/ui/spec028-clue-table.test.tsx`
 
 ### UX-004: Accessibility
 
@@ -492,19 +492,19 @@ channels for a real round in a real browser with no console error.
 | Requirement | Method | Evidence |
 | --- | --- | --- |
 | REQ-001 | automated | `test/spec028-geography-index.test.ts` |
-| REQ-002 | automated | `test/spec028-clue-channels.test.ts`, `test/ui/spec028-clue-ledger.test.tsx` |
+| REQ-002 | automated | `test/spec028-clue-channels.test.ts`, `test/ui/spec028-clue-table.test.tsx` |
 | REQ-003 | automated | `test/spec028-clue-channels.test.ts` |
-| REQ-004 | automated | `test/ui/spec028-clue-ledger.test.tsx` |
-| REQ-005 | automated | `test/ui/spec028-clue-ledger.test.tsx`, `test/spec019-persistence.test.ts` |
+| REQ-004 | automated | `test/ui/spec028-clue-table.test.tsx` |
+| REQ-005 | automated | `test/ui/spec028-clue-table.test.tsx`, `test/spec019-persistence.test.ts` |
 | NFR-001 | automated | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` |
 | NFR-002 | automated | `test/spec028-clue-channels.test.ts` |
 | NFR-003 | automated | `test/spec028-clue-channels.test.ts` |
 | SEC-001 | automated | `test/spec028-geography-index.test.ts` |
 | DATA-001 | automated | `test/spec028-geography-index.test.ts` |
 | API-001 | automated | `test/spec019-persistence.test.ts` |
-| UX-001 | automated + axe | `test/ui/spec028-clue-ledger.test.tsx`, `test/e2e/a11y.e2e.ts` |
-| UX-002 | automated copy check | `test/ui/spec028-clue-ledger.test.tsx` |
-| UX-003 | automated | `test/ui/spec028-clue-ledger.test.tsx` |
+| UX-001 | automated + axe | `test/ui/spec028-clue-table.test.tsx`, `test/e2e/a11y.e2e.ts` |
+| UX-002 | automated copy check | `test/ui/spec028-clue-table.test.tsx` |
+| UX-003 | automated | `test/ui/spec028-clue-table.test.tsx` |
 | UX-004 | automated + axe | `test/e2e/a11y.e2e.ts` |
 
 ## Test plan
@@ -513,7 +513,7 @@ channels for a real round in a real browser with no console error.
    pattern, `generatedFrom`, size bound, and id subset.
 2. `test/spec028-clue-channels.test.ts` — both verdict functions, every case and
    both "not recorded" paths, the four named ratio boundaries, and determinism.
-3. `test/ui/spec028-clue-ledger.test.tsx` — the marks on the guess rows and only
+3. `test/ui/spec028-clue-table.test.tsx` — the marks on the guess rows and only
    on them, every designed state, the absent-index degradation, the copy check,
    and the absence of any silhouette-hint control.
 4. Existing suites that must stay green **unmodified**: `spec019-daily-selection`,
@@ -573,7 +573,7 @@ regenerate.
 | REQ-001 | `src/pipeline/geography.ts`, `scripts/gen_geography.ts`, `public/data/geography.json` | `test/spec028-geography-index.test.ts` | Implemented |
 | REQ-002 | `state/dailyGenus.ts` — `sharedCountries`, `countryVerdict` | `test/spec028-clue-channels.test.ts` | Implemented |
 | REQ-003 | `state/dailyGenus.ts` — `occurrenceVerdict`, `CLOSE_OCCURRENCE_RATIO` | `test/spec028-clue-channels.test.ts` | Implemented |
-| REQ-004 | `DailyGenusScreen.tsx` — `GuessMarks` on the guess rows; `.mark*` in `dailyGenus.module.css` | `test/ui/spec028-clue-marks.test.tsx` | Implemented |
+| REQ-004 | `DailyGenusScreen.tsx` — `GuessMarks` on the guess rows; `.mark*` in `dailyGenus.module.css` | `test/ui/spec028-clue-table.test.tsx` | Implemented |
 | REQ-005 | `DailyGenusScreen.tsx`, `state/dailyGenus.ts`, `dailyGenusStorage.ts` | `test/ui/spec019-daily-screen.test.tsx`, `test/spec019-persistence.test.ts` | Implemented |
 | NFR-001 | `data/atlas.ts` — `fetchGeography` at boot | `test/ui/spec019-no-egress.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Implemented |
 | NFR-002 | pure functions in `state/dailyGenus.ts` | `test/spec028-clue-channels.test.ts` | Implemented |
@@ -581,10 +581,10 @@ regenerate.
 | SEC-001 | `src/pipeline/geography.ts` | `test/spec028-geography-index.test.ts` | Implemented |
 | DATA-001 | `domain/snapshot.ts` (`countriesByTaxon`), `read/api.ts` (`countriesFor`, `hasGeography`), `data/atlas.ts` | `test/spec028-geography-index.test.ts`, `test/ui/atlas-loader.test.tsx` | Implemented |
 | API-001 | `state/dailyGenus.ts` — `GameTaxon`, `Guess` | `test/spec019-persistence.test.ts` | Implemented |
-| UX-001 | `.markSame` / `.markClose` + glyph + words | `test/ui/spec028-clue-marks.test.tsx` | Implemented |
-| UX-002 | `OCCURRENCE_WORDS`, the key line | `test/ui/spec028-clue-marks.test.tsx` | Implemented |
-| UX-003 | `hasGeography()` + the withheld-channel note | `test/ui/spec028-clue-marks.test.tsx`, `test/ui/atlas-loader.test.tsx` | Implemented |
-| UX-004 | the live-region sentence | `test/ui/spec028-clue-marks.test.tsx` | Implemented |
+| UX-001 | `.markSame` / `.markClose` + glyph + words | `test/ui/spec028-clue-table.test.tsx` | Implemented |
+| UX-002 | `OCCURRENCE_WORDS`, the key line | `test/ui/spec028-clue-table.test.tsx` | Implemented |
+| UX-003 | `hasGeography()` + the withheld-channel note | `test/ui/spec028-clue-table.test.tsx`, `test/ui/atlas-loader.test.tsx` | Implemented |
+| UX-004 | the live-region sentence | `test/ui/spec028-clue-table.test.tsx` | Implemented |
 
 ## Implementation notes
 
@@ -594,11 +594,20 @@ regenerate.
 - The pool reconstruction used for the REQ-003 measurement was validated against
   the running app: it yields exactly 1,492 guessable and 985 pool entries, the
   same figures the screen displays.
-- **REQ-004's open risk did not materialise.** Measured in Chromium at 1440×1000
-  after seven guesses on the shipped snapshot: the diagram's `scrollWidth` is
-  438 px against a `clientWidth` of 436 px, so the marks cost 2 px of horizontal
-  scroll, not the overflow the requirement flagged. Rows land at their depth
-  (32, 48, 64 … 192 px) and no connector crosses a label.
+- **REQ-004's open risk did materialise, and AMEND-001 is the answer.** The
+  first implementation put the marks on the guess rows; at 1440×1000 that
+  measured 438 px of content against 436 px of region — 2 px of overflow, which
+  looked harmless and was not. The 2 px produced a horizontal scrollbar, and
+  because `.diagram` carried an inline height equal to its own content, that
+  scrollbar was laid out inside the height and `overflow-y: hidden` clipped the
+  last row. Both halves are fixed: the marks moved to their own table
+  (AMEND-001), and the height moved to an inner `.canvas` so a scrollbar can
+  never clip again. Re-measured after the change, seven guesses, shipped
+  snapshot: 1440×1000 → 1024 px of content in 1024 px of region, no scrollbar,
+  last row fully visible; 390×844 → 496 px of content in 366 px of region, the
+  **region** scrolling and the page body not, last row still fully visible.
+  Rows land at their depth (32, 48, 64 … 192 px) and no connector crosses a
+  label.
 - **UX-001's contrast was measured, not assumed.** `--color-overlap` for `same`
   resolves to `rgb(14, 107, 62)` at **6.58:1** against the surface, and
   `--color-attention` for `close` to `rgb(138, 90, 18)` at **5.91:1**. Both clear
@@ -612,7 +621,58 @@ regenerate.
 
 ## Spec amendments
 
-None yet.
+### AMEND-001 — the two clue channels move off the tree into a separate guess table
+
+- **Date:** 2026-08-26
+- **Reason:** The owner reviewed the shipped screen and directed: "you must
+  separate the hints of occurence and country from the taxonomic tree. Perhaps
+  with a separated list of the guesses with columns for each" (2026-08-26).
+  Two measured problems back the report. First, the marks lengthened the guess
+  rows past the diagram's `MAX_LABEL_PX` label reserve, which pushed the region
+  into horizontal overflow — and because `.diagram` carried an inline height
+  equal to its own content while scrolling on `overflow-x: auto`, the resulting
+  scrollbar was laid out inside that fixed height and clipped the last row, so
+  the tree was **cut off vertically** as well. Second, the tree positions a guess
+  by *clade*, so guesses sit at different depths and different rows; a player
+  comparing "which countries have I seen shared" had to scan a diagonal.
+- **Changed requirements:** **REQ-004** is **replaced in full**. Its statement
+  ("Both verdicts are marks on the guess's own row in the tree"), its rationale,
+  its acceptance criteria and its recorded open risk are retired. The replacement:
+
+  > **REQ-004 (as amended): The two channels are rendered as a per-guess table.**
+  > The verdicts are rendered together in one region beneath the board, as a real
+  > table with a caption or an equivalent labelled structure: one row per guess in
+  > guess order, with a column for the guess's name, a column for its
+  > shared-countries verdict, and a column for its occurrence verdict. The region
+  > is absent — not empty — before any guess is made. It does not restate the
+  > clade verdict, which the tree owns, or the time verdict, which the Ma column
+  > owns. **No mark from either channel is rendered inside the cladogram**, so the
+  > diagram's row widths are exactly what SPEC-025 sized them for.
+
+  Everything else in SPEC-028 is unchanged: both verdicts, their wording, the
+  "not recorded" distinction, UX-001's glyph-before-colour rule, UX-002's
+  record-count wording, UX-003's designed states and UX-004's announcement.
+- **Why the original design was wrong, recorded honestly.** REQ-004 chose marks
+  on the tree by reading `docs/mockups/anti-slop-checklist.md` — "a verdict is a
+  mark on the object, not a badge beside it", and the worked example's rejection
+  of "a separate guess list in the right panel". That reading was too literal.
+  The checklist rejects a guess list that **duplicates** the tree's own verdict;
+  these two channels are not in the tree and not in the column, and the tree
+  cannot position them meaningfully because its axis is clade, not geography. The
+  checklist's own rule 6 is the one that applies — "let the data structure the
+  layout" — and for a per-guess comparison the structure is a table. The
+  requirement also carried an explicit open risk about row width, which
+  materialised in the form above.
+- **Behavioral impact:** No verdict changes; only where it is drawn. The
+  cladogram returns to exactly the rows SPEC-025 specifies, which removes the
+  horizontal overflow and the vertical clipping it caused.
+- **Test impact:** `test/ui/spec028-clue-table.test.tsx` is rewritten against the
+  table: row-per-guess, guess order, the three columns, every designed state, the
+  absent-index degradation, the copy check, and a new assertion that **no clue
+  mark appears inside the diagram**. The browser-free verdict tests in
+  `test/spec028-clue-channels.test.ts` are unaffected and pass unmodified, which
+  is the evidence that this is a rendering change and not a logic one.
+- **Human approval reference:** Owner decision in session, 2026-08-26.
 
 ## Review checklist
 

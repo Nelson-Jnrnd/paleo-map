@@ -28,9 +28,10 @@
 
 .head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border);
 }
@@ -106,12 +107,14 @@
  * segmented control, no border box (anti-slop checklist). A rule and the labels
  * carry it.
  */
+/* SPEC-020 AMEND-006: the option sits on the header row, so it aligns with the
+   puzzle identity rather than occupying a band of its own above the board. */
 .tracks {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  margin: var(--space-3) 0 0;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
 }
 
 .trackGroup {
@@ -120,21 +123,25 @@
   gap: var(--space-3);
 }
 
-/* SPEC-024 REQ-001: selection is carried by weight and a rule as well as by
-   colour, and by aria-checked for assistive technology. */
+/* Owner request, 2026-08-26: these must read as buttons, so they are outlined.
+   SPEC-024 REQ-001 still holds — selection is carried by weight and a filled
+   ground as well as by colour, and by `aria-checked` for assistive technology,
+   so it survives with colour removed. */
 .trackButton {
-  padding: var(--space-1) 0;
+  padding: var(--space-1) var(--space-3);
   min-height: var(--target-min);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   color: var(--color-text-muted);
+  font: inherit;
   font-size: 0.8125rem;
   cursor: pointer;
 }
 
 .trackButton:hover {
   color: var(--color-text-hi);
+  border-color: var(--color-text-faint);
 }
 
 .trackButton:focus-visible {
@@ -143,9 +150,40 @@
 }
 
 .trackButtonOn {
-  color: var(--color-text-hi);
+  color: var(--color-on-accent);
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
   font-weight: 700;
-  border-bottom-color: var(--color-accent-deep);
+}
+
+.trackButtonOn:hover {
+  color: var(--color-on-accent);
+  border-color: var(--color-accent-deep);
+}
+
+/* SPEC-020 AMEND-006: the information control. Always rendered, so the caveat is
+   always one deliberate action away; the disclosure it opens is a real element
+   below the header, never a `title`. */
+.aboutToggle {
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0 var(--space-1);
+  background: none;
+  border: none;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.aboutToggle:hover {
+  color: var(--color-text-hi);
+}
+
+.aboutToggle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 /* REQ-003: a fixed slot, so previewing the other track's size on hover or focus
@@ -157,17 +195,15 @@
   color: var(--color-text-faint);
 }
 
+/* The disclosed caveat. A left rule marks it as a note, the same idiom the
+   practice and rollover banners use — not a popover box floating over the page. */
 .trackAbout {
-  margin: 0;
-  flex-basis: 100%;
-  font-size: var(--text-min);
-  color: var(--color-text-faint);
-}
-
-.trackAbout {
-  flex-basis: 100%;
   margin: 0;
   max-width: 46rem;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
 }
 
 /* ── board: the tree, and the stratigraphic column ──────────────────────── */
@@ -190,13 +226,28 @@
    Two coordinate systems described one picture, so a wrapped label put them out
    of step. Now every row owns a fixed pitch and both layers are positioned from
    the same integers, so they cannot disagree and labels cannot collide. */
+/* The scrolling region. It carries no height of its own: the sized `.canvas`
+   inside it does. That separation is the fix for a real defect — with the height
+   on this element, a horizontal scrollbar was laid out *inside* the content box
+   and `overflow-y: hidden` clipped the last row, so the tree was cut off
+   vertically by its own scrollbar. Now the scrollbar sits under the canvas and
+   the region simply grows by its thickness. */
 .diagram {
-  position: relative;
   margin: var(--space-4) 0 0;
   /* UX-001: the region scrolls rather than wrapping, with the trunk's origin at
      its left edge so the spine stays put while eliminations scroll into view. */
   overflow-x: auto;
-  overflow-y: hidden;
+  /* And the *region* is what scrolls — never the page. The sized canvas inside
+     is free to be wider than the viewport; this keeps its container from
+     shrink-wrapping to it and pushing the body into a horizontal scroll
+     (UX-001 acceptance criterion 3). */
+  max-width: 100%;
+}
+
+/* The coordinate space both layers position against (SPEC-025 REQ-002): its
+   height and width are pushed in as inline styles from the layout's integers. */
+.canvas {
+  position: relative;
 }
 
 .diagram:focus-visible {
@@ -312,6 +363,12 @@
 
 .markClose {
   color: var(--color-attention);
+}
+
+/* The neutral end of the scale. Named rather than left unstyled so every verdict
+   has a class and the table cannot silently lose one. */
+.markFar {
+  color: var(--color-text);
 }
 
 /* Both keys space their entries with `gap` and nothing else — the spacer span
@@ -514,6 +571,51 @@
   margin: var(--space-2) 0 0;
   font-size: var(--text-min);
   color: var(--color-text-muted);
+}
+
+/* ── the clue table (SPEC-028 REQ-004, amended 2026-08-26) ──────────────────
+   A table, not a panel: hairline rules and alignment carry it, so it reads like
+   a printed plate rather than a card. No border box, no chips. */
+.clues {
+  margin: var(--space-5) 0 0;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  max-width: 40rem;
+  width: 100%;
+}
+
+.cluesCaption {
+  text-align: left;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-2);
+}
+
+.clues th,
+.clues td {
+  text-align: left;
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border-bottom: 1px solid var(--color-divider);
+  vertical-align: baseline;
+  font-weight: 400;
+}
+
+.clues thead th {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+  border-bottom-color: var(--color-border);
+}
+
+.clueName {
+  color: var(--color-text-hi);
+  font-style: italic;
+}
+
+.clueCountries {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
 }
 
 /* ── the guess line: a rule, not a boxed field ──────────────────────────── */
@@ -721,6 +823,11 @@
      would leave a dead gap under a short tree. */
   .treeWrap {
     flex: 0 0 auto;
+    /* Take the column's width, not the diagram's content width. Without this the
+       section shrink-wraps the over-wide canvas and the *page* scrolls sideways
+       instead of the region (UX-001 acceptance criterion 3). */
+    width: 100%;
+    min-width: 0;
   }
 
   .column {
