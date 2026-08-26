@@ -5,8 +5,8 @@
 import { describe, expect, it } from "vitest";
 import type { ReadOccurrence, ReadTaxon } from "../../src/domain/index.js";
 import {
-  NOT_CLASSIFIED_KEY,
   groupByLocality,
+  classifiesAt,
   groupByTaxon,
   indexTaxaById,
 } from "../../src/app/state/grouping.js";
@@ -140,24 +140,40 @@ describe("SPEC-010 REQ-004/005: groupByTaxon with rank roll-up", () => {
     expect(groups.find((g) => g.name === "Ceratopsia")!.count).toBe(1);
   });
 
-  it("buckets records above the tier as not-classified, always last", () => {
-    // An occurrence identified only to a clade (Theropoda) cannot roll down to a genus.
+  it("excludes records that do not classify at the tier (SPEC-026 REQ-004)", () => {
+    // An occurrence identified only to a clade (Theropoda) cannot roll down to a
+    // genus. Before SPEC-026 it went into a trailing "not classified" bucket;
+    // the owner instructed that the bucket be filtered out of the taxon units
+    // (2026-08-14). The record is untouched at the Occurrence and Locality
+    // units — it is excluded from *this* unit, not from the atlas.
     const withIndet = [...occurrences, occ("o4", "c:thero", "colD", 80, 82)];
     const groups = groupByTaxon(withIndet, "genus", TAXA);
-    const last = groups[groups.length - 1]!;
-    expect(last.notClassified).toBe(true);
-    expect(last.key).toBe(NOT_CLASSIFIED_KEY);
-    expect(last.count).toBe(1);
-    expect(last.name).toMatch(/not classified at genus/i);
+    expect(groups.every((g) => Boolean(g.taxonId))).toBe(true);
+    expect(groups.some((g) => /not classified/i.test(g.name))).toBe(false);
+    // The classified groups are unaffected by the record's presence.
+    expect(groups).toEqual(groupByTaxon(occurrences, "genus", TAXA));
   });
 
-  it("buckets a taxon absent from the snapshot as not-classified", () => {
+  it("yields no group at all when nothing classifies at the tier", () => {
     const groups = groupByTaxon(
       [occ("o1", "g:unknown", "colA", 66, 68)],
       "genus",
       TAXA,
     );
-    expect(groups).toHaveLength(1);
-    expect(groups[0]!.notClassified).toBe(true);
+    expect(groups).toHaveLength(0);
+  });
+
+  it("classifiesAt is the predicate the unit filters by", () => {
+    const indet = occ("o4", "c:thero", "colD", 80, 82);
+    expect(classifiesAt(indet, "genus", TAXA)).toBe(false);
+    expect(classifiesAt(occurrences[0]!, "genus", TAXA)).toBe(true);
+  });
+
+  it("orders taxon groups by count descending, then name (SPEC-026 REQ-005)", () => {
+    // The render cap makes the order decide what is *not* shown, so the busiest
+    // groups must come first rather than the alphabetically luckiest.
+    const groups = groupByTaxon(occurrences, "genus", TAXA);
+    const counts = groups.map((g) => g.count);
+    expect([...counts].sort((a, b) => b - a)).toEqual(counts);
   });
 });

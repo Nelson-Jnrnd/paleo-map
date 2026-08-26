@@ -54,7 +54,7 @@ test("REQ-010: practice is labelled as not today's puzzle, and unrecorded", asyn
     .click(screen.getByRole("button", { name: /practice round/i }));
   expect(screen.getByText(/Practice — not today’s puzzle/i)).toBeTruthy();
   expect(screen.getByText(/Nothing here is recorded/i)).toBeTruthy();
-  expect(screen.getByText(/Daily Genus · practice/i)).toBeTruthy();
+  expect(screen.getByText(/Dinordle · practice/i)).toBeTruthy();
 });
 
 test("REQ-010: a practice round never draws today's genus", async () => {

@@ -36,7 +36,6 @@ test("REQ-009: the countdown reads the true interval to the next 00:00 UTC", () 
   render(
     <DailyGenusScreen
       api={api}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={() => new Date(`${dateKey}T17:47:16Z`)}
       store={memoryStore()}
@@ -53,7 +52,6 @@ test("REQ-009: the countdown ticks down against the clock", () => {
   render(
     <DailyGenusScreen
       api={api}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={() => new Date(instant)}
       store={memoryStore()}
@@ -74,7 +72,6 @@ test("REQ-013: a UTC date change never swaps the answer under the player", async
   render(
     <DailyGenusScreen
       api={api}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={() => new Date(instant)}
       store={memoryStore()}
@@ -102,7 +99,6 @@ test("REQ-013: the new day's round starts only on the explicit control", async (
   render(
     <DailyGenusScreen
       api={api}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={() => new Date(instant)}
       store={memoryStore()}
@@ -166,7 +162,6 @@ test("REQ-011: state stored for another UTC date does not resume", async () => {
   render(
     <DailyGenusScreen
       api={api}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={() => new Date("2027-01-01T12:00:00Z")}
       store={store}

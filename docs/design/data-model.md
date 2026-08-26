@@ -561,7 +561,7 @@ periodic re-import job, which is far cheaper than the alternatives.
 | Identifiable source per occurrence/time range (FONC-1100, PERF-140/150, CONS-390/400) | Every L1 row carries a `Source`; the app can't render without one |
 | Distinguish primary / database / editorial (CONS-420) | `SourceKind` + `Source.derivedFrom` chain |
 | Fossil-derived vs interpretative (FONC-670, FONC-1110, CONS-440) | Derived `interpretative` flag from `Source.kind`; assertions never mixed with facts in one field |
-| Reconstructed / approximate marked (FONC-1130/1140, CONS-110/210) | Derived flags from `rotationModel` and `spansMultipleStages` |
+| Approximate time marked (FONC-1140, CONS-210) | Derived flag from `spansMultipleStages`. *(FONC-1130/CONS-110's reconstructed-position cue retired by SPEC-021, 2026-08-14; `rotationModel` is still carried in the data.)* |
 | Missing shown explicitly (FONC-490, FONC-1120, PERF-180/190) | Nullable typed fields + derived `missing` flag |
 | Validity/doubtful flagged with basis (FONC-720, CONS-300/310) | `TaxonomicOpinion` + winning opinion shown with its reference |
 | Content levels (FONC-430…470) | Derived `ContentLevel` from populated structured fields |

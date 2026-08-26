@@ -7,7 +7,7 @@
 
 import { readFileSync } from "node:fs";
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   DAILY_FRAGMENT,
@@ -98,7 +98,7 @@ test("REQ-012/NFR-001: the shell opens the puzzle from #daily with no network", 
     render(<ExplorationView api={harnessApi()} />);
 
     await waitFor(() =>
-      expect(screen.getByText(/Daily Genus · No\./i)).toBeTruthy(),
+      expect(screen.getByText(/Dinordle · No\./i)).toBeTruthy(),
     );
     expect(fetchSpy).not.toHaveBeenCalled();
   } finally {
@@ -115,11 +115,15 @@ test("REQ-012: leaving the puzzle clears the fragment", async () => {
   const { harnessApi } = await import("./spec019-harness.js");
   render(<ExplorationView api={harnessApi()} />);
 
+  // SPEC-022 REQ-004/NFR-001: leaving the puzzle now happens through the app
+  // bar's Map destination. The fragment contract is unchanged — leaving must
+  // clear the fragment exactly once and must not re-open the puzzle.
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: /back to map/i })).toBeTruthy(),
+    expect(screen.getByRole("navigation", { name: /main/i })).toBeTruthy(),
   );
+  const mainNav = screen.getByRole("navigation", { name: /main/i });
   await userEvent
     .setup()
-    .click(screen.getByRole("button", { name: /back to map/i }));
+    .click(within(mainNav).getByRole("button", { name: "Map" }));
   await waitFor(() => expect(globalThis.location.hash).toBe(""));
 });

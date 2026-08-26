@@ -107,44 +107,59 @@
  * carry it.
  */
 .tracks {
-  border: none;
-  border-left: 2px solid var(--color-divider);
-  margin: 0;
-  padding: var(--space-1) 0 var(--space-1) var(--space-3);
   display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-5);
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
 }
 
-.tracksLegend {
-  padding: 0;
-  font-size: var(--text-min);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.trackChoice {
+.trackGroup {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
-  cursor: pointer;
+  gap: var(--space-3);
+}
+
+/* SPEC-024 REQ-001: selection is carried by weight and a rule as well as by
+   colour, and by aria-checked for assistive technology. */
+.trackButton {
+  padding: var(--space-1) 0;
   min-height: var(--target-min);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
   font-size: 0.8125rem;
-  color: var(--color-text);
+  cursor: pointer;
 }
 
-.trackChoice input {
-  accent-color: var(--color-accent-deep);
-}
-
-.trackName {
+.trackButton:hover {
   color: var(--color-text-hi);
 }
 
-.trackNote,
+.trackButton:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.trackButtonOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
+/* REQ-003: a fixed slot, so previewing the other track's size on hover or focus
+   never reflows the header. */
+.trackDetail {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
 .trackAbout {
+  margin: 0;
+  flex-basis: 100%;
   font-size: var(--text-min);
   color: var(--color-text-faint);
 }
@@ -169,49 +184,82 @@
   min-width: 0;
 }
 
-.trunk {
-  list-style: none;
+/* --- Cladogram (SPEC-025) --------------------------------------------------
+   The old render indented an <ol> and faked its connectors with CSS
+   pseudo-elements sized in `rem`, while the rows were sized by their content.
+   Two coordinate systems described one picture, so a wrapped label put them out
+   of step. Now every row owns a fixed pitch and both layers are positioned from
+   the same integers, so they cannot disagree and labels cannot collide. */
+.diagram {
+  position: relative;
   margin: var(--space-4) 0 0;
+  /* UX-001: the region scrolls rather than wrapping, with the trunk's origin at
+     its left edge so the spine stays put while eliminations scroll into view. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.diagram:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.connectors {
+  position: absolute;
+  inset: 0;
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
+.trunk,
+.cuts {
+  list-style: none;
+  margin: 0;
   padding: 0;
 }
 
-/*
- * Each node is indented one step deeper than its parent and draws its own
- * connector: a riser up to the parent's row and an elbow across to the dot.
- * That is the whole cladogram — no absolute positioning, so it reflows and
- * stays keyboard- and screen-reader-legible.
- */
-.node {
-  position: relative;
-  padding-left: calc(var(--depth, 0) * 0.875rem);
+/* The list items are structure only — they carry no box. Each row's positioned
+   span is what the reader sees, and it positions against `.diagram`, so nesting
+   depth in the DOM never affects where a row lands. */
+.trunkItem,
+.cutItem {
+  position: static;
 }
 
-.nodeRow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  position: relative;
-  padding: var(--space-1) 0;
-}
-
-.node + .node .nodeRow::before {
-  content: "";
+.row {
   position: absolute;
-  left: calc(-0.875rem + 4px);
-  top: -0.35rem;
-  width: 0.875rem;
-  height: 0.85rem;
-  border-left: 1.5px solid var(--color-text);
-  border-bottom: 1.5px solid var(--color-text);
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--row-pitch, 21px);
+  /* The label's line box must fit inside the row pitch, or consecutive rows
+     collide even though their origins are exactly one pitch apart — measured at
+     21.8px against a 21px pitch before this was set, which the non-overlap gate
+     caught. A tight line box is what makes one-label-per-row actually true. */
+  line-height: 1;
+  /* UX-001: one line, never wrapped, never ellipsised. */
+  white-space: nowrap;
 }
 
 .dot {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--clade-tint, #b4bcc6);
-  border: 1px solid var(--color-text-faint);
   flex: none;
+  background: var(--clade-tint, var(--color-text-faint));
+  border: 1.5px solid transparent;
+}
+
+/* REQ-003: a ruled-out row carries no clade tint — an unfilled dot with a ring,
+   so the ring is never read against a tint. */
+.ringDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ruled-out);
 }
 
 .nodeName {
@@ -219,86 +267,23 @@
   color: var(--color-text-hi);
 }
 
+.ruledOut .nodeName {
+  color: var(--color-text-muted);
+}
+
+/* REQ-004: the deepest node keeps its teal ring, its weight and its rule. */
+.frontier .dot {
+  border-color: var(--color-accent-deep);
+}
+
 .frontier .nodeName {
   font-weight: 700;
   border-bottom: 1.5px solid var(--color-accent);
 }
 
-.frontier .dot {
-  border-color: var(--color-accent-deep);
-  border-width: 2px;
-}
-
-.rank {
+.deepest {
   font-size: var(--text-min);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-}
-
-.reached {
-  font-style: italic;
-  font-size: 0.8125rem;
   color: var(--color-accent-deep);
-}
-
-/* Ruled-out branches: the same tree, thinner and grey, ending in a terminal. */
-.cuts {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 var(--space-1) 0.9rem;
-}
-
-.cut {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  position: relative;
-  padding: 2px 0 2px var(--space-4);
-  color: var(--color-text-faint);
-  font-size: 0.8125rem;
-}
-
-.cut::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: -0.3rem;
-  width: var(--space-3);
-  height: 0.75rem;
-  border-left: 1.2px solid var(--color-border);
-  border-bottom: 1.2px solid var(--color-border);
-}
-
-.cutMark {
-  color: var(--color-text-faint);
-}
-
-.cutName {
-  color: var(--color-text-faint);
-}
-
-.cutBy {
-  font-style: italic;
-  color: var(--color-text-muted);
-}
-
-.unresolved {
-  margin: var(--space-1) 0 0;
-  padding-left: calc(var(--depth, 0) * 0.875rem);
-  font-size: 0.8125rem;
-  color: var(--color-text-faint);
-  border-left: none;
-}
-
-.unresolved::before {
-  content: "";
-  display: inline-block;
-  width: 0.875rem;
-  height: 0.9rem;
-  margin-right: var(--space-2);
-  border-left: 1.5px dashed var(--color-text);
-  vertical-align: -0.35rem;
 }
 
 .key {
@@ -310,6 +295,26 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.keyRing {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ruled-out);
+  vertical-align: -1px;
+}
+
+.keyRingTeal {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+  border: 2px solid var(--color-accent-deep);
+  vertical-align: -1px;
 }
 
 .keyDot {
@@ -387,10 +392,6 @@
   opacity: 0.22;
 }
 
-.bandLit {
-  opacity: 0.62;
-}
-
 .bars {
   position: relative;
   height: 100%;
@@ -409,19 +410,68 @@
   height: 100%;
 }
 
+/* SPEC-024 REQ-005: the verdict is carried by fill-versus-outline first and by
+   colour second, so it survives with colour removed. */
 .bar {
   position: absolute;
   left: 0;
   width: 100%;
-  background: var(--color-accent);
-  opacity: 0.5;
+  border-radius: 1px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.periodNote {
-  margin: var(--space-3) 0 0;
+.barOverlaps {
+  background: var(--color-overlap);
+}
+
+.barMisses {
+  background: none;
+  border: 1px solid var(--color-text-faint);
+}
+
+/* REQ-006: the direction mark sits at the bar and points along the axis toward
+   where the answer lies. */
+.barMark {
+  position: absolute;
+  top: -0.85em;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+/* REQ-007: a guess with no recorded span is marked at the foot of its slot,
+   outside the plotting area — never a zero-height or full-height bar. */
+.barMissing {
+  position: absolute;
+  bottom: -1.1em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-faint);
+}
+
+/* REQ-006: the treatment key, in the shape the tree's key already uses. */
+.timeKey {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.keyBar {
+  display: inline-block;
+  width: 6px;
+  height: 10px;
+  vertical-align: -1px;
+  border-radius: 1px;
+}
+
+.noSpanNote {
+  margin: var(--space-2) 0 0;
   font-size: var(--text-min);
   color: var(--color-text-muted);
-  max-width: 20rem;
 }
 
 /* ── the guess line: a rule, not a boxed field ──────────────────────────── */
@@ -507,8 +557,7 @@
 
 .entryNote,
 .note,
-.record,
-.provenance {
+.record {
   font-size: var(--text-min);
   color: var(--color-text-faint);
 }

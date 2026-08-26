@@ -980,12 +980,223 @@ playtested; and the answer is in the client bundle by construction (SEC-001).
 
 ### AMEND-001
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-08-14
+- **Reason:** SPEC-021 deletes the screen footer that carried "Per PBDB snapshot
+  {date} — a placement is a sourced opinion, not a settled fact", on the owner's
+  instruction to delete rather than relocate. The snapshot date it carried is
+  moved into the answer reveal so the provenance is stated at the moment the game
+  asserts a placement.
+- **Changed requirements:** **UX-004** — the snapshot date is now shown **in the
+  answer reveal**, alongside `accepted per …`, rather than standing in the screen
+  footer for the whole round. Both acceptance criteria are still met literally:
+  the reveal opens by itself when the round finishes, so the date is behind
+  neither a hover nor a second click, and the reveal still shows `acceptedPer`.
+  The third criterion ("no copy asserts a placement without its source") is
+  unaffected. This amendment records the narrowing of *when* the date is on
+  screen; UX-004's statement is otherwise unchanged. The traceability row for
+  UX-004 already reads "snapshot date + `acceptedPer` in the reveal" and becomes
+  accurate for the first time.
+- **Behavioral impact:** During a round the snapshot date is no longer displayed;
+  it appears with the reveal. The "a placement is a sourced opinion, not a settled
+  fact" sentence is retired as copy — the reveal's `accepted per …` line remains
+  the mechanism that names whose classification is being played on. The screen
+  footer no longer renders at all unless the storage-blocked note is present. The
+  tree heading is separately renamed from "Established classification" to
+  "Taxonomic tree" (SPEC-021 UX-006); no requirement in this spec mandated that
+  string, so it needs no amendment.
+- **Test impact:** In `test/ui/spec019-daily-screen.test.tsx` the UX-004 test is
+  rewritten to play a round to completion and assert the date on the reveal; the
+  domain-language test's `"established classification"` expectation becomes
+  `"taxonomic tree"`. `test/e2e/spec019-daily.e2e.ts` moves its snapshot-date
+  assertion to the reveal and updates the heading probe. No test is deleted or
+  skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
+### AMEND-002 — the puzzle is named Dinordle, and its entry point is the global app bar
+
+- **Date:** 2026-08-14
+- **Reason:** The owner named the product **Dinordle** (chosen from Cladle /
+  Saurdle / Dinordle / Taxordle) and asked for a real app bar carrying Map /
+  Dinordle / Taxonomy on every screen (SPEC-022). "Daily Genus" was a
+  description, not a name, and the puzzle's only entry point was one button in
+  the map screen's context bar — invisible from the other three screens.
+- **Changed requirements:** **REQ-012** — the entry point is the **global app
+  bar** (SPEC-022 REQ-001/002), present on all four screens, and the control is
+  labelled **Dinordle**; the fragments `#daily` and `#practice` and their
+  meanings are **unchanged**, and no routing library is added. **REQ-011** — the
+  shared summary's leading label is the product name and therefore now begins
+  `Dinordle `; its spoiler-free content rules (no taxon name, rank, clade name,
+  depth or distance) and its storage behaviour are unchanged. Every other prose
+  use of "Daily Genus" in this spec, including the title, becomes "Dinordle". No
+  other requirement changes.
+- **Behavioral impact:** Display only, plus a better entry point. Explicitly
+  **unchanged**: the four URL fragments (SPEC-022 API-001), the local-storage
+  keys `paleo-map:daily-genus:round` / `:record` / `:track` and the stored
+  payload shapes (SPEC-022 DATA-001) — renaming them would silently zero every
+  player's record and streak and drop an in-progress round, because
+  `dailyGenusStorage.ts` has no migration path and reads a missing key as "no
+  stored state". Also unchanged: selection, pools, guess evaluation, the revealed
+  tree, the time clue, the hint, the countdown, rollover, and SEC-001/SEC-002.
+  The screen's own "← Back to map" button is removed; the app bar's **Map**
+  destination is the one-action return, so REQ-012's back contract still holds.
+- **Test impact:** `test/spec019-persistence.test.ts` (summary string),
+  `test/ui/spec019-states.test.tsx`, `test/ui/spec019-practice.test.tsx`,
+  `test/ui/spec019-entry-point.test.tsx` (label and the return control),
+  `test/e2e/spec019-daily.e2e.ts` and `test/e2e/a11y.e2e.ts` update their
+  expected strings and drive the app bar instead of the removed back button.
+  `test/ui/spec020-track-fragments.test.tsx` must pass **unmodified** — that is
+  the evidence the addresses did not move. New:
+  `test/spec022-rename-compatibility.test.ts` pins the literal storage keys and
+  fragments. No test is skipped or deleted.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
+### AMEND-003 — the time clue becomes a per-guess overlap verdict; the answer's period is no longer disclosed
+
+- **Date:** 2026-08-14
+- **Reason:** The owner reported that the Ma column is not understood in play
+  ("I don't understand how the Ma reveal work in the puzzle", 2026-08-14). As
+  built, every guess draws an identical teal bar and the only per-guess verdict —
+  older / younger / overlaps — exists solely in `visuallyHidden` text, so a
+  sighted player is told nothing per guess; the answer's period is disclosed by
+  raising one ICS band's opacity from 0.22 to 0.62, a change few players notice
+  and none can be expected to interpret. SPEC-024 replaces the mechanic with one
+  that is legible on the axis itself.
+- **Changed requirements:** REQ-006 (the time clue). The statement drops "and
+  disclosing the answer's geological period once a guess's span overlaps it" and
+  gains: each guess's span is drawn as one bar on the shared Ma axis, rendered
+  solid in a new overlap status token when it overlaps the answer's span and
+  hollow in a neutral token when it does not, with a visible direction mark on a miss showing
+  whether the answer is older or younger, every treatment named in words in a
+  key, and a guess with no recorded span rendering an explicit visible
+  missing-value mark and statement in place of a bar. The acceptance criterion
+  "The answer's period is disclosed only after a guess whose span overlaps it,
+  and never before" is **deleted** and replaced by "The answer's geological
+  period is never named during a round; the answer's time span continues to be
+  stated in the reveal (REQ-007)." The remaining criteria — the older / younger /
+  overlapping decision, the explicit "Not available", and inventing no value —
+  are unchanged. `timeVerdict()` and its four-member `TimeVerdict` type are
+  unchanged.
+- **Behavioral impact:** The game stops disclosing one aggregate fact (the
+  answer's geological period) mid-round, and starts showing two per-guess facts
+  that were previously invisible to sighted players (overlap-or-miss, and the
+  direction of the miss). No band changes weight at any point. The reveal at the
+  end of the round is unchanged and still states the answer's time span in Ma.
+  Answers, guess evaluation, the revealed tree, the eight-guess budget, the
+  stored round schema and the shared summary are all unchanged — `shareSummary`
+  never encoded the time verdict, so no shared result changes meaning. A guess
+  with no recorded time span stops being invisible.
+- **Test impact:** `test/ui/spec019-states.test.tsx` — the REQ-006 period test
+  (lines 101-126) is rewritten in place to assert the new bar treatments and that
+  no rendered text names the answer's period during a round; the no-span test
+  (lines 130-136) is extended with the visible mark and statement. Its
+  `visuallyHidden` assertions are kept.
+  `test/ui/spec019-daily-screen.test.tsx` gains an assertion that each bar's
+  verdict is carried by a non-colour attribute as well as its fill.
+  `test/spec019-clue-rows.test.ts` passes **unmodified** (the pure verdict logic
+  is untouched), as do `test/spec019-guess-evaluation.test.ts`,
+  `test/spec019-persistence.test.ts` and `test/spec020-share-track.test.ts`. No
+  test is skipped or deleted. `docs/mockups/daily-genus.md` and the two mockup
+  SVGs are updated in the same PR.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
+### AMEND-004 — the revealed tree is drawn as a horizontal cladogram; its contents are unchanged
+
+- **Date:** 2026-08-14
+- **Reason:** The owner reported the tree's rendering as defective — "would be
+  better if the render of the tree was better it's wonky text here you think it's
+  easy to make a real horizontal tree?" (2026-08-14). As built, the tree is an
+  indented `<ol>` whose connectors are CSS pseudo-element elbows of a fixed `rem`
+  height hung off rows whose height is content-driven, so a wrapped clade name
+  leaves the elbow floating and the diagram visibly comes apart. SPEC-025
+  replaces the rendering with a real horizontal rectangular cladogram whose
+  connector geometry is computed from each label's row and depth.
+- **Changed requirements:** **REQ-005** only, and only in how the surface is
+  drawn — the unresolved continuation is handled separately, by AMEND-005. Its
+  statement — the trunk from `Dinosauria` to the deepest shared clade, the
+  ruled-out child branch per guess labelled with the guessed genus, only nodes a
+  guess has touched, no node marked confirmed unless it is an ancestor of the
+  answer — is **unchanged** by this block. What is added, by SPEC-025
+  REQ-001…REQ-004 and UX-001, is a constraint on the rendering: the tree is drawn
+  root-left with depth increasing rightward, exactly one label per row, branch
+  connectors drawn in an `aria-hidden` SVG layer from row and depth integers,
+  each ruled-out branch drawn as a ringed node in a shared column with the guess
+  that ruled it out as a ringed leaf one indent further right, and no label
+  wrapping — a diagram wider than its pane scrolls horizontally with the trunk
+  pinned. The guessed genus appearing as its own node is **not** new content: it
+  is the same string REQ-005 already requires the ruled-out branch to be
+  "labelled with", moved from a suffix to a row, and it is a node a guess has
+  touched by definition, so REQ-005's no-siblings rule is not weakened.
+  **UX-003 is preserved** except as amended by AMEND-005: the accessible
+  structure stays an ordered list in root-first order with the same
+  `visuallyHidden` state sentences, plus a nested item for the guess carrying its
+  own sentence, and nothing moves into the SVG. **UX-001 is unchanged**: the clade
+  tint keeps its cross-screen role, teal stays the only accent for the
+  deepest-reached marks, and every state stays legible in shape and in words.
+  **REQ-004 and REQ-014 are unchanged**: no depth, distance or out-of-subtree node
+  is rendered — the guess leaf is placed one schematic indent below its branch and
+  never states the real distance.
+- **Behavioral impact:** Visual only, plus a scroll affordance. The set of taxa
+  named, their order, their words, the deepest-reached and elimination marks and
+  the hidden annotations are all identical; `revealedTree()`, `TrunkNode` and
+  `RevealedTree` are not modified. Nothing about selection, guess evaluation, the
+  time clue, the hint, the budget, storage or the shared summary changes. The one
+  new user-visible behaviour is that at a very deep lineage in a narrow pane the
+  diagram scrolls sideways instead of wrapping.
+- **Test impact:** `test/spec019-revealed-tree.test.ts` must pass
+  **unmodified** — that is the evidence the model did not change. Selector-only
+  edits in `test/ui/spec019-daily-screen.test.tsx` (its deepest-node lookup uses
+  the hashed class name `[class*="frontier"]`, replaced by the `data-tree-*`
+  hooks) and `test/ui/spec019-states.test.tsx`; no assertion about content is
+  weakened.
+  New: `test/spec025-cladogram-layout.test.ts`,
+  `test/ui/spec025-cladogram-render.test.tsx`,
+  `test/ui/spec025-cladogram-css.test.ts` and the geometry gate
+  `test/e2e/cladogram.e2e.ts`. `test/e2e/a11y.e2e.ts` and
+  `test/ui/spec019-no-egress.test.tsx` pass unmodified. No test is skipped or
+  deleted.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
+### AMEND-005 — the unresolved continuation is removed from the revealed tree
+
+- **Date:** 2026-08-14
+- **Reason:** Reviewing the SPEC-025 mockup, the owner simplified the tree's key
+  to three entries and removed the fourth outright: *"the descent continues — how
+  far is not stated → nothing"* (2026-08-14). The key is the only place a mark is
+  defined in words, so a mark whose entry is gone has no word left; keeping the
+  drawn `?` would leave an undefined mark on the diagram, which is worse than
+  removing it. SPEC-025 REQ-004 therefore removes the mark itself.
+- **Changed requirements:** **REQ-005** and **UX-003**.
+  - REQ-005's statement currently requires the tree to show "an unresolved
+    continuation below the deepest confirmed ancestor". That clause is
+    **retired**. Its acceptance criterion "At no point does the tree render a node
+    that no guess has touched, **other than the unresolved continuation, which
+    carries no name, id, or silhouette**" is amended by deleting the exception:
+    the tree now renders only nodes a guess has touched, with no exception. Every
+    other clause and criterion of REQ-005 stands.
+  - UX-003's statement lists the states a tree node's accessible name must
+    describe as "confirmed ancestor / ruled out / **unresolved**". The third is
+    **retired**; the first two stand unchanged, and no other part of UX-003 —
+    keyboard operability, the live region, colour never being the sole carrier,
+    WCAG 2 AA — is touched.
+- **Behavioral impact:** A disclosure is removed, for sighted and screen-reader
+  players alike. Mid-round, the diagram and the list now end at the deepest
+  established clade with nothing after it; a fresh round is a single node,
+  `Dinosauria`, with nothing below it. The tree no longer states that the descent
+  continues below the deepest node reached, so a player may read the diagram as
+  ending the lineage there. That is a real cost against the design charter's
+  first-class-uncertainty rule (§2) and is accepted on the owner's instruction. No
+  node, name, id, silhouette or clue is added or withdrawn — the continuation
+  never carried any — and `revealedTree()`'s `unresolved` field is untouched in
+  the model; it simply stops being rendered.
+- **Test impact:** `test/spec019-revealed-tree.test.ts` passes **unmodified** (it
+  asserts the model's `unresolved` flag, not the rendering).
+  `test/ui/spec019-states.test.tsx` and `test/ui/spec019-daily-screen.test.tsx`
+  lose their assertions that the rendered tree shows the unresolved continuation;
+  those assertions are **replaced, not deleted** — by an assertion in
+  `test/ui/spec025-cladogram-render.test.tsx` that no unresolved mark, word or
+  hidden statement is rendered in any state, so the removal is itself gated.
+  `test/e2e/a11y.e2e.ts` passes unmodified.
+- **Human approval reference:** Owner approval in session, 2026-08-14
 
 ## Review checklist
 

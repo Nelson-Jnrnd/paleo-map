@@ -203,7 +203,7 @@ test("REQ-011/REQ-004: the shared summary names no taxon and reports no distance
   // Dinosauria, Velociraptor Coelurosauria, Gorgosaurus Tyrannosauridae, and
   // the winning guess the answer itself.
   const summary = shareSummary(round);
-  expect(summary).toBe("Daily Genus 1 · 6/8 · hint · ▲·▲▲·▲");
+  expect(summary).toBe("Dinordle 1 · 6/8 · hint · ▲·▲▲·▲");
 
   const forbidden = [
     ...data.guessable.map((t) => t.scientificName),

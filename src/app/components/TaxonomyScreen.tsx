@@ -31,7 +31,6 @@ interface TaxonomyScreenProps {
   api: ReadApi;
   /** The taxon in focus. Falls back to the scope root when out of scope. */
   taxonId: string | null;
-  onBack: () => void;
   onSelectTaxon: (taxonId: string) => void;
   /** Open the taxon's page (the Wikipedia embed) — kept as a distinct action. */
   onOpenProfile?: (taxonId: string) => void;
@@ -40,7 +39,6 @@ interface TaxonomyScreenProps {
 export function TaxonomyScreen({
   api,
   taxonId,
-  onBack,
   onSelectTaxon,
   onOpenProfile,
 }: TaxonomyScreenProps): ReactElement {
@@ -79,11 +77,6 @@ export function TaxonomyScreen({
   if (!focusId) {
     return (
       <section className={styles.profile} aria-label="Taxonomy">
-        <div className={styles.topbar}>
-          <button type="button" className={styles.back} onClick={onBack}>
-            ← Back to map
-          </button>
-        </div>
         <p className={styles.taxEmpty}>
           This snapshot holds no <span className="sciName">Dinosauria</span>, so
           there is no taxonomy to show.
@@ -98,9 +91,6 @@ export function TaxonomyScreen({
   return (
     <section className={styles.profile} aria-label="Taxonomy">
       <div className={styles.topbar}>
-        <button type="button" className={styles.back} onClick={onBack}>
-          ← Back to map
-        </button>
         {onOpenProfile && focus && (
           <button
             type="button"

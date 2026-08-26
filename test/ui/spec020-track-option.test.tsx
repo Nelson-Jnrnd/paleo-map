@@ -7,7 +7,7 @@
  */
 
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ReadApi } from "../../src/read/api.js";
 import { DailyGenusScreen } from "../../src/app/components/DailyGenusScreen.js";
@@ -63,7 +63,6 @@ function renderScreen(
     ...render(
       <DailyGenusScreen
         api={api}
-        onBack={vi.fn()}
         onOpenProfile={vi.fn()}
         now={clockOn("2026-08-11")}
         random={() => 0}
@@ -86,8 +85,8 @@ test("REQ-004: the option offers both puzzles and defaults to every genus", () =
   renderScreen(rankedModel());
   const every = screen.getByRole("radio", { name: /every genus/i });
   const known = screen.getByRole("radio", { name: /well-known/i });
-  expect((every as HTMLInputElement).checked).toBe(true);
-  expect((known as HTMLInputElement).checked).toBe(false);
+  expect(every.getAttribute("aria-checked")).toBe("true");
+  expect(known.getAttribute("aria-checked")).toBe("false");
 });
 
 test("REQ-004: choosing a track persists and is reported to the shell", async () => {
@@ -100,11 +99,15 @@ test("REQ-004: choosing a track persists and is reported to the shell", async ()
   expect(onTrackChange).toHaveBeenCalledWith("wellKnown");
   expect(loadTrack(store)).toBe("wellKnown");
   expect(
-    (screen.getByRole("radio", { name: /well-known/i }) as HTMLInputElement)
-      .checked,
-  ).toBe(true);
-  // The header states which puzzle is being played.
-  expect(screen.getByText(/Daily Genus · No\. \d+ · well-known/i)).toBeTruthy();
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
+  ).toBe("true");
+  // SPEC-024 REQ-001: the header states the chosen track exactly once — on the
+  // selected control — so the `· well-known` suffix is gone from the identity
+  // line. Asserted both ways so the statement cannot silently double up again.
+  expect(screen.queryByText(/Dinordle · No\. \d+ · well-known/i)).toBeNull();
+  expect(screen.getByText(/Dinordle · No\. \d+/i)).toBeTruthy();
 });
 
 test("REQ-004: a stored choice is honoured on the next visit", () => {
@@ -115,9 +118,10 @@ test("REQ-004: a stored choice is honoured on the next visit", () => {
   );
   renderScreen(rankedModel(), {}, store);
   expect(
-    (screen.getByRole("radio", { name: /well-known/i }) as HTMLInputElement)
-      .checked,
-  ).toBe(true);
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
+  ).toBe("true");
 });
 
 test("REQ-003: the tracks are independent puzzles over their own pools", () => {
@@ -188,9 +192,10 @@ test("REQ-004: practice honours the chosen track", async () => {
   expect(screen.getByText(/Practice — not today’s puzzle/i)).toBeTruthy();
   expect(screen.getByLabelText("Guess a genus")).toBeTruthy();
   expect(
-    (screen.getByRole("radio", { name: /well-known/i }) as HTMLInputElement)
-      .checked,
-  ).toBe(true);
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
+  ).toBe("true");
 });
 
 test("UX-001: the option says what the ranking is, and what it is not", () => {
@@ -225,10 +230,64 @@ test("REQ-008/UX-003: with no popularity the option is absent and the full track
 
 test("UX-004: the option is a labelled radio group, operable by keyboard", async () => {
   renderScreen(rankedModel());
-  const group = screen.getByRole("group", { name: /which puzzle/i });
+  const group = screen.getByRole("radiogroup", { name: /which puzzle/i });
   expect(group).toBeTruthy();
   const known = screen.getByRole("radio", { name: /well-known/i });
   known.focus();
   await userEvent.setup().keyboard("{ }");
-  expect((known as HTMLInputElement).checked).toBe(true);
+  expect(known.getAttribute("aria-checked")).toBe("true");
+});
+
+/* SPEC-024 REQ-001…REQ-003 — the track choice as two header controls ---------- */
+
+test("SPEC-024 REQ-002: the attention caveat is visible for both tracks, never on demand", async () => {
+  const { container } = renderScreen(rankedModel());
+  const caveat = /a measure of attention, not of scientific importance/i;
+
+  // Visible on the default track, with no interaction at all.
+  expect(screen.getByText(caveat)).toBeTruthy();
+  // And still visible after switching — this is provenance, so the charter
+  // forbids it being conditional on which track is chosen.
+  await userEvent
+    .setup()
+    .click(screen.getByRole("radio", { name: /well-known/i }));
+  expect(screen.getByText(caveat)).toBeTruthy();
+
+  // It is a rendered element, not a tooltip: nothing in this region may carry
+  // the statement in a `title`, which is unreachable by touch and by keyboard.
+  for (const el of container.querySelectorAll("[title]")) {
+    expect(el.getAttribute("title")).not.toMatch(caveat);
+  }
+});
+
+test("SPEC-024 REQ-003: the pool size is described, and previews on focus as well as hover", async () => {
+  renderScreen(rankedModel());
+  const every = screen.getByRole("radio", { name: /every genus/i });
+  const known = screen.getByRole("radio", { name: /well-known/i });
+
+  // The detail is a real element the control points at — not a bare title.
+  const describedBy = every.getAttribute("aria-describedby");
+  expect(describedBy).toBeTruthy();
+  const detail = document.getElementById(describedBy!);
+  expect(detail).not.toBeNull();
+  expect(every.getAttribute("title")).toBeNull();
+  expect(known.getAttribute("title")).toBeNull();
+
+  // The selected track's size is shown with no interaction.
+  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
+
+  // Keyboard focus previews the other track's size — hover is not the only path.
+  fireEvent.focus(known);
+  expect(detail!.textContent).toMatch(/most read about/i);
+  fireEvent.blur(known);
+  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
+
+  // Pointer hover previews it too, in the same slot.
+  fireEvent.mouseEnter(known);
+  expect(detail!.textContent).toMatch(/most read about/i);
+  fireEvent.mouseLeave(known);
+  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
+
+  // The slot is not a live region: it must not be announced on every hover.
+  expect(detail!.getAttribute("aria-live")).toBeNull();
 });

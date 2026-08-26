@@ -740,6 +740,89 @@ will fill most of them in.
 - **Human approval reference:** **Approved by the owner, 2026-08-11** ("I
   validate everything"), on the implementation report of the same day.
 
+### AMEND-003 — the product is named Dinordle; addresses and per-track keys are unchanged
+
+- **Date:** 2026-08-14
+- **Reason:** The owner renamed the puzzle from "Daily Genus" to **Dinordle**
+  (SPEC-022 REQ-007). This spec names the product in its title, its prose and in
+  the one string it owns: the shared summary's label.
+- **Changed requirements:** **REQ-006** only — the shared summary's leading label
+  is the product name and now reads `Dinordle <n> · well-known · …`; the rule
+  this requirement exists for, that the summary **names its track**, and the
+  ` · well-known` suffix itself, are unchanged. Every prose use of "Daily Genus",
+  including the title, becomes "Dinordle". **REQ-001…REQ-005, REQ-007 and
+  REQ-008 are unchanged.**
+- **Behavioral impact:** Display only. Explicitly **unchanged**, and deliberately
+  so: **REQ-007** — the four addresses `#daily`, `#practice`, `#daily-known`,
+  `#practice-known` keep their exact spellings, because renaming them would break
+  every link and bookmark already shared. **REQ-005/REQ-008** — the per-track
+  storage keys (`paleo-map:daily-genus:record[:wellKnown]`,
+  `…:round[:wellKnown]`, `…:track`) keep their exact spellings, because
+  `dailyGenusStorage.ts` has no migration path: a renamed key reads as absent,
+  which would reset played/won/streak/best-streak to zero, discard an
+  in-progress round, and silently switch a well-known player back to the full
+  track — precisely the regression REQ-008 exists to prevent. The popularity
+  signal, the pool, the per-track salt and the degradation behaviour are
+  untouched.
+- **Test impact:** `test/spec020-share-track.test.ts` and
+  `test/ui/spec020-track-option.test.tsx` update their expected summary/eyebrow
+  strings. `test/ui/spec020-track-fragments.test.tsx` and
+  `test/spec020-popularity-cache.test.ts` must pass **unmodified**. New:
+  `test/spec022-rename-compatibility.test.ts` asserts the per-track keys and the
+  four fragments literally. No test is skipped or deleted.
+- **Human approval reference:** Owner approval in session, 2026-08-14
+
+### AMEND-004 — the track option becomes two named controls in the header, with the pool sizes on demand and the caveat still always visible
+
+- **Date:** 2026-08-14
+- **Reason:** The owner reported the option as "awkward and too wordy" and asked
+  for controls in the header with the detail on hover (2026-08-14). As built it
+  is a fieldset with the legend "Which puzzle", two labels each carrying a name
+  and a scope note, and a caveat paragraph — four blocks of copy for a two-way
+  choice, sitting between the header and the tree on a screen whose subject is
+  the tree.
+- **Changed requirements:** REQ-004 (the track option). The statement gains: the
+  choice is presented as exactly two controls in the screen header, labelled with
+  the domain names "Every genus" and "Well-known" — never a difficulty word — and
+  exposed as a single-choice group of two options with the accessible group name
+  "Which puzzle". Each track's **pool size** may be carried in an on-demand
+  detail, provided that detail is revealed on pointer hover **and** on keyboard
+  focus, is reachable on a touch device with no hover, and is exposed as the
+  control's accessible description through a real element rather than a `title`
+  attribute. The **ranking caveat required by UX-001 and UX-002** — English
+  Wikipedia, the stated window, how often people read the article, and "a
+  measure of attention, not of scientific importance" — must remain rendered and
+  visible whenever the control is rendered and must never move behind a hover or
+  any other on-demand disclosure. The header names the chosen track exactly once.
+  Existing acceptance criteria are retained, including "the option is visible on
+  the screen and is not hidden behind a hover", and one is added: the pool sizes
+  are reachable without a pointer. **UX-001 and UX-002 are not amended** — they
+  are satisfied unchanged, because the caveat stays visible.
+- **Behavioral impact:** None to which puzzle is played, to the answer sequences,
+  to per-track records and streaks, to the non-destructive switch that preserves
+  each track's open round, to persistence, to practice, or to the four fragments.
+  The visible surface loses the legend and the two scope notes (the sizes move to
+  the detail) and loses the duplicate `· well-known` suffix on the puzzle-identity
+  line, which the selected control now carries. Nothing about provenance becomes
+  less legible: the caveat is in the same always-visible class it was before.
+- **Test impact:** `test/ui/spec020-track-option.test.tsx` — the header-suffix
+  assertion (line 107) and the two scope-note strings are updated; new tests
+  cover the caveat's presence with no interaction, the accessible description
+  resolving to the pool size, the keyboard-focus preview, and the absence of a
+  `title`-attribute implementation. Keeping the native radio inputs inside a
+  fieldset with a visually hidden legend leaves the `getByRole("radio", …)` and
+  `getByRole("group", { name: /which puzzle/i })` queries working;
+  `test/ui/spec020-track-fragments.test.tsx` and
+  `test/ui/spec020-no-egress.test.tsx` then need no change, and
+  `test/e2e/spec019-daily.e2e.ts` keeps its `.check()` call. If the
+  implementation instead uses ARIA radios, those four files are updated to
+  `aria-checked` and `click()`. `test/e2e/a11y.e2e.ts` is the gate and must stay
+  green on both tracks. `test/spec020-share-track.test.ts` and
+  `test/spec020-well-known-pool.test.ts` pass unmodified. No test is skipped or
+  deleted. The "The track choice (SPEC-020)" section of
+  `docs/mockups/daily-genus.md` and the mockup SVGs are updated in the same PR.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

@@ -119,12 +119,10 @@ test("REQ-007/NFR-001: booting at #daily-known opens that track with no network"
     render(<ExplorationView api={rankedApi()} />);
     await waitFor(() =>
       expect(
-        (
-          screen.getByRole("radio", {
-            name: /well-known/i,
-          }) as HTMLInputElement
-        ).checked,
-      ).toBe(true),
+        screen
+          .getByRole("radio", { name: /well-known/i })
+          .getAttribute("aria-checked"),
+      ).toBe("true"),
     );
     expect(fetchSpy).not.toHaveBeenCalled();
   } finally {

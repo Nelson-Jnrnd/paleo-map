@@ -11,8 +11,8 @@
 import { MESOZOIC_PERIODS, MESOZOIC_STAGES } from "../../domain/index.js";
 import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
-import { DEFAULT_RANK_TIER } from "./grouping.js";
-import type { GroupingMode, RankTier } from "./grouping.js";
+import { DEFAULT_RANK_TIER, modeAndRankOf } from "./grouping.js";
+import type { GroupingMode, ListUnit, RankTier } from "./grouping.js";
 
 /** Full Mesozoic stages, oldest → youngest (deep-time reads left → right). */
 export const EXPLORATION_STAGES: readonly GeologicalStage[] = MESOZOIC_STAGES;
@@ -37,13 +37,13 @@ export const DEFAULT_GROUP = "Dinosaurs";
 
 export type Screen = "map" | "profile" | "taxonomy" | "daily";
 
-/** Which round the Daily Genus screen opens in (SPEC-019 REQ-010/012). */
+/** Which round the Dinordle screen opens in (SPEC-019 REQ-010/012). */
 export type DailyMode = "daily" | "practice";
 
 /** Which of the two parallel puzzles (SPEC-020 REQ-004/007). */
 export type DailyTrack = "full" | "wellKnown";
 
-export type { GroupingMode, RankTier } from "./grouping.js";
+export type { GroupingMode, ListUnit, RankTier } from "./grouping.js";
 
 export interface ExplorationState {
   /** Selected geological stage — the timeline steps by stage (FONC-120). */
@@ -63,7 +63,7 @@ export interface ExplorationState {
   profileTaxonId: string | null;
   /** Taxon in focus on the taxonomy screen (SPEC-017). Null → the scope root. */
   taxonomyTaxonId: string | null;
-  /** Round the Daily Genus screen is playing (SPEC-019 REQ-010). */
+  /** Round the Dinordle screen is playing (SPEC-019 REQ-010). */
   dailyMode: DailyMode;
   /** Which parallel puzzle it is playing (SPEC-020 REQ-004). */
   dailyTrack: DailyTrack;
@@ -86,8 +86,9 @@ export const initialExplorationState: ExplorationState = {
 
 export type ExplorationAction =
   | { type: "selectStage"; stageName: string }
-  | { type: "setMode"; mode: GroupingMode }
-  | { type: "setRank"; rank: RankTier }
+  // SPEC-026 API-001: one atomic action for the flat unit selector. It sets
+  // mode and rank together, because the control asks one question.
+  | { type: "setUnit"; unit: ListUnit }
   | { type: "selectOccurrence"; occurrenceId: string }
   | { type: "selectLocality"; collectionId: string }
   | { type: "selectTaxon"; taxonKey: string }
@@ -128,14 +129,14 @@ export function explorationReducer(
         stageName: action.stageName,
         ...NO_SELECTION,
       };
-    case "setMode":
-      // Switch the grouping unit; drop selections that no longer map. Stage,
-      // rank and (upstream) the map viewport are preserved (SPEC-010 REQ-001).
-      return { ...state, mode: action.mode, ...NO_SELECTION };
-    case "setRank":
-      // Re-grouping changes the taxon groups, so the current taxon selection is
-      // dropped; stage/mode preserved (SPEC-010 REQ-005).
-      return { ...state, rank: action.rank, selectedTaxonKey: null };
+    case "setUnit": {
+      // Switch the row unit; drop selections that no longer map. Stage and
+      // (upstream) the map viewport are preserved (SPEC-010 REQ-001). The rank
+      // carries through the non-taxon units, so leaving Genus for Occurrence and
+      // coming back lands on Genus again rather than resetting the tier.
+      const { mode, rank } = modeAndRankOf(action.unit, state.rank);
+      return { ...state, mode, rank, ...NO_SELECTION };
+    }
     case "selectOccurrence":
       return {
         ...state,

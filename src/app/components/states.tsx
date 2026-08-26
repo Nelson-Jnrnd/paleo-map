@@ -85,7 +85,13 @@ export function ErrorState({
   onRetry,
 }: {
   message: string;
-  onRetry: () => void;
+  /**
+   * Omitted where there is nothing to retry — the Dinordle data-error surfaces
+   * are a bad snapshot, not a failed fetch, and since SPEC-022 the app bar is
+   * always present as the way out, so a button that only navigated away would
+   * duplicate a destination (REQ-004).
+   */
+  onRetry?: (() => void) | undefined;
 }): ReactElement {
   return (
     <div className={styles.stateWrap} role="alert">
@@ -93,9 +99,11 @@ export function ErrorState({
         Could not load the snapshot
       </p>
       <p>{message}</p>
-      <button type="button" className={styles.primary} onClick={onRetry}>
-        Retry
-      </button>
+      {onRetry && (
+        <button type="button" className={styles.primary} onClick={onRetry}>
+          Retry
+        </button>
+      )}
     </div>
   );
 }

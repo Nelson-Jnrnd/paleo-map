@@ -1,71 +1,57 @@
 /**
- * Grouping-mode control + rank selector (SPEC-010 REQ-001/005). An always-visible
- * segmented control switches the grouping unit (Occurrences / Localities / Taxa);
- * in Taxon mode a rank selector chooses the roll-up tier (Genus / Family / Major
- * group). Domain language, legible as text, keyboard-operable; the active mode is
- * carried by `aria-pressed` (not colour alone — charter §4, PERF-250).
+ * The list's unit selector (SPEC-026 REQ-001). One always-visible control over
+ * five flat options — Occurrence · Locality · Genus · Family · Major group.
+ *
+ * It replaces the mode segmented control plus the rank `<select>` that appeared
+ * only in Taxon mode: two controls answering one question, where the third mode
+ * secretly spawned a dropdown. The option set is identical in every state of the
+ * column, so nothing appears, disappears or changes size as a result of choosing.
+ *
+ * Active state is carried by weight, a rule *and* `aria-checked` — never colour
+ * alone (PERF-250).
  */
 
 import type { ReactElement } from "react";
-import { RANK_TIERS, RANK_TIER_LABEL } from "../state/grouping.js";
-import type { GroupingMode, RankTier } from "../state/grouping.js";
+import { LIST_UNITS, LIST_UNIT_LABEL } from "../state/grouping.js";
+import type { ListUnit } from "../state/grouping.js";
 import styles from "./exploration.module.css";
 
-const MODES: ReadonlyArray<{ mode: GroupingMode; label: string }> = [
-  { mode: "occurrence", label: "Occurrences" },
-  { mode: "locality", label: "Localities" },
-  { mode: "taxon", label: "Taxa" },
-];
-
 interface GroupingControlsProps {
-  mode: GroupingMode;
-  rank: RankTier;
-  onSelectMode: (mode: GroupingMode) => void;
-  onSelectRank: (rank: RankTier) => void;
+  unit: ListUnit;
+  onSelectUnit: (unit: ListUnit) => void;
+  /** Loading and error keep the options visible but inert (charter §7). */
+  disabled?: boolean;
 }
 
 export function GroupingControls({
-  mode,
-  rank,
-  onSelectMode,
-  onSelectRank,
+  unit,
+  onSelectUnit,
+  disabled = false,
 }: GroupingControlsProps): ReactElement {
   return (
-    <div className={styles.listHeaderTop}>
+    <div className={styles.unitBar}>
+      <span className={styles.unitLabel} id="unit-selector-label">
+        One row per
+      </span>
       <div
-        className={styles.groupByToggle}
-        role="group"
-        aria-label="Group occurrences by"
+        className={styles.unitGroup}
+        role="radiogroup"
+        aria-labelledby="unit-selector-label"
       >
-        {MODES.map((m) => (
+        {LIST_UNITS.map((u) => (
           <button
-            key={m.mode}
+            key={u}
             type="button"
-            aria-pressed={mode === m.mode}
-            onClick={() => onSelectMode(m.mode)}
+            role="radio"
+            aria-checked={unit === u}
+            disabled={disabled}
+            className={`${styles.unitOption} ${unit === u ? styles.unitOptionOn : ""}`}
+            onClick={() => onSelectUnit(u)}
           >
-            {m.label}
+            {LIST_UNIT_LABEL[u]}
           </button>
         ))}
       </div>
-
-      {mode === "taxon" && (
-        <label className={styles.rankField}>
-          <span className={styles.statLabel}>Group by rank</span>
-          <select
-            className={styles.rankSelect}
-            aria-label="Group by rank"
-            value={rank}
-            onChange={(e) => onSelectRank(e.target.value as RankTier)}
-          >
-            {RANK_TIERS.map((tier) => (
-              <option key={tier} value={tier}>
-                {RANK_TIER_LABEL[tier]}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
     </div>
   );
 }

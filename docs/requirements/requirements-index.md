@@ -43,7 +43,7 @@ brevity.
 | FONC-270 | MVP | Paleogeographic map | Allow a displayed occurrence to be selected. |
 | FONC-280 | MVP | Paleogeographic map | Show an information panel when an occurrence is selected. |
 | FONC-290 | MVP | Paleogeographic map | Panel shows taxon, time range, modern & paleo position, source. |
-| FONC-300 | MVP | Paleogeographic map | Clearly indicate the map is a paleogeographic reconstruction. |
+| FONC-300 | MVP | Paleogeographic map | ~~Clearly indicate the map is a paleogeographic reconstruction.~~ Retired by SPEC-021 (2026-08-14). |
 | FONC-310 | V1 | Paleogeographic map | Allow a present-day continents comparison layer. |
 | FONC-320 | V1 | Paleogeographic map | Allow occurrence display to be toggled on/off. |
 | FONC-330 | V2 | Paleogeographic map | Animate the map transition between two ages. |
@@ -126,7 +126,7 @@ brevity.
 | FONC-1100 | MVP | Sources & uncertainty | Display an identifiable source per visible occurrence. |
 | FONC-1110 | MVP | Sources & uncertainty | Distinguish fossil-derived data from interpretative data. |
 | FONC-1120 | MVP | Sources & uncertainty | Indicate missing info instead of an unmarked assumption. |
-| FONC-1130 | MVP | Sources & uncertainty | Indicate when a geographic position is reconstructed. |
+| FONC-1130 | MVP | Sources & uncertainty | ~~Indicate when a geographic position is reconstructed.~~ Retired by SPEC-021 (2026-08-14). |
 | FONC-1140 | MVP | Sources & uncertainty | Indicate when a time range is approximate. |
 | FONC-1150 | MVP | Sources & uncertainty | Show occurrences as discovery evidence, not distribution. |
 | FONC-1160 | V1 | Sources & uncertainty | Show a confidence level for interpretative info when available. |
@@ -173,7 +173,7 @@ brevity.
 | CONS-090 | V1 | Scientific scope | Limit secondary groups to an explicitly defined list. |
 | CONS-100 | MVP | Scientific scope | Avoid wording equating secondary content with dinosaurs. |
 | CONS-110 | MVP | Geographic representation | Distinguish modern from reconstructed coordinates. |
-| CONS-120 | MVP | Geographic representation | State ancient maps are reconstructions, not observations. |
+| CONS-120 | MVP | Geographic representation | ~~State ancient maps are reconstructions, not observations.~~ Retired by SPEC-021 (2026-08-14). |
 | CONS-130 | MVP | Geographic representation | Do not present fossil points as exact life positions. |
 | CONS-140 | MVP | Geographic representation | Present fossil points as discovery/collection locations. |
 | CONS-150 | MVP | Geographic representation | Do not extrapolate continuous distribution from points. |

@@ -35,11 +35,14 @@ click (CONS-490):
 
 - Fossil points are **discovery evidence**, never a distribution range or an
   exact life position (FONC-1150, CONS-130/140).
-- **Reconstructed** paleo positions carry a standing map-level "Paleogeographic
-  reconstruction" label, and time ranges that **span multiple stages** are labeled
-  as such (FONC-1130/1140). *(SPEC-007, 2026-07-21: the per-occurrence
-  "reconstructed" chip was retired in favour of the standing map label; the time
-  cue was reworded from "approximate" to the factual "spans multiple stages".)*
+- Time ranges that **span multiple stages** are labeled as such (FONC-1140).
+  Reconstructed paleo positions carry **no on-screen cue**; the rotation model
+  behind them stays inspectable in the basemap attribution popover.
+  *(SPEC-021, 2026-08-14, owner-approved: the standing map-level "Paleogeographic
+  reconstruction" label was removed, retiring FONC-300, CONS-120 and FONC-1130
+  with it. SPEC-007, 2026-07-21: the per-occurrence "reconstructed" chip had
+  already been retired in favour of that label, and the time cue was reworded
+  from "approximate" to the factual "spans multiple stages".)*
 - **Missing** data is shown with an explicit label, never a blank or a silent
   default (FONC-490, FONC-1120, PERF-180).
 - *(SPEC-007, 2026-07-21, owner-approved: the fossil-derived vs. **interpretative**

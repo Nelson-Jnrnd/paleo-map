@@ -26,6 +26,7 @@ test("occurrence panel shows provenance fields and the primary action", async ()
       occurrence={occ}
       onOpenProfile={() => {}}
       onClose={() => {}}
+      backLabel="Back to 5 occurrence(s) in view"
     />,
   );
 
@@ -56,6 +57,7 @@ test("a paleoposition shows its coordinates without a reconstructed cue (SPEC-00
       occurrence={occ}
       onOpenProfile={() => {}}
       onClose={() => {}}
+      backLabel="Back to 5 occurrence(s) in view"
     />,
   );
 

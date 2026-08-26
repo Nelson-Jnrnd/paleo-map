@@ -35,10 +35,12 @@ test("shows selected age in Ma, group, and a matching occurrence count", async (
   );
   expect(Number(countEl.textContent)).toBe(expected);
 
-  // Not presented as a complete atlas of all Mesozoic life (FONC-400).
+  // SPEC-021 UX-001: the scope subtext under the title is removed on the owner's
+  // instruction, and SPEC-003 REQ-005's disclaimer criterion retired with it
+  // (SPEC-003 AMEND-005). FONC-400 is a prohibition, satisfied by omission.
   expect(
-    screen.getByText(/not a complete atlas of Mesozoic life/i),
-  ).toBeInTheDocument();
+    screen.queryByText(/not a complete atlas of Mesozoic life/i),
+  ).not.toBeInTheDocument();
 
   // The main controls (timeline, reset) stay visible (CONS-450).
   expect(

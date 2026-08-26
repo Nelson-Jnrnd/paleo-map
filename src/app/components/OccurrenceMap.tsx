@@ -72,6 +72,21 @@ function clusterDiscRadius(count: number): number {
   return 13;
 }
 
+/**
+ * The accessible name for a cluster badge (SPEC-021 REQ-001, restoring SPEC-010
+ * REQ-002's original criterion). A cluster's number is a count of *records* at a
+ * location — density — and never a count of distinct taxa; saying which unit is
+ * counted is the whole point of the name, so the unit follows the mode. Locality
+ * mode collapses collections, so it counts localities; every other mode plots one
+ * feature per occurrence record.
+ */
+export function clusterCountLabel(count: number, mode: GroupingMode): string {
+  if (mode === "locality") {
+    return `${count} ${count === 1 ? "locality" : "localities"}`;
+  }
+  return `${count} occurrence record${count === 1 ? "" : "s"}`;
+}
+
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
   selectedId: string | null;
@@ -348,6 +363,9 @@ export function OccurrenceMap({
   const multiRef = useRef(multi);
   multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
+  // UX-001: open by default, remembered for the session only — no storage, and
+  // never collapsed automatically by viewport size.
+  const [cladeKeyOpen, setCladeKeyOpen] = useState(true);
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
   >([]);
@@ -949,6 +967,9 @@ export function OccurrenceMap({
     ? cladeMarkerForTaxon(carded.taxonId, taxaById)
     : null;
   const showCladeUi = mode !== "locality";
+  // The clade key renders only when the map is actually up and the mode uses
+  // clade identity; the rail it lives in is suppressed when nothing renders.
+  const cladeKeyVisible = available && mapLoaded && showCladeUi;
 
   return (
     <>
@@ -968,10 +989,16 @@ export function OccurrenceMap({
           </p>
         </div>
       )}
-      {available && mapLoaded && showCladeUi && (
+      {available && mapLoaded && (
         <>
           {/* Labels + cluster counts share the map's pixel coordinate space; the
-              overlay is non-interactive except the pinned card (which opts in). */}
+              overlay is non-interactive except the pinned card (which opts in).
+
+              SPEC-021 REQ-002: the overlay itself is no longer gated on
+              `showCladeUi` — the count badges must exist in Locality mode too, so
+              that REQ-001's accessible name has a carrier wherever clusters do.
+              The clade key, the name labels and the cards stay gated, which is
+              what `showCladeUi` was actually protecting. */}
           <div className={styles.mapOverlay}>
             {clusterCounts.map((c) => {
               const r = clusterDiscRadius(c.count);
@@ -980,23 +1007,29 @@ export function OccurrenceMap({
                   key={c.key}
                   className={styles.clusterCount}
                   style={{ left: c.x + r * 0.62, top: c.y - r * 0.62 }}
-                  aria-hidden="true"
+                  /* SPEC-021 REQ-001: the badge states the unit it counts, on the
+                     cluster itself. The visible glyph stays the bare number; the
+                     unit rides in the accessible name, so a cluster can never be
+                     read as a count of distinct taxa. */
+                  role="img"
+                  aria-label={clusterCountLabel(c.count, mode)}
                 >
                   {c.count}
                 </span>
               );
             })}
-            {labels.map((l) => (
-              <span
-                key={l.id}
-                className={`sciName ${styles.mapLabel}`}
-                style={{ left: l.x, top: l.y }}
-                aria-hidden="true"
-              >
-                {l.taxon}
-              </span>
-            ))}
-            {!multi && cardAnchor && carded && cardedMarker && (
+            {showCladeUi &&
+              labels.map((l) => (
+                <span
+                  key={l.id}
+                  className={`sciName ${styles.mapLabel}`}
+                  style={{ left: l.x, top: l.y }}
+                  aria-hidden="true"
+                >
+                  {l.taxon}
+                </span>
+              ))}
+            {showCladeUi && !multi && cardAnchor && carded && cardedMarker && (
               <MapHoverCard
                 content={hoverCardContent(carded, cardedMarker.label)}
                 x={cardAnchor.x}
@@ -1011,7 +1044,7 @@ export function OccurrenceMap({
                 onClose={() => setPinned(null)}
               />
             )}
-            {multi && (
+            {showCladeUi && multi && (
               <MapSpeciesCard
                 x={multi.x}
                 y={multi.y}
@@ -1033,73 +1066,111 @@ export function OccurrenceMap({
               />
             )}
           </div>
-          <div className={styles.mapLegend2} role="note" aria-label="Clade key">
-            {CLADE_MARKERS.map((m) => (
-              <span key={m.id} className={styles.legendItem}>
-                <span
-                  className={styles.legendSwatch}
-                  style={{ background: m.tint }}
-                />
-                <img className={styles.legendIcon} src={m.src} alt="" />
-                {m.label}
-              </span>
-            ))}
-          </div>
         </>
       )}
-      {basemap && frame && (
-        <div className={styles.basemapAttribution}>
-          <button
-            type="button"
-            className={styles.attributionToggle}
-            aria-expanded={attributionOpen}
-            aria-label="Basemap source and reconstruction details"
-            onClick={() => setAttributionOpen((open) => !open)}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              focusable="false"
+      {/* SPEC-023 REQ-002/REQ-003: the bottom-left rail — reading the map and its
+          provenance. DOM order is the reading order from the corner outward, so
+          the ⓘ comes first (corner-most) and its popover, which opens upward,
+          paints over its rail siblings without needing a z-index. The rail is
+          suppressed entirely when neither child renders (REQ-001). */}
+      {(cladeKeyVisible || (basemap && frame)) && (
+        <div
+          className={`${styles.mapRail} ${styles.railBottomLeft}`}
+          data-map-rail="bottom-left"
+        >
+          {basemap && frame && (
+            <div
+              className={styles.basemapAttribution}
+              data-map-overlay="basemap-attribution"
             >
-              <circle
-                cx="8"
-                cy="8"
-                r="7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-              <circle cx="8" cy="4.4" r="1" fill="currentColor" />
-              <rect
-                x="7.15"
-                y="6.6"
-                width="1.7"
-                height="5.2"
-                rx="0.5"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-          {attributionOpen && (
-            <div className={styles.attributionPopover} role="note">
-              <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
-              {basemap.meta.licence}
-              <br />
-              {!frameExact && (
-                <>
-                  Nearest available reconstruction ({basemap.meta.targetAgeMa}{" "}
-                  Ma) shown for {stageName}.{" "}
-                </>
+              <button
+                type="button"
+                className={styles.attributionToggle}
+                aria-expanded={attributionOpen}
+                aria-label="Basemap source and reconstruction details"
+                onClick={() => setAttributionOpen((open) => !open)}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  />
+                  <circle cx="8" cy="4.4" r="1" fill="currentColor" />
+                  <rect
+                    x="7.15"
+                    y="6.6"
+                    width="1.7"
+                    height="5.2"
+                    rx="0.5"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+              {attributionOpen && (
+                <div className={styles.attributionPopover} role="note">
+                  <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
+                  {basemap.meta.licence}
+                  <br />
+                  {!frameExact && (
+                    <>
+                      Nearest available reconstruction (
+                      {basemap.meta.targetAgeMa} Ma) shown for {stageName}.{" "}
+                    </>
+                  )}
+                  {frame.note} {basemap.meta.note}
+                  {reconstructedToFrame && (
+                    <>
+                      {" "}
+                      Occurrences are reconstructed to this frame’s age, so each
+                      point sits on the coastline shown (SPEC-016).
+                    </>
+                  )}
+                </div>
               )}
-              {frame.note} {basemap.meta.note}
-              {reconstructedToFrame && (
-                <>
-                  {" "}
-                  Occurrences are reconstructed to this frame’s age, so each
-                  point sits on the coastline shown (SPEC-016).
-                </>
+            </div>
+          )}
+          {cladeKeyVisible && (
+            <div
+              className={styles.mapLegend2}
+              role="note"
+              aria-label="Clade key"
+              data-map-overlay="clade-key"
+            >
+              {/* UX-001: the clade key is a reading aid, so it may be collapsed
+                  — by the reader, never automatically by viewport. Provenance
+                  and uncertainty overlays stay put. */}
+              <button
+                type="button"
+                className={styles.cladeKeyToggle}
+                aria-expanded={cladeKeyOpen}
+                onClick={() => setCladeKeyOpen((open) => !open)}
+              >
+                <span aria-hidden="true">{cladeKeyOpen ? "▾" : "▸"}</span> Clade
+                key
+              </button>
+              {cladeKeyOpen && (
+                <div className={styles.cladeKeyBody}>
+                  {CLADE_MARKERS.map((m) => (
+                    <span key={m.id} className={styles.legendItem}>
+                      <span
+                        className={styles.legendSwatch}
+                        style={{ background: m.tint }}
+                      />
+                      <img className={styles.legendIcon} src={m.src} alt="" />
+                      {m.label}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           )}

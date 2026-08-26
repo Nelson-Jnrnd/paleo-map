@@ -9,6 +9,64 @@
 }
 
 /* --- Context bar (permanent age / group / count) --- */
+/* --- Global app bar (SPEC-022 REQ-001…REQ-003) --------------------------- */
+/* One row: wordmark, then the three destinations. It wraps to a second line on a
+   narrow viewport rather than collapsing into a hidden menu (UX-002) — three
+   destinations always fit somewhere, and a menu would hide the whole point. */
+.appBar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wordmark {
+  font-size: 16px;
+  color: var(--color-text-hi);
+  margin-right: auto;
+  /* A long wordmark wraps rather than clipping (UX-002). */
+  min-width: 0;
+}
+
+.appNav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.navLink {
+  padding: var(--space-2) 0;
+  min-height: var(--target-min);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  /* The current-destination rule is drawn as a transparent border at rest, so
+     marking it current changes only the colour and never the row's height. */
+  border-bottom: 2px solid transparent;
+}
+
+.navLink:hover {
+  color: var(--color-text-hi);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+/* Current destination: weight *and* a rule, never colour alone (PERF-250). */
+.navCurrent {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -27,11 +85,6 @@
 
 .brandTitle {
   font-size: 16px;
-}
-
-.brandSub {
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
 }
 
 .context {
@@ -116,13 +169,28 @@
   color: var(--color-accent-deep);
 }
 
+/* SPEC-022 REQ-006: a quiet text control, not a peer of the navigation. No
+   border, no filled chrome, small type — but still a real 24px target and still
+   the words "Reset view", never an icon. */
 .reset {
-  padding: var(--space-2) var(--space-3);
-  min-height: var(--target-min);
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  padding: var(--space-2) 0;
+  min-height: 24px;
+  background: none;
+  color: var(--color-text-muted);
+  border: none;
+  font-size: var(--text-min);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reset:hover {
+  color: var(--color-text-hi);
+}
+
+.reset:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 .reset:hover {
@@ -389,11 +457,10 @@
 /* Basemap provenance — a compact info button at the map's bottom-left corner; the
    full source/licence/reconstruction text opens in a popover anchored above it,
    so the disclosure never spills across the map. */
+/* SPEC-023: a bottom-left rail child. The rail owns the corner; this element
+   keeps only its own positioning context, for the popover anchored to it. */
 .basemapAttribution {
-  position: absolute;
-  bottom: var(--space-3);
-  left: var(--space-3);
-  z-index: 3;
+  position: relative;
 }
 
 .attributionToggle {
@@ -453,28 +520,10 @@
   filter: drop-shadow(0 1px 0 var(--color-border));
 }
 
-.reconstructionBanner {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
-}
-
-/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. */
+/* SPEC-014 AMEND-005: Wikipedia-gate toggle over the map. SPEC-023 REQ-002
+   moved it out of the top-right corner, which is reserved for MapLibre's own
+   controls, into the bottom-right rail. */
 .wikiGateToggle {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -492,10 +541,70 @@
 }
 
 /* SPEC-015: map marker overlays (labels + hover card) in the map's pixel space. */
+/* --- Map overlay corner rails (SPEC-023 REQ-001…REQ-005) ------------------
+   The defect this replaces: six overlays each picked a corner in isolation, so
+   two of them collided in the bottom-left and a third sat under MapLibre's own
+   controls. A rail owns its corner offset; children never set their own.
+
+   Paint order (REQ-005): canvas and library controls, then map-space labels,
+   then rails, then transient pointer-anchored cards. */
+.mapRail {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* REQ-004: a rail can never grow into the opposite rail's half, and its
+     children wrap or scroll inside their own box rather than overflowing. */
+  max-width: calc(50% - var(--space-3));
+  /* The rail itself is a layout channel, not a surface: only its children are
+     hit-testable, so the rail never covers the canvas or a library control. */
+  pointer-events: none;
+}
+
+.mapRail > * {
+  pointer-events: auto;
+  /* REQ-001: the rail owns the corner. A child that sets its own offsets would
+     re-introduce exactly the defect this scheme removes. */
+  position: static;
+}
+
+.railTopLeft {
+  top: var(--space-3);
+  left: var(--space-3);
+  align-items: flex-start;
+}
+
+/* top-right is reserved for MapLibre's own controls (REQ-002) — no rail. */
+
+.railBottomLeft {
+  bottom: var(--space-3);
+  left: var(--space-3);
+  align-items: flex-start;
+  /* Bottom rails stack upward from the corner: the DOM order is the reading
+     order from the corner outward, so `column-reverse` puts the first child
+     (the ⓘ) nearest the corner (REQ-003). */
+  flex-direction: column-reverse;
+  /* REQ-004: capped so it cannot reach the top rails' band. */
+  max-height: 55%;
+}
+
+.railBottomRight {
+  bottom: var(--space-3);
+  right: var(--space-3);
+  align-items: flex-end;
+  flex-direction: column-reverse;
+  max-height: 55%;
+}
+
 .mapOverlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* SPEC-023 REQ-005: above the rails (z-index 2), so a hover or species card
+     anchored to a marker is never trapped under a corner rail. Map-space labels
+     and cluster badges live here too and are non-interactive, so a higher layer
+     costs the rails nothing. */
+  z-index: 3;
   pointer-events: none;
   overflow: hidden;
 }
@@ -699,11 +808,9 @@
   color: var(--color-text-muted);
 }
 
+/* SPEC-023: a bottom-left rail child, above the ⓘ. UX-001 makes it the one
+   collapsible overlay — it is a reading aid, not provenance. */
 .mapLegend2 {
-  position: absolute;
-  left: var(--space-3);
-  bottom: var(--space-3);
-  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -715,6 +822,40 @@
   color: var(--color-text-muted);
   max-height: 45%;
   overflow-y: auto;
+}
+
+/* SPEC-023 UX-001: the key's own disclosure control. Words, not an icon alone;
+   the caret is decorative. */
+.cladeKeyToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  min-height: 24px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  cursor: pointer;
+}
+
+.cladeKeyToggle:hover {
+  color: var(--color-text-hi);
+}
+
+.cladeKeyToggle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.cladeKeyBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  /* REQ-004: the key scrolls inside its own box rather than overflowing its
+     rail — the one overlay whose height grows with the data. */
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .legendItem {
@@ -750,6 +891,52 @@
 }
 
 /* --- Occurrence list (SPEC-009: viewport-linked, cross-highlighted) --- */
+/* --- One list row (SPEC-026 REQ-002, UX-002) ------------------------------ */
+.unitRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* UX-002: the clade tint reinforces which clade a row belongs to; the row's
+   identity is its name, and the clade is named in the row's accessible name and
+   in the detail it opens — so the tint never carries a meaning without words. */
+.unitRow[data-clade="true"] {
+  border-left-color: var(--clade-tint);
+}
+
+.unitRow:hover,
+.unitRow[data-highlighted="true"] {
+  background: var(--color-ground);
+}
+
+.unitRow:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.unitRow[aria-current="true"] {
+  background: var(--color-ground);
+  font-weight: 700;
+}
+
+.unitRowName {
+  font-size: 0.875rem;
+  color: var(--color-text-hi);
+}
+
+.unitRowMeta {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
 .listPane {
   display: flex;
   flex-direction: column;
@@ -774,6 +961,59 @@
 }
 
 /* --- Grouped / aggregated list (SPEC-005) --- */
+/* --- Unit selector (SPEC-026 REQ-001) ------------------------------------- */
+.unitBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.unitLabel {
+  font-size: var(--text-min);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.unitGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+.unitOption {
+  padding: var(--space-1) 0;
+  min-height: 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.unitOption:hover:not(:disabled) {
+  color: var(--color-text-hi);
+}
+
+.unitOption:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.unitOption:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.unitOptionOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
 .listHeaderTop {
   display: flex;
   align-items: center;
@@ -992,6 +1232,36 @@
   padding: var(--space-4);
   border-bottom: 2px solid var(--color-divider);
   background: color-mix(in srgb, var(--color-accent) 4%, var(--color-surface));
+}
+
+/* SPEC-026 REQ-003: the detail replaces the list, so its first control is a
+   back control that names what it returns to — not a bare ✕. */
+.panelBack {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panelBack:hover {
+  color: var(--color-text-hi);
+}
+
+.panelBack:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.panelClade {
+  margin: 0 var(--space-4);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
 }
 
 .panelHead {
@@ -1292,25 +1562,6 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-}
-
-/* Cluster-semantics legend (SPEC-010 REQ-002): a persistent disclosure that a
-   cluster counts records / localities (density), not distinct taxa — the canvas
-   cannot carry per-cluster accessible names, so the meaning lives in the DOM. */
-.mapLegend {
-  position: absolute;
-  bottom: var(--space-3);
-  /* Clear the basemap info button that anchors the map's bottom-left corner. */
-  left: calc(var(--space-3) + 30px + var(--space-2));
-  z-index: 2;
-  max-width: 22rem;
-  margin: 0;
-  padding: var(--space-1) var(--space-3);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-min);
-  color: var(--color-text-muted);
 }
 
 /* --- Taxon enrichment (SPEC-014 REQ-005) --- */

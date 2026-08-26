@@ -19,7 +19,7 @@ function forbidNetwork(): void {
   const boom = (what: string) => {
     return (...args: unknown[]): never => {
       attempts.push(`${what}:${String(args[0])}`);
-      throw new Error(`${what} is forbidden on the Daily Genus screen`);
+      throw new Error(`${what} is forbidden on the Dinordle screen`);
     };
   };
   vi.stubGlobal("fetch", boom("fetch"));
@@ -63,7 +63,6 @@ function renderTrack(track: "full" | "wellKnown") {
   return render(
     <DailyGenusScreen
       api={rankedApi()}
-      onBack={vi.fn()}
       onOpenProfile={vi.fn()}
       now={clockOn("2026-08-11")}
       random={() => 0}
@@ -83,7 +82,7 @@ async function guess(name: string): Promise<void> {
 
 test("NFR-001: the well-known track opens and plays with no network at all", async () => {
   renderTrack("wellKnown");
-  expect(screen.getByText(/ESTABLISHED CLASSIFICATION/i)).toBeTruthy();
+  expect(screen.getByText(/TAXONOMIC TREE/i)).toBeTruthy();
   await guess("Triceratops");
   expect(screen.getByText("1 of 8 guesses")).toBeTruthy();
   expect(attempts).toEqual([]);
@@ -95,9 +94,10 @@ test("NFR-001: switching track issues no request either", async () => {
     .setup()
     .click(screen.getByRole("radio", { name: /well-known/i }));
   expect(
-    (screen.getByRole("radio", { name: /well-known/i }) as HTMLInputElement)
-      .checked,
-  ).toBe(true);
+    screen
+      .getByRole("radio", { name: /well-known/i })
+      .getAttribute("aria-checked"),
+  ).toBe("true");
   expect(attempts).toEqual([]);
 });
 

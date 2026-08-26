@@ -42,8 +42,13 @@ test("no legend entry exists for water depth", () => {
   expect(map).not.toMatch(/legend[^\n]*\b(depth|shelf|slope|bathym)/i);
 });
 
-test("the standing reconstruction label is untouched", () => {
-  expect(exploration).toMatch(/Paleogeographic reconstruction/i);
+test("the standing reconstruction label is retired, not merely hidden", () => {
+  // SPEC-021 UX-003 (owner disposition A, 2026-08-14): the banner is deleted with
+  // no compensating carrier, and FONC-300, CONS-120 and FONC-1130 are retired with
+  // it (SPEC-018 AMEND-002). This asserts the deletion so the label cannot be
+  // reintroduced by accident — the reconstruction detail now lives only in the
+  // basemap attribution popover, which this file does not govern.
+  expect(exploration).not.toMatch(/Paleogeographic reconstruction/i);
 });
 
 test("land relief carries no meaning — it is distance to the coast, not data", () => {

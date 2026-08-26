@@ -23,13 +23,11 @@ async function guess(name: string): Promise<void> {
   await user.click(screen.getByRole("button", { name: /guess/i }));
 }
 
-test("Error handling: a pool too small to be fair refuses to start, with a retry", () => {
+test("Error handling: a pool too small to be fair refuses to start, and says why", () => {
   // The bare fixture holds six eligible genera — far below the floor.
-  const onBack = vi.fn();
   render(
     <DailyGenusScreen
       api={ReadApi.fromModel(fixtureModel())}
-      onBack={onBack}
       onOpenProfile={vi.fn()}
       now={clockOn("2026-08-11")}
       store={memoryStore()}
@@ -39,7 +37,12 @@ test("Error handling: a pool too small to be fair refuses to start, with a retry
   expect(alert.textContent).toContain("No puzzle today");
   expect(alert.textContent).toContain("below the 500 needed");
   expect(alert.textContent).toContain("a data problem, not a wrong guess");
-  expect(screen.getByRole("button", { name: /retry/i })).toBeTruthy();
+  // SPEC-022 REQ-004/UX-002: this is a bad snapshot, not a failed fetch, so there
+  // is nothing to retry. The screen states the problem and the app bar — rendered
+  // by the shell on every screen, including this one — is the way out, so the
+  // player is not trapped. A "Retry" that only navigated away would duplicate the
+  // bar's Map destination.
+  expect(screen.queryByRole("button", { name: /retry/i })).toBeNull();
 });
 
 test("UX-002: with storage blocked the round plays on and says progress is not kept", () => {
@@ -72,7 +75,7 @@ test("REQ-011: when the clipboard refuses, the result is shown as text", async (
     expect(
       screen.getByText(/Copy is unavailable — your result:/i),
     ).toBeTruthy();
-    expect(screen.getByText(/Daily Genus \d+ · 1\/8/)).toBeTruthy();
+    expect(screen.getByText(/Dinordle \d+ · 1\/8/)).toBeTruthy();
   } finally {
     Object.defineProperty(globalThis.navigator, "clipboard", {
       value: original,
@@ -98,21 +101,25 @@ test("REQ-011: a copied result reports success and names no taxon", async () => 
   expect(shared).not.toContain("Dinosauria");
 });
 
-test("REQ-006: the answer's period is withheld until a guess overlaps it", async () => {
+test("SPEC-024 REQ-008: the answer's period is never disclosed during a round", async () => {
+  // The band-lighting mechanic is retired in full (owner: "Yes don't disclose
+  // it"), so the period is not named at any point in the round — before a
+  // guess, after a miss, or after an overlap. The answer's span is still stated
+  // in the reveal at the end (SPEC-019 REQ-007), which this test does not reach.
   renderGame();
-  expect(
-    screen.getByText(/The answer’s period appears once a guess overlaps it/i),
-  ).toBeTruthy();
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
 
-  // Nyasasaurus is Triassic; the answer is Cretaceous, so nothing is disclosed.
-  await guess("Nyasasaurus");
-  expect(screen.queryByText(/the answer’s period/i)?.textContent).not.toContain(
-    "Cretaceous",
-  );
+  await guess("Nyasasaurus"); // Triassic — a miss against a Cretaceous answer.
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
 
-  // Triceratops overlaps the answer's range, which discloses the period.
-  await guess("Triceratops");
-  expect(screen.getByText(/Cretaceous — the answer’s period/i)).toBeTruthy();
+  await guess("Triceratops"); // Overlaps: previously the disclosure trigger.
+  expect(screen.queryByText(/the answer’s period/i)).toBeNull();
+  expect(screen.queryByText(/Cretaceous — /i)).toBeNull();
+
+  // What replaced it: the per-guess verdict, named in words in the key.
+  expect(screen.getByText(/overlaps/i)).toBeTruthy();
+  expect(screen.getByText(/answer older/i)).toBeTruthy();
+  expect(screen.getByText(/answer younger/i)).toBeTruthy();
 });
 
 test("REQ-006: each guess's range is stated in words for assistive technology", async () => {

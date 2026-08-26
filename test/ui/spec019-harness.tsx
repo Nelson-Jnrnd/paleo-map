@@ -1,5 +1,5 @@
 /**
- * Rendering harness for the Daily Genus screen tests (SPEC-019). Builds a model
+ * Rendering harness for the Dinordle screen tests (SPEC-019). Builds a model
  * from the shared fixture, padded past `MIN_POOL_SIZE` so the screen takes the
  * real pool path rather than the degraded-pool error state, and finds a UTC date
  * whose *production* selection is the genus a test wants to play against — so
@@ -111,7 +111,6 @@ export function renderGame(
   const result = render(
     <DailyGenusScreen
       api={api}
-      onBack={onBack}
       onOpenProfile={onOpenProfile}
       now={clockOn(dateWithAnswer(api, answerId))}
       random={() => 0}
