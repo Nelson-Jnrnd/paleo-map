@@ -6,7 +6,8 @@
  * obscure genera, then alphabetically. Deterministic (NFR-001).
  */
 
-import type { ContentLevel, TimeRange } from "../../domain/index.js";
+import type { ContentLevel, ReadTaxon, TimeRange } from "../../domain/index.js";
+import { tierOfTaxon } from "./grouping.js";
 import type { RankTier } from "./grouping.js";
 
 export interface SearchableTaxon {
@@ -73,14 +74,65 @@ export function searchTaxa(
 }
 
 /**
- * Map a taxon's PBDB rank to the taxon-mode tier whose group key is that taxon
- * (SPEC-013 REQ-004). A Genus groups at Genus, a Family at Family, a clade at the
- * Major-group tier; anything else defaults to Genus (the common search target).
+ * Where a search result lands in Taxon mode (SPEC-013 REQ-004, SPEC-027 REQ-004):
+ * the tier to group at and the group key to select.
  */
-export function tierForRank(rank: string): RankTier {
-  if (rank === "Family") return "family";
-  if (rank === "Clade") return "majorGroup";
-  return "genus";
+export interface TaxonLanding {
+  /** The group key to select — always a key `groupByTaxon` can produce. */
+  taxonKey: string;
+  /** The tier to group at: the one at which `taxonKey` is itself a group. */
+  rank: RankTier;
+  /** The landed taxon's name (what the panel will show). */
+  landedName: string;
+  /**
+   * The searched taxon's name when it is *not* the landed one — i.e. the search
+   * had to substitute an ancestor, which the panel must disclose. Null when the
+   * Explorer landed on exactly what they searched for.
+   */
+  substitutedFrom: string | null;
+}
+
+/**
+ * Resolve a searched taxon to a group the map/list can actually produce
+ * (SPEC-027 REQ-004).
+ *
+ * Rank alone is not enough: `groupByTaxon`'s Major-group tier only ever keys on
+ * the curated `MAJOR_GROUP_NAMES`, so 268 of the snapshot's 285 clades can never
+ * be a group key. Landing on such a taxon used to select a key no group could
+ * match — mode, rank and stage all changed and nothing was selected.
+ *
+ * So we walk the taxon's **real ancestry** (DATA-002) and land on the *nearest*
+ * ancestor that is tier-eligible — itself, if it qualifies — reporting the
+ * substitution so the panel can disclose it (HD-001). Returns null when no
+ * ancestor qualifies, which the caller turns into a designed explanatory state
+ * rather than a silent no-op. Cycle-guarded; pure and deterministic.
+ */
+export function landingForTaxon(
+  taxonId: string,
+  taxaById: ReadonlyMap<string, ReadTaxon>,
+): TaxonLanding | null {
+  const searched = taxaById.get(taxonId);
+  if (!searched) return null;
+
+  const seen = new Set<string>();
+  let current: ReadTaxon | null = searched;
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    const tier = tierOfTaxon(current);
+    if (tier) {
+      return {
+        taxonKey: current.id,
+        rank: tier,
+        landedName: current.scientificName,
+        substitutedFrom:
+          current.id === searched.id ? null : searched.scientificName,
+      };
+    }
+    current = current.parentId
+      ? (taxaById.get(current.parentId) ?? null)
+      : null;
+  }
+  return null;
 }
 
 /** A stage as needed to place a taxon on the timeline (older bound = larger Ma). */

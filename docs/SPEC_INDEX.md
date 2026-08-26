@@ -48,6 +48,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-024-puzzle-legibility.md`](specs/implemented/SPEC-024-puzzle-legibility.md) |
 | SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-025-cladogram-render.md`](specs/implemented/SPEC-025-cladogram-render.md) |
 | SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-026-sidebar-redesign.md`](specs/implemented/SPEC-026-sidebar-redesign.md) |
+| SPEC-027 | Search & selection legibility under clustering | In Implementation | nelsonjeanrenaud@gmail.com | — | #19 | [`specs/approved/SPEC-027-selection-legibility-under-clustering.md`](specs/approved/SPEC-027-selection-legibility-under-clustering.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in

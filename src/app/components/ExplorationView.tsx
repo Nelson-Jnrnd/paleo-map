@@ -35,7 +35,7 @@ import {
 import { occurrencesInView } from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
 import { gateOccurrences } from "../state/wikipediaGate.js";
-import { stageForTaxon, tierForRank } from "../state/search.js";
+import { landingForTaxon, stageForTaxon } from "../state/search.js";
 import type { SearchableTaxon } from "../state/search.js";
 import {
   LIST_UNIT_LABEL,
@@ -269,22 +269,76 @@ export function ExplorationView({
     [api],
   );
 
-  // Landing a search result (SPEC-013 REQ-004): switch to Taxon mode at the
-  // taxon's tier, move the age into its recorded range if the current age misses
-  // it, and select it — map emphasis + side panel, not a jump to the profile.
+  const taxaById = useMemo(
+    () => indexTaxaById(stageApi.listTaxa()),
+    [stageApi],
+  );
+
+  // How the last search landed (SPEC-027 REQ-004). Only set when the Explorer
+  // needs to be told something: the search resolved to an ancestor rather than
+  // the name they typed, or it could not resolve at all.
+  // Each carries the state it was raised against, so it is shown only while it
+  // is still about what the Explorer is looking at — no effect, no stale notice.
+  type SearchOutcome =
+    | {
+        kind: "substituted";
+        taxonKey: string;
+        searched: string;
+        landed: string;
+      }
+    | {
+        kind: "unreachable";
+        searched: string;
+        atStage: string;
+        atMode: string;
+      };
+  const [searchOutcome, setSearchOutcome] = useState<SearchOutcome | null>(
+    null,
+  );
+  // Bumped only by a search landing (SPEC-027 REQ-003) so the map frames the
+  // taxon exactly once — a list selection or a map click must never move the
+  // camera, and neither may a re-render of the same selection.
+  const [fitToken, setFitToken] = useState(0);
+
+  // Landing a search result (SPEC-013 REQ-004; SPEC-027 REQ-003/004): switch to
+  // Taxon mode at the tier that actually holds the taxon, move the age into its
+  // recorded range if the current age misses it, select it, and frame it — map
+  // emphasis + side panel, not a jump to the profile.
   const onSearchSelect = (taxonId: string): void => {
-    const taxon = api.getTaxon(taxonId);
+    const landing = landingForTaxon(taxonId, taxaById);
+    if (!landing) {
+      // No ancestor of this taxon can key a group at any tier, so there is
+      // nothing to select. Say so instead of silently changing mode and stage.
+      setSearchOutcome({
+        kind: "unreachable",
+        searched: api.getTaxon(taxonId)?.scientificName ?? taxonId,
+        atStage: state.stageName,
+        atMode: state.mode,
+      });
+      return;
+    }
+    setSearchOutcome(
+      landing.substitutedFrom
+        ? {
+            kind: "substituted",
+            taxonKey: landing.taxonKey,
+            searched: landing.substitutedFrom,
+            landed: landing.landedName,
+          }
+        : null,
+    );
     const profile = api.getProfile(taxonId);
     dispatch({
       type: "selectSearchTaxon",
-      taxonKey: taxonId,
-      rank: tierForRank(taxon?.rank ?? "Genus"),
+      taxonKey: landing.taxonKey,
+      rank: landing.rank,
       stageName: stageForTaxon(
         profile?.timeSpan ?? null,
         state.stageName,
         EXPLORATION_STAGES,
       ),
     });
+    setFitToken((n) => n + 1);
   };
 
   // The occurrences currently on the map: narrowed to the viewport, or the full
@@ -295,10 +349,6 @@ export function ExplorationView({
   );
 
   // --- SPEC-010 grouping: derive locality/taxon groups from the in-view set ---
-  const taxaById = useMemo(
-    () => indexTaxaById(stageApi.listTaxa()),
-    [stageApi],
-  );
 
   // Locality markers for the map cover the whole stage; the list is viewport-linked.
   const mapLocalities = useMemo(
@@ -309,10 +359,26 @@ export function ExplorationView({
     () => (state.mode === "locality" ? groupByLocality(inView) : []),
     [state.mode, inView],
   );
+  // The list is a "what's on screen" device, so it groups the in-view set
+  // (SPEC-010 REQ-004). The *selection* is not: a taxon stays selected — with
+  // its panel, focus and timeline span — wherever the camera happens to be, so
+  // it resolves against the whole stage (SPEC-027 REQ-002). Same split the
+  // localities above already make between map and list.
+  //
+  // Both sides fold `unitOccurrences`, the SPEC-026 REQ-004 filtered set, so the
+  // list, the count, the map and the selection cannot disagree about which
+  // records exist at this unit.
   const taxonGroups = useMemo(
     () =>
       state.mode === "taxon" ? groupByTaxon(inView, state.rank, taxaById) : [],
     [state.mode, state.rank, inView, taxaById],
+  );
+  const stageTaxonGroups = useMemo(
+    () =>
+      state.mode === "taxon"
+        ? groupByTaxon(unitOccurrences, state.rank, taxaById)
+        : [],
+    [state.mode, state.rank, unitOccurrences, taxaById],
   );
 
   const selectedLocality = useMemo(
@@ -335,8 +401,9 @@ export function ExplorationView({
     [selectedLocality, unitOccurrences],
   );
   const selectedTaxonGroup = useMemo(
-    () => taxonGroups.find((g) => g.key === state.selectedTaxonKey) ?? null,
-    [taxonGroups, state.selectedTaxonKey],
+    () =>
+      stageTaxonGroups.find((g) => g.key === state.selectedTaxonKey) ?? null,
+    [stageTaxonGroups, state.selectedTaxonKey],
   );
   const focusIds = useMemo(
     () =>
@@ -345,6 +412,45 @@ export function ExplorationView({
         : null,
     [state.mode, selectedTaxonGroup],
   );
+  // A taxon is selected but has no occurrences at this age (SPEC-027 REQ-004):
+  // the panel must explain that rather than leave the sidebar blank.
+  const absentTaxonName =
+    state.mode === "taxon" && state.selectedTaxonKey && !selectedTaxonGroup
+      ? (taxaById.get(state.selectedTaxonKey)?.scientificName ??
+        state.selectedTaxonKey)
+      : null;
+  // The disclosure only belongs to the selection it was recorded for.
+  const substitution =
+    searchOutcome?.kind === "substituted" &&
+    searchOutcome.taxonKey === state.selectedTaxonKey
+      ? searchOutcome
+      : null;
+  // An unreachable search dispatches nothing, so its notice stands until the
+  // Explorer moves the age or the grouping mode themselves.
+  const unreachable =
+    searchOutcome?.kind === "unreachable" &&
+    searchOutcome.atStage === state.stageName &&
+    searchOutcome.atMode === state.mode
+      ? searchOutcome
+      : null;
+  // The occurrences the map should frame after a search landing (REQ-003).
+  const focusOccurrences = useMemo(() => {
+    if (!focusIds || focusIds.length === 0) return [];
+    const ids = new Set(focusIds);
+    return unitOccurrences.filter((o) => ids.has(o.id));
+  }, [focusIds, unitOccurrences]);
+
+  // Select the taxon-mode group that holds a given taxon, rolling it up to the
+  // active tier (SPEC-010 REQ-005). Shared by map-point clicks and the cluster
+  // aggregate card, so picking a species out of a cluster selects it rather than
+  // leaving the map for the profile (SPEC-027 REQ-005).
+  const handleSelectTaxonId = (taxonId: string): void => {
+    // SPEC-026 REQ-004 retired the not-classified bucket, so a taxon that does
+    // not resolve at this tier has no group to select — selecting nothing beats
+    // selecting a key with no row behind it.
+    const resolved = resolveTierTaxon(taxonId, state.rank, taxaById);
+    if (resolved) dispatch({ type: "selectTaxon", taxonKey: resolved.id });
+  };
 
   // A group's aggregate Ma span, shared by the row meta line and the timeline
   // highlight (SPEC-009 REQ-005).
@@ -475,11 +581,10 @@ export function ExplorationView({
     } else if (state.mode === "taxon") {
       const occ = occurrences.find((o) => o.id === featureId);
       if (!occ) return;
-      // REQ-004: at a taxon unit the map plots only classifying records, so a
-      // clicked point always resolves. The guard is kept because a stale click
-      // during a unit switch must not select a key with no row.
-      const resolved = resolveTierTaxon(occ.taxonId, state.rank, taxaById);
-      if (resolved) dispatch({ type: "selectTaxon", taxonKey: resolved.id });
+      // SPEC-026 REQ-004: at a taxon unit the map plots only classifying
+      // records, so a clicked point always resolves. The guard is kept because a
+      // stale click during a unit switch must not select a key with no row.
+      handleSelectTaxonId(occ.taxonId);
     } else {
       dispatch({ type: "selectOccurrence", occurrenceId: featureId });
     }
@@ -524,6 +629,9 @@ export function ExplorationView({
         onClose={() => dispatch({ type: "clearSelection" })}
         backLabel={backLabel}
         clade={cladeMarkerForTaxon(selectedTaxonGroup.taxonId, taxaById).label}
+        // SPEC-027 REQ-004: when the search landed on an ancestor rather than
+        // the name that was typed, the panel says so.
+        substitutedFrom={substitution?.searched ?? null}
       />
     ) : null;
 
@@ -697,9 +805,14 @@ export function ExplorationView({
               mode={state.mode}
               localities={mapLocalities}
               focusIds={focusIds}
+              focusOccurrences={focusOccurrences}
+              fitToken={fitToken}
               taxaById={taxaById}
               onOpenProfile={(taxonId) =>
                 dispatch({ type: "openProfile", taxonId })
+              }
+              onSelectTaxon={
+                state.mode === "taxon" ? handleSelectTaxonId : undefined
               }
             />
           )}
@@ -723,6 +836,27 @@ export function ExplorationView({
                   dispatch({ type: "setUnit", unit: next })
                 }
               />
+
+              {/* SPEC-027 REQ-004: the app tells the Explorer what it did
+                  with their search when that is not what they typed. Both sit
+                  above the detail-or-list block, because in each case there is
+                  no detail to carry them: the first made no selection at all,
+                  the second selected a group with nothing at this age. */}
+              {unreachable && (
+                <p className={styles.notice} role="status">
+                  <span className="sciName">{unreachable.searched}</span> isn’t
+                  a level the map groups by, and none of the groups above it are
+                  either — so it can’t be selected. Try a genus, a family, or a
+                  major group.
+                </p>
+              )}
+              {absentTaxonName && (
+                <p className={styles.notice} role="status">
+                  <span className="sciName">{absentTaxonName}</span> has no
+                  records in the {state.stageName}. Step the timeline to an age
+                  within its range, or clear the selection.
+                </p>
+              )}
 
               {/* REQ-003: a selection *replaces* the list in the same column
                   rather than stacking above it. Stacking pushed the list out of

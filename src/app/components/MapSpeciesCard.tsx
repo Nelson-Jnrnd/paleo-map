@@ -22,6 +22,13 @@ interface MapSpeciesCardProps {
   x: number;
   y: number;
   onOpenProfile: (taxonId: string) => void;
+  /**
+   * SPEC-027 REQ-005: select the taxon on the map. Supplied in Taxon mode, where
+   * selection — not the profile — is the mode's unit, so it becomes the row's
+   * action and the profile moves to a secondary link. Absent in Occurrence mode,
+   * where the row keeps opening the profile as before.
+   */
+  onSelectTaxon?: ((taxonId: string) => void) | undefined;
   onClose: () => void;
 }
 
@@ -30,6 +37,7 @@ export function MapSpeciesCard({
   x,
   y,
   onOpenProfile,
+  onSelectTaxon,
   onClose,
 }: MapSpeciesCardProps): ReactElement {
   return (
@@ -51,19 +59,51 @@ export function MapSpeciesCard({
         </button>
       </div>
       <ul className={styles.speciesList}>
-        {species.map((s) =>
-          s.hasPage ? (
+        {species.map((s) => {
+          const body = (
+            <>
+              <img className={styles.speciesIcon} src={s.iconSrc} alt="" />
+              <span className={`sciName ${styles.speciesName}`}>{s.taxon}</span>
+              <span className={styles.speciesClade}>{s.clade}</span>
+            </>
+          );
+
+          // Taxon mode: the row selects, and the profile — which needs an
+          // article — steps back to a secondary link. Selection has no such
+          // precondition, so every row stays actionable here.
+          if (onSelectTaxon) {
+            return (
+              <li key={s.taxonId} className={styles.speciesItem}>
+                <button
+                  type="button"
+                  className={styles.speciesRow}
+                  aria-label={`Select ${s.taxon}`}
+                  onClick={() => onSelectTaxon(s.taxonId)}
+                >
+                  {body}
+                </button>
+                {s.hasPage && (
+                  <button
+                    type="button"
+                    className={styles.speciesProfile}
+                    aria-label={`Open ${s.taxon} profile`}
+                    onClick={() => onOpenProfile(s.taxonId)}
+                  >
+                    Profile →
+                  </button>
+                )}
+              </li>
+            );
+          }
+
+          return s.hasPage ? (
             <li key={s.taxonId}>
               <button
                 type="button"
                 className={styles.speciesRow}
                 onClick={() => onOpenProfile(s.taxonId)}
               >
-                <img className={styles.speciesIcon} src={s.iconSrc} alt="" />
-                <span className={`sciName ${styles.speciesName}`}>
-                  {s.taxon}
-                </span>
-                <span className={styles.speciesClade}>{s.clade}</span>
+                {body}
               </button>
             </li>
           ) : (
@@ -72,15 +112,11 @@ export function MapSpeciesCard({
                 className={`${styles.speciesRow} ${styles.speciesRowDisabled}`}
                 title="No Wikipedia article for this taxon"
               >
-                <img className={styles.speciesIcon} src={s.iconSrc} alt="" />
-                <span className={`sciName ${styles.speciesName}`}>
-                  {s.taxon}
-                </span>
-                <span className={styles.speciesClade}>{s.clade}</span>
+                {body}
               </span>
             </li>
-          ),
-        )}
+          );
+        })}
       </ul>
     </div>
   );

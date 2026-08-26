@@ -131,6 +131,18 @@ function matchesTier(taxon: ReadTaxon, tier: RankTier): boolean {
 }
 
 /**
+ * The tier at which this taxon is itself a group key, or null when it can never
+ * key a group at any tier (SPEC-027 REQ-004). Most clades fall in that second
+ * case: `MAJOR_GROUP_NAMES` is a curated set of 17 names, while the snapshot
+ * carries 285 clades, so a rank alone cannot tell you whether a taxon is
+ * selectable — only this check can. The single home for that question, so
+ * `groupByTaxon` and the search landing can never disagree about it.
+ */
+export function tierOfTaxon(taxon: ReadTaxon): RankTier | null {
+  return RANK_TIERS.find((tier) => matchesTier(taxon, tier)) ?? null;
+}
+
+/**
  * Resolve an occurrence's identified taxon **up its parent chain** to the nearest
  * ancestor (or itself) at the requested tier (SPEC-010 REQ-005 / DATA-002).
  * Returns null when no ancestor qualifies — the record is above the tier (e.g. a
