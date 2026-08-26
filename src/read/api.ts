@@ -68,6 +68,33 @@ export class ReadApi {
     return this.model.sources[sourceId];
   }
 
+  /**
+   * The present-day country codes of a taxon's occurrences, sorted (SPEC-028
+   * DATA-001). Answers `[]` both for a taxon with no occurrences and for a model
+   * that carries no geography index at all — the caller cannot tell the two
+   * apart, which is correct: in either case the countries are not established,
+   * and SPEC-028 REQ-002 requires that to read as "not recorded" rather than as
+   * a "no overlap" verdict.
+   *
+   * Codes are PBDB's own (it writes `UK`, not `GB`) and are never normalised.
+   */
+  countriesFor(taxonId: string): readonly string[] {
+    return this.model.countriesByTaxon?.[taxonId] ?? [];
+  }
+
+  /**
+   * Whether a country index was loaded at all (SPEC-028 UX-003).
+   *
+   * `countriesFor` deliberately cannot distinguish "this taxon has no recorded
+   * countries" from "there is no index" — both are `[]`, because in both cases
+   * the countries are not established. But the *screen* must tell them apart: a
+   * missing index means the whole channel is unavailable and has to say so,
+   * where a taxon with no countries is one ordinary "not recorded" row.
+   */
+  hasGeography(): boolean {
+    return this.model.countriesByTaxon !== undefined;
+  }
+
   listOccurrences(filter: OccurrenceFilter = {}): ReadOccurrence[] {
     return this.model.occurrences.filter((o) => {
       if (filter.taxonId && o.taxonId !== filter.taxonId) return false;

@@ -192,4 +192,16 @@ export interface ReadModel {
   taxa: ReadTaxon[];
   occurrences: ReadOccurrence[];
   profiles: ReadProfile[];
+  /**
+   * Derived index: taxon id → sorted country codes of its occurrences
+   * (SPEC-028 DATA-001). Optional because it is joined at boot from its own
+   * artifact rather than carried in `reference.json`, and because a model built
+   * in memory (tests, fixtures) legitimately has none — consumers read it
+   * through `ReadApi.countriesFor`, which answers `[]` when it is absent.
+   *
+   * It lives here rather than beside `occurrences` because it is a *whole
+   * snapshot* aggregate: the occurrences in the model at any moment are one
+   * stage's, and the countries of a genus are not.
+   */
+  countriesByTaxon?: Readonly<Record<string, readonly string[]>>;
 }

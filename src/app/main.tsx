@@ -31,7 +31,7 @@ let index: AtlasIndex | null = null;
 const loader: ModelLoader = async (onProgress) => {
   const boot = await bootAtlas(onProgress);
   index = boot.index;
-  return referenceModel(boot.reference);
+  return referenceModel(boot.reference, boot.geography);
 };
 
 const stageSource: StageSource = {

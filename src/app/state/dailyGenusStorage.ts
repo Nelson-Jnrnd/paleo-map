@@ -52,7 +52,6 @@ export interface StoredRound {
   readonly dateKey: string;
   readonly answerId: string;
   readonly guesses: readonly StoredGuess[];
-  readonly hintUsed: boolean;
   readonly outcome: "playing" | "won" | "lost";
 }
 
@@ -145,7 +144,6 @@ export function saveRound(store: KeyValueStore | null, round: Round): boolean {
       taxonId: g.taxonId,
       scientificName: g.scientificName,
     })),
-    hintUsed: round.hintUsed,
     outcome: round.outcome,
   };
   return writeJson(store, stateKey(round.track), payload);
@@ -212,9 +210,14 @@ export function saveTrack(store: KeyValueStore | null, track: Track): boolean {
 
 /**
  * The shared summary (REQ-011). Spoiler-free by construction: it contains the
- * puzzle number, the guess count, a hint marker, and one mark per guess — `▲`
- * where that guess pushed the tree deeper, `·` where it did not. No taxon name,
- * rank or clade name, and no depth or distance number, consistent with REQ-004.
+ * puzzle number, the guess count, and one mark per guess — `▲` where that guess
+ * pushed the tree deeper, `·` where it did not. No taxon name, rank or clade
+ * name, and no depth or distance number, consistent with REQ-004.
+ *
+ * The hint marker is gone with the silhouette hint itself (SPEC-028 REQ-005).
+ * Neither new clue channel appears here: the shared countries would name a real
+ * subset of the answer's localities, which is exactly the spoiler this summary
+ * exists to avoid.
  */
 export function shareSummary(round: Round): string {
   const n = round.dateKey ? puzzleNumber(round.dateKey) : 0;
@@ -234,6 +237,5 @@ export function shareSummary(round: Round): string {
     }
     return "·";
   });
-  const hint = round.hintUsed ? " · hint" : "";
-  return `Dinordle ${n}${track} · ${score}${hint} · ${marks.join("")}`;
+  return `Dinordle ${n}${track} · ${score} · ${marks.join("")}`;
 }

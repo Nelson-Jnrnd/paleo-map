@@ -72,7 +72,11 @@ test("NFR-001: a full round completes with every network API throwing", async ()
   const { attempts } = forbidNetwork();
   renderGame();
 
-  // Open, guess, lose the branch, take a hint, win, share.
+  // Open, guess, lose the branch, win, share. (The hint step is gone with the
+  // hint — SPEC-028 REQ-005 — but the round still has to reach six guesses for
+  // the assertion below, and every guess now also derives two clue channels
+  // from the boot-loaded country index, which is the new code path this test
+  // has to prove makes no request of its own.)
   for (const name of [
     "Triceratops",
     "Diplodocus",
@@ -82,9 +86,6 @@ test("NFR-001: a full round completes with every network API throwing", async ()
   ]) {
     await guess(name);
   }
-  await userEvent
-    .setup()
-    .click(screen.getByRole("button", { name: /reveal the silhouette/i }));
   await guess("Tyrannosaurus");
 
   expect(screen.getByText(/Solved in 6 of 8/i)).toBeTruthy();

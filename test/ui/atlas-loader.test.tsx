@@ -17,6 +17,7 @@ import { App } from "../../src/app/App.js";
 import {
   bootAtlas,
   fetchStageOccurrences,
+  referenceApi,
   referenceModel,
 } from "../../src/app/data/atlas.js";
 import type { AtlasIndex, StageSource } from "../../src/app/data/atlas.js";
@@ -29,7 +30,10 @@ afterEach(() => {
   cleanup();
 });
 
-function atlasFetchMock(partition: AtlasPartition): {
+function atlasFetchMock(
+  partition: AtlasPartition,
+  options: { geography?: "ok" | "missing" | "malformed" } = {},
+): {
   fetchImpl: typeof fetch;
   calls: string[];
 } {
@@ -47,6 +51,16 @@ function atlasFetchMock(partition: AtlasPartition): {
     if (url.endsWith("data/index.json")) return ok(partition.index);
     if (url.endsWith("data/reference.json")) return ok(partition.reference);
     if (url.endsWith("data/enrichment.json")) return ok(partition.enrichment);
+    if (url.endsWith("data/geography.json")) {
+      if (options.geography === "missing")
+        return {
+          ok: false,
+          headers: { get: noHeader },
+          json: async () => ({}),
+        };
+      if (options.geography === "malformed") return ok({ nope: true });
+      return ok({ generatedFrom: "2026-07-26", countriesByTaxon: {} });
+    }
     const m = url.match(/stage-([a-z0-9-]+)\.json$/);
     if (m) return ok({ occurrences: bySlug.get(m[1]!)?.occurrences ?? [] });
     return { ok: false, headers: { get: noHeader }, json: async () => ({}) };
@@ -54,7 +68,7 @@ function atlasFetchMock(partition: AtlasPartition): {
   return { fetchImpl, calls };
 }
 
-test("boot fetches only the index and reference", async () => {
+test("boot fetches the index, reference, enrichment and geography — nothing else", async () => {
   const partition = await mesozoicPartition();
   const { fetchImpl, calls } = atlasFetchMock(partition);
   vi.stubGlobal("fetch", fetchImpl);
@@ -63,10 +77,13 @@ test("boot fetches only the index and reference", async () => {
   expect(boot.index.stages.length).toBe(30);
   // 4 occurrence-bearing genera + their Family/clade ancestors (SPEC-010 DATA-003).
   expect(boot.reference.taxa.length).toBe(12);
+  // SPEC-028 DATA-001 adds the country index as a fourth boot fetch. No stage
+  // file is touched: that is still the claim this assertion exists to make.
   expect(calls.filter((u) => u.includes("data/"))).toEqual([
     "data/index.json",
     "data/reference.json",
     "data/enrichment.json",
+    "data/geography.json",
   ]);
 
   const entry = boot.index.stages.find((s) => s.name === "Maastrichtian")!;
@@ -133,4 +150,31 @@ test("the app fetches only the active stage, then one more per step", async () =
 
   // Never fetched a whole-dataset snapshot.
   expect(calls.some((u) => u.includes("snapshot.json"))).toBe(false);
+});
+
+test("SPEC-028 UX-003: a missing geography index degrades, it does not fail the boot", async () => {
+  const partition = await mesozoicPartition();
+  const { fetchImpl } = atlasFetchMock(partition, { geography: "missing" });
+  vi.stubGlobal("fetch", fetchImpl);
+
+  const boot = await bootAtlas();
+  // The rest of the boot is unaffected...
+  expect(boot.index.stages.length).toBe(30);
+  expect(boot.reference.taxa.length).toBe(12);
+  // ...and the absence is explicit, so the puzzle can say so rather than
+  // rendering "not recorded" against every guess.
+  expect(boot.geography).toBeNull();
+  expect(referenceApi(boot.reference, boot.geography).hasGeography()).toBe(
+    false,
+  );
+});
+
+test("SPEC-028 UX-003: a malformed geography index is treated as absent", async () => {
+  const partition = await mesozoicPartition();
+  const { fetchImpl } = atlasFetchMock(partition, { geography: "malformed" });
+  vi.stubGlobal("fetch", fetchImpl);
+
+  // Valid JSON, wrong shape: caught here rather than surfacing as undefined
+  // lookups at play time.
+  expect((await bootAtlas()).geography).toBeNull();
 });

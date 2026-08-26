@@ -40,7 +40,10 @@ export function TaxonProfile({
     : null;
 
   return (
-    <section className={styles.profile} aria-label={`Taxon page: ${name}`}>
+    <section
+      className={`${styles.profile} ${styles.profileWide}`}
+      aria-label={`Taxon page: ${name}`}
+    >
       <div className={styles.topbar}>
         {taxon && (
           <TaxonomyTree

@@ -24,8 +24,18 @@ import type { TaxonomyIndex } from "./taxonomy.js";
 
 /** Guesses per round (REQ-007). One constant, so a change is one line. */
 export const MAX_GUESSES = 8;
-/** Unsuccessful guesses before the silhouette hint is offered (REQ-008). */
-export const HINT_AFTER_GUESSES = 5;
+/**
+ * How far apart two occurrence counts may be and still read as "close"
+ * (SPEC-028 REQ-003): within a factor of two, in either direction.
+ *
+ * A **ratio** rather than an absolute band because the distribution is extremely
+ * skewed — median 1, p75 3, maximum 431 — so an absolute +/-2 would call
+ * 429-vs-431 close and 30-vs-34 far. Measured over 200,000 random guess/answer
+ * pairs, a factor of two marks ~21% of pairs close on the full pool and ~21% on
+ * the well-known pool: the only candidate band that means the same thing on both
+ * tracks.
+ */
+export const CLOSE_OCCURRENCE_RATIO = 2;
 /** The pool floor below which the game refuses to start (REQ-002). */
 export const MIN_POOL_SIZE = 500;
 
@@ -99,6 +109,18 @@ export interface GameTaxon {
   readonly timeSpan: TimeRange | null;
   readonly silhouette: string | null;
   readonly acceptedPer: string | null;
+  /**
+   * Present-day country codes of this genus's occurrences, sorted (SPEC-028
+   * REQ-002). Empty when the snapshot records none — which is *not* the same as
+   * "shares no country with the answer", and the verdict keeps the two apart.
+   */
+  readonly countries: readonly string[];
+  /**
+   * Occurrences of this genus in the whole snapshot (SPEC-028 REQ-003), or null
+   * when none are recorded. A count of records, never a claim about how common
+   * the animal was (UX-002).
+   */
+  readonly occurrenceCount: number | null;
 }
 
 export interface GameData {
@@ -118,6 +140,9 @@ export interface GameData {
 
 type ProfileLookup = (taxonId: string) => ReadProfile | undefined;
 
+/** Sorted country codes of a taxon's occurrences (SPEC-028 DATA-001). */
+export type CountryLookup = (taxonId: string) => readonly string[];
+
 /**
  * The guessable set: rank `Genus`, inside `Dinosauria`, outside the avian
  * branches, and `Valid` in the snapshot (REQ-003). Ordered by scientific name so
@@ -127,6 +152,7 @@ function deriveGuessable(
   taxa: readonly ReadTaxon[],
   index: TaxonomyIndex,
   profileOf: ProfileLookup,
+  countriesOf: CountryLookup,
 ): GameTaxon[] {
   const out: GameTaxon[] = [];
   for (const t of taxa) {
@@ -134,6 +160,9 @@ function deriveGuessable(
     if (!index.inScope(t.id) || index.isAvian(t.id)) continue;
     if (t.validity?.value !== "Valid") continue;
     const profile = profileOf(t.id);
+    // A zero count is "none recorded", not "zero of them existed" — it collapses
+    // to null so the verdict says `unavailable` rather than comparing against 0.
+    const count = profile?.occurrenceCount ?? 0;
     out.push({
       id: t.id,
       scientificName: t.scientificName,
@@ -141,6 +170,8 @@ function deriveGuessable(
       timeSpan: profile?.timeSpan ?? null,
       silhouette: profile?.silhouette ?? null,
       acceptedPer: t.acceptedPer ?? null,
+      countries: countriesOf(t.id),
+      occurrenceCount: count > 0 ? count : null,
     });
   }
   return out.sort((a, b) => a.scientificName.localeCompare(b.scientificName));
@@ -217,8 +248,9 @@ export function buildGameData(
   taxa: readonly ReadTaxon[],
   index: TaxonomyIndex,
   profileOf: ProfileLookup,
+  countriesOf: CountryLookup = () => [],
 ): GameData {
-  const guessable = deriveGuessable(taxa, index, profileOf);
+  const guessable = deriveGuessable(taxa, index, profileOf, countriesOf);
   const guessableById = new Map(guessable.map((t) => [t.id, t]));
   const pool = derivePool(guessable, profileOf);
   return {
@@ -462,6 +494,71 @@ export function timeVerdict(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Geography and abundance clue channels (SPEC-028 REQ-002, REQ-003)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Whether the guess and the answer share any country of occurrence.
+ *
+ * `unavailable` is deliberately distinct from `none`: a genus the snapshot
+ * records no locality country for has an *unknown* overlap, and reporting that
+ * as "shares nothing" would be a verdict the data does not support (REQ-002).
+ */
+export type CountryVerdict = "shared" | "none" | "unavailable";
+
+/**
+ * The countries a guess and the answer have in common — the intersection of the
+ * two sets, in the sorted order both carry. Empty when they share none.
+ *
+ * This publishes only a *subset* of the answer's own countries, never the whole
+ * set, which is what keeps it a clue rather than a reveal.
+ */
+export function sharedCountries(
+  guess: readonly string[],
+  answer: readonly string[],
+): string[] {
+  const inAnswer = new Set(answer);
+  return guess.filter((code) => inAnswer.has(code));
+}
+
+export function countryVerdict(
+  guess: readonly string[],
+  answer: readonly string[],
+): CountryVerdict {
+  if (guess.length === 0 || answer.length === 0) return "unavailable";
+  return sharedCountries(guess, answer).length > 0 ? "shared" : "none";
+}
+
+/**
+ * How the answer's occurrence count compares to the guess's (REQ-003), stated
+ * from the **answer's** point of view: `more` means the answer has more.
+ *
+ * `close` means the two counts are within `CLOSE_OCCURRENCE_RATIO` of each
+ * other; see that constant for why the band is a ratio and not an absolute
+ * difference. A count is only ever a count of records in this snapshot — the
+ * wording that renders it must never call an animal common or rare (UX-002).
+ */
+export type OccurrenceVerdict =
+  | "same"
+  | "more-close"
+  | "more-far"
+  | "fewer-close"
+  | "fewer-far"
+  | "unavailable";
+
+export function occurrenceVerdict(
+  guess: number | null,
+  answer: number | null,
+): OccurrenceVerdict {
+  if (guess === null || answer === null) return "unavailable";
+  if (guess === answer) return "same";
+  const close =
+    Math.max(guess, answer) <= CLOSE_OCCURRENCE_RATIO * Math.min(guess, answer);
+  const direction = answer > guess ? "more" : "fewer";
+  return `${direction}-${close ? "close" : "far"}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Guess evaluation and the revealed tree (REQ-004, REQ-005, REQ-014)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -476,6 +573,11 @@ export interface Guess {
   readonly ruledOutId: string | null;
   readonly ruledOutName: string | null;
   readonly time: TimeVerdict;
+  /** SPEC-028 REQ-002: the countries this guess and the answer have in common. */
+  readonly sharedCountries: readonly string[];
+  readonly countryVerdict: CountryVerdict;
+  /** SPEC-028 REQ-003: how the answer's occurrence count compares to this one's. */
+  readonly occurrences: OccurrenceVerdict;
   readonly correct: boolean;
   /** Internal only — the shared clade's depth, used to order guesses. Never rendered. */
   readonly sharedDepth: number;
@@ -515,6 +617,12 @@ export function evaluateGuess(
     ruledOutId: ruledOut?.id ?? null,
     ruledOutName: ruledOut?.scientificName ?? null,
     time: timeVerdict(guess.timeSpan, answer.timeSpan),
+    sharedCountries: sharedCountries(guess.countries, answer.countries),
+    countryVerdict: countryVerdict(guess.countries, answer.countries),
+    occurrences: occurrenceVerdict(
+      guess.occurrenceCount,
+      answer.occurrenceCount,
+    ),
     correct: guess.id === answer.id,
     sharedDepth: sharedAt >= 0 ? sharedAt : 0,
   };
@@ -531,7 +639,6 @@ export interface Round {
   readonly dateKey: string | null;
   readonly answerId: string;
   readonly guesses: readonly Guess[];
-  readonly hintUsed: boolean;
   readonly outcome: RoundOutcome;
 }
 
@@ -547,7 +654,6 @@ export function startRound(
     dateKey,
     answerId,
     guesses: [],
-    hintUsed: false,
     outcome: "playing",
   };
 }
@@ -562,20 +668,6 @@ export function applyGuess(round: Round, guess: Guess): Round {
       ? "lost"
       : "playing";
   return { ...round, guesses, outcome };
-}
-
-/** The hint is offered only after `HINT_AFTER_GUESSES` misses (REQ-008). */
-export function hintAvailable(round: Round): boolean {
-  return (
-    round.outcome === "playing" &&
-    !round.hintUsed &&
-    round.guesses.length >= HINT_AFTER_GUESSES
-  );
-}
-
-/** Taking the hint consumes no guess and never ends the round (REQ-008). */
-export function takeHint(round: Round): Round {
-  return hintAvailable(round) ? { ...round, hintUsed: true } : round;
 }
 
 /** A node on the established trunk, root-first. */

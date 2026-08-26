@@ -26,13 +26,23 @@ import {
 } from "../../src/app/state/dailyGenus.js";
 import type { KeyValueStore } from "../../src/app/state/dailyGenusStorage.js";
 import {
+  FIXTURE_COUNTRIES,
   FIXTURE_TAXA,
   fixtureProfiles,
   paddingTaxa,
 } from "../spec019-fixture.js";
 import type { ProfileOptions } from "../spec019-fixture.js";
 
-export function paddedModel(options: ProfileOptions = {}): ReadModel {
+/**
+ * `withGeography: false` boots the harness with no country index at all, which
+ * is SPEC-028 UX-003's degraded state — distinct from a genus that simply has no
+ * countries recorded.
+ */
+export interface HarnessOptions extends ProfileOptions {
+  readonly withGeography?: boolean;
+}
+
+export function paddedModel(options: HarnessOptions = {}): ReadModel {
   const padding = paddingTaxa(MIN_POOL_SIZE + 20);
   const taxa: ReadTaxon[] = [...FIXTURE_TAXA, ...padding];
   const baseProfiles = fixtureProfiles(options);
@@ -46,10 +56,13 @@ export function paddedModel(options: ProfileOptions = {}): ReadModel {
     profiles: [...baseProfiles, ...paddedProfiles],
     occurrences: [],
     sources: {},
+    ...(options.withGeography === false
+      ? {}
+      : { countriesByTaxon: FIXTURE_COUNTRIES }),
   } as unknown as ReadModel;
 }
 
-export function harnessApi(options: ProfileOptions = {}): ReadApi {
+export function harnessApi(options: HarnessOptions = {}): ReadApi {
   return ReadApi.fromModel(paddedModel(options));
 }
 
@@ -98,7 +111,7 @@ export interface Harness extends RenderResult {
 export function renderGame(
   answerName = "Tyrannosaurus",
   overrides: Partial<DailyGenusScreenProps> = {},
-  options: ProfileOptions = {},
+  options: HarnessOptions = {},
 ): Harness {
   const api = overrides.api ?? harnessApi(options);
   const answerId = api

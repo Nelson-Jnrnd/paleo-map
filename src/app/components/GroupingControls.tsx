@@ -30,13 +30,13 @@ export function GroupingControls({
 }: GroupingControlsProps): ReactElement {
   return (
     <div className={styles.unitBar}>
-      <span className={styles.unitLabel} id="unit-selector-label">
-        One row per
-      </span>
+      {/* The question the options answer is obvious from the options themselves,
+          so it is not printed above them; the group still carries it as its
+          accessible name, which is what a screen reader announces. */}
       <div
         className={styles.unitGroup}
         role="radiogroup"
-        aria-labelledby="unit-selector-label"
+        aria-label="One row per"
       >
         {LIST_UNITS.map((u) => (
           <button

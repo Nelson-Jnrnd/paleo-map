@@ -60,8 +60,13 @@ the layout gives weight to.
 - **Time clue as a stratigraphic column** — ICS period bands on an Ma axis with
   each guess's range plotted against them, and the answer's period lit only once
   a guess overlaps it (REQ-006).
-- **Silhouette hint** — offered from guess 5, optional, marked when shared
-  (REQ-008).
+- **Shared countries, per guess** — the present-day countries this guess and the
+  answer both occur in, or "no shared country", or "not recorded" when either
+  side has none (SPEC-028 REQ-002).
+- **Occurrence comparison, per guess** — whether the answer has more or fewer
+  recorded occurrences than the guess, and whether the two are within a factor of
+  two (SPEC-028 REQ-003). A count of records in this snapshot, never a claim
+  about how common the animal was (SPEC-028 UX-002).
 - **Practice entry** — a round that does not touch the daily (REQ-010).
 - **Provenance** — the snapshot date on the screen, and `acceptedPer` on the
   answer reveal (UX-004).
