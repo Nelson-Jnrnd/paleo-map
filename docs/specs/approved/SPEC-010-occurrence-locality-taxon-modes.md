@@ -663,6 +663,137 @@ Delivered 2026-07-22. Decisions as built:
 - **Human approval reference:** Mechanism-level adjustment within the approved intent
   (disclose that a cluster counts records); flagged to the owner in the delivery summary.
 
+### AMEND-002: REQ-002 reverts to a per-cluster accessible name — AMEND-001's premise no longer holds
+
+- **Date:** 2026-08-14
+- **Reason:** AMEND-001 replaced REQ-002's per-cluster accessible name with a DOM
+  legend paragraph, on the grounds that "the map is a WebGL canvas with no
+  per-feature DOM … so a per-cluster accessible name is not achievable in this
+  architecture". That premise was true in 2026-07 and is not true now: SPEC-015
+  introduced an HTML overlay (`styles.mapOverlay`) that renders one real `<span>`
+  per rendered cluster carrying its count, currently `aria-hidden="true"`. Under
+  SPEC-021 the owner is deleting the legend paragraph, and the correct
+  replacement is the mechanism REQ-002 originally asked for.
+- **Changed requirements:** **REQ-002** acceptance — the "records, not diversity"
+  meaning is once again conveyed by **each cluster's own accessible name**
+  ("42 occurrence records" in Occurrence mode, "12 localities" in Locality mode),
+  not by a DOM legend. AMEND-001's legend mechanism is **withdrawn**. REQ-002's
+  statement, the SPEC-009 regression clause, and the "no colour-only signal"
+  clause are unchanged. As a consequence the cluster-count overlay must also
+  render in **Locality** mode, where SPEC-015 currently suppresses it; Taxon mode
+  is still excluded, since it does not collapse points into clusters.
+- **Behavioral impact:** The legend paragraph disappears from the map pane in
+  Occurrence and Locality mode. Cluster count badges gain a spoken name they did
+  not have before, and appear in Locality mode. The visible badge glyph is still
+  the bare integer. Clustering itself, marker rendering, the clade key and the
+  name labels are unchanged, and the clade key stays hidden in Locality mode.
+- **Test impact:** `test/ui/grouping-mode.test.tsx` replaces its legend assertion
+  with the per-cluster accessible-name assertion in both modes, and asserts the
+  paragraph is gone. `test/e2e/a11y.e2e.ts` needs no edit but must be re-run,
+  since previously `aria-hidden` elements become named. No test is deleted or
+  skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
+### AMEND-003: One five-unit selector replaces the mode + rank controls; rows carry two subtitles; the not-classified bucket is removed from the taxon units (via SPEC-026)
+
+- **Date:** 2026-08-14
+- **Reason:** Owner feedback, 2026-08-14 — "We need to rethink and redesign the
+  sidebar with occurence/genus/family it's a mess as it is." — followed by owner
+  review of the redesign mockup the same day. As built, REQ-001's three-mode
+  segmented control and REQ-005's rank `<select>` are two controls answering one
+  question ("what is one row?"), and the rank control exists only inside one of
+  the three segments, so it appears and disappears under the user. The mockup
+  review added three cuts: a row may carry at most two subtitles; a locality row
+  must say where it is in the present day; and the *not classified at this level*
+  bucket must be filtered out rather than disclosed. Two defects were also found
+  on the shipped snapshot: the bucket sorts last and, at the Maastrichtian
+  default, holds **2,810 of 4,945 records (57 %)** at **row 358 of 358**, behind
+  the 300-row render cap — so REQ-005's disclosure is not actually on screen; and
+  alphabetical ordering plus the same cap hides the two largest genus groups
+  (*Triceratops*, 165 occurrences, sorted 343rd of 378; *Tyrannosaurus*, 83,
+  sorted 348th).
+- **Changed requirements:**
+  - **REQ-001** — the *mechanism* changes. The always-visible grouping control is
+    no longer three options named Occurrences / Localities / Taxa; it is one
+    control over **five** flat options — **Occurrence, Locality, Genus, Family,
+    Major group** — where the last three are the REQ-005 tiers promoted to
+    first-class options. Everything else in REQ-001 stands unchanged: always
+    visible, default **Occurrence**, keyboard-operable, active option exposed to
+    assistive tech and legible as text (never colour-only), and a change switches
+    the list row unit, the map glyph/selection semantics and the panel target
+    together while preserving the stage, the viewport and (where still
+    meaningful) the selection.
+  - **REQ-005** — the *carrier* changes and **one clause is reversed**. There is
+    no longer a separate rank selector "hidden or disabled outside Taxon mode";
+    the three tiers are three of the five units, so the acceptance criterion
+    "outside Taxon mode the selector is not offered" is struck as no longer
+    meaningful. **Unchanged:** the ladder is still exactly Genus / Family / Major
+    group with no Species, Genus is still the default taxonomic tier, and roll-up
+    still walks the parent chain via `resolveTierTaxon`. **Reversed:** records
+    that resolve to no taxon at the chosen tier are **no longer shown in a
+    disclosed "not classified at this level" bucket**. They are filtered out of
+    the Genus, Family and Major group units entirely — out of the list, the
+    count and the map together, from one filtered set, so the three cannot
+    disagree. This is a **deliberate owner decision, taken on 2026-08-14, to stop
+    disclosing that share of records in the taxon views**; at the Maastrichtian
+    default that share is **57 %** (2,810 of 4,945 records; 2,898 of 5,064 with
+    the article gate lifted). It is bounded, and the bound is part of the
+    amendment: those records are **not** deleted, hidden from the atlas, or
+    dropped from any non-taxon count — they remain listed, counted, mapped and
+    openable under the **Occurrence** and **Locality** units, which is where an
+    identification that reaches no genus is a meaningful row.
+  - **REQ-003** — the locality **row** contents change; the locality *mode* does
+    not. The row keeps its **distinct-taxon count** and gains the collection's
+    **present-day region** (`modernPosition.value.region`, present on 100 % of
+    the snapshot, e.g. "Alberta, CA"); the formation, the occurrence count and
+    the locality's Ma range move off the row into the locality detail, which
+    already shows them. One marker per collection at the collection's own
+    paleocoordinate, the clustering, and the detail's taxa list are unchanged.
+  - **REQ-004** — row contents preserved, **one clause amended**, and one
+    unimplemented clause finally delivered. Taxon rows keep the accepted
+    scientific name, the in-view occurrence count and the aggregate Ma span (the
+    clade word that the SPEC-026 mockup had added is not shown on the row; the
+    clade is carried by the SPEC-015 tint, the row's accessible name and the
+    detail). **Amended:** the clause "the map still contains one feature per
+    occurrence (feature count unchanged from Occurrence mode)" no longer holds at
+    a taxon unit — the map plots the records that classify at the chosen tier,
+    the same set the list and the count are derived from. The no-collapsing rule,
+    the real-paleocoordinate rule, the focus/dim behaviour and the
+    no-per-taxon-hue rule are all unchanged. **Delivered:** REQ-004's hover clause
+    ("hovering a taxon row emphasises that taxon's points and vice-versa"), which
+    `LocalityList`/`TaxonList` never implemented, is delivered by SPEC-026
+    REQ-006 for every unit.
+  - **REQ-002, AMEND-001, AMEND-002** — unchanged. Occurrence mode's behaviour,
+    clustering, the cluster count's accessible name and the clade key are all
+    untouched by this amendment.
+- **Behavioral impact:** The Occurrences/Localities/Taxa segmented control and
+  the "Group by rank" `<select>` are replaced by one five-option selector that
+  never changes size or spawns a second control. Every row is a name plus at most
+  two values; the formation leaves the occurrence row for the occurrence detail
+  (which gains a `Formation` field), and the locality row shows its present-day
+  region. Locality and taxon rows become count-ordered instead of name/id-ordered.
+  At Genus, Family and Major group the list, the count and the map exclude records
+  that classify at no taxon at that tier; Occurrence and Locality are unaffected
+  and still show every record. A selection replaces the list in the sidebar
+  instead of stacking a panel above it. No change to clustering, to the roll-up
+  resolver, to the read model, to the snapshot, or to which records exist.
+- **Test impact:** `test/ui/grouping-mode.test.tsx` moves from three mode buttons
+  plus a rank combobox to five unit options and asserts no combobox exists in any
+  state; `test/ui/taxon-mode.test.tsx` inverts its bucket assertion (the bucket
+  must be absent, and the unit's count and map set must exclude the same records)
+  and gains the ordering, hover-linkage and replaced-list cases;
+  `test/ui/locality-mode.test.tsx` asserts the two-subtitle row with the
+  present-day region; `test/ui/occurrence-list.test.tsx` keeps every assertion,
+  drops the formation from the row and gains the detail-replaces-list and
+  focus-restoration cases; `test/ui/occurrence-panel.test.tsx` gains the
+  `Formation` field and its missing label; `test/ui/grouping.test.ts` gains the
+  ordering and unit-mapping tests; `test/ui/rank-rollup.test.ts` keeps its
+  null-resolution assertion, which is now the filter's predicate. No test is
+  deleted, skipped or weakened.
+- **Human approval reference:** Owner approval recorded in session, 2026-08-14
+  (nelsonjeanrenaud@gmail.com) — "I confirm and approve everything mentionned
+  here".
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

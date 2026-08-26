@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" font-family="'Courier New',Courier,monospace" role="img" aria-label="Daily Genus — the classification tree as the whole screen: an established trunk from Dinosauria to Tyrannosauridae, four ruled-out branches labelled with the guess that eliminated them, and a stratigraphic column showing each guess's time span">
+  <style>
+    .eyebrow{font-size:11px;fill:#52606e;letter-spacing:2.2px}
+    .node{font-size:14px;fill:#1f2b38}
+    .rank{font-size:10.5px;fill:#5b6773;letter-spacing:1px}
+    .cut{font-size:13px;fill:#7a848f}
+    .by{font-size:12px;fill:#52606e;font-style:italic}
+    .faint{font-size:10.5px;fill:#5b6773}
+    .id{font-size:8.5px;fill:#8a949e;letter-spacing:.6px}
+    .axis{font-size:9.5px;fill:#5b6773}
+  </style>
+
+  <rect width="1200" height="880" fill="#ffffff"/>
+
+  <!-- ── header: no bar, no card. Type and a hairline. ── -->
+  <text x="40" y="40" class="eyebrow">DAILY GENUS · No. 128</text>
+  <text x="40" y="64" font-size="13" fill="#33424f">4 of 8 guesses</text>
+  <text x="1160" y="46" font-size="22" font-weight="700" fill="#1f2b38" text-anchor="end">06:12:44</text>
+  <text x="1160" y="64" class="faint" text-anchor="end">next puzzle · 00:00 UTC</text>
+  <text x="1160" y="80" class="id" text-anchor="end">REQ-001 · REQ-009</text>
+  <line x1="40" y1="96" x2="1160" y2="96" stroke="#cfd8de"/>
+
+  <!-- ══════════ THE TREE — the screen's whole subject ══════════ -->
+  <text x="40" y="126" class="eyebrow">ESTABLISHED CLASSIFICATION</text>
+  <text x="700" y="126" class="id">REQ-005 · REQ-014</text>
+
+  <!-- established trunk: rectangular cladogram, root at top -->
+  <g stroke="#33424f" stroke-width="1.6" fill="none">
+    <path d="M60 150 V264"/><path d="M60 264 H82"/>
+    <path d="M82 264 V302"/><path d="M82 302 H104"/>
+    <path d="M104 302 V340"/><path d="M104 340 H126"/>
+    <path d="M126 340 V378"/><path d="M126 378 H148"/>
+    <path d="M148 378 V416"/><path d="M148 416 H170"/>
+    <path d="M170 416 V492"/><path d="M170 492 H192"/>
+    <path d="M192 492 V530"/><path d="M192 530 H214"/>
+    <path d="M214 530 V606"/>
+  </g>
+
+  <!-- ruled-out branches: the same tree, thinner and grey, ending in a terminal bar -->
+  <g stroke="#b9c2cb" stroke-width="1.2" fill="none">
+    <path d="M60 188 H460"/><path d="M460 182 V194"/>
+    <path d="M60 226 H460"/><path d="M460 220 V232"/>
+    <path d="M170 454 H460"/><path d="M460 448 V460"/>
+    <path d="M214 568 H460"/><path d="M460 562 V574"/>
+  </g>
+
+  <!-- unresolved continuation -->
+  <path d="M214 606 H252" stroke="#33424f" stroke-width="1.6" fill="none" stroke-dasharray="4 5"/>
+
+  <!-- ── established nodes ── -->
+  <circle cx="60" cy="150" r="4.5" fill="#b4bcc6"/>
+  <text x="74" y="155" class="node" font-weight="700">Dinosauria</text>
+  <text x="188" y="155" class="rank">CLADE · ROOT</text>
+
+  <circle cx="82" cy="264" r="4.5" fill="#dc9a80"/>
+  <text x="96" y="269" class="node">Theropoda</text>
+  <text x="196" y="269" class="rank">CLADE</text>
+
+  <circle cx="104" cy="302" r="4.5" fill="#dc9a80"/>
+  <text x="118" y="307" class="node">Neotheropoda</text>
+  <text x="248" y="307" class="rank">CLADE</text>
+
+  <circle cx="126" cy="340" r="4.5" fill="#dc9a80"/>
+  <text x="140" y="345" class="node">Averostra</text>
+  <text x="240" y="345" class="rank">CLADE</text>
+
+  <circle cx="148" cy="378" r="4.5" fill="#dc9a80"/>
+  <text x="162" y="383" class="node">Tetanurae</text>
+  <text x="262" y="383" class="rank">CLADE</text>
+
+  <circle cx="170" cy="416" r="4.5" fill="#dc9a80"/>
+  <text x="184" y="421" class="node">Coelurosauria</text>
+  <text x="314" y="421" class="rank">CLADE</text>
+
+  <circle cx="192" cy="492" r="4.5" fill="#dc9a80"/>
+  <text x="206" y="497" class="node">Tyrannosauroidea</text>
+  <text x="366" y="497" class="rank">CLADE</text>
+
+  <!-- the frontier: deepest established node, and the guess that reached it -->
+  <circle cx="214" cy="530" r="5.5" fill="#dc9a80" stroke="#0a7f66" stroke-width="1.8"/>
+  <text x="228" y="535" class="node" font-weight="700">Tyrannosauridae</text>
+  <line x1="228" y1="541" x2="346" y2="541" stroke="#0f9d83" stroke-width="1.4"/>
+  <text x="360" y="535" class="rank">FAMILY</text>
+  <text x="430" y="535" class="by" fill="#0a7f66">◂ Gorgosaurus</text>
+
+  <text x="266" y="611" font-size="14" fill="#5b6773">?</text>
+  <text x="286" y="611" class="faint">the descent continues — how far is not stated</text>
+
+  <!-- ── ruled-out terminals ── -->
+  <text x="470" y="192" class="cut">✕</text>
+  <text x="490" y="192" class="cut" text-decoration="line-through">Ornithischia</text>
+  <text x="640" y="192" class="by">◂ Triceratops</text>
+
+  <text x="470" y="230" class="cut">✕</text>
+  <text x="490" y="230" class="cut" text-decoration="line-through">Saurischia</text>
+  <text x="640" y="230" class="by">◂ Diplodocus</text>
+
+  <text x="470" y="458" class="cut">✕</text>
+  <text x="490" y="458" class="cut" text-decoration="line-through">Maniraptora</text>
+  <text x="640" y="458" class="by">◂ Velociraptor</text>
+
+  <text x="470" y="572" class="cut">✕</text>
+  <text x="490" y="572" class="cut" text-decoration="line-through">Albertosaurinae</text>
+  <text x="640" y="572" class="by">◂ Gorgosaurus</text>
+
+  <!-- key: three marks, three words -->
+  <circle cx="44" cy="656" r="4.5" fill="#dc9a80"/>
+  <text x="58" y="660" class="faint">established</text>
+  <line x1="170" y1="656" x2="194" y2="656" stroke="#b9c2cb" stroke-width="1.2"/>
+  <text x="202" y="660" class="faint">✕ ruled out</text>
+  <line x1="310" y1="656" x2="334" y2="656" stroke="#33424f" stroke-width="1.6" stroke-dasharray="4 5"/>
+  <text x="342" y="660" class="faint">unresolved</text>
+  <text x="460" y="660" class="faint">tint = clade, as on the map</text>
+
+  <!-- ══════════ STRATIGRAPHIC COLUMN — the time clue as an axis, not a chip ══════════ -->
+  <text x="940" y="126" class="eyebrow">Ma</text>
+  <text x="1160" y="126" class="id" text-anchor="end">REQ-006</text>
+
+  <rect x="972" y="150" width="18" height="150" fill="#8e5aa5" fill-opacity="0.20"/>
+  <rect x="972" y="300" width="18" height="166" fill="#3e93c6" fill-opacity="0.20"/>
+  <rect x="972" y="466" width="18" height="234" fill="#5fa96a" fill-opacity="0.55"/>
+  <line x1="972" y1="150" x2="972" y2="700" stroke="#cfd8de"/>
+  <line x1="990" y1="150" x2="990" y2="700" stroke="#cfd8de"/>
+  <line x1="966" y1="300" x2="990" y2="300" stroke="#cfd8de"/>
+  <line x1="966" y1="466" x2="990" y2="466" stroke="#cfd8de"/>
+
+  <text x="962" y="154" class="axis" text-anchor="end">252</text>
+  <text x="962" y="304" class="axis" text-anchor="end">201</text>
+  <text x="962" y="470" class="axis" text-anchor="end">145</text>
+  <text x="962" y="704" class="axis" text-anchor="end">66</text>
+
+  <text x="998" y="228" class="faint">Triassic</text>
+  <text x="998" y="386" class="faint">Jurassic</text>
+  <text x="998" y="486" class="faint" fill="#1f2b38">Cretaceous</text>
+  <text x="998" y="502" class="faint">the answer’s period,</text>
+  <text x="998" y="516" class="faint">disclosed by guess 1</text>
+
+  <!-- guess spans, plotted on the same axis -->
+  <rect x="1082" y="648" width="8" height="52" fill="#0f9d83" fill-opacity="0.5"/>
+  <rect x="1096" y="428" width="8" height="44" fill="#0f9d83" fill-opacity="0.5"/>
+  <rect x="1110" y="598" width="8" height="102" fill="#0f9d83" fill-opacity="0.5"/>
+  <rect x="1124" y="648" width="8" height="52" fill="#0f9d83" fill-opacity="0.5"/>
+  <text x="1084" y="716" class="axis">1</text>
+  <text x="1098" y="716" class="axis">2</text>
+  <text x="1112" y="716" class="axis">3</text>
+  <text x="1126" y="716" class="axis">4</text>
+  <text x="1160" y="740" class="faint" text-anchor="end">your guesses’ ranges</text>
+
+  <!-- ══════════ INPUT — a line, not a box ══════════ -->
+  <line x1="40" y1="768" x2="1160" y2="768" stroke="#cfd8de"/>
+  <text x="40" y="806" font-size="15" fill="#0a7f66">▸</text>
+  <text x="64" y="806" font-size="15" fill="#8a949e">type a genus</text>
+  <line x1="40" y1="818" x2="460" y2="818" stroke="#33424f" stroke-width="1.4"/>
+  <text x="476" y="806" class="faint" fill="#0a7f66">↵ guess</text>
+  <text x="40" y="842" class="faint">genera only · 1,492 guessable</text>
+
+  <text x="640" y="806" class="faint">silhouette hint — from guess 5</text>
+  <text x="960" y="806" class="faint" fill="#0a7f66">practice round</text>
+  <text x="1160" y="842" class="faint" text-anchor="end">Per PBDB snapshot 26 Jul 2026 — a placement is a sourced opinion</text>
+  <text x="1160" y="862" class="id" text-anchor="end">REQ-003 · REQ-008 · REQ-010 · UX-004</text>
+</svg>

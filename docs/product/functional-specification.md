@@ -164,7 +164,7 @@ taxon profile is two actions).
 - **FONC-270** [MVP] — The system must allow a fossil occurrence displayed on the map to be selected.
 - **FONC-280** [MVP] — The system must display an information panel when a fossil occurrence is selected.
 - **FONC-290** [MVP] — The system must display at minimum, for a selected occurrence: the associated taxon, the time range, the modern location, the paleogeographic position and the source.
-- **FONC-300** [MVP] — The system must clearly indicate that the ancient map displayed is a paleogeographic reconstruction.
+- **FONC-300** [MVP] — ~~The system must clearly indicate that the ancient map displayed is a paleogeographic reconstruction.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** the standing map label was removed; the reconstruction detail remains available in the basemap attribution popover.
 - **FONC-310** [V1] — The system should allow a comparison layer with present-day continents to be displayed.
 - **FONC-320** [V1] — The system should allow fossil occurrence display to be enabled or disabled.
 - **FONC-330** [V2] — The system should allow the map transition between two geological ages to be animated.
@@ -284,7 +284,7 @@ taxon profile is two actions).
 - **FONC-1100** [MVP] — The system must display an identifiable source for each visible fossil occurrence.
 - **FONC-1110** [MVP] — ~~The system must distinguish data directly derived from fossil occurrences from interpretative data.~~ **Retired by SPEC-007 (2026-07-21, owner-approved):** the fossil-derived vs. interpretative distinction is removed. Sources (FONC-1090/1100) and the missing-data label (FONC-1120) are retained.
 - **FONC-1120** [MVP] — The system must indicate when information is missing instead of replacing it with an unmarked assumption.
-- **FONC-1130** [MVP] — The system must indicate when a geographic position is reconstructed.
+- **FONC-1130** [MVP] — ~~The system must indicate when a geographic position is reconstructed.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** its sole carrier was the standing map label retired above (FONC-300) — SPEC-007 (2026-07-21) had already retired the per-occurrence "reconstructed" chip in favour of that label. Occurrence paleocoordinates are still derived from the recorded `rotationModel`, which remains inspectable in the basemap attribution popover; the product no longer marks them as reconstructed at the point of reading.
 - **FONC-1140** [MVP] — The system must indicate when a time range is approximate.
 - **FONC-1150** [MVP] — The system must display fossil occurrences as evidence of discovery, not as complete distribution boundaries.
 - **FONC-1160** [V1] — The system should display a confidence level for morphological, ecological or behavioral information when such a level is available.
@@ -345,7 +345,7 @@ taxon profile is two actions).
 ### 2.2 Geographic representation
 
 - **CONS-110** [MVP] — The system must distinguish modern coordinates from reconstructed paleogeographic coordinates.
-- **CONS-120** [MVP] — The system must state that ancient maps are scientific reconstructions and not direct observations.
+- **CONS-120** [MVP] — ~~The system must state that ancient maps are scientific reconstructions and not direct observations.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** see FONC-300.
 - **CONS-130** [MVP] — The system must not present fossil points as exact positions where the animal lived.
 - **CONS-140** [MVP] — The system must present fossil points as documented discovery, collection or fossil observation locations.
 - **CONS-150** [MVP] — The system must not automatically extrapolate a continuous distribution area from isolated fossil points.

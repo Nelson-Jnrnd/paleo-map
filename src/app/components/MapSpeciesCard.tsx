@@ -23,7 +23,7 @@ interface MapSpeciesCardProps {
   y: number;
   onOpenProfile: (taxonId: string) => void;
   /**
-   * SPEC-017 REQ-005: select the taxon on the map. Supplied in Taxon mode, where
+   * SPEC-027 REQ-005: select the taxon on the map. Supplied in Taxon mode, where
    * selection — not the profile — is the mode's unit, so it becomes the row's
    * action and the profile moves to a secondary link. Absent in Occurrence mode,
    * where the row keeps opening the profile as before.

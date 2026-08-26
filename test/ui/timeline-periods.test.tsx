@@ -40,9 +40,11 @@ test("the period quick-select offers the three Mesozoic periods and reports the 
   await user.click(within(group).getByRole("button", { name: "Triassic" }));
   expect(onSelectPeriod).toHaveBeenCalledWith("Triassic");
 
-  // The timeline discloses that a period jumps to its most fossil-rich stage,
-  // so landing on a late stage reads as intended (SPEC-011 REQ-006, AMEND-001).
-  expect(screen.getByText(/most fossil-rich stage/i)).toBeInTheDocument();
+  // SPEC-021 UX-002: the caption is removed on the owner's instruction and
+  // SPEC-011 REQ-006 retired with it (SPEC-011 AMEND-002). The *behaviour* it
+  // described is unchanged — the assertion above still proves the period jump —
+  // so only the copy goes.
+  expect(screen.queryByText(/most fossil-rich stage/i)).not.toBeInTheDocument();
 });
 
 test("selecting a period jumps to a representative stage and updates the count", async () => {

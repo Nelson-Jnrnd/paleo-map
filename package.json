@@ -24,6 +24,7 @@
     "snapshot:app": "tsx scripts/gen_web_data.ts --live",
     "check:budget": "tsx scripts/check_budget.ts",
     "enrich:fetch": "tsx scripts/enrich_fetch.ts",
+    "fetch:popularity": "tsx scripts/fetch_popularity.ts",
     "enrich:batch": "tsx scripts/enrich_batch.ts",
     "fetch:silhouettes": "tsx scripts/fetch_silhouettes.ts",
     "shrink:clade-icons": "tsx scripts/shrink_clade_icons.ts",

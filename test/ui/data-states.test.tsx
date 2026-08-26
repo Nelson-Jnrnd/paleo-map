@@ -53,18 +53,21 @@ test("taxon page embeds the taxon's Wikipedia article (AMEND-005)", async () => 
     <TaxonProfile
       api={api}
       taxonId="txn:nanotyrannus"
-      onBack={() => {}}
       onOpenTaxon={() => {}}
     />,
   );
 
-  // The page is the inline Wikipedia article (mobile domain), under Back to map.
+  // The page is the inline Wikipedia article (mobile domain).
   const frame = screen.getByTitle(/Wikipedia article: Nanotyrannus/i);
   expect(frame.tagName).toBe("IFRAME");
   expect(frame.getAttribute("src")).toContain("en.m.wikipedia.org/wiki/");
+  // SPEC-022 REQ-004: the screen no longer carries its own "← Back to map" —
+  // the global app bar is the single return path, and it is rendered by the
+  // shell, not by this component. Asserted as an absence so a second control
+  // cannot creep back in beside the bar's Map destination.
   expect(
-    screen.getByRole("button", { name: /Back to map/i }),
-  ).toBeInTheDocument();
+    screen.queryByRole("button", { name: /Back to map/i }),
+  ).not.toBeInTheDocument();
 });
 
 test("taxon page for a taxon with no article is an honest, navigable screen (AMEND-005)", async () => {
@@ -73,7 +76,6 @@ test("taxon page for a taxon with no article is an honest, navigable screen (AME
     <TaxonProfile
       api={api}
       taxonId="txn:not-a-real-taxon"
-      onBack={() => {}}
       onOpenTaxon={() => {}}
     />,
   );
@@ -83,7 +85,8 @@ test("taxon page for a taxon with no article is an honest, navigable screen (AME
   expect(
     screen.getByText(/No Wikipedia article for this taxon/i),
   ).toBeInTheDocument();
+  // SPEC-022 REQ-004: return path lives in the app bar, not on the screen.
   expect(
-    screen.getByRole("button", { name: /Back to map/i }),
-  ).toBeInTheDocument();
+    screen.queryByRole("button", { name: /Back to map/i }),
+  ).not.toBeInTheDocument();
 });

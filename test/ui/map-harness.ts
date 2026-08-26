@@ -1,7 +1,7 @@
 /**
- * A fake MapLibre for jsdom (SPEC-017 test plan).
+ * A fake MapLibre for jsdom (SPEC-027 test plan).
  *
- * SPEC-017's map requirements are about *what the map is told to draw* — which
+ * SPEC-027's map requirements are about *what the map is told to draw* — which
  * features land in the emphasis overlay, which layers dim, whether the base
  * source is re-fed on a selection, whether the camera is asked to move. Those
  * are assertions about the calls `OccurrenceMap` makes, so they need a map

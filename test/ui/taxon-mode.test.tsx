@@ -17,34 +17,36 @@ async function enterTaxonMode() {
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
   const group = within(
-    await screen.findByRole("group", { name: /group occurrences by/i }),
+    await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
-  await user.click(group.getByRole("button", { name: "Taxa" }));
+  await user.click(group.getByRole("radio", { name: "Genus" }));
   return user;
 }
 
-test("lists one row per genus at the default (genus) tier", async () => {
+test("lists one row per genus at the Genus unit", async () => {
   await enterTaxonMode();
-  const region = screen.getByRole("region", { name: /taxa on the map/i });
+  const region = screen.getByRole("region", { name: /genus on the map/i });
   expect(within(region).getByText("Tyrannosaurus")).toBeInTheDocument();
   expect(within(region).getByText("Triceratops")).toBeInTheDocument();
 });
 
-test("the rank selector rolls genera up into their family", async () => {
+test("SPEC-026 REQ-001: choosing Family rolls genera up, in one action", async () => {
   const user = await enterTaxonMode();
-  await user.selectOptions(
-    screen.getByRole("combobox", { name: /group by rank/i }),
-    "family",
+  // The rank `<select>` is gone: the tier is one of the five units, so this is
+  // a single click rather than a mode plus a dropdown.
+  const group = within(
+    screen.getByRole("radiogroup", { name: /one row per/i }),
   );
-  const region = screen.getByRole("region", { name: /taxa on the map/i });
+  await user.click(group.getByRole("radio", { name: "Family" }));
+  const region = screen.getByRole("region", { name: /family on the map/i });
   expect(within(region).getByText("Tyrannosauridae")).toBeInTheDocument();
   // Genera are now rolled up, so their names no longer head a row.
   expect(within(region).queryByText("Nanotyrannus")).toBeNull();
 });
 
-test("selecting a taxon opens its panel with the profile action", async () => {
+test("SPEC-026 REQ-003: selecting a taxon replaces the list with its detail", async () => {
   const user = await enterTaxonMode();
-  const region = screen.getByRole("region", { name: /taxa on the map/i });
+  const region = screen.getByRole("region", { name: /genus on the map/i });
   await user.click(
     within(region).getByRole("button", { name: /Tyrannosaurus/ }),
   );
@@ -52,5 +54,18 @@ test("selecting a taxon opens its panel with the profile action", async () => {
   const panel = screen.getByRole("region", { name: /taxon:/i });
   expect(
     within(panel).getByRole("button", { name: /open taxon profile/i }),
+  ).toBeInTheDocument();
+  // The detail *replaces* the list rather than stacking above it — stacking
+  // pushed the list out of a 360px column.
+  expect(
+    screen.queryByRole("region", { name: /genus on the map/i }),
+  ).not.toBeInTheDocument();
+  // And the way back names what it returns to, so the cost of leaving is legible.
+  const back = within(panel).getByRole("button", {
+    name: /back to \d+ genera/i,
+  });
+  await user.click(back);
+  expect(
+    screen.getByRole("region", { name: /genus on the map/i }),
   ).toBeInTheDocument();
 });

@@ -74,7 +74,7 @@ export function searchTaxa(
 }
 
 /**
- * Where a search result lands in Taxon mode (SPEC-013 REQ-004, SPEC-017 REQ-004):
+ * Where a search result lands in Taxon mode (SPEC-013 REQ-004, SPEC-027 REQ-004):
  * the tier to group at and the group key to select.
  */
 export interface TaxonLanding {
@@ -94,7 +94,7 @@ export interface TaxonLanding {
 
 /**
  * Resolve a searched taxon to a group the map/list can actually produce
- * (SPEC-017 REQ-004).
+ * (SPEC-027 REQ-004).
  *
  * Rank alone is not enough: `groupByTaxon`'s Major-group tier only ever keys on
  * the curated `MAJOR_GROUP_NAMES`, so 268 of the snapshot's 285 clades can never

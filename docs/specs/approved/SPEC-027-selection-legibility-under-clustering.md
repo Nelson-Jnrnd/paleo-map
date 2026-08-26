@@ -1,6 +1,6 @@
 ---
 doc_type: spec
-spec_id: SPEC-017
+spec_id: SPEC-027
 title: Search & selection legibility under clustering
 status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
@@ -10,14 +10,14 @@ affected_components: [app-frontend, exploration-view, map-rendering, taxon-searc
 affected_interfaces: []
 supersedes: []
 superseded_by:
-depends_on: [SPEC-009, SPEC-010, SPEC-013, SPEC-015]
+depends_on: [SPEC-009, SPEC-010, SPEC-013, SPEC-015, SPEC-021, SPEC-023, SPEC-026]
 conflicts_with: []
 approved_by: nelsonjeanrenaud@gmail.com
 approved_at: 2026-08-04
-last_verified_at: 2026-08-04
+last_verified_at: 2026-08-26
 ---
 
-# SPEC-017: Search & selection legibility under clustering
+# SPEC-027: Search & selection legibility under clustering
 
 ## Summary
 
@@ -34,6 +34,16 @@ grouping can never produce. This spec makes a selection visible wherever it is,
 frames a search result, and guarantees that a search always lands somewhere real.
 
 ## Context
+
+> **Re-verified 2026-08-26 against `main` at `4b9ba3f`.** This spec was drafted
+> against `d73eca6`; nine specs landed in between (SPEC-018…SPEC-026), several on
+> the exact surfaces it touches. What that re-check found is recorded in
+> **Staleness re-verification** below: the five defects REQ-001…REQ-004 and
+> REQ-008 describe are all still present in the shipped code, verbatim; REQ-007
+> is retired because SPEC-021 deleted the surface it extended; REQ-006 is reduced
+> to the part SPEC-021 did not already do; and the A-2 residual risk is dissolved
+> by SPEC-026. The spec id also moved from SPEC-017 to **SPEC-027**: SPEC-017 was
+> claimed by the taxonomy-infographics work (PR #21) while this branch was open.
 
 Verified against the working tree on 2026-08-03 (branch
 `claude/search-selection-clusters-09p7z9`, base `d73eca6`).
@@ -146,7 +156,7 @@ in-memory read model; MapLibre's clustered GeoJSON source.
 - **Verification method:** automated component test asserting the overlay source
   data and the cluster-layer paint properties, plus a manual visual check at zoom
   2.2 and zoom 6.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`,
   `src/app/components/OccurrenceMap.tsx` (`emphasisFeatures`, `baseOpacity`,
   the `emphasis` source and `emphasis-bg`/`emphasis-icon` layers).
 
@@ -167,7 +177,7 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   in-viewport taxa and its heading count is unchanged.
 - **Verification method:** automated component test driving a viewport that
   excludes the taxon.
-- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
+- **Evidence location:** `test/ui/spec027-selection.test.tsx`,
   `src/app/components/ExplorationView.tsx` (`stageTaxonGroups`).
 
 ### REQ-003: A search result is brought into view
@@ -187,7 +197,7 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   away afterwards is not undone.
 - **Verification method:** automated component test with a stubbed map camera
   (counting fit calls) + manual check.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`,
   `test/ui/viewport.test.ts`, `src/app/state/viewport.ts`
   (`boundsOfPoints`, `fractionInView`).
 
@@ -211,8 +221,8 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   and never a blank panel.
 - **Verification method:** automated unit test on the pure resolution function +
   component test for the disclosure and the empty state.
-- **Evidence location:** `test/ui/spec017-search-landing.test.ts`,
-  `test/ui/spec017-selection.test.tsx`, `src/app/state/search.ts`
+- **Evidence location:** `test/ui/spec027-search-landing.test.ts`,
+  `test/ui/spec027-selection.test.tsx`, `src/app/state/search.ts`
   (`landingForTaxon`), `src/app/state/grouping.ts` (`tierOfTaxon`).
 
 ### REQ-005: Cluster interaction respects the grouping mode
@@ -231,14 +241,19 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   taxon selection and the panel/focus follow; in locality mode, a cluster click
   zooms and sets no card state; no cluster click leaves the map unchanged.
 - **Verification method:** automated component test per mode.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`,
   `src/app/components/MapSpeciesCard.tsx`.
 
 ### REQ-006: Locality-mode cluster rendering and state are correct
 
-- **Statement:** In Locality mode, cluster discs must carry their **count badge**
-  and must not carry a clade silhouette; and no cluster interaction may leave
-  residual card state that suppresses hover.
+- **Statement:** In Locality mode, cluster discs must not carry a clade
+  silhouette, and no cluster interaction may leave residual card state that
+  suppresses hover.
+- **Narrowed 2026-08-26:** the original statement also required the **count
+  badge** to render in Locality mode. SPEC-021 REQ-002 shipped exactly that while
+  this branch was open, so that half is struck — it is done, and claiming it here
+  would double-count someone else's work. The silhouette and the residual-card
+  defect were not addressed upstream and remain in scope.
 - **Rationale:** The map overlay — cluster counts included — is gated behind
   `showCladeUi` (`OccurrenceMap.tsx:933`), so locality clusters render a dinosaur
   icon with no count while `ExplorationView.tsx:371` tells the Explorer the
@@ -251,24 +266,27 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   (non-clade) cluster mark; after a locality cluster click, hover cross-highlight
   still works.
 - **Verification method:** automated component test + manual visual check.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`,
   `src/app/components/OccurrenceMap.tsx` (cluster badges outside the
   `showCladeUi` gate; the mode-change card reset).
 
-### REQ-007: Cluster semantics are disclosed in every mode
+### REQ-007: Cluster semantics are disclosed in every mode — **RETIRED**
 
-- **Statement:** The map pane's cluster-semantics note must be present in **Taxon**
-  mode too, stating what a cluster counts there, and must state what the count
-  means while a focus is active.
-- **Rationale:** The note is suppressed in taxon mode
-  (`ExplorationView.tsx:368`) although clusters still render, leaving an unlabelled
-  aggregate; SPEC-010 AMEND-001 made this DOM note the accessible carrier of
-  cluster meaning, so omitting it in one mode drops the disclosure entirely there.
-- **Acceptance criteria:** The note is present and mode-appropriate in all three
-  modes.
-- **Verification method:** automated component test.
-- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
-  `src/app/components/ExplorationView.tsx` (`mapLegend`).
+- **Status:** Retired 2026-08-26, unimplemented, superseded by **SPEC-021
+  REQ-001/REQ-002** (Implemented, PR #25).
+- **Original statement:** the map pane's cluster-semantics note must be present
+  in Taxon mode too, and must state what the count means while a focus is active.
+- **Why it is retired:** SPEC-021 deleted that DOM note outright — it was one of
+  the five interface lines the owner asked to retire — and moved the meaning onto
+  the cluster itself as an accessible name (`clusterCountLabel`), which is what
+  SPEC-010 REQ-002 originally asked for. Requiring the note to exist would now
+  contradict shipped, owner-approved work. SPEC-021 also already ungated the
+  count badges so they render in Locality mode, which was REQ-006's first half.
+- **Residual gap, deliberately not closed here:** the accessible name still says
+  "N occurrence records" while a focus is active, without noting that the count
+  includes de-emphasised records. That is a change to SPEC-021's carrier, not to
+  this spec's, so it belongs to whoever owns that string — recorded, not folded
+  in (no-opportunistic-refactor rule).
 
 ### REQ-008: Labels prefer the focused taxon
 
@@ -301,7 +319,7 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   `scenario-perf-360` / `scenario-perf-370` scenarios stay green.
 - **Verification method:** automated test asserting the source is not re-fed on
   focus change + existing perf scenarios.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`
   ("NFR-001: changing the focus never re-feeds the clustered source").
 
 ### NFR-002: Accessible, not colour-only
@@ -316,7 +334,7 @@ in-memory read model; MapLibre's clustered GeoJSON source.
   jsdom (no-WebGL) tests; no new information is carried by hue alone.
 - **Verification method:** component test + inspection against
   `docs/mockups/design-guidelines.md`.
-- **Evidence location:** `test/ui/spec017-selection.test.tsx`,
+- **Evidence location:** `test/ui/spec027-selection.test.tsx`,
   `src/app/components/exploration.module.css` (`.notice`, `.clusterCountDim`).
 
 ## Security and privacy considerations
@@ -349,7 +367,7 @@ occurrences already loaded.
 - **Acceptance criteria:** The new helpers are importable and tested without
   rendering a component; no I/O.
 - **Verification method:** unit test.
-- **Evidence location:** `test/ui/spec017-search-landing.test.ts`,
+- **Evidence location:** `test/ui/spec027-search-landing.test.ts`,
   `test/ui/viewport.test.ts`, `test/ui/map-labels.test.ts`.
 
 ## UI or UX impact
@@ -399,6 +417,57 @@ variables, no feature flags.
 - **Rank change while focused:** `setRank` already drops the taxon selection; the
   overlay must follow.
 
+## Staleness re-verification (2026-08-26)
+
+This spec sat open across nine merged specs. Every claim it makes was re-checked
+against `main` at `4b9ba3f` before the work continued; this section records the
+result, because a spec that is quietly wrong about the code is worse than no spec.
+
+### Still present, verbatim — the defects are real
+
+| Requirement | Evidence on `main` @ `4b9ba3f` |
+| --- | --- |
+| REQ-001 | `pointOpacity(focusIds)` reaches `points-bg` / `points-icon` only; the `clusters` layer carries no focus input and no `emphasis` source exists. SPEC-018 restyled the map without touching this. |
+| REQ-002 | `focusIds` ← `selectedTaxonGroup` ← `taxonGroups` ← `inView`. Still viewport-coupled. |
+| REQ-003 | Zero occurrences of `fitBounds` or `flyTo` under `src/`. |
+| REQ-004 | `onSearchSelect` still calls `tierForRank`, which still maps every `Clade` to `majorGroup`. |
+| REQ-008 | Zero occurrences of `focused` in `mapLabels.ts`. |
+| NFR-003 | The `localities = []` / `taxaById = new Map()` defaults and the three unguarded overlay `setState` calls are all unchanged. |
+
+### Changed by upstream work
+
+- **REQ-007 retired.** SPEC-021 deleted the cluster-semantics note and moved the
+  meaning to an accessible name on the badge. See the requirement for detail.
+- **REQ-006 narrowed.** SPEC-021 REQ-002 already ungated the count badges in
+  Locality mode. Only the clade silhouette and the residual-card defect remain.
+- **REQ-002 re-based.** SPEC-026 introduced `unitOccurrences` — the set filtered
+  by SPEC-026 REQ-004 — as the single source the list, the count and the map all
+  derive from. The stage-resolved selection folds *that* set, not the raw stage
+  set, so all four cannot disagree about which records exist.
+- **REQ-004 re-based.** The disclosure and the two explanatory states now live in
+  the SPEC-026 sidebar, where a detail *replaces* the list. Both notices sit
+  above the detail-or-list block, since in each case there is no detail to
+  carry them.
+- **REQ-005 unaffected.** `MapSpeciesCard` and the cluster-click handler are
+  unchanged upstream.
+
+### Dissolved
+
+- **The A-2 residual risk is gone.** It was the not-classified bucket reaching
+  5,336 occurrences with the Wikipedia gate off. SPEC-026 REQ-004 filters records
+  that reach no taxon at the chosen tier out of the taxon units altogether, and
+  `NOT_CLASSIFIED_KEY` no longer exists in `grouping.ts`. The largest overlay is
+  now the largest *named* group — 1,100 in the default view, 1,764 with the gate
+  off — which is inside the original assumption. The manual check the measurement
+  called for is struck from the test plan with it.
+
+### Identity
+
+`SPEC-017` was taken by the taxonomy-infographics spec (merged, PR #21) while
+this branch was open. This spec is renumbered **SPEC-027**; its requirement ids,
+`AMEND-001` and `NFR-003` are unchanged, and every code and test reference was
+renamed with it. The two specs are unrelated and do not conflict.
+
 ## Acceptance criteria
 
 This spec is satisfied when: a taxon selected by any route is visibly emphasised
@@ -417,19 +486,19 @@ green.
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Focus overlay populated; cluster layers dimmed; clustered feature count unchanged | automated + manual | `pnpm test` — 4 cases in `spec017-map-emphasis` | `test/ui/spec017-map-emphasis.test.tsx` | — |
-| REQ-002 | Off-viewport taxon still focuses and panels; list stays viewport-linked | automated | `pnpm test` — 2 cases in `spec017-selection` | `test/ui/spec017-selection.test.tsx` | — |
-| REQ-003 | Exactly one camera fit on search landing; none on list select | automated | `pnpm test` — 3 fit cases + 6 bounds unit cases | `test/ui/spec017-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | — |
-| REQ-004 | Non-major-group clade resolves to disclosed ancestor; no-group state designed | automated | `pnpm test` — 8 unit + 2 component cases | `test/ui/spec017-search-landing.test.ts`, `test/ui/spec017-selection.test.tsx` | — |
-| REQ-005 | Taxon-mode cluster card selects; locality cluster zooms; no silent click | automated | `pnpm test` — 2 cases in `spec017-map-emphasis` | `test/ui/spec017-map-emphasis.test.tsx` | — |
-| REQ-006 | Locality clusters show counts, no clade icon, hover survives | automated + manual | `pnpm test` + visual check | `test/ui/spec017-map-emphasis.test.tsx` | — |
-| REQ-007 | Cluster note present in all three modes | automated | `pnpm test` — 2 cases in `spec017-selection` | `test/ui/spec017-selection.test.tsx` | — |
+| REQ-001 | Focus overlay populated; cluster layers dimmed; clustered feature count unchanged | automated + manual | `pnpm test` — 4 cases in `spec027-map-emphasis` | `test/ui/spec027-map-emphasis.test.tsx` | — |
+| REQ-002 | Off-viewport taxon still focuses and panels; list stays viewport-linked | automated | `pnpm test` — 2 cases in `spec027-selection` | `test/ui/spec027-selection.test.tsx` | — |
+| REQ-003 | Exactly one camera fit on search landing; none on list select | automated | `pnpm test` — 3 fit cases + 6 bounds unit cases | `test/ui/spec027-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | — |
+| REQ-004 | Non-major-group clade resolves to disclosed ancestor; no-group state designed | automated | `pnpm test` — 8 unit + 2 component cases | `test/ui/spec027-search-landing.test.ts`, `test/ui/spec027-selection.test.tsx` | — |
+| REQ-005 | Taxon-mode cluster card selects; locality cluster zooms; no silent click | automated | `pnpm test` — 2 cases in `spec027-map-emphasis` | `test/ui/spec027-map-emphasis.test.tsx` | — |
+| REQ-006 | Locality clusters carry no clade icon; hover survives a cluster click (counts done by SPEC-021) | automated + manual | `pnpm test` + visual check | `test/ui/spec027-map-emphasis.test.tsx` | — |
+| REQ-007 | _Retired 2026-08-26 — superseded by SPEC-021 REQ-001/002_ | — | — | — | — |
 | REQ-008 | Focused candidates take labels ahead of unfocused | automated | `pnpm test` — 3 cases in `map-labels` | `test/ui/map-labels.test.ts` | — |
-| NFR-001 | No base-source `setData` on focus change; perf scenarios green | automated | `pnpm test` — NFR-001 case + `scenario-perf-360/370` | `test/ui/spec017-map-emphasis.test.tsx` | — |
-| NFR-002 | States present without WebGL; no hue-only encoding | automated + inspection | `pnpm test` (jsdom) + guideline review | `test/ui/spec017-selection.test.tsx` | — |
-| NFR-003 | Map settles with default/unstable props; no-op recompute does not re-render | automated | `pnpm test` — 2 integration + 2 unit cases | `test/ui/spec017-map-emphasis.test.tsx` | — |
+| NFR-001 | No base-source `setData` on focus change; perf scenarios green | automated | `pnpm test` — NFR-001 case + `scenario-perf-360/370` | `test/ui/spec027-map-emphasis.test.tsx` | — |
+| NFR-002 | States present without WebGL; no hue-only encoding | automated + inspection | `pnpm test` (jsdom) + guideline review | `test/ui/spec027-selection.test.tsx` | — |
+| NFR-003 | Map settles with default/unstable props; no-op recompute does not re-render | automated | `pnpm test` — 2 integration + 2 unit cases | `test/ui/spec027-map-emphasis.test.tsx` | — |
 | SEC-001 | No new egress | automated | `pnpm test` | `test/data-005-no-runtime-egress.test.ts` | — |
-| API-001 | New helpers pure and unit-tested | automated | `pnpm test` — no React/MapLibre imports in the unit suites | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | — |
+| API-001 | New helpers pure and unit-tested | automated | `pnpm test` — no React/MapLibre imports in the unit suites | `test/ui/spec027-search-landing.test.ts`, `test/ui/viewport.test.ts` | — |
 
 ## Test plan
 
@@ -452,11 +521,6 @@ green.
 - **Manual** — Campanian (9,240 occurrences) at zoom 2.2 and zoom 6: search a
   taxon on another continent, confirm the fit and the emphasis; verify locality
   cluster counts; verify hover after a locality cluster click.
-- **Manual (A-2 residual risk)** — Campanian, "show taxa without a Wikipedia
-  article" enabled, Taxon mode at the Genus tier: select the *Not classified at
-  genus level* bucket (5,336 occurrences) and judge whether the unclustered
-  overlay is legible and responsive. This is the measured worst case and the one
-  input the automated tests cannot speak to.
 - No new fixtures or data artifacts required.
 
 ## Rollback plan
@@ -531,19 +595,19 @@ Affected components: `app-frontend`, `exploration-view`, `map-rendering`,
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Focus overlay source + cluster dim | `OccurrenceMap.tsx` — `emphasisFeatures`, `baseOpacity`, `emphasis` source, `emphasis-bg`/`emphasis-icon` layers | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
-| REQ-002 | Stage-resolved selected group | `ExplorationView.tsx` — `stageTaxonGroups`, `selectedTaxonGroup`; `GroupedPanels.tsx` count label | `test/ui/spec017-selection.test.tsx` | Implemented |
-| REQ-003 | Search-landing camera fit | `viewport.ts` — `boundsOfPoints`, `fractionInView`, `paleoPoints`; `OccurrenceMap.tsx` fit effect; `ExplorationView.tsx` `fitToken` | `test/ui/spec017-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | Implemented |
-| REQ-004 | Reachable tier/key resolution | `grouping.ts` — `tierOfTaxon`; `search.ts` — `landingForTaxon`; `ExplorationView.tsx` — `searchOutcome`, `absentTaxonName`; `GroupedPanels.tsx` — `substitutedFrom` | `test/ui/spec017-search-landing.test.ts`, `test/ui/spec017-selection.test.tsx` | Implemented |
-| REQ-005 | Mode-aware cluster interaction | `OccurrenceMap.tsx` — locality short-circuit in the click handler; `MapSpeciesCard.tsx` — `onSelectTaxon`; `ExplorationView.tsx` — `handleSelectTaxonId` | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
-| REQ-006 | Locality cluster rendering/state | `OccurrenceMap.tsx` — badges outside `showCladeUi`, `clusters-icon` visibility, mode-change card reset | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
-| REQ-007 | Cluster semantics note | `ExplorationView.tsx` — `mapLegend` in all modes + focus clause | `test/ui/spec017-selection.test.tsx` | Implemented |
+| REQ-001 | Focus overlay source + cluster dim | `OccurrenceMap.tsx` — `emphasisFeatures`, `baseOpacity`, `emphasis` source, `emphasis-bg`/`emphasis-icon` layers | `test/ui/spec027-map-emphasis.test.tsx` | Implemented |
+| REQ-002 | Stage-resolved selected group | `ExplorationView.tsx` — `stageTaxonGroups`, `selectedTaxonGroup`; `GroupedPanels.tsx` count label | `test/ui/spec027-selection.test.tsx` | Implemented |
+| REQ-003 | Search-landing camera fit | `viewport.ts` — `boundsOfPoints`, `fractionInView`, `paleoPoints`; `OccurrenceMap.tsx` fit effect; `ExplorationView.tsx` `fitToken` | `test/ui/spec027-map-emphasis.test.tsx`, `test/ui/viewport.test.ts` | Implemented |
+| REQ-004 | Reachable tier/key resolution | `grouping.ts` — `tierOfTaxon`; `search.ts` — `landingForTaxon`; `ExplorationView.tsx` — `searchOutcome`, `absentTaxonName`; `GroupedPanels.tsx` — `substitutedFrom` | `test/ui/spec027-search-landing.test.ts`, `test/ui/spec027-selection.test.tsx` | Implemented |
+| REQ-005 | Mode-aware cluster interaction | `OccurrenceMap.tsx` — locality short-circuit in the click handler; `MapSpeciesCard.tsx` — `onSelectTaxon`; `ExplorationView.tsx` — `handleSelectTaxonId` | `test/ui/spec027-map-emphasis.test.tsx` | Implemented |
+| REQ-006 | Locality cluster rendering/state | `OccurrenceMap.tsx` — `clusters-icon` visibility, mode-change card reset | `test/ui/spec027-map-emphasis.test.tsx` | Implemented (narrowed) |
+| REQ-007 | _Retired_ — SPEC-021 deleted the note it extended | — | — | Retired (unimplemented) |
 | REQ-008 | Focus-preferring labels | `mapLabels.ts` — `focused` candidate flag; `OccurrenceMap.tsx` — `focusIdsRef` in the label pass | `test/ui/map-labels.test.ts` | Implemented |
-| NFR-001 | No re-clustering on selection | `OccurrenceMap.tsx` — emphasis effect touches only the `emphasis` source | `test/ui/spec017-map-emphasis.test.tsx` | Implemented |
-| NFR-002 | Non-colour-only emphasis | `OccurrenceMap.tsx`, `exploration.module.css` — `.notice`, `.clusterCountDim` | `test/ui/spec017-selection.test.tsx` | Implemented |
-| NFR-003 | Settling: value-equal overlay state + frozen prop defaults | `OccurrenceMap.tsx` — `sameCounts`, `sameLabels`, `NO_LOCALITIES`/`NO_OCCURRENCES`/`NO_TAXA` | `test/ui/spec017-map-emphasis.test.tsx` | Implemented (AMEND-001) |
+| NFR-001 | No re-clustering on selection | `OccurrenceMap.tsx` — emphasis effect touches only the `emphasis` source | `test/ui/spec027-map-emphasis.test.tsx` | Implemented |
+| NFR-002 | Non-colour-only emphasis | `OccurrenceMap.tsx`, `exploration.module.css` — `.notice`, `.clusterCountDim` | `test/ui/spec027-selection.test.tsx` | Implemented |
+| NFR-003 | Settling: value-equal overlay state + frozen prop defaults | `OccurrenceMap.tsx` — `sameCounts`, `sameLabels`, `NO_LOCALITIES`/`NO_OCCURRENCES`/`NO_TAXA` | `test/ui/spec027-map-emphasis.test.tsx` | Implemented (AMEND-001) |
 | SEC-001 | No new egress | — (no new network calls) | `test/data-005-no-runtime-egress.test.ts` | Implemented |
-| API-001 | Pure helpers | `src/app/state/search.ts`, `src/app/state/grouping.ts`, `src/app/state/viewport.ts` | `test/ui/spec017-search-landing.test.ts`, `test/ui/viewport.test.ts` | Implemented |
+| API-001 | Pure helpers | `src/app/state/search.ts`, `src/app/state/grouping.ts`, `src/app/state/viewport.ts` | `test/ui/spec027-search-landing.test.ts`, `test/ui/viewport.test.ts` | Implemented |
 
 ## Implementation notes
 
@@ -561,7 +625,7 @@ Decisions and observations from implementation (2026-08-04):
 
 - **`tierForRank` was removed, not deprecated.** REQ-004 replaces it wholesale:
   it mapped rank → tier without consulting `MAJOR_GROUP_NAMES`, which is the bug.
-  Its unit test was replaced by `test/ui/spec017-search-landing.test.ts`, which
+  Its unit test was replaced by `test/ui/spec027-search-landing.test.ts`, which
   covers the same ground plus the substitution and no-ancestor paths.
 - **`tierOfTaxon` lives in `grouping.ts`, not `search.ts`.** The question "can
   this taxon key a group?" must have exactly one answer, or the search landing
@@ -587,19 +651,14 @@ Decisions and observations from implementation (2026-08-04):
   view, ≤ 1,764 with the gate off. Building the overlay `FeatureCollection` for
   the worst case measured **0.79 ms**, far inside PERF-030.
 
-  The assumption is **falsified for the not-classified bucket with the Wikipedia
-  gate off**: 5,336 occurrences, 58% of the stage, drawn unclustered. That
-  combination requires the Explorer to tick "show taxa without a Wikipedia
-  article" and then select the indeterminate bucket. It is not capped, because a
-  partial overlay would show some of a group's points and silently omit others —
-  a worse failure than a crowded one, and the spec's edge cases already make the
-  bucket a legitimate focus target. Circle and overlap-allowed symbol layers at
-  that count are well within MapLibre's normal range, but the **legibility** of
-  5,336 emphasised markers is inherently poor. Recorded as a residual risk with a
-  named manual check (see Test plan); it is not a regression, since selecting the
-  bucket previously drew nothing at all. If the manual check finds it
-  unacceptable, the fix is a design decision about whether the bucket should be
-  focusable — a new spec, not a cap bolted on here.
+  The measurement did falsify it in one case at the time: the not-classified
+  bucket with the Wikipedia gate off reached 5,336 occurrences, 58% of the stage.
+  **That case no longer exists.** SPEC-026 REQ-004 (merged 2026-08-26) filters
+  records that classify at no taxon at the chosen tier out of the taxon units
+  entirely, and `NOT_CLASSIFIED_KEY` is gone from `grouping.ts`, so the bucket is
+  not a focus target any more. The worst case is now the largest named group,
+  which the table above shows is comfortably inside the assumption. A-2 therefore
+  **holds**, and the manual check it called for is struck from the test plan.
 - **Deferred, not fixed — a latent render loop in `OccurrenceMap`.** Its
   `localities = []` / `taxaById = new Map()` prop defaults are fresh objects each
   render, so the data-sync effect re-runs every pass and calls `updateOverlays`,
@@ -607,7 +666,7 @@ Decisions and observations from implementation (2026-08-04):
   unbounded render loop. It is unreachable from the app today because
   `ExplorationView` memoises both props, and it is pre-existing rather than
   introduced here, so per the no-opportunistic-refactor rule it was left alone;
-  `test/ui/spec017-map-emphasis.test.tsx` passes stable props and documents why.
+  `test/ui/spec027-map-emphasis.test.tsx` passes stable props and documents why.
   It surfaced only because this spec's tests are the first to run the map's
   `load` path in jsdom. Worth its own spec.
 
@@ -639,7 +698,7 @@ Decisions and observations from implementation (2026-08-04):
 - **Test impact:** Two integration cases (`settles when a caller omits the
   collection props`, `a map event that changes nothing does not re-render`) and
   two unit cases over the extracted `sameCounts` / `sameLabels` predicates, all
-  in `test/ui/spec017-map-emphasis.test.tsx`. Verified to be meaningful by
+  in `test/ui/spec027-map-emphasis.test.tsx`. Verified to be meaningful by
   reverting each half of the fix: with neither half the settling test hangs;
   with the equality guards alone it passes, confirming they carry the fix and
   the frozen defaults are complementary.
@@ -661,7 +720,7 @@ Decisions and observations from implementation (2026-08-04):
   events with an unchanged camera perform no further overlay work.
 - **Verification method:** automated component test (bounded overlay-write count)
   + unit tests on the equality predicates.
-- **Evidence location:** `test/ui/spec017-map-emphasis.test.tsx`,
+- **Evidence location:** `test/ui/spec027-map-emphasis.test.tsx`,
   `src/app/components/OccurrenceMap.tsx` (`sameCounts`, `sameLabels`,
   `NO_LOCALITIES` / `NO_OCCURRENCES` / `NO_TAXA`).
 

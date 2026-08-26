@@ -3,7 +3,7 @@
  * `withinBounds` (incl. antimeridian wrap) and `occurrencesInView` (mirrors the
  * map's placeable points; null bounds ⇒ the full set).
  *
- * SPEC-017 REQ-003 adds the inverse: `boundsOfPoints` / `fractionInView`, which
+ * SPEC-027 REQ-003 adds the inverse: `boundsOfPoints` / `fractionInView`, which
  * turn a focused taxon into a camera target and decide whether to move at all.
  */
 import { expect, test } from "vitest";
@@ -72,7 +72,7 @@ test("occurrencesInView with null bounds lists every placeable occurrence (no ma
   expect(occurrencesInView(list, null).map((o) => o.id)).toEqual(["a"]);
 });
 
-/* SPEC-017 REQ-003 — deriving a camera target from a point set. */
+/* SPEC-027 REQ-003 — deriving a camera target from a point set. */
 
 test("boundsOfPoints encloses every point", () => {
   const b = boundsOfPoints([

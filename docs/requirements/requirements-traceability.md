@@ -58,7 +58,7 @@ apply everywhere.
 | FONC-270 | Exploration view, Occurrence panel | Occurrence-selection activity | AC-080 | Draft |
 | FONC-280 | Occurrence panel | Occurrence-selection activity | AC-080 | Draft |
 | FONC-290 | Occurrence panel | Occurrence-selection activity, domain model | AC-080 | Draft |
-| FONC-300 | Exploration view | — | AC-050 | Draft |
+| FONC-300 | — | — | — | Retired by SPEC-021 (2026-08-14) |
 | FONC-310 | Exploration view | — | TBD | Draft |
 | FONC-320 | Exploration view, Filters panel | — | TBD | Draft |
 | FONC-330 | Exploration view | — | TBD | Draft |
@@ -141,7 +141,7 @@ apply everywhere.
 | FONC-1100 | Occurrence panel | — | AC-180 | Draft |
 | FONC-1110 | Taxon profile | — | AC-180 | Draft |
 | FONC-1120 | Taxon profile | — | AC-170, AC-180 | Draft |
-| FONC-1130 | Occurrence panel, Taxon profile | — | AC-180 | Draft |
+| FONC-1130 | — | — | — | Retired by SPEC-021 (2026-08-14) |
 | FONC-1140 | Occurrence panel, Taxon profile | — | AC-180 | Draft |
 | FONC-1150 | Occurrence panel | — | AC-180 | Draft |
 | FONC-1160 | Taxon profile | — | TBD | Draft |

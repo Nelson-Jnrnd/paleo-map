@@ -6,7 +6,7 @@
  * bounds are known (no WebGL / map not yet loaded) the caller passes `null` and the
  * full set is returned — the accessible fallback (REQ-003).
  *
- * SPEC-017 REQ-003 adds the inverse direction: deriving a camera target from a
+ * SPEC-027 REQ-003 adds the inverse direction: deriving a camera target from a
  * point set (`boundsOfPoints`) and deciding whether the camera needs to move at
  * all (`fractionInView`), so a search result can be framed. Same discipline —
  * pure, no map object, unit-testable.
@@ -66,7 +66,7 @@ export interface LngLat {
   lat: number;
 }
 
-/** The placeable paleocoordinates of a set of occurrences (SPEC-017 REQ-003). */
+/** The placeable paleocoordinates of a set of occurrences (SPEC-027 REQ-003). */
 export function paleoPoints(occurrences: readonly ReadOccurrence[]): LngLat[] {
   const points: LngLat[] = [];
   for (const o of occurrences) {
@@ -109,9 +109,9 @@ function shorterLngArc(lngs: readonly number[]): {
 
 /**
  * Bounds enclosing a point set, or null when there is nothing to frame
- * (SPEC-017 REQ-003). A single point — or several at one place — yields a
+ * (SPEC-027 REQ-003). A single point — or several at one place — yields a
  * zero-area box; the caller clamps the resulting zoom rather than diving to
- * maximum (SPEC-017 Edge cases).
+ * maximum (SPEC-027 Edge cases).
  */
 export function boundsOfPoints(points: readonly LngLat[]): Bounds | null {
   if (points.length === 0) return null;
@@ -126,7 +126,7 @@ export function boundsOfPoints(points: readonly LngLat[]): Bounds | null {
 }
 
 /**
- * The share of `points` already inside `bounds`, in [0, 1] (SPEC-017 REQ-003,
+ * The share of `points` already inside `bounds`, in [0, 1] (SPEC-027 REQ-003,
  * OQ-002). With no bounds yet (no viewport signal) nothing is considered framed,
  * so the caller frames it. An empty point set is vacuously fully in view — there
  * is nothing to move the camera for.

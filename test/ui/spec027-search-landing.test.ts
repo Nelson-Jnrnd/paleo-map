@@ -1,5 +1,5 @@
 /**
- * SPEC-017 REQ-004 — a search must land on a group the map can actually produce.
+ * SPEC-027 REQ-004 — a search must land on a group the map can actually produce.
  *
  * Rank alone cannot decide this: `groupByTaxon`'s Major-group tier keys only on
  * the 17 curated `MAJOR_GROUP_NAMES`, while the shipped snapshot carries 285

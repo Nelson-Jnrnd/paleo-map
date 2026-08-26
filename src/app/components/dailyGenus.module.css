@@ -1,0 +1,693 @@
+/*
+ * Daily Genus (SPEC-019 UX-001). The cladogram is the screen, so this sheet is
+ * mostly lines and spacing: no card containers, no bordered boxes, no pill
+ * chips (docs/mockups/anti-slop-checklist.md). Structure comes from the tree's
+ * own connectors and a few hairline rules; every colour is a charter token.
+ */
+
+.screen {
+  min-height: 100vh;
+  /*
+   * Grow with the content, never shrink to the shell's viewport-height box.
+   * As a plain flex child this was capped at 100vh, so anything below the fold
+   * — after SPEC-020's track option, the guess line — rendered *outside* the
+   * painted background and sat on the page ground instead. That is invisible
+   * until it isn't: it dropped teal-on-white to teal-on-grey and failed the axe
+   * contrast gate at 4.23:1.
+   */
+  flex: 1 0 auto;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.progress {
+  margin: var(--space-2) 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.headRight {
+  margin-left: auto;
+  text-align: right;
+}
+
+.countdown {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-hi);
+  font-variant-numeric: tabular-nums;
+}
+
+.countdownLabel {
+  margin: 0;
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.back {
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent-deep);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--target-min);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.back:hover {
+  background: var(--color-ground);
+}
+
+/* ── banners ────────────────────────────────────────────────────────────── */
+
+.practiceBanner,
+.rollover {
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-text-faint);
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+.rollover {
+  border-left-color: var(--color-accent);
+}
+
+/* ── the track choice ───────────────────────────────────────────────────── */
+
+/*
+ * A choice between two puzzles, so it is a real radio group: no pill toggle, no
+ * segmented control, no border box (anti-slop checklist). A rule and the labels
+ * carry it.
+ */
+.tracks {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+}
+
+.trackGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+/* SPEC-024 REQ-001: selection is carried by weight and a rule as well as by
+   colour, and by aria-checked for assistive technology. */
+.trackButton {
+  padding: var(--space-1) 0;
+  min-height: var(--target-min);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.trackButton:hover {
+  color: var(--color-text-hi);
+}
+
+.trackButton:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.trackButtonOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
+/* REQ-003: a fixed slot, so previewing the other track's size on hover or focus
+   never reflows the header. */
+.trackDetail {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.trackAbout {
+  margin: 0;
+  flex-basis: 100%;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.trackAbout {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 46rem;
+}
+
+/* ── board: the tree, and the stratigraphic column ──────────────────────── */
+
+.board {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.treeWrap {
+  flex: 1 1 32rem;
+  min-width: 0;
+}
+
+/* --- Cladogram (SPEC-025) --------------------------------------------------
+   The old render indented an <ol> and faked its connectors with CSS
+   pseudo-elements sized in `rem`, while the rows were sized by their content.
+   Two coordinate systems described one picture, so a wrapped label put them out
+   of step. Now every row owns a fixed pitch and both layers are positioned from
+   the same integers, so they cannot disagree and labels cannot collide. */
+.diagram {
+  position: relative;
+  margin: var(--space-4) 0 0;
+  /* UX-001: the region scrolls rather than wrapping, with the trunk's origin at
+     its left edge so the spine stays put while eliminations scroll into view. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.diagram:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.connectors {
+  position: absolute;
+  inset: 0;
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
+.trunk,
+.cuts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The list items are structure only — they carry no box. Each row's positioned
+   span is what the reader sees, and it positions against `.diagram`, so nesting
+   depth in the DOM never affects where a row lands. */
+.trunkItem,
+.cutItem {
+  position: static;
+}
+
+.row {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--row-pitch, 21px);
+  /* The label's line box must fit inside the row pitch, or consecutive rows
+     collide even though their origins are exactly one pitch apart — measured at
+     21.8px against a 21px pitch before this was set, which the non-overlap gate
+     caught. A tight line box is what makes one-label-per-row actually true. */
+  line-height: 1;
+  /* UX-001: one line, never wrapped, never ellipsised. */
+  white-space: nowrap;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--clade-tint, var(--color-text-faint));
+  border: 1.5px solid transparent;
+}
+
+/* REQ-003: a ruled-out row carries no clade tint — an unfilled dot with a ring,
+   so the ring is never read against a tint. */
+.ringDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ruled-out);
+}
+
+.nodeName {
+  font-size: 0.9375rem;
+  color: var(--color-text-hi);
+}
+
+.ruledOut .nodeName {
+  color: var(--color-text-muted);
+}
+
+/* REQ-004: the deepest node keeps its teal ring, its weight and its rule. */
+.frontier .dot {
+  border-color: var(--color-accent-deep);
+}
+
+.frontier .nodeName {
+  font-weight: 700;
+  border-bottom: 1.5px solid var(--color-accent);
+}
+
+.deepest {
+  font-size: var(--text-min);
+  color: var(--color-accent-deep);
+}
+
+.key {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-divider);
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.keyRing {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ruled-out);
+  vertical-align: -1px;
+}
+
+.keyRingTeal {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+  border: 2px solid var(--color-accent-deep);
+  vertical-align: -1px;
+}
+
+.keyDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #dc9a80;
+  border: 1px solid var(--color-text-faint);
+  display: inline-block;
+}
+
+.keySep {
+  width: var(--space-4);
+}
+
+/* ── stratigraphic column: the time clue as an axis, not a badge ─────────── */
+
+.column {
+  flex: 0 0 20rem;
+}
+
+.columnBody {
+  position: relative;
+  height: 22rem;
+  margin-top: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+/* The scale: Ma at each period boundary, and the period each band is. */
+.ticks {
+  position: relative;
+  width: 2.2rem;
+  height: 100%;
+  flex: none;
+}
+
+.tick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-0.5em);
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.bands {
+  position: relative;
+  width: 18px;
+  height: 100%;
+  flex: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.periodNames {
+  position: relative;
+  width: 5.5rem;
+  height: 100%;
+  flex: none;
+}
+
+.periodName {
+  position: absolute;
+  left: 0;
+  transform: translateY(-0.5em);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+.band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0.22;
+}
+
+.bars {
+  position: relative;
+  height: 100%;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.barSlot {
+  position: relative;
+  width: 8px;
+  height: 100%;
+}
+
+/* SPEC-024 REQ-005: the verdict is carried by fill-versus-outline first and by
+   colour second, so it survives with colour removed. */
+.bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-radius: 1px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.barOverlaps {
+  background: var(--color-overlap);
+}
+
+.barMisses {
+  background: none;
+  border: 1px solid var(--color-text-faint);
+}
+
+/* REQ-006: the direction mark sits at the bar and points along the axis toward
+   where the answer lies. */
+.barMark {
+  position: absolute;
+  top: -0.85em;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+/* REQ-007: a guess with no recorded span is marked at the foot of its slot,
+   outside the plotting area — never a zero-height or full-height bar. */
+.barMissing {
+  position: absolute;
+  bottom: -1.1em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-faint);
+}
+
+/* REQ-006: the treatment key, in the shape the tree's key already uses. */
+.timeKey {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.keyBar {
+  display: inline-block;
+  width: 6px;
+  height: 10px;
+  vertical-align: -1px;
+  border-radius: 1px;
+}
+
+.noSpanNote {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+}
+
+/* ── the guess line: a rule, not a boxed field ──────────────────────────── */
+
+.entry {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+  position: relative;
+}
+
+.entryLabel {
+  display: block;
+  font-size: var(--text-min);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 34rem;
+}
+
+.caret {
+  color: var(--color-accent-deep);
+}
+
+.entryInput {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-text-hi);
+  padding: var(--space-2) 0;
+  min-height: var(--target-min);
+}
+
+.entryInput:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.enter {
+  border: none;
+  background: transparent;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  min-height: var(--target-min);
+  padding: 0 var(--space-2);
+}
+
+.enter:hover {
+  text-decoration: underline;
+}
+
+.options {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  max-width: 34rem;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.option {
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  border-top: 1px solid var(--color-divider);
+}
+
+.optionActive {
+  color: var(--color-text-hi);
+  font-weight: 700;
+}
+
+.entryNote,
+.note,
+.record {
+  font-size: var(--text-min);
+  color: var(--color-text-faint);
+}
+
+.entryNote {
+  margin: var(--space-2) 0 0;
+}
+
+.rejection {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-attention);
+  color: var(--color-attention);
+  font-size: 0.8125rem;
+  max-width: 34rem;
+}
+
+.aside {
+  margin: var(--space-4) 0 0;
+  display: flex;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+.linkAction {
+  border: none;
+  background: transparent;
+  color: var(--color-accent-deep);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: var(--space-1) 0;
+  min-height: var(--target-min);
+  text-decoration: underline;
+}
+
+.hintSilhouette,
+.revealSilhouette {
+  display: block;
+  margin-top: var(--space-3);
+  max-width: 12rem;
+  height: auto;
+}
+
+/* ── the reveal ─────────────────────────────────────────────────────────── */
+
+.reveal {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.revealName {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-text-hi);
+}
+
+.revealMeta,
+.revealLineage,
+.revealSource {
+  margin: var(--space-2) 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.revealLineage {
+  max-width: 48rem;
+}
+
+.actions {
+  margin: var(--space-4) 0 0;
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.primary {
+  border: none;
+  background: var(--color-accent-deep);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--target-min);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.record {
+  margin: var(--space-3) 0 0;
+}
+
+/* ── footer ─────────────────────────────────────────────────────────────── */
+
+.foot {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Phone: the column drops under the tree rather than squeezing it. */
+@media (max-width: 40rem) {
+  .screen {
+    padding: var(--space-4) var(--space-3) var(--space-5);
+  }
+
+  .board {
+    flex-direction: column;
+  }
+
+  /* Once the board stacks, `flex-basis` is a *height*: the tree's 32rem basis
+     would leave a dead gap under a short tree. */
+  .treeWrap {
+    flex: 0 0 auto;
+  }
+
+  .column {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .columnBody {
+    height: 12rem;
+  }
+}

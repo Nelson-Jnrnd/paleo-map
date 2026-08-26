@@ -13,7 +13,7 @@ export interface LabelCandidate {
   x: number;
   y: number;
   /**
-   * SPEC-017 REQ-008: this marker belongs to the focused taxon. Focused
+   * SPEC-027 REQ-008: this marker belongs to the focused taxon. Focused
    * candidates are placed first, so the `maxLabels` cap cannot be spent naming
    * the de-emphasised markers around a selection while the selected taxon itself
    * goes unlabelled.
@@ -55,7 +55,7 @@ export interface LabelLayoutOptions {
  * overlaps an already-placed one. Returns the accepted labels (a subset), capped
  * at `maxLabels`.
  *
- * Focused candidates (SPEC-017 REQ-008) are considered first; within each of the
+ * Focused candidates (SPEC-027 REQ-008) are considered first; within each of the
  * two bands the caller's order is preserved, so placement stays deterministic
  * and unchanged when nothing is focused.
  */

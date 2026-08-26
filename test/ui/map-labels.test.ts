@@ -32,7 +32,7 @@ test("respects the maxLabels cap in candidate order", () => {
   expect(out.map((l) => l.id)).toEqual(["p0", "p1", "p2"]);
 });
 
-/* SPEC-017 REQ-008 — focused markers get the labels first. */
+/* SPEC-027 REQ-008 — focused markers get the labels first. */
 
 test("focused candidates take the cap ahead of unfocused ones", () => {
   // Ten well-separated candidates, cap of 3, and the focused one is last in

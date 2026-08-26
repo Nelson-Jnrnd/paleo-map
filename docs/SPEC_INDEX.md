@@ -38,7 +38,22 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-007 | Provenance tag & taxon-profile simplification | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md`](specs/approved/SPEC-007-provenance-tags-and-profile-simplification.md) |
 | SPEC-008 | Full-Mesozoic time window (252–66 Ma) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-008-full-mesozoic-time-window.md`](specs/approved/SPEC-008-full-mesozoic-time-window.md) |
 | SPEC-009 | Ergonomic timeline slider & viewport-linked occurrence list | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/active/SPEC-009-timeline-slider-and-viewport-list.md`](specs/active/SPEC-009-timeline-slider-and-viewport-list.md) |
-| SPEC-017 | Search & selection legibility under clustering | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-selection-legibility-under-clustering.md`](specs/approved/SPEC-017-selection-legibility-under-clustering.md) |
+| SPEC-017 | Taxonomy infographics — clade sheet, common ancestor, descent, fan, neighbours (rooted at Dinosauria) | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-017-taxonomy-infographics.md`](specs/approved/SPEC-017-taxonomy-infographics.md) |
+| SPEC-018 | Map cartographic styling — bathymetric ocean, land relief, graticule, marker retune | Implemented | nelsonjeanrenaud@gmail.com | — | #20 | [`specs/implemented/SPEC-018-map-cartographic-styling.md`](specs/implemented/SPEC-018-map-cartographic-styling.md) |
+| SPEC-019 | Daily Genus — a daily taxonomic deduction puzzle | Implemented | nelsonjeanrenaud@gmail.com | — | #22 | [`specs/implemented/SPEC-019-daily-genus-puzzle.md`](specs/implemented/SPEC-019-daily-genus-puzzle.md) |
+| SPEC-020 | Daily Genus — a parallel well-known track, ranked by encyclopedic attention | Implemented | nelsonjeanrenaud@gmail.com | — | #23 | [`specs/implemented/SPEC-020-daily-genus-well-known-track.md`](specs/implemented/SPEC-020-daily-genus-well-known-track.md) |
+| SPEC-021 | Chrome copy removal — five interface lines retired, with compensating carriers | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-021-chrome-copy-removal.md`](specs/implemented/SPEC-021-chrome-copy-removal.md) |
+| SPEC-022 | A global app bar — Map / Dinordle / Taxonomy, and the Dinordle rename | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-022-global-app-bar.md`](specs/implemented/SPEC-022-global-app-bar.md) |
+| SPEC-023 | Map overlay layout — corner rails and an automated non-overlap gate | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-023-map-overlay-layout.md`](specs/implemented/SPEC-023-map-overlay-layout.md) |
+| SPEC-024 | Dinordle legibility — named track controls and a per-guess overlap verdict | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-024-puzzle-legibility.md`](specs/implemented/SPEC-024-puzzle-legibility.md) |
+| SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-025-cladogram-render.md`](specs/implemented/SPEC-025-cladogram-render.md) |
+| SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-026-sidebar-redesign.md`](specs/implemented/SPEC-026-sidebar-redesign.md) |
+| SPEC-027 | Search & selection legibility under clustering | In Implementation | nelsonjeanrenaud@gmail.com | — | #19 | [`specs/approved/SPEC-027-selection-legibility-under-clustering.md`](specs/approved/SPEC-027-selection-legibility-under-clustering.md) |
+
+> **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
+> table although those specs exist under `docs/specs/approved/`. Recorded in
+> `docs/reports/fan-feature-wishlist.md`; left for a dedicated `/drift-check`
+> rather than folded into an unrelated change.
 
 > Keep this table in sync with the frontmatter of each spec. `/spec-report` and
 > `scripts/validate_drift.py` help detect drift between this index and the

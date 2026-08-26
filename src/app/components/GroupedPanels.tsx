@@ -24,6 +24,8 @@ interface LocalityPanelProps {
   /** SPEC-014 AMEND-005: whether a taxon has a Wikipedia article (→ a page). */
   hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
+  /** Names the list this detail replaced (SPEC-026 REQ-003). */
+  backLabel: string;
 }
 
 export function LocalityPanel({
@@ -32,6 +34,7 @@ export function LocalityPanel({
   onOpenProfile,
   hasArticle,
   onClose,
+  backLabel,
 }: LocalityPanelProps): ReactElement {
   // Distinct taxa recorded here, in stable name order.
   const seen = new Map<string, string>();
@@ -41,16 +44,12 @@ export function LocalityPanel({
 
   return (
     <section className={styles.panel} aria-label={`Locality: ${group.name}`}>
+      {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
+      <button type="button" className={styles.panelBack} onClick={onClose}>
+        ← {backLabel}
+      </button>
       <div className={styles.panelHead}>
         <h2>{group.name}</h2>
-        <button
-          type="button"
-          className={styles.panelClose}
-          onClick={onClose}
-          aria-label="Close locality panel"
-        >
-          ✕
-        </button>
       </div>
 
       <dl className={styles.fieldGrid}>
@@ -113,8 +112,12 @@ interface TaxonPanelProps {
   /** SPEC-014 AMEND-005: whether this taxon has a Wikipedia article (→ a page). */
   hasArticle: (taxonId: string) => boolean;
   onClose: () => void;
+  /** Names the list this detail replaced (SPEC-026 REQ-003). */
+  backLabel: string;
+  /** The clade the row's tint stood for, named in words (SPEC-026 UX-002). */
+  clade: string;
   /**
-   * SPEC-017 REQ-004: the name the Explorer searched for, when it is not this
+   * SPEC-027 REQ-004: the name the Explorer searched for, when it is not this
    * group — the search landed on the nearest ancestor the map groups by, and
    * must say so rather than quietly showing a different taxon.
    */
@@ -126,23 +129,25 @@ export function TaxonPanel({
   onOpenProfile,
   hasArticle,
   onClose,
+  backLabel,
+  clade,
   substitutedFrom = null,
 }: TaxonPanelProps): ReactElement {
+  const unitWord = "taxon";
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
+      {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
+      <button type="button" className={styles.panelBack} onClick={onClose}>
+        ← {backLabel}
+      </button>
       <div className={styles.panelHead}>
-        <h2 className={group.notClassified ? undefined : "sciName"}>
-          {group.name}
-        </h2>
-        <button
-          type="button"
-          className={styles.panelClose}
-          onClick={onClose}
-          aria-label="Close taxon panel"
-        >
-          ✕
-        </button>
+        <h2 className="sciName">{group.name}</h2>
       </div>
+      {/* UX-002: the clade the row's tint stood for, in visible words — so the
+          tint never carries a meaning that has no worded form. */}
+      <p className={styles.panelClade}>
+        {clade} · {unitWord}
+      </p>
 
       {substitutedFrom && (
         <p className={styles.notice} role="status">
@@ -153,7 +158,7 @@ export function TaxonPanel({
       )}
 
       <dl className={styles.fieldGrid}>
-        {/* SPEC-017 REQ-002: the selection is resolved across the whole stage,
+        {/* SPEC-027 REQ-002: the selection is resolved across the whole stage,
             not the viewport, so this count is "at this age" — not "in view". */}
         <dt className={styles.fieldLabel}>Occurrences at this age</dt>
         <dd className={styles.fieldValue}>
@@ -171,30 +176,23 @@ export function TaxonPanel({
         </dd>
       </dl>
 
-      {group.taxonId ? (
-        hasArticle(group.taxonId) ? (
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={() => onOpenProfile(group.taxonId!)}
-          >
-            Open taxon profile →
-          </button>
-        ) : (
-          <button
-            type="button"
-            className={styles.primary}
-            disabled
-            title={NO_ARTICLE}
-          >
-            Open taxon profile →
-          </button>
-        )
+      {hasArticle(group.taxonId) ? (
+        <button
+          type="button"
+          className={styles.primary}
+          onClick={() => onOpenProfile(group.taxonId)}
+        >
+          Open taxon profile →
+        </button>
       ) : (
-        <p className={styles.source}>
-          These records are identified only above this rank, so they have no
-          single taxon profile. Choose a coarser rank to group them.
-        </p>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled
+          title={NO_ARTICLE}
+        >
+          Open taxon profile →
+        </button>
       )}
     </section>
   );

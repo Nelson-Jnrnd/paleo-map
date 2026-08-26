@@ -46,6 +46,17 @@ import {
   cladeMarkerById,
   cladeMarkerForTaxon,
 } from "./mapCladeMarkers.js";
+import {
+  LAND_TEXTURE_ID,
+  OCEAN_DEEP,
+  buildEquator,
+  buildGraticule,
+  buildLandTexture,
+  coastLayer,
+  graticuleLayers,
+  landLayers,
+  oceanDepthLayers,
+} from "./mapCartography.js";
 import { MapHoverCard, hoverCardContent } from "./MapHoverCard.js";
 import { MapSpeciesCard } from "./MapSpeciesCard.js";
 import type { SpeciesRow } from "./MapSpeciesCard.js";
@@ -59,7 +70,7 @@ const LABEL_MIN_ZOOM = 5;
 const MAX_LABELS = 10;
 
 /**
- * SPEC-017 REQ-001 / OQ-003: how far the un-focused map recedes while a taxon is
+ * SPEC-027 REQ-001 / OQ-003: how far the un-focused map recedes while a taxon is
  * focused. One constant for the clustered discs and the loose points alike, so
  * the whole base recedes by the same amount and the value is tunable in one
  * place.
@@ -67,7 +78,7 @@ const MAX_LABELS = 10;
 const DIM_OPACITY = 0.2;
 
 /**
- * SPEC-017 REQ-003: framing a search result. The padding keeps the outermost
+ * SPEC-027 REQ-003: framing a search result. The padding keeps the outermost
  * markers off the map edge; `maxZoom` stops a taxon known from a single locality
  * (a zero-area bounds) from diving to full zoom; the ease is short enough to
  * read as a move rather than a teleport.
@@ -76,13 +87,13 @@ const FIT_PADDING = 64;
 const FIT_MAX_ZOOM = 5.5;
 const FIT_DURATION_MS = 700;
 /**
- * SPEC-017 OQ-002: skip the move when the taxon is already substantially framed,
+ * SPEC-027 OQ-002: skip the move when the taxon is already substantially framed,
  * so searching something you are already looking at does not jolt the camera.
  */
 const FIT_SKIP_THRESHOLD = 0.5;
 
 /**
- * SPEC-017 AMEND-001. Stable identities for the optional collection props, and
+ * SPEC-027 AMEND-001. Stable identities for the optional collection props, and
  * value equality for the two DOM-overlay arrays.
  *
  * `updateOverlays` is called from effects *and* from map events, and it sets two
@@ -134,6 +145,21 @@ function clusterDiscRadius(count: number): number {
   return 13;
 }
 
+/**
+ * The accessible name for a cluster badge (SPEC-021 REQ-001, restoring SPEC-010
+ * REQ-002's original criterion). A cluster's number is a count of *records* at a
+ * location — density — and never a count of distinct taxa; saying which unit is
+ * counted is the whole point of the name, so the unit follows the mode. Locality
+ * mode collapses collections, so it counts localities; every other mode plots one
+ * feature per occurrence record.
+ */
+export function clusterCountLabel(count: number, mode: GroupingMode): string {
+  if (mode === "locality") {
+    return `${count} ${count === 1 ? "locality" : "localities"}`;
+  }
+  return `${count} occurrence record${count === 1 ? "" : "s"}`;
+}
+
 interface OccurrenceMapProps {
   occurrences: readonly ReadOccurrence[];
   selectedId: string | null;
@@ -158,20 +184,20 @@ interface OccurrenceMapProps {
    */
   focusIds?: readonly string[] | null;
   /**
-   * The focused occurrences themselves (SPEC-017 REQ-003), for framing the
+   * The focused occurrences themselves (SPEC-027 REQ-003), for framing the
    * camera on a search landing. Same set as `focusIds`, resolved to records so
    * the map can read their paleocoordinates without a lookup.
    */
   focusOccurrences?: readonly ReadOccurrence[];
   /**
-   * Frame the focus when this changes (SPEC-017 REQ-003). Bumped **only** by a
+   * Frame the focus when this changes (SPEC-027 REQ-003). Bumped **only** by a
    * search landing, so a list selection or a map click never moves the camera.
    * The fit is deferred until the focus is actually populated, because the
    * landed stage's occurrences may still be loading.
    */
   fitToken?: number;
   /**
-   * Select a taxon from the cluster aggregate card (SPEC-017 REQ-005). Provided
+   * Select a taxon from the cluster aggregate card (SPEC-027 REQ-005). Provided
    * only in taxon mode; when present, picking a species selects it on the map
    * instead of leaving for its profile.
    */
@@ -188,9 +214,6 @@ interface OccurrenceMapProps {
   onOpenProfile?: (taxonId: string) => void;
 }
 
-const OCEAN_OUTER = "#d7e4ec";
-const LAND = "#edf1f1";
-const COAST = "#a9b9c3";
 const ACCENT_DEEP = "#0a7f66";
 
 /**
@@ -208,7 +231,11 @@ function pointStrokeWidth(
     3,
     ["==", ["get", "id"], highlightedId ?? ""],
     2.5,
-    1.5,
+    // SPEC-018 REQ-004: the resting casing widened from 1.5 to 2. The background
+    // is no longer one flat value, so a marker now has to separate itself from
+    // the shelf, the slope, the deep water *and* the land it may sit on. The
+    // selected > highlighted > resting ordering (SPEC-009 REQ-004) is preserved.
+    2,
   ];
 }
 
@@ -226,7 +253,11 @@ function pointStrokeColor(
   ];
 }
 
-/** Self-contained style — background only, no external tiles/glyphs (SEC-001). */
+/**
+ * Self-contained style — background only, no external tiles/glyphs (SEC-001).
+ * The background is the **deep** water value; the shelf and slope bands above it
+ * are derived from the coastline at frame time (SPEC-018 REQ-001).
+ */
 const BASE_STYLE = {
   version: 8 as const,
   sources: {},
@@ -234,7 +265,7 @@ const BASE_STYLE = {
     {
       id: "ocean",
       type: "background" as const,
-      paint: { "background-color": OCEAN_OUTER },
+      paint: { "background-color": OCEAN_DEEP },
     },
   ],
 };
@@ -356,7 +387,7 @@ function featuresForMode(
 }
 
 /**
- * Base-layer opacity while a taxon is focused (SPEC-010 REQ-004, SPEC-017
+ * Base-layer opacity while a taxon is focused (SPEC-010 REQ-004, SPEC-027
  * REQ-001). The whole base recedes — clustered discs included — because the
  * focused occurrences are re-drawn at full strength by the emphasis overlay
  * above it. Emphasis, not hue. No focus → everything opaque.
@@ -370,7 +401,7 @@ function baseOpacity(focusIds: readonly string[] | null | undefined): number {
 }
 
 /**
- * The emphasis overlay's features (SPEC-017 REQ-001): the focused taxon's
+ * The emphasis overlay's features (SPEC-027 REQ-001): the focused taxon's
  * occurrences, plus the selected and hovered feature, drawn **unclustered**
  * above everything else.
  *
@@ -437,7 +468,7 @@ export function OccurrenceMap({
   occurrencesRef.current = occurrences;
   const modeRef = useRef(mode);
   modeRef.current = mode;
-  // SPEC-017 REQ-008: the focus set, as a Set, for the label pass.
+  // SPEC-027 REQ-008: the focus set, as a Set, for the label pass.
   const focusIdsRef = useRef<ReadonlySet<string>>(new Set());
   focusIdsRef.current = new Set(focusIds ?? []);
 
@@ -467,6 +498,9 @@ export function OccurrenceMap({
   const multiRef = useRef(multi);
   multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
+  // UX-001: open by default, remembered for the session only — no storage, and
+  // never collapsed automatically by viewport size.
+  const [cladeKeyOpen, setCladeKeyOpen] = useState(true);
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
   >([]);
@@ -495,7 +529,7 @@ export function OccurrenceMap({
         counts.push({ key, x: p.x, y: p.y, count: n });
       }
     }
-    // SPEC-017 AMEND-001: keep the previous array when nothing actually moved.
+    // SPEC-027 AMEND-001: keep the previous array when nothing actually moved.
     // `updateOverlays` runs from effects as well as map events, and a fresh array
     // identity here forces a re-render — which re-runs those effects, which calls
     // this again. Bailing on an unchanged value breaks that cycle at its source
@@ -528,7 +562,7 @@ export function OccurrenceMap({
     }
     const seen = new Set<string>();
     const candidates: LabelCandidate[] = [];
-    // SPEC-017 REQ-008: read the emphasis overlay too, and mark its markers, so
+    // SPEC-027 REQ-008: read the emphasis overlay too, and mark its markers, so
     // the focused taxon gets named rather than losing every label to the dimmed
     // markers around it.
     const focusSet = focusIdsRef.current;
@@ -678,6 +712,28 @@ export function OccurrenceMap({
             );
             if (cancelled || !mapRef.current) return;
 
+            // SPEC-018 AMEND-001: the land stipple. Registered before any layer
+            // references it, and as a Uint8ClampedArray — a plain Uint8Array is
+            // accepted by addImage but never renders as a fill-pattern.
+            if (!map.hasImage(LAND_TEXTURE_ID)) {
+              map.addImage(LAND_TEXTURE_ID, buildLandTexture());
+            }
+
+            // SPEC-018 REQ-003: the graticule is **frame-independent**, so it is
+            // added at load rather than with the basemap. That is what keeps it
+            // rendering in the no-frame fallback the map already degrades to.
+            // Added before the occurrence layers below, so it can never obscure a
+            // marker; `land-line` is later inserted above it so it can never
+            // obscure a coastline either.
+            map.addSource("graticule", {
+              type: "geojson",
+              data: buildGraticule(),
+            });
+            map.addSource("equator", { type: "geojson", data: buildEquator() });
+            for (const layer of graticuleLayers("graticule", "equator")) {
+              map.addLayer(layer as never);
+            }
+
             map.addSource("occurrences", {
               type: "geojson",
               data: featuresForMode(mode, occurrences, localities, taxaById),
@@ -713,8 +769,11 @@ export function OccurrenceMap({
                   28,
                 ],
                 "circle-stroke-color": "#ffffff",
-                "circle-stroke-width": 1.5,
-                // SPEC-017 REQ-001: the discs recede with the rest of the base
+                // SPEC-018 REQ-004: widened with the point casing above — the
+                // pale cluster disc sits close in value to the new slope band,
+                // so the white casing is what keeps it legible over water.
+                "circle-stroke-width": 2,
+                // SPEC-027 REQ-001: the discs recede with the rest of the base
                 // while a taxon is focused, so the overlay above reads clearly.
                 "circle-opacity": baseOpacity(focusIds),
                 "circle-stroke-opacity": baseOpacity(focusIds),
@@ -740,7 +799,7 @@ export function OccurrenceMap({
                 ] as never,
                 "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
-                // SPEC-017 REQ-006: a locality cluster aggregates collections,
+                // SPEC-027 REQ-006: a locality cluster aggregates collections,
                 // not animals, so it must not wear a clade silhouette.
                 visibility: mode === "locality" ? "none" : "visible",
               },
@@ -802,7 +861,7 @@ export function OccurrenceMap({
               paint: { "icon-opacity": baseOpacity(focusIds) },
             });
 
-            // SPEC-017 REQ-001: the emphasis overlay — an **unclustered** source
+            // SPEC-027 REQ-001: the emphasis overlay — an **unclustered** source
             // holding only the focused / selected / highlighted occurrences,
             // drawn above everything. Clustering can no longer swallow a
             // selection: whatever is emphasised is always its own marker, at any
@@ -925,7 +984,7 @@ export function OccurrenceMap({
               const zoomIn = (): void => {
                 map.easeTo({ center, zoom: map.getZoom() + 2 });
               };
-              // SPEC-017 REQ-005/006: the species card is a taxonomic device, so
+              // SPEC-027 REQ-005/006: the species card is a taxonomic device, so
               // it has no business in locality mode — those leaves are
               // collections and carry no taxon at all, which used to strand an
               // empty, invisible card that suppressed hover. There, a cluster
@@ -1045,24 +1104,21 @@ export function OccurrenceMap({
       return;
     }
     map.addSource("basemap", { type: "geojson", data: basemap.geojson });
-    map.addLayer(
-      {
-        id: "land-fill",
-        type: "fill",
-        source: "basemap",
-        paint: { "fill-color": LAND },
-      },
-      "clusters",
-    );
-    map.addLayer(
-      {
-        id: "land-line",
-        type: "line",
-        source: "basemap",
-        paint: { "line-color": COAST, "line-width": 1 },
-      },
-      "clusters",
-    );
+
+    // SPEC-018 REQ-001/002. Stacking, bottom to top: the two blurred depth bands,
+    // then the land fill painted over their landward halves, then the land
+    // relief. All of these go *below* the graticule; only `land-line` goes above
+    // it, so the coastline always stays crisp (REQ-003).
+    //
+    // Each `addLayer(..., beforeId)` inserts immediately below `beforeId`, so
+    // insertion order here is the stacking order — see CARTOGRAPHY_LAYER_ORDER.
+    for (const layer of [
+      ...oceanDepthLayers("basemap"),
+      ...landLayers("basemap", LAND_TEXTURE_ID),
+    ]) {
+      map.addLayer(layer as never, "graticule");
+    }
+    map.addLayer(coastLayer("basemap") as never, "clusters");
   }, [mapLoaded, basemap]);
 
   // Sync source data when the visible occurrences, mode, or localities change
@@ -1075,7 +1131,7 @@ export function OccurrenceMap({
     updateOverlaysRef.current();
   }, [occurrences, localities, mode, taxaById]);
 
-  // Sync the emphasis overlay + the base dim (SPEC-010 REQ-004, SPEC-017
+  // Sync the emphasis overlay + the base dim (SPEC-010 REQ-004, SPEC-027
   // REQ-001). Note what this effect does *not* do: it never re-feeds the
   // clustered `occurrences` source, so selecting a taxon costs one small
   // setData on the overlay rather than re-clustering 5k–9k points (NFR-001).
@@ -1135,7 +1191,7 @@ export function OccurrenceMap({
     }
   }, [selectedId, highlightedId]);
 
-  // SPEC-017 REQ-006: a locality cluster must not wear a clade silhouette.
+  // SPEC-027 REQ-006: a locality cluster must not wear a clade silhouette.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedRef.current || !map.getLayer("clusters-icon")) return;
@@ -1146,7 +1202,7 @@ export function OccurrenceMap({
     );
   }, [mode]);
 
-  // SPEC-017 REQ-003: frame a search landing — once per token, and only once the
+  // SPEC-027 REQ-003: frame a search landing — once per token, and only once the
   // focus is populated (the landed stage may still have been loading when the
   // token was bumped). Skipped when the taxon is already substantially in view,
   // so searching what you are looking at does not jolt the camera (OQ-002).
@@ -1190,7 +1246,7 @@ export function OccurrenceMap({
     setMulti(null);
   }, [occurrences, pinned, hover]);
 
-  // SPEC-017 REQ-006: changing mode re-keys every feature, so any card left over
+  // SPEC-027 REQ-006: changing mode re-keys every feature, so any card left over
   // belongs to features that no longer exist. Clearing them here also releases
   // the hover suppression those cards hold — a locality cluster click used to
   // strand an invisible card and kill hover until the stage changed.
@@ -1219,6 +1275,9 @@ export function OccurrenceMap({
     ? cladeMarkerForTaxon(carded.taxonId, taxaById)
     : null;
   const showCladeUi = mode !== "locality";
+  // The clade key renders only when the map is actually up and the mode uses
+  // clade identity; the rail it lives in is suppressed when nothing renders.
+  const cladeKeyVisible = available && mapLoaded && showCladeUi;
 
   return (
     <>
@@ -1241,12 +1300,18 @@ export function OccurrenceMap({
       {available && mapLoaded && (
         <>
           {/* Labels + cluster counts share the map's pixel coordinate space; the
-              overlay is non-interactive except the pinned card (which opts in). */}
+              overlay is non-interactive except the pinned card (which opts in).
+
+              SPEC-021 REQ-002: the overlay itself is no longer gated on
+              `showCladeUi` — the count badges must exist in Locality mode too, so
+              that REQ-001's accessible name has a carrier wherever clusters do.
+              The clade key, the name labels and the cards stay gated, which is
+              what `showCladeUi` was actually protecting. */}
           <div className={styles.mapOverlay}>
-            {/* SPEC-017 REQ-006: the count badge is what makes a cluster mean
-                anything, so it renders in every mode — locality clusters used to
-                show a dinosaur silhouette and no number at all. It dims with the
-                disc it belongs to while a taxon is focused (REQ-001). */}
+            {/* SPEC-027 REQ-001: the badge dims with the disc it labels while a
+                taxon is focused, so the emphasis overlay is not competing with
+                bright pills. (Rendering it in every mode is SPEC-021 REQ-002's,
+                above — SPEC-027 only adds the dim.) */}
             {clusterCounts.map((c) => {
               const r = clusterDiscRadius(c.count);
               return (
@@ -1258,7 +1323,12 @@ export function OccurrenceMap({
                       : ""
                   }`}
                   style={{ left: c.x + r * 0.62, top: c.y - r * 0.62 }}
-                  aria-hidden="true"
+                  /* SPEC-021 REQ-001: the badge states the unit it counts, on the
+                     cluster itself. The visible glyph stays the bare number; the
+                     unit rides in the accessible name, so a cluster can never be
+                     read as a count of distinct taxa. */
+                  role="img"
+                  aria-label={clusterCountLabel(c.count, mode)}
                 >
                   {c.count}
                 </span>
@@ -1308,7 +1378,7 @@ export function OccurrenceMap({
                   setMulti(null);
                   onOpenProfileRef.current?.(tid);
                 }}
-                // SPEC-017 REQ-005: in taxon mode, picking a species out of a
+                // SPEC-027 REQ-005: in taxon mode, picking a species out of a
                 // cluster selects it on the map — the mode's own unit — rather
                 // than leaving the map for the profile.
                 onSelectTaxon={
@@ -1323,79 +1393,111 @@ export function OccurrenceMap({
               />
             )}
           </div>
-          {showCladeUi && (
+        </>
+      )}
+      {/* SPEC-023 REQ-002/REQ-003: the bottom-left rail — reading the map and its
+          provenance. DOM order is the reading order from the corner outward, so
+          the ⓘ comes first (corner-most) and its popover, which opens upward,
+          paints over its rail siblings without needing a z-index. The rail is
+          suppressed entirely when neither child renders (REQ-001). */}
+      {(cladeKeyVisible || (basemap && frame)) && (
+        <div
+          className={`${styles.mapRail} ${styles.railBottomLeft}`}
+          data-map-rail="bottom-left"
+        >
+          {basemap && frame && (
+            <div
+              className={styles.basemapAttribution}
+              data-map-overlay="basemap-attribution"
+            >
+              <button
+                type="button"
+                className={styles.attributionToggle}
+                aria-expanded={attributionOpen}
+                aria-label="Basemap source and reconstruction details"
+                onClick={() => setAttributionOpen((open) => !open)}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle
+                    cx="8"
+                    cy="8"
+                    r="7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  />
+                  <circle cx="8" cy="4.4" r="1" fill="currentColor" />
+                  <rect
+                    x="7.15"
+                    y="6.6"
+                    width="1.7"
+                    height="5.2"
+                    rx="0.5"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+              {attributionOpen && (
+                <div className={styles.attributionPopover} role="note">
+                  <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
+                  {basemap.meta.licence}
+                  <br />
+                  {!frameExact && (
+                    <>
+                      Nearest available reconstruction (
+                      {basemap.meta.targetAgeMa} Ma) shown for {stageName}.{" "}
+                    </>
+                  )}
+                  {frame.note} {basemap.meta.note}
+                  {reconstructedToFrame && (
+                    <>
+                      {" "}
+                      Occurrences are reconstructed to this frame’s age, so each
+                      point sits on the coastline shown (SPEC-016).
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          {cladeKeyVisible && (
             <div
               className={styles.mapLegend2}
               role="note"
               aria-label="Clade key"
+              data-map-overlay="clade-key"
             >
-              {CLADE_MARKERS.map((m) => (
-                <span key={m.id} className={styles.legendItem}>
-                  <span
-                    className={styles.legendSwatch}
-                    style={{ background: m.tint }}
-                  />
-                  <img className={styles.legendIcon} src={m.src} alt="" />
-                  {m.label}
-                </span>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-      {basemap && frame && (
-        <div className={styles.basemapAttribution}>
-          <button
-            type="button"
-            className={styles.attributionToggle}
-            aria-expanded={attributionOpen}
-            aria-label="Basemap source and reconstruction details"
-            onClick={() => setAttributionOpen((open) => !open)}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <circle
-                cx="8"
-                cy="8"
-                r="7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-              <circle cx="8" cy="4.4" r="1" fill="currentColor" />
-              <rect
-                x="7.15"
-                y="6.6"
-                width="1.7"
-                height="5.2"
-                rx="0.5"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-          {attributionOpen && (
-            <div className={styles.attributionPopover} role="note">
-              <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
-              {basemap.meta.licence}
-              <br />
-              {!frameExact && (
-                <>
-                  Nearest available reconstruction ({basemap.meta.targetAgeMa}{" "}
-                  Ma) shown for {stageName}.{" "}
-                </>
-              )}
-              {frame.note} {basemap.meta.note}
-              {reconstructedToFrame && (
-                <>
-                  {" "}
-                  Occurrences are reconstructed to this frame’s age, so each
-                  point sits on the coastline shown (SPEC-016).
-                </>
+              {/* UX-001: the clade key is a reading aid, so it may be collapsed
+                  — by the reader, never automatically by viewport. Provenance
+                  and uncertainty overlays stay put. */}
+              <button
+                type="button"
+                className={styles.cladeKeyToggle}
+                aria-expanded={cladeKeyOpen}
+                onClick={() => setCladeKeyOpen((open) => !open)}
+              >
+                <span aria-hidden="true">{cladeKeyOpen ? "▾" : "▸"}</span> Clade
+                key
+              </button>
+              {cladeKeyOpen && (
+                <div className={styles.cladeKeyBody}>
+                  {CLADE_MARKERS.map((m) => (
+                    <span key={m.id} className={styles.legendItem}>
+                      <span
+                        className={styles.legendSwatch}
+                        style={{ background: m.tint }}
+                      />
+                      <img className={styles.legendIcon} src={m.src} alt="" />
+                      {m.label}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           )}

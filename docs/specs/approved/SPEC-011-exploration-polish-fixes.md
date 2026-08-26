@@ -363,6 +363,29 @@ and SPEC-011.
 - **Test impact:** Adds a component test asserting the caption is present.
 - **Human approval reference:** Owner reply "a" on 2026-07-24.
 
+### AMEND-002: REQ-006 retired — the period-hint caption is removed
+
+- **Date:** 2026-08-14
+- **Reason:** REQ-006 was added by AMEND-001 on the owner's 2026-07-24 decision
+  (a): keep the most-populated quick-select target and disclose it with a static
+  caption. On 2026-08-14 the owner reversed the disclosure half of that decision,
+  choosing to delete the caption outright rather than relocate or reword it
+  (SPEC-021 UX-002).
+- **Changed requirements:** **REQ-006** ("Disclose the period quick-select
+  target") is **retired in full**. The behaviour it accompanied is untouched:
+  SPEC-008 REQ-003's most-populated target still governs which stage a period
+  quick-select selects. REQ-001…005 are unaffected.
+- **Behavioral impact:** The timeline no longer renders the line "Periods jump to
+  their most fossil-rich stage." Picking a period still lands on that period's
+  `representative` stage — identical behaviour, now undisclosed. The caption
+  described a control's behaviour, not scientific uncertainty or provenance, so
+  CONS-490 does not apply and no other requirement is affected.
+- **Test impact:** `test/ui/timeline-periods.test.tsx` inverts its caption
+  assertion to assert absence; the file's existing assertion that a period selects
+  its `representative` stage remains and becomes the regression guard. No test is
+  deleted or skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

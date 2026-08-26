@@ -602,6 +602,40 @@ SPEC-004's real basemap; A-3's CI gates landed via AMEND-002).
 - **Human approval reference:** Owner "I allow you to remove that test. it's
   cleaner" (2026-07-21).
 
+### AMEND-005: Two acceptance criteria retired — the scope disclaimer, and the standing reconstruction label (via SPEC-021)
+
+- **Date:** 2026-08-14
+- **Reason:** SPEC-021 removes five pieces of explanatory interface copy on the
+  owner's instruction to delete rather than relocate them. Two of those lines are
+  the only carriers of acceptance criteria in this spec: the brand subtext
+  ("…not a complete atlas of Mesozoic life") and the map's standing
+  "▲ Paleogeographic reconstruction" banner.
+- **Changed requirements:**
+  - **REQ-005** — the acceptance criterion "a disclaimer/label conveys the app is
+    not a complete atlas of all Mesozoic life" is **struck**. REQ-005's statement
+    is unchanged and still binds: the app must not *present* itself as a complete
+    atlas. FONC-400 is a prohibition, not a mandate to print a disclaimer, and it
+    remains satisfied by the permanent `Group: Dinosaurs` context stat and the
+    product title. Nothing in the functional specification changes.
+  - **REQ-002** — the acceptance criterion "a persistent 'Paleogeographic
+    reconstruction' label is present" is **changed**, subject to the owner's
+    FONC-300 / CONS-120 disposition recorded in SPEC-021. Under disposition A it
+    is struck; under disposition B it is reworded to require an always-visible
+    statement on the basemap attribution control instead of a separate banner;
+    under disposition C this half of the amendment does not apply. The rest of
+    REQ-002 — reconstructed paleocoordinates, single-vs-group distinguishable by
+    shape not colour, zoom and pan — is unchanged.
+- **Behavioral impact:** The header loses its subtitle; the map loses its
+  floating reconstruction banner (or gains a labelled attribution control under
+  disposition B). No change to what is mapped, how occurrences are placed, how
+  they cluster, what the group filter defaults to, or what reset does.
+- **Test impact:** `test/ui/exploration-context.test.tsx` inverts its
+  "complete atlas" assertion and retargets the FONC-400 comment at the Group
+  stat. `test/ui/spec018-no-depth-claim.test.ts` and
+  `test/e2e/exploration.e2e.ts` follow the UX-003 disposition. No test is deleted
+  or skipped.
+- **Human approval reference:** Owner approval in session, 2026-08-14.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

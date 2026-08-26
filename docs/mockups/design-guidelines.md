@@ -35,11 +35,14 @@ click (CONS-490):
 
 - Fossil points are **discovery evidence**, never a distribution range or an
   exact life position (FONC-1150, CONS-130/140).
-- **Reconstructed** paleo positions carry a standing map-level "Paleogeographic
-  reconstruction" label, and time ranges that **span multiple stages** are labeled
-  as such (FONC-1130/1140). *(SPEC-007, 2026-07-21: the per-occurrence
-  "reconstructed" chip was retired in favour of the standing map label; the time
-  cue was reworded from "approximate" to the factual "spans multiple stages".)*
+- Time ranges that **span multiple stages** are labeled as such (FONC-1140).
+  Reconstructed paleo positions carry **no on-screen cue**; the rotation model
+  behind them stays inspectable in the basemap attribution popover.
+  *(SPEC-021, 2026-08-14, owner-approved: the standing map-level "Paleogeographic
+  reconstruction" label was removed, retiring FONC-300, CONS-120 and FONC-1130
+  with it. SPEC-007, 2026-07-21: the per-occurrence "reconstructed" chip had
+  already been retired in favour of that label, and the time cue was reworded
+  from "approximate" to the factual "spans multiple stages".)*
 - **Missing** data is shown with an explicit label, never a blank or a silent
   default (FONC-490, FONC-1120, PERF-180).
 - *(SPEC-007, 2026-07-21, owner-approved: the fossil-derived vs. **interpretative**
@@ -96,6 +99,22 @@ Everything else is cool neutral. Two additional colour systems exist, both
   Chronostratigraphic Chart hues: **Triassic** violet `#8E5AA5`, **Jurassic**
   blue `#3E93C6`, **Cretaceous** green `#5FA96A`. A period filter dot uses the
   same hue so the mapping is learnable. These are domain codes, not styling.
+- **Clade tints** — one muted hue per major dinosaur group, defined in
+  `src/app/components/mapCladeMarkers.ts` and established by SPEC-015 for the map's
+  occurrence markers: Theropod `#dc9a80`, Sauropod `#82b6a7`, Ornithopod
+  `#93a9cc`, Thyreophoran `#cbbd7f`, Ceratopsian `#c893ad`, Pachycephalosaur
+  `#aa9cc8`, plus the two great divisions for taxa that resolve no deeper —
+  Ornithischian `#9cc49b` and Saurischian `#cbb49b` (SPEC-015 AMEND-003) — and a
+  neutral `#b4bcc6` for anything else.
+
+  > **Owner decision (2026-08-06, SPEC-017 AMEND-001).** These tints are the
+  > product's clade code and are **not** confined to the map: the taxonomy fan
+  > uses the same hue for the same clade, so the mapping is learnable across
+  > screens the way the ICS period colours are. The rule that has always applied
+  > still applies — **shape and name carry identity first, the tint reinforces**
+  > (charter §4, PERF-250). A clade tint may never be the only way a clade is
+  > identified, and it is never applied decoratively to something that is not a
+  > clade.
 - **Provenance / status cues** — kept neutral so the accent stays singular:
 
 | Status | Cue | Meaning |
@@ -139,6 +158,26 @@ graticule are the only "texture", and they are cartographic, not decorative.
 Shadows, gradients, rounded corners, and animation are used sparingly and only
 when they aid comprehension (a marker's selected halo, a cluster expanding).
 Respect `prefers-reduced-motion`.
+
+> **Owner override (2026-08-05, SPEC-018).** The restraint rule above **no longer
+> constrains the paleogeographic basemap.** The map may be as visually rich as it
+> needs to be to read as a real cartographic object: multiple tonal bands,
+> gradients, depth gradation, relief and texture on land and sea are all
+> permitted, and the "single subtle radial" ceiling is lifted. The rule still
+> governs panels, cards, controls and every other surface — the override is
+> scoped to the basemap.
+>
+> Three things this override explicitly does **not** relax, because they are not
+> matters of taste:
+> - **§2 (uncertainty is first-class).** Richer rendering must never read as data
+>   the atlas does not have. Depth gradation is a cartographic device derived from
+>   distance to the coastline, not measured bathymetry, and must never be labelled
+>   or legended as depth (SPEC-018 UX-002).
+> - **Accessibility.** WCAG 2 AA contrast and the axe gate still win over any
+>   aesthetic choice (SPEC-003 AMEND-002).
+> - **Accent semantics.** Teal still belongs to the data and interaction layer,
+>   and ICS period hues still belong to the timeline. The basemap gets richer in
+>   the cool-neutral family; it does not acquire a second accent.
 
 ## 5. Hierarchy and actions
 
@@ -232,6 +271,10 @@ layouts; placeholder content that fits any app; decorative gradients, blobs, and
 glassmorphism; icon soup; fake metrics; and anything that makes a fossil point
 look like a range or hides how sure we are. Boring clarity beats decorative
 complexity.
+
+The specific failure modes, the reasons they happen, and a countable self-check
+are in [`anti-slop-checklist.md`](anti-slop-checklist.md) — read it with this
+charter. It is subordinate to this document and introduces no requirements.
 
 ---
 

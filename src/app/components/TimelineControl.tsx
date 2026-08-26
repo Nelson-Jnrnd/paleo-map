@@ -279,9 +279,6 @@ export function TimelineControl({
             landing on (e.g.) the Rhaetian for the Triassic reads as intended
             rather than arbitrary (SPEC-011 REQ-006, AMEND-001; owner decision
             a). Static text, not a hover, per the charter's "always legible". */}
-        <p className={styles.periodHint}>
-          Periods jump to their most fossil-rich stage.
-        </p>
 
         <div
           className={styles.stageTrack}

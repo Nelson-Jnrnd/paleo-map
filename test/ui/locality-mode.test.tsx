@@ -17,9 +17,9 @@ async function enterLocalityMode() {
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
   const group = within(
-    await screen.findByRole("group", { name: /group occurrences by/i }),
+    await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
-  await user.click(group.getByRole("button", { name: "Localities" }));
+  await user.click(group.getByRole("radio", { name: "Locality" }));
   return user;
 }
 
@@ -51,8 +51,14 @@ test("selecting a taxon in the locality panel opens its profile (SPEC-003 loop)"
     within(panel).getAllByRole("button", { name: /open profile/i })[0]!,
   );
 
-  // Navigated to the taxon profile screen (the back-to-map affordance appears).
+  // Navigated to the taxon profile screen. SPEC-022 REQ-004 removed the screen's
+  // own back control, so the profile is identified by its own region, and the
+  // return path is the app bar's Map destination — which REQ-003 leaves unmarked
+  // here, because the taxon page is a detail view, not one of the three
+  // destinations.
   expect(
-    screen.getByRole("button", { name: /back to map|↤|←|back/i }),
+    screen.getByRole("region", { name: /taxon page:/i }),
   ).toBeInTheDocument();
+  const nav = screen.getByRole("navigation", { name: /main/i });
+  expect(within(nav).getByRole("button", { name: "Map" })).toBeInTheDocument();
 });

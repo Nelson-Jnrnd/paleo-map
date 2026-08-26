@@ -131,9 +131,10 @@ Boundaries on how data may be displayed:
   (FONC-1150).
 - No continuous distribution area extrapolated from isolated points (CONS-150);
   no complete distribution area unless explicitly sourced (CONS-160).
-- Ancient maps must be labeled as scientific reconstructions, not direct
+- ~~Ancient maps must be labeled as scientific reconstructions, not direct
   observations (CONS-120, FONC-300); reconstructed positions must be marked
-  (FONC-1130).
+  (FONC-1130).~~ *(All three retired by SPEC-021, 2026-08-14, owner-approved.
+  CONS-110 below is unaffected and still stands.)*
 - Approximate time ranges must be marked as approximate (FONC-1140); broad time
   ranges must be indicated clearly (CONS-210).
 - Modern coordinates must be distinguished from reconstructed paleogeographic

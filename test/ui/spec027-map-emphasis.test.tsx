@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * SPEC-017 REQ-001/003/005/006 + NFR-001 — what the map is told to draw when a
+ * SPEC-027 REQ-001/003/005/006 + NFR-001 — what the map is told to draw when a
  * selection is active. Driven through the fake MapLibre in `map-harness.ts`,
  * because these are assertions about source data, layer paint and camera calls
  * rather than about pixels.
