@@ -9,10 +9,8 @@ import {
   MAX_GUESSES,
   applyGuess,
   evaluateGuess,
-  hintAvailable,
   revealedTree,
   startRound,
-  takeHint,
 } from "../src/app/state/dailyGenus.js";
 import type { GameTaxon, Round } from "../src/app/state/dailyGenus.js";
 import { fixtureGameData } from "./spec019-fixture.js";
@@ -172,23 +170,10 @@ test("REQ-007: the round is lost after eight misses and takes no ninth guess", (
   expect(after.outcome).toBe("lost");
 });
 
-test("REQ-008: the hint is locked until the fifth miss, then consumes no guess", () => {
-  let round = play("Tyrannosaurus", ["Triceratops", "Diplodocus"]);
-  expect(hintAvailable(round)).toBe(false);
-  expect(takeHint(round).hintUsed).toBe(false);
-
-  round = play("Tyrannosaurus", [
-    "Triceratops",
-    "Diplodocus",
-    "Velociraptor",
-    "Gorgosaurus",
-    "Nyasasaurus",
-  ]);
-  expect(hintAvailable(round)).toBe(true);
-  const hinted = takeHint(round);
-  expect(hinted.hintUsed).toBe(true);
-  expect(hinted.guesses).toHaveLength(5);
-  expect(hinted.outcome).toBe("playing");
-  // Offered once: taking it again changes nothing.
-  expect(hintAvailable(hinted)).toBe(false);
-});
+/*
+ * REQ-008's silhouette-hint test is gone with the requirement: SPEC-028 REQ-005
+ * retires the hint. Measured reason, on record in that spec: 1,731 valid genera
+ * resolve to only 403 distinct silhouettes, so for 86% of them the hint showed a
+ * relative's outline rather than the animal's. The behaviour it covered no
+ * longer exists — this is not a skipped or disabled test.
+ */

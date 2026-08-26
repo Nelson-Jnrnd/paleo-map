@@ -19,7 +19,6 @@ import {
   applyGuess,
   evaluateGuess,
   startRound,
-  takeHint,
 } from "../src/app/state/dailyGenus.js";
 import type { GameTaxon, Round } from "../src/app/state/dailyGenus.js";
 import { fixtureGameData } from "./spec019-fixture.js";
@@ -59,17 +58,15 @@ function play(answerName: string, guessNames: readonly string[], dateKey = "2026
   return round;
 }
 
-test("REQ-011: a saved round reloads with its guesses, hint and outcome", () => {
+test("REQ-011: a saved round reloads with its guesses and outcome", () => {
   const store = memoryStore();
-  const round = takeHint(
-    play("Tyrannosaurus", [
-      "Triceratops",
-      "Diplodocus",
-      "Velociraptor",
-      "Gorgosaurus",
-      "Nyasasaurus",
-    ]),
-  );
+  const round = play("Tyrannosaurus", [
+    "Triceratops",
+    "Diplodocus",
+    "Velociraptor",
+    "Gorgosaurus",
+    "Nyasasaurus",
+  ]);
   expect(saveRound(store, round)).toBe(true);
 
   const restored = loadRound(store, "2026-08-11")!;
@@ -81,7 +78,6 @@ test("REQ-011: a saved round reloads with its guesses, hint and outcome", () => 
     "Gorgosaurus",
     "Nyasasaurus",
   ]);
-  expect(restored.hintUsed).toBe(true);
   expect(restored.outcome).toBe("playing");
 });
 
@@ -118,7 +114,6 @@ test("SEC-002: the stored payload carries only ids, names, counts and dates", ()
     "answerId",
     "dateKey",
     "guesses",
-    "hintUsed",
     "outcome",
   ]);
   const guess = (payload.guesses as Record<string, unknown>[])[0]!;
@@ -185,25 +180,24 @@ test("REQ-011: an unfinished round does not enter the record", () => {
 });
 
 test("REQ-011/REQ-004: the shared summary names no taxon and reports no distance", () => {
-  // The hint is taken mid-round, at five misses, then the sixth guess wins.
-  const hinted = takeHint(
-    play("Tyrannosaurus", [
-      "Triceratops",
-      "Diplodocus",
-      "Velociraptor",
-      "Gorgosaurus",
-      "Nyasasaurus",
-    ]),
-  );
+  // Five misses, then the sixth guess wins.
+  const played = play("Tyrannosaurus", [
+    "Triceratops",
+    "Diplodocus",
+    "Velociraptor",
+    "Gorgosaurus",
+    "Nyasasaurus",
+  ]);
   const round = applyGuess(
-    hinted,
+    played,
     evaluateGuess(genus("Tyrannosaurus"), genus("Tyrannosaurus"), data),
   );
   // ▲ marks a guess that pushed the tree deeper: Triceratops reaches
   // Dinosauria, Velociraptor Coelurosauria, Gorgosaurus Tyrannosauridae, and
   // the winning guess the answer itself.
   const summary = shareSummary(round);
-  expect(summary).toBe("Dinordle 1 · 6/8 · hint · ▲·▲▲·▲");
+  // The `· hint` marker is gone with the hint itself (SPEC-028 REQ-005).
+  expect(summary).toBe("Dinordle 1 · 6/8 · ▲·▲▲·▲");
 
   const forbidden = [
     ...data.guessable.map((t) => t.scientificName),

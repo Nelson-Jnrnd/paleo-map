@@ -96,6 +96,37 @@ export function paddingTaxa(count: number): ReadTaxon[] {
   return out;
 }
 
+/**
+ * Countries of occurrence per fixture genus (SPEC-028 REQ-002). Chosen to
+ * exercise every verdict: *Tyrannosaurus* and *Gorgosaurus* overlap in two
+ * countries, *Velociraptor* overlaps in none, *Diplodocus* overlaps in one, and
+ * *Nyasasaurus* has none recorded at all.
+ */
+export const FIXTURE_COUNTRIES: Readonly<Record<string, readonly string[]>> = {
+  "t:trex": ["CA", "US"],
+  "t:gorgo": ["CA", "US"],
+  "t:veloci": ["CN", "MN"],
+  "t:diplo": ["PT", "US"],
+  "t:trike": ["CA"],
+  "t:nyasa": [],
+  "t:archaeo": ["DE"],
+};
+
+/**
+ * Occurrence counts per fixture genus (SPEC-028 REQ-003). Chosen to land on both
+ * sides of the factor-of-two band: 40 vs 30 is close, 40 vs 3 is far, 40 vs 40
+ * is the same, and *Nyasasaurus* has none recorded.
+ */
+export const FIXTURE_OCCURRENCE_COUNTS: Readonly<Record<string, number>> = {
+  "t:trex": 40,
+  "t:gorgo": 30,
+  "t:veloci": 3,
+  "t:diplo": 40,
+  "t:trike": 80,
+  "t:nyasa": 0,
+  "t:archaeo": 12,
+};
+
 export interface ProfileOptions {
   /** Genera deliberately left out of the answer pool, by id. */
   readonly noImage?: readonly string[];
@@ -132,7 +163,7 @@ export function fixtureProfiles(options: ProfileOptions = {}): ReadProfile[] {
             ],
         enrichment: null,
         silhouette: has(options.noSilhouette, t.id) ? null : `data/sil/${t.id}.svg`,
-        occurrenceCount: 4,
+        occurrenceCount: FIXTURE_OCCURRENCE_COUNTS[t.id] ?? 4,
         timeSpan: has(options.noSpan, t.id) ? null : (FIXTURE_SPANS[t.id] ?? span(150, 100)),
         timeSpanApproximate: false,
       }) as unknown as ReadProfile,
@@ -146,13 +177,19 @@ export function fixtureModel(options: ProfileOptions = {}): ReadModel {
     profiles: fixtureProfiles(options),
     occurrences: [],
     sources: {},
+    countriesByTaxon: FIXTURE_COUNTRIES,
   } as unknown as ReadModel;
 }
 
 export function fixtureGameData(options: ProfileOptions = {}): GameData {
   const model = fixtureModel(options);
   const byId = new Map(model.profiles.map((p) => [p.taxonId, p]));
-  return buildGameData(model.taxa, buildTaxonomyIndex(model.taxa), (id) => byId.get(id));
+  return buildGameData(
+    model.taxa,
+    buildTaxonomyIndex(model.taxa),
+    (id) => byId.get(id),
+    (id) => FIXTURE_COUNTRIES[id] ?? [],
+  );
 }
 
 /** Look up a fixture taxon by name — keeps the tests readable. */

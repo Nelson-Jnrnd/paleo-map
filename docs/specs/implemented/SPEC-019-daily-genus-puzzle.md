@@ -1198,6 +1198,45 @@ playtested; and the answer is in the client bundle by construction (SEC-001).
   `test/e2e/a11y.e2e.ts` passes unmodified.
 - **Human approval reference:** Owner approval in session, 2026-08-14
 
+### AMEND-006 — the silhouette hint is retired; the two new clue channels replace it
+
+- **Date:** 2026-08-26
+- **Reason:** The owner reported the game as too hard even on the well-known
+  track, and the silhouette hint as "not helping because it's not precise at all"
+  (2026-08-26), then directed: "Demote the silhouette it's useless." The report
+  is measurable and the measurement supports it. `pipeline/silhouettes.ts`
+  resolves a genus by name and then falls back up the parent chain to the nearest
+  relative PhyloPic knows. Measured on the shipped snapshot: **1,731 valid genera
+  resolve to 403 distinct silhouettes; only 236 genera (14%) carry one no other
+  genus uses; the single most-reused silhouette stands in for 86 genera.** So for
+  roughly six genera in seven the hint showed an outline that is not the animal,
+  and the screen never said so — a documented fallback presented as a fact.
+  REQ-008's own rationale ("Every genus in the snapshot has a silhouette (100%
+  coverage)") rests on a figure that is true but misleading: the coverage is
+  mostly borrowed.
+- **Changed requirements:** **REQ-008** is **retired in full** by SPEC-028
+  REQ-005. There is no reveal control, no `hintUsed` round state, no
+  `HINT_AFTER_GUESSES` gate, and no hint marker in the shared summary. The
+  silhouette continues to be shown **at the reveal**, where the answer is already
+  named and the image therefore asserts nothing the player must guess from; and
+  `derivePool`'s requirement (REQ-002) that an answer *have* a silhouette is
+  untouched, because there it is a proxy for "recognisable when revealed" and
+  still does that job. Relabelling the hint was considered and rejected: a hint
+  captioned "this may not be the animal" is not a hint.
+- **Behavioral impact:** A player loses one optional rescue and gains two
+  per-guess clue channels (SPEC-028 REQ-002/REQ-003). The shared summary loses
+  its ` · hint` segment, so a summary from before this change and one from after
+  are distinguishable — accepted, since the marker existed only to keep a hinted
+  result honest and there is no longer a hint to disclose. Nothing changes about
+  the answer sequences, the pools, selection, records, streaks, the tracks, the
+  fragments, or the guess count.
+- **Test impact:** `test/spec019-revealed-tree.test.ts` — the REQ-008 test is
+  removed with the requirement, and a comment in its place records why, so it
+  cannot be mistaken for a deleted failing test. `test/spec019-persistence.test.ts`
+  — the round-trip and SEC-002 payload tests drop `hintUsed`, and the shared
+  summary's expected string loses ` · hint`. No test is skipped or disabled.
+- **Human approval reference:** Owner decision in session, 2026-08-26.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.

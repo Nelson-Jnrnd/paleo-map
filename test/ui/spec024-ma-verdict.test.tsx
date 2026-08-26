@@ -63,18 +63,50 @@ test("REQ-006: a miss points toward the answer; an overlap points nowhere", asyn
   for (const m of marks.slice(0, 2)) expect(m === "▲" || m === "▼").toBe(true);
 });
 
-test("REQ-006: every treatment is named in words, not just drawn", async () => {
+test("REQ-006: the mark sits at the end of the bar the answer lies beyond", async () => {
+  // The column is oldest-at-top, so "toward the answer" is the top of the bar
+  // when the answer is older and its foot when the answer is younger. Both used
+  // to float above the bar: only the glyph changed, never the placement.
+  renderGame("Tyrannosaurus"); // Late Cretaceous
+  await guess("Diplodocus"); // Jurassic: the answer is younger → ▼
+  const younger = bars()[0]!.querySelector('[class*="barMark"]')!;
+  expect(younger.textContent).toBe("▼");
+  expect(classOf(younger)).toMatch(/barMarkYounger/);
+  expect(classOf(younger)).not.toMatch(/barMarkOlder/);
+  cleanup();
+
+  renderGame("Nyasasaurus"); // Middle Triassic
+  await guess("Diplodocus"); // Jurassic: the answer is older → ▲
+  const older = bars()[0]!.querySelector('[class*="barMark"]')!;
+  expect(older.textContent).toBe("▲");
+  expect(classOf(older)).toMatch(/barMarkOlder/);
+  expect(classOf(older)).not.toMatch(/barMarkYounger/);
+
+  // The two verdicts are placed by different classes, not by one shared rule.
+  expect(classOf(younger)).not.toBe(classOf(older));
+});
+
+test("REQ-006 as amended: the key names three treatments, not four", async () => {
   renderGame();
   await guess("Triceratops");
-  // The key names one entry per treatment — the same shape as the tree's key.
-  for (const word of [
-    /overlaps/i,
-    /answer older/i,
-    /answer younger/i,
-    /no span recorded/i,
-  ]) {
+  // AMEND-001 (owner, 2026-08-26) drops the fourth entry from the key.
+  for (const word of [/overlaps/i, /answer older/i, /answer younger/i]) {
     expect(screen.getByText(word)).toBeTruthy();
   }
+  expect(screen.queryByText(/no span recorded/i)).toBeNull();
+});
+
+test("REQ-007 survives that amendment: the ✕ mark and its sentence stay", async () => {
+  // The boundary of AMEND-001, guarded: only the *key entry* went. A guess with
+  // no recorded span must still be marked on the column and named beneath it, or
+  // the mark would be undefined on the diagram — the failure SPEC-019 AMEND-005
+  // identified for the retired `?`.
+  renderGame("Tyrannosaurus", {}, { noSpan: ["t:veloci"] });
+  await guess("Velociraptor");
+  expect(
+    screen.getByText(/Velociraptor has no time span recorded/i),
+  ).toBeTruthy();
+  expect(document.querySelector('[class*="barMissing"]')).toBeTruthy();
 });
 
 test("REQ-007: a guess with no recorded span is marked and named, never invisible", async () => {

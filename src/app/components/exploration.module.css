@@ -1004,13 +1004,6 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.unitLabel {
-  font-size: var(--text-min);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-faint);
-}
-
 .unitGroup {
   display: flex;
   flex-wrap: wrap;
@@ -1509,9 +1502,14 @@
 }
 
 /* --- Experimental inline Wikipedia embed (off-spec spike) --- */
+/* The article is the page, so the frame takes the height left under the app bar
+   and the breadcrumb rather than a fixed 78vh, which cut the article off above
+   its body text. The floor keeps it usable if the chrome ever grows. */
 .wikiFrame {
+  display: block;
   width: 100%;
-  height: 78vh;
+  height: calc(100vh - 210px);
+  min-height: 420px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -1527,6 +1525,14 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-panel);
+}
+
+/* Taxon page only: the embedded article *is* the content, so the container takes
+   the window's width instead of the 720px reading column `.profile` gives the
+   text-and-controls screens that share it. The upper bound stops it sprawling on
+   an ultrawide monitor. */
+.profileWide {
+  max-width: min(96vw, 1280px);
 }
 
 .back {

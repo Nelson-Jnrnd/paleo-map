@@ -14,9 +14,9 @@ import styles from "./exploration.module.css";
 
 const SCOPE_ROOT = "Dinosauria";
 /** Show every crumb when the lineage is at most this long; otherwise elide. */
-const ELIDE_ABOVE = 5;
+const ELIDE_ABOVE = 7;
 /** When eliding, keep this many trailing crumbs (parent chain + current). */
-const TAIL_KEEP = 2;
+const TAIL_KEEP = 4;
 
 interface TaxonomyTreeProps {
   taxonId: string;

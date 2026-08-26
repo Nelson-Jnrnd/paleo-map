@@ -192,10 +192,18 @@ test("REQ-007: eight misses lose the round and still reveal the whole descent", 
   expect(screen.queryByLabelText("Guess a genus")).toBeNull();
 });
 
-test("REQ-008: the hint is locked until the fifth miss, then consumes no guess", async () => {
-  renderGame();
-  expect(screen.getByText(/silhouette hint — from guess 5/i)).toBeTruthy();
+/*
+ * REQ-008's silhouette-hint test is gone with the requirement (SPEC-019
+ * AMEND-006 / SPEC-028 REQ-005). Measured reason on record there: 1,731 valid
+ * genera resolve to only 403 distinct silhouettes, so for 86% of them the hint
+ * showed a relative's outline, not the animal's. The behaviour no longer
+ * exists — this is not a skipped or disabled test. The replacement clue
+ * channels are covered by `test/ui/spec028-clue-marks.test.tsx`.
+ */
 
+test("SPEC-028 REQ-005: no silhouette-hint control exists in any state", async () => {
+  renderGame();
+  expect(screen.queryByText(/silhouette hint/i)).toBeNull();
   for (const name of [
     "Triceratops",
     "Diplodocus",
@@ -205,11 +213,11 @@ test("REQ-008: the hint is locked until the fifth miss, then consumes no guess",
   ]) {
     await guess(name);
   }
-  const reveal = screen.getByRole("button", { name: /reveal the silhouette/i });
-  await userEvent.setup().click(reveal);
-
-  expect(screen.getByAltText("Silhouette of the hidden genus")).toBeTruthy();
-  expect(screen.getByText(/hint used — marked in your result/i)).toBeTruthy();
+  // Past the guess at which the hint used to unlock.
+  expect(
+    screen.queryByRole("button", { name: /reveal the silhouette/i }),
+  ).toBeNull();
+  expect(screen.queryByAltText("Silhouette of the hidden genus")).toBeNull();
   expect(screen.getByText("5 of 8 guesses")).toBeTruthy();
 });
 

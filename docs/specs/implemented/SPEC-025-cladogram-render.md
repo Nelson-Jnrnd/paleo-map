@@ -1112,10 +1112,33 @@ and renumber these blocks if the siblings have not all landed.
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
 | REQ-001 | Layout | `src/app/state/cladogramLayout.ts` — `layoutCladogram()`, pure, DOM-free | `test/spec025-cladogram-layout.test.ts` (8 tests) | Implemented |
-| REQ-002 | Connectors | `DailyGenusScreen.tsx` — `CladogramConnectors`, one `aria-hidden` `<svg>`, coordinates from `(row, depth)` only; the `.nodeRow::before` / `.cut::before` / `.unresolved::before` rules are deleted | `test/e2e/cladogram.e2e.ts` | Implemented |
+| REQ-002 | Connectors | `DailyGenusScreen.tsx` — `CladogramConnectors`, one `aria-hidden` `<svg>`, coordinates from `(row, depth)` only; the `.nodeRow::before` / `.cut::before` / `.unresolved::before` rules are deleted | `test/e2e/cladogram.e2e.ts`, `test/spec025-row-alignment.test.ts` | Implemented (defect fixed 2026-08-26 — see note below) |
 | REQ-003 | Ringed leaves | `.ruledOut` + `.ringDot` (unfilled dot, ruled-out ring, no clade tint); the guess renders as its own row one indent right | `test/ui/spec019-daily-screen.test.tsx`, `test/spec025-cladogram-layout.test.ts` | Implemented |
 | REQ-004 | Frontier + retirement | `.frontier` keeps the teal ring, weight and rule, plus the visible words "deepest reached"; nothing is emitted for `tree.unresolved`; the key carries exactly `ancestor` / `closest relative` / `guess` | `test/ui/spec019-daily-screen.test.tsx`, `test/e2e/cladogram.e2e.ts` | Implemented |
 | REQ-005 | Content unchanged | `revealedTree()`, `TrunkNode`, `RevealedTree` untouched | `test/spec019-revealed-tree.test.ts` — **passes unmodified**, which is the evidence | Implemented |
+
+### Defect against REQ-001/REQ-002, found and fixed 2026-08-26
+
+The owner reported the tree's dotted lines overlapping its text. Measured in
+Chromium: **every row's left edge was 32 px, at every depth** — `rowStyle(row)`
+returned only `top` and `.row` was pinned `left: 0`, so the labels never spent
+the `depth` coordinate REQ-001 defines, while the SVG layer drew at
+`cx(depth) = depth × 16 + 4`. One coordinate system was being used by one layer
+only, which is the exact class of defect this spec was written to remove — the
+`.diagram` element was even sizing itself to a per-level indent budget that was
+never spent.
+
+Fixed by returning `left: depth × DEPTH_INDENT` alongside `top`, so a row's dot
+centre lands at `left + 4.5 ≈ cx(depth)`. Verified in the browser: rows now sit
+at 32, 48, 64 … 192 px, dot centres at 4.5, 20.5 … 164.5 and SVG lines at
+4, 20 … 164 — the predicted half-pixel offset, measured rather than assumed.
+
+**Why NFR-001's gate did not catch it:** it compares label boxes to *label*
+boxes. With every label at the same x they never overlapped each other, so the
+gate stayed green while the connectors ran through the text. The new
+`test/spec025-row-alignment.test.ts` closes that gap without a browser (NFR-002),
+asserting the dot centre lands on `cx(depth)` at seven depths and at every row of
+a real layout.
 | NFR-001 | Geometry gate | `test/e2e/cladogram.e2e.ts`, sharing `disjoint()` with SPEC-023 via `test/e2e/geometry.ts` | 5 Playwright tests across 3 viewports | Implemented |
 | NFR-002 | Browser-free guard | `test/spec025-cladogram-layout.test.ts` — one label per row, column alignment, row bounds | 8 Vitest tests | Implemented |
 | NFR-003 | Synchronous render | No measurement API, no observer, no rAF; rows bounded by `trunk + 2 × eliminations` | `test/spec025-cladogram-layout.test.ts` ("rows are bounded"), `test/ui/spec019-daily-screen.test.tsx` (NFR-002 render budget) | Implemented |

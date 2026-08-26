@@ -1088,7 +1088,7 @@ AMEND-001 and AMEND-002 are taken; this block is `AMEND-003`.
 | REQ-003 | Detail slot | `trackPreview` state driven by `onMouseEnter`/`onFocus` and cleared on leave/blur; `aria-describedby` to a real element; fixed-height slot, not a live region | `test/ui/spec020-track-option.test.tsx` (focus *and* hover paths) | Implemented |
 | REQ-004 | Behaviour unchanged | `chooseTrack` untouched; storage, fragments, practice and `onTrackChange` unchanged | `test/ui/spec020-track-option.test.tsx`, `test/ui/spec020-track-fragments.test.tsx`, `test/ui/spec020-no-egress.test.tsx` | Implemented |
 | REQ-005 | Bar treatment | `.barOverlaps` (solid, `--color-overlap`) vs `.barMisses` (hollow outline) | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
-| REQ-006 | Direction + key | `.barMark` ▲/▼ on misses only; `.timeKey` names all four treatments in words | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
+| REQ-006 | Direction + key | `.barMark` ▲/▼ on misses only, placed by `.barMarkOlder` / `.barMarkYounger`; `.timeKey` names three treatments in words (AMEND-001) | `test/ui/spec024-ma-verdict.test.tsx` | Implemented (two defects fixed 2026-08-26 — see note below) |
 | REQ-007 | No-span guesses | `.barMissing` ✕ at the foot of the slot + `.noSpanNote` naming the guess; `visuallyHidden` sentence retained | `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
 | REQ-008 | Period reveal retired | `answerPeriod`, `periodDisclosedBy`, `periodDisclosed`, `periodOf()`, `.bandLit` and `.periodNote` all deleted; bands, ticks and names kept | `test/ui/spec019-states.test.tsx`, `test/ui/spec024-ma-verdict.test.tsx` | Implemented |
 | REQ-009 | Pure core untouched | No file under `src/app/state/` changed | `pnpm test` (the SPEC-019/020 core suites pass unmodified) | Implemented |
@@ -1154,11 +1154,65 @@ value clearing both separations while holding contrast over the band.
 To be filled during implementation. Any deviation must trace to an assumption
 above or to a new amendment here.
 
+### Two defects against REQ-006, found and fixed 2026-08-26
+
+Both reported by the owner and reproduced in Chromium before either was touched.
+
+**The key collapsed into itself.** It rendered as
+"overlaps▯▲ answer older▯▼ answer younger✕ no span recorded", with no space
+between entries. Measured: `.keySep` computed to `display: inline` with
+`width: 16px` and a **rendered width of 0** — width does not apply to a
+non-replaced inline box. `.timeKey` was `display: block`, while the tree's key
+`.key`, which used the same spacer element, was `display: flex`, where the width
+does apply. One key got flex and the other did not, so the same element worked in
+one place and was inert in the other. Fixed by giving `.timeKey` a real flex
+layout and deleting `.keySep` from **both** keys in favour of `gap`, so there is
+now one spacing mechanism rather than two. The acceptance criterion "the key
+line … is one line" now holds at the column's width with AMEND-001's three
+entries.
+
+**The direction mark never moved.** REQ-006's statement requires the mark "at the
+end of the bar … upward on the column when the answer is older, downward when
+the answer is younger". The component swapped the glyph but `.barMark` carried an
+unconditional `top: -0.85em`, so both verdicts floated above the bar and only the
+glyph distinguished them — half of the requirement was implemented. Fixed with
+`.barMarkOlder { top: -0.85em }` and `.barMarkYounger { bottom: -0.85em }`.
+Verified in the browser: an older mark sits at 572.4–581.4 against a bar top of
+579, a younger one at 464–473 against a bar bottom of 466.4.
+
+
 ## Spec amendments
 
-> Required for any behavioral change after this spec is Approved. None yet — the
-> amendments this spec *requires of other specs* are in "Required amendments to
-> existing specs" above, not here.
+> Required for any behavioral change after this spec is Approved. The amendments
+> this spec *requires of other specs* are in "Required amendments to existing
+> specs" above, not here.
+
+### AMEND-001 — the Ma key drops its "no span recorded" entry; the mark and its sentence stay
+
+- **Date:** 2026-08-26
+- **Reason:** The owner reviewed the shipped screen and asked: "Remove the legend
+  for the no span recorded" (2026-08-26). The key is the narrowest element on the
+  screen and this is its longest entry, for the rarest treatment.
+- **Changed requirements:** **REQ-006**. Its statement requires "one entry per
+  treatment: overlaps, answer older, answer younger, no span recorded", and its
+  acceptance criterion requires the key to name "all four treatments in words".
+  Both are amended to **three**: overlaps, answer older, answer younger. Every
+  other clause of REQ-006 stands — the direction mark at the end of the bar, the
+  overlapping bar carrying no mark, the key being a line rather than an
+  explanatory paragraph, and the retained `visuallyHidden` per-guess sentence.
+- **What is deliberately not removed:** **REQ-007 is untouched.** The ✕ mark
+  still appears at the foot of a slot whose guess has no recorded span, and the
+  sentence beneath the column still names those guesses by name. That sentence is
+  the disclosure the charter requires, and it is why the key entry is the only
+  redundant piece: a mark with an explicit sentence does not also need a key
+  entry, whereas a mark with neither would be undefined on the diagram — the
+  failure SPEC-019 AMEND-005 already identified for the retired `?`.
+- **Behavioral impact:** Visual only. No verdict, no plotted bar, no accessible
+  text and no stored state changes.
+- **Test impact:** `test/ui/spec024-ma-verdict.test.tsx` — the key-line assertion
+  expects three entries and asserts the ✕ mark and the no-span sentence are still
+  rendered, so the amendment's own boundary is guarded.
+- **Human approval reference:** Owner request in session, 2026-08-26.
 
 ## Review checklist
 

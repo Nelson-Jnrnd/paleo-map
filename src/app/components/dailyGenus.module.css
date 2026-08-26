@@ -226,9 +226,11 @@
   position: static;
 }
 
+/* `left` is set per row from its depth (SPEC-025 REQ-001), not pinned here:
+   pinned at the origin, every label sat under the connector layer's leads and
+   the lines were drawn through the text. */
 .row {
   position: absolute;
-  left: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -286,6 +288,35 @@
   color: var(--color-accent-deep);
 }
 
+/* SPEC-028 REQ-004: the two clue channels, as marks on the guess's own row —
+   not chips, not a second panel. Plain middot-separated text is the idiom the
+   map sidebar already uses for locality data, so geography borrows it rather
+   than inventing a badge. */
+.mark {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.markMuted {
+  color: var(--color-text-faint);
+}
+
+/* UX-001: colour is the third carrier here, after the glyph (= / arrow / doubled
+   arrow) and the visually-hidden words. Both hues are existing tokens — no new
+   colour enters the palette for this. */
+.markSame {
+  color: var(--color-overlap);
+  font-weight: 700;
+}
+
+.markClose {
+  color: var(--color-attention);
+}
+
+/* Both keys space their entries with `gap` and nothing else — the spacer span
+   they used to share only had a width in the one key that was already flex, so
+   in the Ma key it collapsed and the swatches sat on the words. */
 .key {
   margin: var(--space-5) 0 0;
   padding-top: var(--space-3);
@@ -293,8 +324,9 @@
   font-size: var(--text-min);
   color: var(--color-text-faint);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1) var(--space-3);
 }
 
 .keyRing {
@@ -324,10 +356,6 @@
   background: #dc9a80;
   border: 1px solid var(--color-text-faint);
   display: inline-block;
-}
-
-.keySep {
-  width: var(--space-4);
 }
 
 /* ── stratigraphic column: the time clue as an axis, not a badge ─────────── */
@@ -431,14 +459,22 @@
   border: 1px solid var(--color-text-faint);
 }
 
-/* REQ-006: the direction mark sits at the bar and points along the axis toward
-   where the answer lies. */
+/* REQ-006: the direction mark sits *at the end of the bar* and points along the
+   axis toward where the answer lies. The column is oldest-at-top, so the older
+   end is the top of the bar and the younger end is its foot. */
 .barMark {
   position: absolute;
-  top: -0.85em;
   font-size: 9px;
   line-height: 1;
   color: var(--color-text-muted);
+}
+
+.barMarkOlder {
+  top: -0.85em;
+}
+
+.barMarkYounger {
+  bottom: -0.85em;
 }
 
 /* REQ-007: a guess with no recorded span is marked at the foot of its slot,
@@ -453,11 +489,17 @@
   color: var(--color-text-faint);
 }
 
-/* REQ-006: the treatment key, in the shape the tree's key already uses. */
+/* REQ-006: the treatment key, in the shape the tree's key already uses — the
+   same flex-and-gap. The column is narrow, so entries may wrap onto a second
+   line; the row gap keeps them apart when they do. */
 .timeKey {
   margin: var(--space-4) 0 0;
   font-size: var(--text-min);
   color: var(--color-text-faint);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
 }
 
 .keyBar {
@@ -594,7 +636,6 @@
   text-decoration: underline;
 }
 
-.hintSilhouette,
 .revealSilhouette {
   display: block;
   margin-top: var(--space-3);

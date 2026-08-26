@@ -28,14 +28,12 @@ import type { ReadApi } from "../../read/api.js";
 import { MESOZOIC_PERIODS, MESOZOIC_STAGES } from "../../domain/index.js";
 import { buildTaxonomyIndex } from "../state/taxonomy.js";
 import {
-  HINT_AFTER_GUESSES,
   MAX_GUESSES,
   MIN_POOL_SIZE,
   applyGuess,
   buildGameData,
   evaluateGuess,
   formatCountdown,
-  hintAvailable,
   msUntilNextUtcDay,
   poolForTrack,
   puzzleNumber,
@@ -45,7 +43,6 @@ import {
   selectDailyGenus,
   selectPracticeGenus,
   startRound,
-  takeHint,
   TRACKS,
   trackAvailable,
   utcDateKey,
@@ -53,6 +50,8 @@ import {
 import type {
   GameData,
   GameTaxon,
+  Guess,
+  OccurrenceVerdict,
   Rejection,
   Round,
   RoundMode,
@@ -123,6 +122,15 @@ function depthPercent(ma: number): number {
 }
 
 /**
+ * The production clock, hoisted to module scope so its identity is stable across
+ * renders. As an inline default parameter it was a fresh function every render,
+ * and the countdown effect depends on it — so the effect re-ran, set a new
+ * millisecond value, re-rendered, and looped without bound ("Maximum update
+ * depth exceeded"). Tests still inject their own `now` (NFR-004).
+ */
+const SYSTEM_NOW = (): Date => new Date();
+
+/**
  * The diagram's two integers (SPEC-025 REQ-002). Both the labels and the SVG
  * connectors are derived from these, so the two can never describe different
  * pictures — which is the defect this render replaces. They are declared here
@@ -139,21 +147,38 @@ const MAX_LABEL_PX = 260;
 const DASH = "3 2";
 const STROKE = 1.2;
 
-/** Where a row sits, in the coordinate system both layers share. */
-function rowStyle(row: number): Record<string, string> {
-  return { top: `${row * ROW_PITCH}px` };
+/** A row's two integers, looked up once and spent by both layers. */
+export interface CladogramPlace {
+  readonly row: number;
+  readonly depth: number;
 }
 
-function rowOf(
+/**
+ * Where a row sits, in the coordinate system both layers share. Both
+ * coordinates are spent: `top` from the row, `left` from the depth — the indent
+ * `.diagram` already budgets for. Without the indent every label started at the
+ * trunk's origin and the connectors were drawn straight through the text.
+ *
+ * Exported, with `cx`, for SPEC-025 NFR-002's browser-free geometry guard.
+ */
+export function rowStyle(place: CladogramPlace): Record<string, string> {
+  return {
+    top: `${place.row * ROW_PITCH}px`,
+    left: `${place.depth * DEPTH_INDENT}px`,
+  };
+}
+
+function placeOf(
   layout: CladogramLayout,
   kind: CladogramRow["kind"],
   id: string,
-): number {
-  return layout.rows.find((r) => r.kind === kind && r.id === id)?.row ?? 0;
+): CladogramPlace {
+  const found = layout.rows.find((r) => r.kind === kind && r.id === id);
+  return { row: found?.row ?? 0, depth: found?.depth ?? 0 };
 }
 
 /** Centre of a row's dot, in diagram coordinates. */
-const cx = (depth: number): number => depth * DEPTH_INDENT + 4;
+export const cx = (depth: number): number => depth * DEPTH_INDENT + 4;
 const cy = (row: number): number => row * ROW_PITCH + ROW_PITCH / 2;
 
 /**
@@ -270,6 +295,95 @@ const TIME_WORDS: Readonly<Record<TimeVerdict, string>> = {
   unavailable: "no time span recorded — not available",
 };
 
+/**
+ * The two SPEC-028 clue channels, drawn on the guess's own row (REQ-004).
+ *
+ * Marks on the object, not badges beside it: a guess already has a row on this
+ * screen, so two facts about that guess belong on it rather than in a second
+ * aligned panel (`docs/mockups/anti-slop-checklist.md`, worked example — "No
+ * guess list: each guess *is* the branch it ruled out").
+ *
+ * Every verdict is carried by a glyph and by words before it is carried by
+ * colour (UX-001), so the row survives with colour removed.
+ */
+
+/** Glyph per occurrence verdict: direction by arrow, distance by doubling. */
+const OCCURRENCE_MARKS: Readonly<Record<OccurrenceVerdict, string>> = {
+  same: "=",
+  "more-close": "▲",
+  "more-far": "▲▲",
+  "fewer-close": "▼",
+  "fewer-far": "▼▼",
+  unavailable: "",
+};
+
+/**
+ * The spoken form of each verdict (UX-002: a count of records in this snapshot,
+ * never a claim that the animal was common or rare).
+ */
+const OCCURRENCE_WORDS: Readonly<Record<OccurrenceVerdict, string>> = {
+  same: "same number of recorded occurrences",
+  "more-close": "the answer has somewhat more recorded occurrences",
+  "more-far": "the answer has far more recorded occurrences",
+  "fewer-close": "the answer has somewhat fewer recorded occurrences",
+  "fewer-far": "the answer has far fewer recorded occurrences",
+  unavailable: "occurrences not recorded",
+};
+
+function occurrenceClass(verdict: OccurrenceVerdict): string {
+  if (verdict === "same") return styles.markSame ?? "";
+  if (verdict === "unavailable") return "";
+  return verdict.endsWith("-close") ? (styles.markClose ?? "") : "";
+}
+
+/** Both marks for one guess, or nothing when the guess is not yet evaluated. */
+function GuessMarks({
+  guess,
+  geographyAvailable,
+}: {
+  guess: Guess | undefined;
+  geographyAvailable: boolean;
+}): ReactElement | null {
+  if (!guess) return null;
+  const occurrence = guess.occurrences;
+  return (
+    <>
+      {/* REQ-002. The codes are plain middot-separated text, the idiom the map
+          sidebar already uses for locality data — not chips. */}
+      {geographyAvailable &&
+        (guess.countryVerdict === "shared" ? (
+          <span className={styles.mark}>
+            {/* "also in" rather than a bare list of codes: the codes cannot say
+                what they are, and two words are cheaper than a key entry for a
+                mark that would otherwise be undefined on the diagram. */}
+            <span className={styles.markMuted}>also in </span>
+            {guess.sharedCountries.join(" · ")}
+          </span>
+        ) : (
+          <span className={`${styles.mark} ${styles.markMuted}`}>
+            {guess.countryVerdict === "none"
+              ? "no shared country"
+              : "countries not recorded"}
+          </span>
+        ))}
+      {/* REQ-003. Direction by arrow, distance by doubling, so the verdict is
+          legible with colour removed (UX-001). */}
+      {occurrence === "unavailable" ? (
+        <span className={`${styles.mark} ${styles.markMuted}`}>
+          occurrences not recorded
+        </span>
+      ) : (
+        <span className={`${styles.mark} ${occurrenceClass(occurrence)}`}>
+          <span aria-hidden="true">{OCCURRENCE_MARKS[occurrence]}</span>
+          <span className="visuallyHidden">
+            {` — ${OCCURRENCE_WORDS[occurrence]}`}
+          </span>
+        </span>
+      )}
+    </>
+  );
+}
+
 function rejectionMessage(r: Rejection): string {
   switch (r.reason) {
     case "not-a-genus":
@@ -296,14 +410,20 @@ export function DailyGenusScreen({
   onModeChange,
   track: trackProp,
   onTrackChange,
-  now = () => new Date(),
+  now = SYSTEM_NOW,
   random = Math.random,
   store,
 }: DailyGenusScreenProps): ReactElement {
   const data: GameData = useMemo(
     () =>
-      buildGameData(api.listTaxa(), buildTaxonomyIndex(api.listTaxa()), (id) =>
-        api.getProfile(id),
+      buildGameData(
+        api.listTaxa(),
+        buildTaxonomyIndex(api.listTaxa()),
+        (id) => api.getProfile(id),
+        // SPEC-028 REQ-002: the country index, loaded at boot alongside the
+        // reference. `countriesFor` answers `[]` when it is absent, which the
+        // verdict reads as "not recorded" rather than "no overlap".
+        (id) => api.countriesFor(id),
       ),
     [api],
   );
@@ -365,7 +485,7 @@ export function DailyGenusScreen({
         if (guess)
           restored = applyGuess(restored, evaluateGuess(guess, answer, data));
       }
-      return stored.hintUsed ? { ...restored, hintUsed: true } : restored;
+      return restored;
     },
     [storage, data],
   );
@@ -559,6 +679,12 @@ export function DailyGenusScreen({
   const snapshotDate = api.metadata().retrievedOn;
   const popularityWindow = api.metadata().popularity?.window ?? null;
   const practice = round.mode === "practice";
+  // SPEC-028 REQ-004: a guess's marks hang off its row in the tree, and the tree
+  // knows a guess only by name, so index the evaluated guesses by name.
+  const guessByName = new Map(round.guesses.map((g) => [g.scientificName, g]));
+  // UX-003: with no index loaded there is no country channel to draw, and the
+  // screen says so rather than rendering "not recorded" against every guess.
+  const geographyAvailable = api.hasGeography();
 
   return (
     <div className={styles.screen}>
@@ -695,12 +821,12 @@ export function DailyGenusScreen({
                 are *positioned* by CSS; DOM order is still reading order. */}
             <ol className={styles.trunk}>
               {tree.trunk.map((node) => {
-                const nodeRow = rowOf(layout, "node", node.id);
+                const nodePlace = placeOf(layout, "node", node.id);
                 return (
                   <li key={node.id} className={styles.trunkItem}>
                     <span
                       className={`${styles.row} ${node.frontier ? styles.frontier : ""}`}
-                      style={rowStyle(nodeRow)}
+                      style={rowStyle(nodePlace)}
                     >
                       {/* Tint reinforces the clade the same way it does on the
                           map (charter §4); the name carries identity first. */}
@@ -743,13 +869,13 @@ export function DailyGenusScreen({
                     {node.ruledOut.length > 0 && (
                       <ul className={styles.cuts}>
                         {node.ruledOut.map((cut) => {
-                          const cutRow = rowOf(layout, "cut", cut.id);
+                          const cutPlace = placeOf(layout, "cut", cut.id);
                           const ownGuess = cut.name === cut.by;
                           return (
                             <li key={cut.id} className={styles.cutItem}>
                               <span
                                 className={`${styles.row} ${styles.ruledOut}`}
-                                style={rowStyle(cutRow)}
+                                style={rowStyle(cutPlace)}
                               >
                                 <span
                                   className={styles.ringDot}
@@ -761,6 +887,14 @@ export function DailyGenusScreen({
                                 <span className="visuallyHidden">
                                   {` — ruled out by the guess ${cut.by}`}
                                 </span>
+                                {/* This row *is* the guess, so it carries the
+                                    marks (SPEC-028 REQ-004). */}
+                                {ownGuess && (
+                                  <GuessMarks
+                                    guess={guessByName.get(cut.by)}
+                                    geographyAvailable={geographyAvailable}
+                                  />
+                                )}
                               </span>
                               {/* REQ-003: the guess is a leaf inside the branch
                                   it eliminated — taxonomically true, since the
@@ -773,7 +907,7 @@ export function DailyGenusScreen({
                                     <span
                                       className={`${styles.row} ${styles.ruledOut}`}
                                       style={rowStyle(
-                                        rowOf(
+                                        placeOf(
                                           layout,
                                           "guess",
                                           `${cut.id}:${cut.by}`,
@@ -792,6 +926,10 @@ export function DailyGenusScreen({
                                           " — your guess, inside the branch it ruled out"
                                         }
                                       </span>
+                                      <GuessMarks
+                                        guess={guessByName.get(cut.by)}
+                                        geographyAvailable={geographyAvailable}
+                                      />
                                     </span>
                                   </li>
                                 </ul>
@@ -811,12 +949,31 @@ export function DailyGenusScreen({
               asked. The unresolved continuation and its entry are both gone. */}
           <p className={styles.key}>
             <span className={styles.keyDot} aria-hidden="true" /> ancestor
-            <span className={styles.keySep} aria-hidden="true" />
             <span className={styles.keyRingTeal} aria-hidden="true" /> closest
             relative
-            <span className={styles.keySep} aria-hidden="true" />
             <span className={styles.keyRing} aria-hidden="true" /> guess
           </p>
+          {/* SPEC-028 REQ-004: the guess rows carry two more marks, so the key
+              names them — the same marks-and-words shape the key above uses. The
+              wording says "recorded occurrences", never common or rare
+              (UX-002). */}
+          <p className={styles.key}>
+            <span className={styles.markSame} aria-hidden="true">
+              =
+            </span>{" "}
+            same recorded occurrences
+            <span className={styles.markClose} aria-hidden="true">
+              ▲▼
+            </span>{" "}
+            within a factor of two
+            <span aria-hidden="true">▲▲▼▼</span> further off
+          </p>
+          {!geographyAvailable && (
+            <p className={styles.noSpanNote}>
+              Countries of occurrence are unavailable — the geography index did
+              not load, so that clue is withheld rather than guessed at.
+            </p>
+          )}
         </section>
 
         <section className={styles.column} aria-labelledby={`${listId}-time`}>
@@ -892,7 +1049,13 @@ export function DailyGenusScreen({
                         {/* REQ-006: a miss points along the axis toward where the
                             answer actually lies. An overlap has nowhere to point. */}
                         {!overlaps && (
-                          <span className={styles.barMark}>
+                          <span
+                            className={`${styles.barMark} ${
+                              g.time === "older"
+                                ? styles.barMarkOlder
+                                : styles.barMarkYounger
+                            }`}
+                          >
                             {g.time === "older" ? "▲" : "▼"}
                           </span>
                         )}
@@ -914,28 +1077,25 @@ export function DailyGenusScreen({
               })}
             </ul>
           </div>
-          {/* REQ-006: one entry per treatment, in words — the same
-              three-marks-three-words shape the tree's key uses. */}
+          {/* SPEC-024 REQ-006 as amended by AMEND-001: three entries, not four.
+              The ✕ treatment keeps its mark on the column and its sentence
+              beneath, so it is the one entry a key line does not also need. */}
           <p className={styles.timeKey}>
             <span
               className={`${styles.keyBar} ${styles.barOverlaps}`}
               aria-hidden="true"
             />{" "}
             overlaps
-            <span className={styles.keySep} aria-hidden="true" />
             <span
               className={`${styles.keyBar} ${styles.barMisses}`}
               aria-hidden="true"
             />
             ▲ answer older
-            <span className={styles.keySep} aria-hidden="true" />
             <span
               className={`${styles.keyBar} ${styles.barMisses}`}
               aria-hidden="true"
             />
             ▼ answer younger
-            <span className={styles.keySep} aria-hidden="true" />✕ no span
-            recorded
           </p>
           {noSpanGuesses.length > 0 && (
             <p className={styles.noSpanNote}>
@@ -1098,23 +1258,6 @@ export function DailyGenusScreen({
             </p>
           )}
           <p className={styles.aside}>
-            {hintAvailable(round) ? (
-              <button
-                type="button"
-                className={styles.linkAction}
-                onClick={() => setRound(takeHint(round))}
-              >
-                Reveal the silhouette
-              </button>
-            ) : round.hintUsed ? (
-              <span className={styles.note}>
-                hint used — marked in your result
-              </span>
-            ) : (
-              <span className={styles.note}>
-                silhouette hint — from guess {HINT_AFTER_GUESSES}
-              </span>
-            )}
             {!practice && (
               <button
                 type="button"
@@ -1125,22 +1268,24 @@ export function DailyGenusScreen({
               </button>
             )}
           </p>
-          {round.hintUsed && answer.silhouette && (
-            <img
-              className={styles.hintSilhouette}
-              src={answer.silhouette}
-              alt="Silhouette of the hidden genus"
-            />
-          )}
           <p aria-live="polite" className="visuallyHidden">
             {round.guesses.length > 0 &&
               (() => {
                 const last = round.guesses[round.guesses.length - 1]!;
+                // SPEC-028 UX-004: the announcement names both new verdicts as
+                // well, so a screen-reader player gets every channel the sighted
+                // row carries.
+                const countries =
+                  !geographyAvailable || last.countryVerdict === "unavailable"
+                    ? ""
+                    : last.countryVerdict === "shared"
+                      ? ` Also found in ${last.sharedCountries.join(", ")}.`
+                      : " No shared country.";
                 return `${last.scientificName}: deepest shared clade ${last.sharedName}, ${last.sharedRank.toLowerCase()}. ${
                   last.ruledOutName && last.ruledOutName !== last.scientificName
                     ? `${last.ruledOutName} is ruled out. `
                     : ""
-                }${TIME_WORDS[last.time]}.`;
+                }${TIME_WORDS[last.time]}.${countries} ${OCCURRENCE_WORDS[last.occurrences]}.`;
               })()}
           </p>
         </section>

@@ -823,6 +823,27 @@ will fill most of them in.
   `docs/mockups/daily-genus.md` and the mockup SVGs are updated in the same PR.
 - **Human approval reference:** Owner approval in session, 2026-08-14.
 
+### AMEND-005 — the shared summary loses its hint marker
+
+- **Date:** 2026-08-26
+- **Reason:** SPEC-028 REQ-005 retires the silhouette hint (see SPEC-019
+  AMEND-006 for the measurement behind that decision). REQ-006's summary format
+  carries a ` · hint` segment for a behaviour that no longer exists.
+- **Changed requirements:** **REQ-006**. The summary is now
+  `Dinordle <n>[ · well-known] · <score> · <marks>`; the optional ` · hint`
+  segment is removed. Everything else REQ-006 requires is unchanged: the track is
+  still named so that two people comparing "4/8" are comparing the same puzzle,
+  and the summary still carries no taxon, rank, clade, depth or distance.
+- **Behavioral impact:** The shared string is one segment shorter for a round
+  that would previously have been marked as hinted. Per-track numbering, records
+  and streaks are untouched. Neither new SPEC-028 clue channel is added to the
+  summary: the shared countries would name a real subset of the answer's
+  localities, which is precisely the spoiler this summary exists to avoid.
+- **Test impact:** `test/spec019-persistence.test.ts` updates one expected
+  string. `test/spec020-share-track.test.ts` passes unmodified — it asserts the
+  track segment, not the hint segment.
+- **Human approval reference:** Owner decision in session, 2026-08-26.
+
 ## Review checklist
 
 - [x] spec_id is unique and follows the SPEC-XXX format.
