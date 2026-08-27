@@ -93,24 +93,35 @@ test("SPEC-020 REQ-004: the track option offers both puzzles and is honest about
   await expect(group).toBeVisible();
   await expect(group.getByRole("radio")).toHaveCount(2);
 
-  // REQ-002: the provenance caveat is rendered and visible with no interaction —
-  // it is what the ranking is and is not, so it may never sit behind a hover.
-  await expect(page.getByText(/English Wikipedia/i).first()).toBeVisible();
-  await expect(
-    page.getByText(/attention, not of scientific importance/i),
-  ).toBeVisible();
+  // SPEC-020 AMEND-006: the caveat moved behind an information control, so what
+  // must be on the surface with no interaction is the *control*. The caveat
+  // itself is one deliberate, keyboard-reachable action away — never a hover,
+  // never a `title`.
+  const caveat = /attention, not of scientific importance/i;
+  const about = page.getByRole("button", {
+    name: /about the .well-known. ranking/i,
+  });
+  await expect(about).toBeVisible();
+  await expect(about).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByText(caveat)).toHaveCount(0);
 
-  // REQ-003: the selected track's pool size is visible without interaction.
+  // REQ-003: the selected track's pool size is still visible without interaction.
   await expect(page.getByText(/genera in the snapshot/i)).toBeVisible();
+
+  // Opening it discloses the wording UX-001 and UX-002 require, unchanged.
+  await about.click();
+  await expect(about).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByText(/English Wikipedia/i).first()).toBeVisible();
+  await expect(page.getByText(caveat)).toBeVisible();
 
   await group.getByRole("radio", { name: /well-known/i }).click();
   await expect(
     group.getByRole("radio", { name: /well-known/i }),
   ).toHaveAttribute("aria-checked", "true");
-  // Still visible after switching, and the detail follows the selection.
-  await expect(
-    page.getByText(/attention, not of scientific importance/i),
-  ).toBeVisible();
+  // The control is rendered on the other track too, so the caveat stays
+  // reachable in every state the option is rendered in; the detail follows the
+  // selection.
+  await expect(about).toBeVisible();
   await expect(page.getByText(/most read about/i)).toBeVisible();
 });
 
