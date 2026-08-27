@@ -10,6 +10,14 @@ import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderGame } from "./spec019-harness.js";
 
+/** The cladogram region. REQ-005 is about what the *tree* renders, so the
+ *  assertions that guard it are scoped here rather than to the whole screen. */
+function diagram(): HTMLElement {
+  const el = document.querySelector<HTMLElement>('[class*="diagram"]');
+  if (!el) throw new Error("no cladogram region rendered");
+  return el;
+}
+
 afterEach(cleanup);
 
 async function guess(name: string): Promise<void> {
@@ -48,26 +56,30 @@ test("REQ-004/REQ-005: a guess establishes the trunk and rules out its branch", 
   expect(cut.closest("s")).toBeNull();
   // The guess that ruled it out is drawn as its own row inside that branch,
   // rather than as a "◂ name" suffix on it — named once either way.
+  // Scoped to the diagram: REQ-005 governs what the *tree* renders, and since
+  // SPEC-028 AMEND-001 the clue table names every guess too. A global count
+  // would assert something no requirement states.
   expect(screen.queryByText("◂ Velociraptor")).toBeNull();
-  expect(screen.getAllByText("Velociraptor")).toHaveLength(1);
+  expect(within(diagram()).getAllByText("Velociraptor")).toHaveLength(1);
   // And it still says, in words, which guess did the ruling out.
   expect(
     screen.getByText(/— ruled out by the guess Velociraptor/i),
   ).toBeTruthy();
 });
 
-test("REQ-005: the guesses are the branches — there is no separate guess list", async () => {
+test("REQ-005: the guesses are the branches — the tree names each one once", async () => {
   renderGame();
   await guess("Triceratops");
   await guess("Diplodocus");
 
   expect(screen.getByText("Ornithischia")).toBeTruthy();
   expect(screen.getByText("Saurischia")).toBeTruthy();
-  // SPEC-025 REQ-003: each guess appears exactly once on the board, now as a
-  // ringed leaf inside the branch it eliminated rather than as a suffix on it.
-  // There is still no separate guess list.
-  expect(screen.getAllByText("Triceratops")).toHaveLength(1);
-  expect(screen.getAllByText("Diplodocus")).toHaveLength(1);
+  // SPEC-025 REQ-003: each guess appears exactly once *in the tree*, as a ringed
+  // leaf inside the branch it eliminated rather than as a suffix on it. The
+  // SPEC-028 clue table names each guess once more, outside the diagram — that
+  // is REQ-004 as amended, not a duplicate row in the tree.
+  expect(within(diagram()).getAllByText("Triceratops")).toHaveLength(1);
+  expect(within(diagram()).getAllByText("Diplodocus")).toHaveLength(1);
 });
 
 test("REQ-005: only branches a guess has touched appear — no siblings", async () => {
@@ -119,8 +131,9 @@ test("REQ-005: the deepest node is the frontier and names the guess that reached
   expect(within(node).getByText(/^deepest reached$/i)).toBeTruthy();
 
   // REQ-003: the guess that got here is its own ringed row inside the branch it
-  // ruled out, one indent further right — no longer a suffix on the node.
-  expect(screen.getAllByText("Gorgosaurus")).toHaveLength(1);
+  // ruled out, one indent further right — no longer a suffix on the node. Once
+  // in the tree; the clue table names it again outside the diagram.
+  expect(within(diagram()).getAllByText("Gorgosaurus")).toHaveLength(1);
   expect(screen.queryByText("◂ Gorgosaurus")).toBeNull();
   expect(
     screen.getByText(/— ruled out by the guess Gorgosaurus/i),
@@ -132,9 +145,10 @@ test("REQ-007: a correct guess wins, reveals the answer, and offers the taxon pa
   await guess("Tyrannosaurus");
 
   expect(screen.getByText(/solved in 1 of 8/i)).toBeTruthy();
-  // Twice on purpose: the trunk now descends all the way to the answer, and the
-  // reveal names it.
-  expect(screen.getAllByText("Tyrannosaurus")).toHaveLength(2);
+  // Once in the trunk, which now descends all the way to the answer; once in the
+  // reveal; and once in the clue table (SPEC-028 REQ-004 as amended).
+  expect(within(diagram()).getAllByText("Tyrannosaurus")).toHaveLength(1);
+  expect(screen.getAllByText("Tyrannosaurus")).toHaveLength(3);
   expect(screen.getByText(/Dinosauria › Theropoda/)).toBeTruthy();
 
   await userEvent
@@ -198,7 +212,7 @@ test("REQ-007: eight misses lose the round and still reveal the whole descent", 
  * genera resolve to only 403 distinct silhouettes, so for 86% of them the hint
  * showed a relative's outline, not the animal's. The behaviour no longer
  * exists — this is not a skipped or disabled test. The replacement clue
- * channels are covered by `test/ui/spec028-clue-marks.test.tsx`.
+ * channels are covered by `test/ui/spec028-clue-table.test.tsx`.
  */
 
 test("SPEC-028 REQ-005: no silhouette-hint control exists in any state", async () => {

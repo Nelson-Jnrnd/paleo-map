@@ -85,3 +85,26 @@ test("daily genus well-known track has no serious accessibility violations", asy
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-020 AMEND-006. The ranking caveat now sits behind an information control,
+ * so the gate has to cover the disclosure *open* as well as closed — the closed
+ * state is what the two tests above already exercise, and an expanded disclosure
+ * is a different accessibility tree.
+ */
+test("the ranking caveat's disclosure is accessible when open", async ({
+  page,
+}) => {
+  await page.goto("/#daily");
+  await page.getByLabel("Guess a genus").waitFor();
+
+  const about = page.getByRole("button", {
+    name: /about the .well-known. ranking/i,
+  });
+  await about.click();
+  await expect(about).toHaveAttribute("aria-expanded", "true");
+  await page.getByText(/attention, not of scientific importance/i).waitFor();
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});

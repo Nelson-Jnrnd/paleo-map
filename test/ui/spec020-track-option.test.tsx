@@ -20,6 +20,18 @@ import {
 } from "../../src/app/state/dailyGenus.js";
 import { buildTaxonomyIndex } from "../../src/app/state/taxonomy.js";
 import { loadRound, loadTrack } from "../../src/app/state/dailyGenusStorage.js";
+
+/** SPEC-020 AMEND-006's information control, which is always rendered. */
+function aboutToggle(): HTMLElement {
+  return screen.getByRole("button", {
+    name: /about the .well-known. ranking/i,
+  });
+}
+
+/** Open the caveat's disclosure. */
+async function openAbout(): Promise<void> {
+  await userEvent.setup().click(aboutToggle());
+}
 import type { ReadModel, ReadProfile } from "../../src/domain/index.js";
 import { clockOn, memoryStore, paddedModel } from "./spec019-harness.js";
 type MemoryStore = ReturnType<typeof memoryStore>;
@@ -198,14 +210,18 @@ test("REQ-004: practice honours the chosen track", async () => {
   ).toBe("true");
 });
 
-test("UX-001: the option says what the ranking is, and what it is not", () => {
+test("UX-001: the disclosed caveat says what the ranking is, and what it is not", async () => {
+  // AMEND-006 moved the caveat behind the information control; UX-001 requires
+  // its *wording*, and the wording is unchanged.
   renderScreen(rankedModel());
+  await openAbout();
   const about = screen.getByText(/ranks genera by how often people read/i);
   expect(about.textContent).toMatch(/attention, not of scientific importance/i);
 });
 
-test("UX-002: the anglophone bias is stated, not hidden", () => {
+test("UX-002: the anglophone bias is stated, not hidden", async () => {
   renderScreen(rankedModel());
+  await openAbout();
   expect(screen.getByText(/English Wikipedia/i)).toBeTruthy();
 });
 
@@ -240,24 +256,50 @@ test("UX-004: the option is a labelled radio group, operable by keyboard", async
 
 /* SPEC-024 REQ-001…REQ-003 — the track choice as two header controls ---------- */
 
-test("SPEC-024 REQ-002: the attention caveat is visible for both tracks, never on demand", async () => {
+test("SPEC-020 AMEND-006: the caveat sits behind a control that is always on the surface", async () => {
   const { container } = renderScreen(rankedModel());
   const caveat = /a measure of attention, not of scientific importance/i;
 
-  // Visible on the default track, with no interaction at all.
-  expect(screen.getByText(caveat)).toBeTruthy();
-  // And still visible after switching — this is provenance, so the charter
-  // forbids it being conditional on which track is chosen.
-  await userEvent
-    .setup()
-    .click(screen.getByRole("radio", { name: /well-known/i }));
-  expect(screen.getByText(caveat)).toBeTruthy();
+  // Closed on load — the *control*, not the caveat, is what is always visible.
+  expect(screen.queryByText(caveat)).toBeNull();
+  const toggle = aboutToggle();
+  expect(toggle.getAttribute("aria-expanded")).toBe("false");
 
-  // It is a rendered element, not a tooltip: nothing in this region may carry
-  // the statement in a `title`, which is unreachable by touch and by keyboard.
+  // One deliberate action reveals it, as a real element in the document.
+  await userEvent.setup().click(toggle);
+  expect(toggle.getAttribute("aria-expanded")).toBe("true");
+  const revealed = screen.getByText(caveat);
+  expect(revealed).toBeTruthy();
+  expect(toggle.getAttribute("aria-controls")).toBe(revealed.id);
+
+  // Still a rendered element and never a tooltip: a `title` is unreachable by
+  // touch and by keyboard, which AMEND-006 preserves as a constraint.
   for (const el of container.querySelectorAll("[title]")) {
     expect(el.getAttribute("title")).not.toMatch(caveat);
   }
+
+  // And the control is there on the other track too, so the caveat is reachable
+  // in every state the option is rendered in.
+  await userEvent
+    .setup()
+    .click(screen.getByRole("radio", { name: /well-known/i }));
+  expect(aboutToggle()).toBeTruthy();
+});
+
+test("SPEC-020 AMEND-006: the disclosure is keyboard-operable", async () => {
+  renderScreen(rankedModel());
+  const toggle = aboutToggle();
+  toggle.focus();
+  expect(document.activeElement).toBe(toggle);
+  await userEvent.setup().keyboard("{Enter}");
+  expect(
+    screen.getByText(/a measure of attention, not of scientific importance/i),
+  ).toBeTruthy();
+  // Toggling closed again is the same control, not a second one.
+  await userEvent.setup().keyboard("{Enter}");
+  expect(
+    screen.queryByText(/a measure of attention, not of scientific importance/i),
+  ).toBeNull();
 });
 
 test("SPEC-024 REQ-003: the pool size is described, and previews on focus as well as hover", async () => {
