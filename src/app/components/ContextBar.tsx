@@ -18,6 +18,7 @@ import type { GeologicalStage } from "../../domain/index.js";
 import { formatStageSpan } from "../format.js";
 import { TaxonSearch } from "./TaxonSearch.js";
 import type { SearchableTaxon } from "../state/search.js";
+import type { FrameMode } from "../state/frame.js";
 import styles from "./exploration.module.css";
 
 interface ContextBarProps {
@@ -25,6 +26,17 @@ interface ContextBarProps {
   stageName: string;
   group: string;
   count: number;
+  /**
+   * The map's frame, and its setter (SPEC-029 REQ-002/UX-001). The control sits
+   * here rather than as a map overlay: it answers the same class of question as
+   * its neighbours — what am I looking at — and it keeps SPEC-023's overlay
+   * layout, and the non-overlap gate that polices it, untouched.
+   *
+   * `onFrameModeChange` absent → the present-day frame is not in the basemap
+   * index, and no control is rendered at all (UX-002).
+   */
+  frameMode?: FrameMode;
+  onFrameModeChange?: (mode: FrameMode) => void;
   /** In-memory taxon search index + selection handler (SPEC-013). */
   searchIndex: readonly SearchableTaxon[];
   onSearchSelect: (taxonId: string) => void;
@@ -36,6 +48,8 @@ export function ContextBar({
   stageName,
   group,
   count,
+  frameMode = "paleo",
+  onFrameModeChange,
   searchIndex,
   onSearchSelect,
   onReset,
@@ -69,6 +83,43 @@ export function ContextBar({
             {count}
           </span>
         </div>
+
+        {/* SPEC-029 REQ-002: the frame choice. Two options, single-choice, in
+            the domain's own words — a reconstruction or today's map. Withheld
+            entirely when the index carries no present-day frame (UX-002),
+            because a control that cannot do anything is worse than none. */}
+        {onFrameModeChange && (
+          <div className={styles.stat}>
+            <span className={styles.statLabel} id="frame-mode-label">
+              Map
+            </span>
+            <div
+              className={styles.frameGroup}
+              role="radiogroup"
+              aria-labelledby="frame-mode-label"
+            >
+              {(
+                [
+                  ["paleo", "Paleogeographic"],
+                  ["present", "Present day"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={frameMode === value}
+                  className={`${styles.frameOption} ${
+                    frameMode === value ? styles.frameOptionOn : ""
+                  }`}
+                  onClick={() => onFrameModeChange(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* SPEC-022 REQ-006: quiet text control at the trailing end of the row —
             the words stay, the button chrome goes. */}

@@ -45,6 +45,23 @@ export interface BasemapFrameIndex {
   rotationModel: string;
   licence: string;
   frames: FrameDescriptor[];
+  /**
+   * The present-day (0 Ma) frame (SPEC-029 DATA-001). A sibling of `frames`,
+   * never a member: `selectFrame` resolves a stage to the nearest frame **by
+   * age**, and a 0 Ma entry in that list could only ever be a wrong answer.
+   * Keeping it out makes that unreachable by construction.
+   *
+   * Optional so an index written before SPEC-029 still parses — the view then
+   * withholds the frame toggle rather than failing (UX-002).
+   */
+  present?: PresentFrameDescriptor;
+}
+
+/** The present-day frame. It has no stage and no slug — there is only one. */
+export interface PresentFrameDescriptor {
+  targetAgeMa: 0;
+  geojsonUrl: string;
+  metaUrl: string;
 }
 
 export const BASEMAP_INDEX_URL = "basemap/index.json";

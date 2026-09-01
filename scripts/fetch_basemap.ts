@@ -13,7 +13,7 @@
  * Run manually to refresh the committed data:  pnpm run fetch:basemap
  */
 
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
@@ -112,6 +112,19 @@ function simplify(raw: FeatureCollection): {
   return { type: "FeatureCollection", features };
 }
 
+/**
+ * The present-day frame (SPEC-029 REQ-001). Deliberately **not** a `FrameEntry`
+ * and deliberately not in `frames`: `selectFrame` resolves a Mesozoic stage to
+ * the nearest available frame by age, and a 0 Ma frame sitting in that list
+ * could only ever be a wrong answer. Keeping it a separate field on the index
+ * makes it unreachable by that path, by construction.
+ */
+interface PresentEntry {
+  targetAgeMa: 0;
+  geojsonUrl: string;
+  metaUrl: string;
+}
+
 interface FrameEntry {
   stage: string;
   slug: string;
@@ -120,10 +133,69 @@ interface FrameEntry {
   metaUrl: string;
 }
 
+/**
+ * Fetch, simplify and write the present-day (0 Ma) frame (SPEC-029 REQ-001).
+ * Same service, same model, same simplification as every stage frame — so the
+ * two frames a player toggles between are the same kind of object, drawn the
+ * same way, and only the age differs.
+ */
+async function writePresentFrame(outDir: string): Promise<PresentEntry> {
+  const url = `https://gws.gplates.org/reconstruct/coastlines/?time=0&model=${MODEL}`;
+  const geojson = simplify(await fetchJson(url));
+  const meta = {
+    name: "Present-day coastlines (0 Ma)",
+    source: "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+    sourceUrl: url,
+    rotationModel: "scotese",
+    model: MODEL,
+    targetAgeMa: 0,
+    licence: LICENCE,
+    note:
+      "Present-day coastlines. Occurrences drawn over this frame are their " +
+      "recorded collection coordinates, not reconstructions (SPEC-029 REQ-005).",
+  };
+  const body = JSON.stringify(geojson) + "\n";
+  await writeFile(join(outDir, "present.geojson"), body, "utf-8");
+  await writeFile(
+    join(outDir, "present.meta.json"),
+    JSON.stringify(meta, null, 2) + "\n",
+    "utf-8",
+  );
+  console.log(
+    `  present-day        0 Ma  ${geojson.features.length} polygons  ` +
+      `${(gzipSync(body).length / 1024).toFixed(0)} KB gz`,
+  );
+  return {
+    targetAgeMa: 0,
+    geojsonUrl: "basemap/present.geojson",
+    metaUrl: "basemap/present.meta.json",
+  };
+}
+
 async function main(): Promise<void> {
   const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
   const outDir = join(repoRoot, "public", "basemap");
   await mkdir(outDir, { recursive: true });
+
+  // `--present-only` refreshes just the 0 Ma frame and leaves the 30 committed
+  // stage frames untouched. Refetching all of them would rewrite committed data
+  // for no reason, and each refetch is a live service call whose output can
+  // drift — so the narrow path is the safe one.
+  if (process.argv.includes("--present-only")) {
+    const present = await writePresentFrame(outDir);
+    const indexPath = join(outDir, "index.json");
+    const existing = JSON.parse(await readFile(indexPath, "utf-8")) as Record<
+      string,
+      unknown
+    >;
+    await writeFile(
+      indexPath,
+      JSON.stringify({ ...existing, present }, null, 2) + "\n",
+      "utf-8",
+    );
+    console.log(`Updated the present-day frame + index.json → ${outDir}`);
+    return;
+  }
 
   // Clear stale frames (old single-frame files + previous per-stage output).
   for (const name of await readdir(outDir).catch(() => [])) {
@@ -186,6 +258,9 @@ async function main(): Promise<void> {
     rotationModel: "scotese",
     licence: LICENCE,
     frames,
+    // A full run writes it too, so `--present-only` is a shortcut rather than
+    // the only way to get one and the two paths cannot diverge.
+    present: await writePresentFrame(outDir),
   };
   await writeFile(
     join(outDir, "index.json"),

@@ -13,6 +13,7 @@
  */
 
 import type {
+  ModernPosition,
   PaleogeographicPosition,
   ReadOccurrence,
   ReadTaxon,
@@ -180,6 +181,9 @@ export interface LocalityGroup {
   region: string | null;
   /** The collection's own reconstructed paleocoordinate (never averaged). */
   paleo: PaleogeographicPosition | null;
+  /** The collection's recorded coordinates, for the present-day frame
+   *  (SPEC-029 REQ-003). Never averaged either — a locality is one collection. */
+  modern: ModernPosition | null;
   occurrenceIds: string[];
   /** Distinct taxa recorded at this locality. */
   taxonIds: string[];
@@ -233,6 +237,10 @@ export function groupByLocality(
         formation: o.formation,
         region: o.modernPosition.value?.region ?? null,
         paleo: o.paleoPosition.value,
+        // SPEC-029 REQ-003: a locality is one collection, so every occurrence in
+        // it shares these coordinates — carrying both lets the marker follow the
+        // frame toggle without re-deriving the group.
+        modern: o.modernPosition.value,
         occurrenceIds: [],
         taxonIds: [],
         taxonCount: 0,

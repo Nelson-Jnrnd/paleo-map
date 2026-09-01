@@ -13,6 +13,8 @@
  */
 
 import type { ReadOccurrence } from "../../domain/index.js";
+import { positionIn } from "./frame.js";
+import type { FrameMode } from "./frame.js";
 
 /** Map bounds in degrees, as reported by MapLibre's `getBounds()`. */
 export interface Bounds {
@@ -50,13 +52,12 @@ export function withinBounds(
 export function occurrencesInView(
   occurrences: readonly ReadOccurrence[],
   bounds: Bounds | null,
+  mode: FrameMode = "paleo",
 ): ReadOccurrence[] {
   return occurrences.filter((o) => {
-    const paleo = o.paleoPosition.value;
-    if (paleo == null) return false;
-    return (
-      bounds == null || withinBounds(paleo.palaeoLng, paleo.palaeoLat, bounds)
-    );
+    const at = positionIn(o, mode);
+    if (at == null) return false;
+    return bounds == null || withinBounds(at.lng, at.lat, bounds);
   });
 }
 
@@ -66,12 +67,20 @@ export interface LngLat {
   lat: number;
 }
 
-/** The placeable paleocoordinates of a set of occurrences (SPEC-027 REQ-003). */
-export function paleoPoints(occurrences: readonly ReadOccurrence[]): LngLat[] {
+/**
+ * The placeable positions of a set of occurrences, in the active frame
+ * (SPEC-027 REQ-003; frame-aware since SPEC-029 REQ-003). Named for the frame
+ * rather than for the paleo one it used to assume, because the camera must fit
+ * the points it is actually about to draw.
+ */
+export function framePoints(
+  occurrences: readonly ReadOccurrence[],
+  mode: FrameMode = "paleo",
+): LngLat[] {
   const points: LngLat[] = [];
   for (const o of occurrences) {
-    const paleo = o.paleoPosition.value;
-    if (paleo) points.push({ lng: paleo.palaeoLng, lat: paleo.palaeoLat });
+    const at = positionIn(o, mode);
+    if (at) points.push(at);
   }
   return points;
 }

@@ -213,5 +213,10 @@
       "geojsonUrl": "basemap/maastrichtian.geojson",
       "metaUrl": "basemap/maastrichtian.meta.json"
     }
-  ]
+  ],
+  "present": {
+    "targetAgeMa": 0,
+    "geojsonUrl": "basemap/present.geojson",
+    "metaUrl": "basemap/present.meta.json"
+  }
 }

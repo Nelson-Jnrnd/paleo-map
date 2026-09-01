@@ -1,0 +1,10 @@
+{
+  "name": "Present-day coastlines (0 Ma)",
+  "source": "GPlates Web Service (gws.gplates.org), PALEOMAP model",
+  "sourceUrl": "https://gws.gplates.org/reconstruct/coastlines/?time=0&model=paleomap",
+  "rotationModel": "scotese",
+  "model": "paleomap",
+  "targetAgeMa": 0,
+  "licence": "CC BY 4.0 — EarthByte / GPlates (Scotese PALEOMAP coastlines)",
+  "note": "Present-day coastlines. Occurrences drawn over this frame are their recorded collection coordinates, not reconstructions (SPEC-029 REQ-005)."
+}

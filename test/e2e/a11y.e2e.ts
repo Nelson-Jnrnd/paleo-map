@@ -108,3 +108,26 @@ test("the ranking caveat's disclosure is accessible when open", async ({
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-029 UX-003. The frame toggle adds a control to the context row and a
+ * status note above the map, so the gate has to cover present-day mode as well
+ * as the paleogeographic default the first test already exercises.
+ */
+test("the present-day map frame has no serious accessibility violations", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: /timeline/i }).waitFor();
+
+  const group = page.getByRole("radiogroup", { name: /^map$/i });
+  await group.waitFor();
+  await group.getByRole("radio", { name: /present day/i }).click();
+  await expect(
+    group.getByRole("radio", { name: /present day/i }),
+  ).toHaveAttribute("aria-checked", "true");
+  await page.getByText(/still chooses which occurrences/i).waitFor();
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});
