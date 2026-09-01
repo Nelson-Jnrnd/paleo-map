@@ -131,3 +131,32 @@ test("the present-day map frame has no serious accessibility violations", async 
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
 });
+
+/**
+ * SPEC-023 REQ-004, defect fixed 2026-09-01. The clade key scrolls inside its
+ * own box when the map pane is short, and a scrollable region must be
+ * keyboard-reachable (WCAG 2.1.1). This runs at a viewport where the key
+ * actually overflows — the default 1280x720 is a couple of pixels above the
+ * threshold, which is why the defect survived the gate for so long.
+ */
+test("the clade key is reachable by keyboard when it scrolls", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 660 });
+  await page.goto("/");
+  await page.getByRole("navigation", { name: /timeline/i }).waitFor();
+
+  const key = page.getByRole("group", { name: /clade key/i });
+  await key.waitFor();
+  // The precondition: it really is overflowing at this height, so the assertion
+  // below is about the case the rule is for.
+  expect(await key.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(
+    true,
+  );
+  await expect(key).toHaveAttribute("tabindex", "0");
+  await key.focus();
+  expect(await key.evaluate((el) => document.activeElement === el)).toBe(true);
+
+  const violations = await seriousViolations(new AxeBuilder({ page }));
+  expect(violations, violations.join("\n")).toEqual([]);
+});

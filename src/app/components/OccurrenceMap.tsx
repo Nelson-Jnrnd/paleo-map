@@ -1567,7 +1567,18 @@ export function OccurrenceMap({
                 key
               </button>
               {cladeKeyOpen && (
-                <div className={styles.cladeKeyBody}>
+                <div
+                  className={styles.cladeKeyBody}
+                  role="group"
+                  aria-label="Clade key"
+                  // The key scrolls inside its own box whenever the map pane is
+                  // short (measured: at 1280x700 and below, before SPEC-029
+                  // existed). A scrollable region must be keyboard-reachable or
+                  // its content is unreachable without a pointer — WCAG 2.1.1,
+                  // and the same pattern SPEC-025 uses for the cladogram region.
+                  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                  tabIndex={0}
+                >
                   {CLADE_MARKERS.map((m) => (
                     <span key={m.id} className={styles.legendItem}>
                       <span

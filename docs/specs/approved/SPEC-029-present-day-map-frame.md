@@ -450,6 +450,16 @@ Revert the PR. `present.geojson`/`present.meta.json` become unreferenced; the
   viewport while being painted over — a reminder that "the element is there" is
   not the same claim as "a reader can see it". It now sits under the timeline,
   which is also the control it is talking about.
+- **A pre-existing defect surfaced, and is fixed here.** SPEC-029's new axe case
+  failed on `scrollable-region-focusable` in present-day mode. The cause was not
+  this feature: `.cladeKeyBody` has been scrollable-but-unfocusable since
+  SPEC-023, and axe flags it at 1280×700 and below in the *shipped
+  paleogeographic default*. It escaped the standing gate only because that gate
+  runs at 1280×720, a couple of pixels above the threshold; REQ-004's note takes
+  about 33 px of the map pane, which pushed the default viewport over the line.
+  Recorded and fixed under SPEC-023 REQ-004, with a regression case at a viewport
+  where the key actually overflows. Re-verified with axe across five viewports in
+  both frame modes: zero serious violations in all ten.
 - **UX-001 checked rather than assumed**: the map's overlay set after this change
   is `wikipedia-gate`, `basemap-attribution`, `clade-key` — unchanged — and the
   toggle is outside `[data-map-pane]` entirely.

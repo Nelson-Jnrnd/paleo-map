@@ -940,6 +940,13 @@
   min-height: 0;
 }
 
+/* It is keyboard-focusable because it scrolls (WCAG 2.1.1), so it needs a
+   visible focus indicator like every other focus target. */
+.cladeKeyBody:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
 .legendItem {
   display: flex;
   align-items: center;
