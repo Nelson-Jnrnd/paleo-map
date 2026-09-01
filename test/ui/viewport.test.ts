@@ -11,7 +11,7 @@ import {
   boundsOfPoints,
   fractionInView,
   occurrencesInView,
-  paleoPoints,
+  framePoints,
   withinBounds,
 } from "../../src/app/state/viewport.js";
 import type { Bounds } from "../../src/app/state/viewport.js";
@@ -109,8 +109,8 @@ test("boundsOfPoints on nothing is null — there is nothing to frame", () => {
   expect(boundsOfPoints([])).toBeNull();
 });
 
-test("paleoPoints drops occurrences with no reconstructed position", () => {
-  const points = paleoPoints([occ("a", { lng: 1, lat: 2 }), occ("b", null)]);
+test("framePoints drops occurrences with no reconstructed position", () => {
+  const points = framePoints([occ("a", { lng: 1, lat: 2 }), occ("b", null)]);
   expect(points).toEqual([{ lng: 1, lat: 2 }]);
 });
 

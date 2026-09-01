@@ -13,6 +13,7 @@ import type { GeologicalStage, ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { DEFAULT_RANK_TIER, modeAndRankOf } from "./grouping.js";
 import type { GroupingMode, ListUnit, RankTier } from "./grouping.js";
+import type { FrameMode } from "./frame.js";
 
 /** Full Mesozoic stages, oldest → youngest (deep-time reads left → right). */
 export const EXPLORATION_STAGES: readonly GeologicalStage[] = MESOZOIC_STAGES;
@@ -67,6 +68,12 @@ export interface ExplorationState {
   dailyMode: DailyMode;
   /** Which parallel puzzle it is playing (SPEC-020 REQ-004). */
   dailyTrack: DailyTrack;
+  /**
+   * Which frame the map draws (SPEC-029 REQ-002). Paleogeographic by default:
+   * deep time is the product's subject, so it is what you see first. Survives a
+   * timeline step by living here rather than inside the map.
+   */
+  frameMode: FrameMode;
 }
 
 export const initialExplorationState: ExplorationState = {
@@ -82,6 +89,7 @@ export const initialExplorationState: ExplorationState = {
   taxonomyTaxonId: null,
   dailyMode: "daily",
   dailyTrack: "full",
+  frameMode: "paleo",
 };
 
 export type ExplorationAction =
@@ -106,6 +114,7 @@ export type ExplorationAction =
   | { type: "openProfile"; taxonId: string }
   | { type: "openTaxonomy"; taxonId: string | null }
   | { type: "openDaily"; mode: DailyMode; track?: DailyTrack }
+  | { type: "setFrameMode"; frameMode: FrameMode }
   | { type: "backToMap" }
   | { type: "reset" };
 
@@ -189,6 +198,11 @@ export function explorationReducer(
       // Single-action return; age, filters and the selected occurrence persist
       // (FONC-1000/1080, CONS-470).
       return { ...state, screen: "map", profileTaxonId: null };
+    case "setFrameMode":
+      // Only the frame. The stage, the selection and the grouping are all
+      // unaffected — switching frames re-projects what is already there
+      // (SPEC-029 NFR-003).
+      return { ...state, frameMode: action.frameMode };
     case "reset":
       // Reset filters to defaults (FONC-080); clears selection and view.
       return { ...initialExplorationState };

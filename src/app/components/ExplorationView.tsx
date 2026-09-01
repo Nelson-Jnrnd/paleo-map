@@ -33,6 +33,7 @@ import {
   visibleOccurrences,
 } from "../state/exploration.js";
 import { occurrencesInView } from "../state/viewport.js";
+import type { FrameMode } from "../state/frame.js";
 import type { Bounds } from "../state/viewport.js";
 import { gateOccurrences } from "../state/wikipediaGate.js";
 import { landingForTaxon, stageForTaxon } from "../state/search.js";
@@ -188,6 +189,10 @@ export function ExplorationView({
   // Map viewport bounds (null until the map reports them / when no WebGL) and the
   // transiently highlighted occurrence shared with the map (SPEC-009 REQ-003/004).
   const [viewport, setViewport] = useState<Bounds | null>(null);
+  // SPEC-029 UX-002: whether the basemap index carries a present-day frame. The
+  // map reports it once the index resolves; until then, and when it is absent,
+  // no frame control is offered at all.
+  const [presentFrameAvailable, setPresentFrameAvailable] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
   // indeterminate occurrences). The toggle below reveals them.
@@ -344,8 +349,10 @@ export function ExplorationView({
   // The occurrences currently on the map: narrowed to the viewport, or the full
   // set when there is no viewport signal (SPEC-009 REQ-003).
   const inView = useMemo(
-    () => occurrencesInView(unitOccurrences, viewport),
-    [unitOccurrences, viewport],
+    // SPEC-029 REQ-003: the list mirrors the map, so it filters on the frame the
+    // map is actually drawing.
+    () => occurrencesInView(unitOccurrences, viewport, state.frameMode),
+    [unitOccurrences, viewport, state.frameMode],
   );
 
   // --- SPEC-010 grouping: derive locality/taxon groups from the in-view set ---
@@ -749,6 +756,18 @@ export function ExplorationView({
         onSelectPeriod={selectPeriod}
         highlightRange={highlightRange}
       />
+      {/* SPEC-029 REQ-004: in present-day mode the coastline stops changing with
+          the age, which is exactly the cue a reader uses to see that the
+          timeline is still filtering. So the screen says it instead — otherwise
+          a Maastrichtian-only scatter reads as the whole record. It sits under
+          the timeline, in normal flow: inside the map pane it would be painted
+          over by the map canvas, which is a positioning context. */}
+      {state.frameMode === "present" && (
+        <p className={styles.frameNote} role="status">
+          Present-day coastlines. The selected age still chooses which
+          occurrences are shown — {state.stageName} here.
+        </p>
+      )}
       <div className={styles.body}>
         <div className={styles.mapPane} data-map-pane>
           {/* SPEC-023 REQ-002: app controls acting on what is plotted live in the
@@ -797,6 +816,8 @@ export function ExplorationView({
                   : state.selectedOccurrenceId
               }
               onSelect={handleMapSelect}
+              frameMode={state.frameMode}
+              onPresentFrameAvailable={setPresentFrameAvailable}
               occurrenceRotationModel={stageApi.metadata().rotationModel}
               stageName={state.stageName}
               onViewportChange={setViewport}
@@ -885,6 +906,13 @@ export function ExplorationView({
       stageName={state.stageName}
       group={state.group}
       count={occurrences.length}
+      frameMode={state.frameMode}
+      {...(presentFrameAvailable
+        ? {
+            onFrameModeChange: (frameMode: FrameMode) =>
+              dispatch({ type: "setFrameMode", frameMode }),
+          }
+        : {})}
       searchIndex={searchIndex}
       onSearchSelect={onSearchSelect}
       onReset={() => dispatch({ type: "reset" })}

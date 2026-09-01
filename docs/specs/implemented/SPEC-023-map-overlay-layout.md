@@ -791,6 +791,28 @@ Recorded during drafting, to be extended at implementation.
   and the toggle float over a panel that has no map behind it. That is a
   behaviour question, not an overlap defect, and is out of scope.
 
+### Defect against REQ-004, found and fixed 2026-09-01
+
+REQ-004 requires an oversized rail child to "scroll inside its own box (the clade
+key)". `.cladeKeyBody` was given `overflow-y: auto` and nothing else — so it
+scrolls, but a keyboard user could not reach it. WCAG 2.1.1: a scrollable region
+must be focusable or its content is unreachable without a pointer, and axe
+reports it as `scrollable-region-focusable` at serious impact.
+
+**Measured on the shipped default, before SPEC-029 existed:** the key overflows
+at 1280×700 and below, and at 900×700 — and axe flags it in every one of those
+cases. It escaped the standing a11y gate only because that gate runs at
+Playwright's default 1280×720, which is a couple of pixels above the threshold.
+SPEC-029's present-day note takes about 33 px of the map pane's height, which
+pushed the default viewport over the line and made the latent defect reachable —
+so it surfaced as a failure of SPEC-029's new axe case rather than as a new bug.
+
+Fixed by giving the region `tabIndex={0}`, `role="group"`, an accessible name and
+a visible focus ring — the same pattern SPEC-025 UX-001 already uses for the
+cladogram's scroll region. Verified with axe across 1280×720, 1280×700,
+1280×620, 1024×768 and 900×700 in both frame modes: **zero serious violations in
+all ten**, with the region focusable and labelled in each.
+
 ## Spec amendments
 
 > Required for any behavioral change after the spec is Approved.

@@ -172,6 +172,54 @@
 /* SPEC-022 REQ-006: a quiet text control, not a peer of the navigation. No
    border, no filled chrome, small type — but still a real 24px target and still
    the words "Reset view", never an icon. */
+/* SPEC-029 REQ-002: the frame choice, in the context row. Two words separated by
+   a hairline — the row's own idiom, not a segmented pill. Selection is carried
+   by weight and a rule as well as by colour, so it survives with colour removed
+   (PERF-250). */
+/* SPEC-029 REQ-004: a note, marked by a left rule — the idiom the puzzle's
+   banners already use — rather than a box floating over the map. */
+.frameNote {
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  border-left: 2px solid var(--color-accent);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+.frameGroup {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.frameOption {
+  padding: 0 0 2px;
+  min-height: 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.frameOption:hover {
+  color: var(--color-text-hi);
+}
+
+.frameOption:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.frameOptionOn {
+  color: var(--color-text-hi);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent-deep);
+}
+
 .reset {
   padding: var(--space-2) 0;
   min-height: 24px;
@@ -890,6 +938,13 @@
      rail — the one overlay whose height grows with the data. */
   overflow-y: auto;
   min-height: 0;
+}
+
+/* It is keyboard-focusable because it scrolls (WCAG 2.1.1), so it needs a
+   visible focus indicator like every other focus target. */
+.cladeKeyBody:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 .legendItem {

@@ -36,7 +36,7 @@ import type { Basemap, BasemapFrameIndex } from "../data/basemap.js";
 import {
   boundsOfPoints,
   fractionInView,
-  paleoPoints,
+  framePoints,
 } from "../state/viewport.js";
 import type { Bounds } from "../state/viewport.js";
 import type { GroupingMode, LocalityGroup } from "../state/grouping.js";
@@ -46,6 +46,8 @@ import {
   cladeMarkerById,
   cladeMarkerForTaxon,
 } from "./mapCladeMarkers.js";
+import { pointIn, positionIn } from "../state/frame.js";
+import type { FrameMode } from "../state/frame.js";
 import {
   LAND_TEXTURE_ID,
   OCEAN_DEEP,
@@ -168,6 +170,17 @@ interface OccurrenceMapProps {
   occurrenceRotationModel: string;
   /** Selected stage — selects the time-varying basemap frame (SPEC-008 REQ-004). */
   stageName: string;
+  /**
+   * Which frame the map draws (SPEC-029 REQ-002). Defaults to the
+   * paleogeographic one, so every existing caller and test is unaffected.
+   */
+  frameMode?: FrameMode;
+  /**
+   * Reports whether the basemap index carries a present-day frame, once it
+   * resolves (SPEC-029 UX-002). The map is the one place that loads the index,
+   * so the shell learns it from here rather than fetching the file twice.
+   */
+  onPresentFrameAvailable?: (available: boolean) => void;
   /** Reports the map's current bounds on load and on pan/zoom (SPEC-005 REQ-002). */
   onViewportChange?: (bounds: Bounds) => void;
   /** Transiently highlighted feature, mirrored with the list (SPEC-009 REQ-004). */
@@ -330,18 +343,22 @@ async function loadIconImage(
 function toFeatureCollection(
   occurrences: readonly ReadOccurrence[],
   taxaById: ReadonlyMap<string, ReadTaxon>,
+  mode: FrameMode,
 ): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
   for (const o of occurrences) {
-    const paleo = o.paleoPosition.value;
-    if (!paleo) continue; // no paleocoordinate → not placeable on the paleo map
+    // SPEC-029 REQ-003: the active frame decides the coordinate, and the same
+    // accessor decides it everywhere — so the points cannot end up in a
+    // different frame from the coastline under them.
+    const at = positionIn(o, mode);
+    if (!at) continue; // no position in this frame → not placeable
     // SPEC-015: resolve the clade marker (icon + tint) for data-driven paint.
     const marker = cladeMarkerForTaxon(o.taxonId, taxaById);
     features.push({
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [paleo.palaeoLng, paleo.palaeoLat],
+        coordinates: [at.lng, at.lat],
       },
       properties: {
         id: o.id,
@@ -358,15 +375,17 @@ function toFeatureCollection(
 /** One marker per collection at its own paleocoordinate (SPEC-010 REQ-003). */
 function toLocalityFeatureCollection(
   localities: readonly LocalityGroup[],
+  mode: FrameMode,
 ): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
   for (const g of localities) {
-    if (!g.paleo) continue; // no paleocoordinate → not placeable
+    const at = pointIn(g.paleo, g.modern, mode);
+    if (!at) continue; // no position in this frame → not placeable
     features.push({
       type: "Feature",
       geometry: {
         type: "Point",
-        coordinates: [g.paleo.palaeoLng, g.paleo.palaeoLat],
+        coordinates: [at.lng, at.lat],
       },
       properties: { id: g.collectionId, taxonCount: g.taxonCount },
     });
@@ -380,10 +399,11 @@ function featuresForMode(
   occurrences: readonly ReadOccurrence[],
   localities: readonly LocalityGroup[],
   taxaById: ReadonlyMap<string, ReadTaxon>,
+  frameMode: FrameMode,
 ): GeoJSON.FeatureCollection {
   return mode === "locality"
-    ? toLocalityFeatureCollection(localities)
-    : toFeatureCollection(occurrences, taxaById);
+    ? toLocalityFeatureCollection(localities, frameMode)
+    : toFeatureCollection(occurrences, taxaById, frameMode);
 }
 
 /**
@@ -437,6 +457,8 @@ export function OccurrenceMap({
   onSelect,
   occurrenceRotationModel,
   stageName,
+  frameMode = "paleo",
+  onPresentFrameAvailable,
   onViewportChange,
   highlightedId = null,
   onHover,
@@ -540,9 +562,9 @@ export function OccurrenceMap({
     const pin = pinnedRef.current;
     if (pin) {
       const o = occurrencesRef.current.find((x) => x.id === pin.id);
-      const paleo = o?.paleoPosition.value;
-      if (paleo) {
-        const p = map.project([paleo.palaeoLng, paleo.palaeoLat]);
+      const at = o ? positionIn(o, frameModeRef.current) : null;
+      if (at) {
+        const p = map.project([at.lng, at.lat]);
         if (p.x !== pin.x || p.y !== pin.y) {
           setPinned({ id: pin.id, x: p.x, y: p.y });
         }
@@ -602,6 +624,10 @@ export function OccurrenceMap({
   const [basemap, setBasemap] = useState<Basemap | null>(null);
   const [frameExact, setFrameExact] = useState(true);
   const [frameIndex, setFrameIndex] = useState<BasemapFrameIndex | null>(null);
+  // The move handler runs outside render, so it reads the frame from a ref for
+  // the same reason it reads the occurrences from one.
+  const frameModeRef = useRef(frameMode);
+  frameModeRef.current = frameMode;
   // Basemap provenance is disclosed via a compact info button so its text can't
   // overlap the map; the details open in a popover anchored above the button.
   const [attributionOpen, setAttributionOpen] = useState(false);
@@ -611,11 +637,16 @@ export function OccurrenceMap({
   useEffect(() => {
     let cancelled = false;
     void loadBasemapFrameIndex().then((idx) => {
-      if (!cancelled) setFrameIndex(idx);
+      if (cancelled) return;
+      setFrameIndex(idx);
+      onPresentFrameAvailable?.(Boolean(idx?.present));
     });
     return () => {
       cancelled = true;
     };
+    // Runs once: the index is immutable for the session, and re-running on a new
+    // callback identity would refetch it on every render of the shell.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Select and load the frame for the current stage; reload when the stage
@@ -627,13 +658,21 @@ export function OccurrenceMap({
       setBasemap(null);
       return;
     }
-    const picked = selectFrame(stageName, frameIndex.frames);
-    if (!picked) {
+    // SPEC-029 REQ-002: present-day mode draws the 0 Ma frame at every age, so
+    // it does not consult `selectFrame` — the present frame is deliberately not
+    // in the list that function searches (REQ-001).
+    const chosen =
+      frameMode === "present"
+        ? frameIndex.present
+          ? { frame: frameIndex.present, exact: true }
+          : null
+        : selectFrame(stageName, frameIndex.frames);
+    if (!chosen) {
       setBasemap(null);
       return;
     }
-    setFrameExact(picked.exact);
-    void loadBasemap(picked.frame.geojsonUrl, picked.frame.metaUrl).then(
+    setFrameExact(chosen.exact);
+    void loadBasemap(chosen.frame.geojsonUrl, chosen.frame.metaUrl).then(
       (b) => {
         if (!cancelled) setBasemap(b);
       },
@@ -641,7 +680,7 @@ export function OccurrenceMap({
     return () => {
       cancelled = true;
     };
-  }, [frameIndex, stageName]);
+  }, [frameIndex, stageName, frameMode]);
 
   // Initialise the map once.
   useEffect(() => {
@@ -736,7 +775,13 @@ export function OccurrenceMap({
 
             map.addSource("occurrences", {
               type: "geojson",
-              data: featuresForMode(mode, occurrences, localities, taxaById),
+              data: featuresForMode(
+                mode,
+                occurrences,
+                localities,
+                taxaById,
+                frameMode,
+              ),
               cluster: true,
               // Decluster sooner (SPEC-015): a smaller radius + a max-zoom cap
               // surface individual clade icons earlier and stop clustering once
@@ -867,7 +912,13 @@ export function OccurrenceMap({
             // selection: whatever is emphasised is always its own marker, at any
             // zoom, at full strength over the receded base.
             const emphasis = emphasisFeatures(
-              featuresForMode(mode, occurrences, localities, taxaById),
+              featuresForMode(
+                mode,
+                occurrences,
+                localities,
+                taxaById,
+                frameMode,
+              ),
               focusIds,
               selectedId,
               highlightedId,
@@ -1127,9 +1178,13 @@ export function OccurrenceMap({
     const map = mapRef.current;
     if (!map || !loadedRef.current) return;
     const source = map.getSource("occurrences") as GeoJSONSource | undefined;
-    source?.setData(featuresForMode(mode, occurrences, localities, taxaById));
+    source?.setData(
+      featuresForMode(mode, occurrences, localities, taxaById, frameMode),
+    );
     updateOverlaysRef.current();
-  }, [occurrences, localities, mode, taxaById]);
+    // `frameMode` belongs here: toggling the frame re-projects the points from
+    // data already loaded, which is the whole behaviour (SPEC-029 NFR-003).
+  }, [occurrences, localities, mode, taxaById, frameMode]);
 
   // Sync the emphasis overlay + the base dim (SPEC-010 REQ-004, SPEC-027
   // REQ-001). Note what this effect does *not* do: it never re-feeds the
@@ -1141,7 +1196,7 @@ export function OccurrenceMap({
     const source = map.getSource("emphasis") as GeoJSONSource;
     source.setData(
       emphasisFeatures(
-        featuresForMode(mode, occurrences, localities, taxaById),
+        featuresForMode(mode, occurrences, localities, taxaById, frameMode),
         focusIds,
         selectedId,
         highlightedId,
@@ -1158,6 +1213,8 @@ export function OccurrenceMap({
     setIf("points-bg", "circle-opacity", dim);
     setIf("points-bg", "circle-stroke-opacity", dim);
     setIf("points-icon", "icon-opacity", dim);
+    // The emphasis overlay carries its own copy of the focused points, so it
+    // has to be rebuilt in the new frame too (SPEC-029 REQ-003).
   }, [
     focusIds,
     selectedId,
@@ -1166,6 +1223,7 @@ export function OccurrenceMap({
     occurrences,
     localities,
     taxaById,
+    frameMode,
   ]);
 
   // Sync the selected- and highlighted-point emphasis (SPEC-009 REQ-004). The
@@ -1211,7 +1269,7 @@ export function OccurrenceMap({
     const map = mapRef.current;
     if (!map || !loadedRef.current) return;
     if (fitToken === fittedTokenRef.current) return;
-    const points = paleoPoints(focusOccurrences);
+    const points = framePoints(focusOccurrences, frameMode);
     if (points.length === 0) return; // wait for the stage's occurrences
     fittedTokenRef.current = fitToken;
     const b = map.getBounds();
@@ -1235,7 +1293,9 @@ export function OccurrenceMap({
         duration: FIT_DURATION_MS,
       },
     );
-  }, [fitToken, focusOccurrences]);
+    // The camera fits the points it is about to draw, so a frame change is a
+    // change of target (SPEC-029 REQ-003).
+  }, [fitToken, focusOccurrences, frameMode]);
 
   // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step);
   // the multi card is dismissed on any occurrence change (its leaves may be stale).
@@ -1261,9 +1321,12 @@ export function OccurrenceMap({
     : null;
   // SPEC-016 UX-001: disclose frame-consistent reconstruction only when it is
   // actually applied — i.e. the occurrences carry a frame reconstruction age.
-  const reconstructedToFrame = occurrences.some(
-    (o) => o.paleoPosition.value?.reconstructionAgeMa != null,
-  );
+  // SPEC-029 REQ-005: in present-day mode there is no reconstruction to
+  // disclose — the points are recorded collection coordinates — so this claim
+  // would be false there.
+  const reconstructedToFrame =
+    frameMode === "paleo" &&
+    occurrences.some((o) => o.paleoPosition.value?.reconstructionAgeMa != null);
 
   // SPEC-015 REQ-003 / AMEND-001: the card shows the pinned occurrence if any,
   // else the hovered one. SPEC-015 REQ-001: the legend shows in point modes.
@@ -1448,18 +1511,36 @@ export function OccurrenceMap({
                   <strong>{basemap.meta.name}</strong> · {basemap.meta.source} ·{" "}
                   {basemap.meta.licence}
                   <br />
-                  {!frameExact && (
+                  {/* SPEC-029 REQ-005: the two frames make different kinds of
+                      claim. Paleogeographic mode asserts a reconstruction under
+                      a stated rotation model; present-day mode asserts nothing
+                      but the coordinates the collection was recorded at. Showing
+                      the reconstruction's provenance over recorded coordinates
+                      would make the weaker claim look stronger, so each mode
+                      discloses only what is true of it. */}
+                  {frameMode === "present" ? (
                     <>
-                      Nearest available reconstruction (
-                      {basemap.meta.targetAgeMa} Ma) shown for {stageName}.{" "}
+                      {basemap.meta.note} Points are the coordinates recorded
+                      with each collection — not reconstructions. The selected
+                      age still chooses which occurrences are shown.
                     </>
-                  )}
-                  {frame.note} {basemap.meta.note}
-                  {reconstructedToFrame && (
+                  ) : (
                     <>
-                      {" "}
-                      Occurrences are reconstructed to this frame’s age, so each
-                      point sits on the coastline shown (SPEC-016).
+                      {!frameExact && (
+                        <>
+                          Nearest available reconstruction (
+                          {basemap.meta.targetAgeMa} Ma) shown for {stageName}
+                          .{" "}
+                        </>
+                      )}
+                      {frame.note} {basemap.meta.note}
+                      {reconstructedToFrame && (
+                        <>
+                          {" "}
+                          Occurrences are reconstructed to this frame’s age, so
+                          each point sits on the coastline shown (SPEC-016).
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -1486,7 +1567,18 @@ export function OccurrenceMap({
                 key
               </button>
               {cladeKeyOpen && (
-                <div className={styles.cladeKeyBody}>
+                <div
+                  className={styles.cladeKeyBody}
+                  role="group"
+                  aria-label="Clade key"
+                  // The key scrolls inside its own box whenever the map pane is
+                  // short (measured: at 1280x700 and below, before SPEC-029
+                  // existed). A scrollable region must be keyboard-reachable or
+                  // its content is unreachable without a pointer — WCAG 2.1.1,
+                  // and the same pattern SPEC-025 uses for the cladogram region.
+                  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                  tabIndex={0}
+                >
                   {CLADE_MARKERS.map((m) => (
                     <span key={m.id} className={styles.legendItem}>
                       <span
