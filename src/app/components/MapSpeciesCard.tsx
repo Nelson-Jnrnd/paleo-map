@@ -43,6 +43,10 @@ export function MapSpeciesCard({
   return (
     <div
       className={styles.speciesCard}
+      // SPEC-030 UX-002: the cluster's identity carrier (SPEC-027 REQ-005).
+      // A tap on a cluster answers "what is this" with this card, exactly as a
+      // tap on a single marker does with the hover card.
+      data-map-card="cluster"
       style={{ left: x, top: y }}
       role="dialog"
       aria-label={`${species.length} species here`}

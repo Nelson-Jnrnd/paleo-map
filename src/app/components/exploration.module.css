@@ -2438,6 +2438,16 @@
 .leadFrame:focus-within .credReveal {
   opacity: 1;
 }
+
+/* SPEC-030 UX-002: where there is no hover, this credit was reachable by
+   nothing at all — the image's provenance simply did not exist on a phone. The
+   charter's §2 north star and CONS-490 both make that a compliance defect
+   rather than a rough edge, so on a touch device the credit is just visible. */
+@media (hover: none) {
+  .credReveal {
+    opacity: 1;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .credReveal {
     transition: none;

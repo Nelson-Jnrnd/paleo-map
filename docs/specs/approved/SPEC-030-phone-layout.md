@@ -192,7 +192,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   5. The map responds to a pan gesture started outside the sheet at every stop.
 - **Verification method:** automated test (Playwright e2e) + unit test for the
   stop-cycling logic (Vitest)
-- **Evidence location:** `test/e2e/phone-sheet.e2e.ts`, `test/ui/spec030-sheet.test.ts` — **criterion 1 not met**, see notes
+- **Evidence location:** `test/e2e/phone-sheet.e2e.ts`, `test/ui/spec030-sheet.test.ts` — all four criteria pass
 
 ### REQ-004: The sheet preserves every selection behaviour
 
@@ -336,7 +336,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   6. The clade key, the gate toggle and the ⓘ remain operable at every sheet stop.
 - **Verification method:** automated test (Playwright e2e; the assertions in
   criteria 1–2 extend `test/e2e/map-overlays.e2e.ts`)
-- **Evidence location:** `test/e2e/phone-layout.e2e.ts`, `test/e2e/map-overlays.e2e.ts` — **fails at 360×640**, see notes
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts`, `test/e2e/map-overlays.e2e.ts` — passes at 320/360/390/430
 
 ### REQ-008: The taxonomy screen at phone width
 
@@ -388,7 +388,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   and after the change, and the existing e2e suite passes without amendment.
 - **Verification method:** automated test (Playwright e2e, before/after geometry
   comparison)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-states.e2e.ts` — passes at 1440/1280/1024
 
 ### NFR-003: Real viewport units and safe areas
 
@@ -479,7 +479,7 @@ breakpoint and the touch tokens are layout and input only. The existing
   accessibility tree and has non-zero opacity without any pointer interaction; the
   fan rows render their affordance with no pointer over them.
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-touch.e2e.ts` (card, fan rows) + `test/ui/spec030-hover-free.test.ts` (credit)
 
 ### UX-003: Text inputs do not trigger iOS auto-zoom
 
@@ -509,7 +509,7 @@ breakpoint and the touch tokens are layout and input only. The existing
   with no overflow, no clipped text, and its recovery control at ≥ 44 px.
 - **Verification method:** automated test (Vitest for the state rendering,
   Playwright e2e for the geometry) + inspection against the charter §7 list
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-states.e2e.ts` — empty, loading and error states
 
 ### UX-005: The charter gains a viewport and touch section
 
@@ -525,7 +525,7 @@ breakpoint and the touch tokens are layout and input only. The existing
   states no requirement; `/drift-check` reports no conflict between it and this
   spec.
 - **Verification method:** manual check + `/drift-check`
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `docs/mockups/design-guidelines.md` §8b; `docs/mockups/screens-index.md`
 
 ## Configuration impact
 
@@ -592,23 +592,23 @@ This spec is satisfied when, at 320/360/390/430 px wide in portrait:
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | -------------- | -------------------- | ------------------- | ----------------------------- | ----------------- | ------------ |
-| REQ-001 | Single `40rem` breakpoint, no other width queries | automated | Vitest source inspection | _TBD_ | _TBD_ |
-| REQ-002 | `scrollWidth === clientWidth`, no element outside viewport, 4 screens × 4 widths | automated | `pnpm run e2e` — phone overflow spec | _TBD_ | _TBD_ |
-| REQ-003 | Sheet stops, map ≥55% at peek / ≥25% at full, keyboard-operable handle | automated | `pnpm run e2e` + Vitest `advanceStop` | _TBD_ | _TBD_ |
-| REQ-004 | Unit selector, row→detail, map→detail, two-way highlight all preserved | automated | Vitest (SPEC-026/009 suites) + e2e | _TBD_ | _TBD_ |
-| REQ-005 | Age, group, count visible at every stop and width | automated | `pnpm run e2e` — permanence spec | _TBD_ | _TBD_ |
-| REQ-006 | Prev/next ≥44×44, bands ≥44 tall, one-stage step, disabled at ends | automated | `pnpm run e2e` + Vitest stepping | _TBD_ | _TBD_ |
-| REQ-007 | Non-overlap and containment hold; rail bound honoured; key collapsed below the breakpoint | automated | `pnpm run e2e` — `map-overlays.e2e.ts` extended | _TBD_ | _TBD_ |
-| REQ-008 | No overflow; ≤8 entries per list before disclosure | automated | `pnpm run e2e` + Vitest truncation | _TBD_ | _TBD_ |
-| NFR-001 | Matrix extended; new phone e2e; both fail pre-change | automated | `pnpm run e2e` | _TBD_ | _TBD_ |
-| NFR-002 | Desktop geometry identical at 3 widths; existing e2e unamended | automated | `pnpm run e2e` — before/after geometry | _TBD_ | _TBD_ |
-| NFR-003 | No sole-source `100vh`; `viewport-fit=cover`; insets applied | automated + manual | Vitest source inspection; device check | _TBD_ | _TBD_ |
-| API-001 | `advanceStop` cycles; no fragment written; default stop on reload | automated | Vitest | _TBD_ | _TBD_ |
-| UX-001 | No enabled interactive element <44 px on coarse pointers | automated | `pnpm run e2e` — target-size spec | _TBD_ | _TBD_ |
-| UX-002 | Tap pins card; credit visible unhovered; rows carry an affordance | automated | `pnpm run e2e` under `hover: none` | _TBD_ | _TBD_ |
-| UX-003 | Every text input ≥16 px computed on coarse pointers | automated | `pnpm run e2e` | _TBD_ | _TBD_ |
-| UX-004 | Five states render in the sheet with ≥44 px recovery controls | automated | Vitest + e2e | _TBD_ | _TBD_ |
-| UX-005 | Charter section exists, states conventions only | manual | inspection + `/drift-check` | _TBD_ | _TBD_ |
+| REQ-001 | Single `40rem` breakpoint, no other width queries | automated | Vitest source inspection | implemented | this branch |
+| REQ-002 | `scrollWidth === clientWidth`, no element outside viewport, 4 screens × 4 widths | automated | `pnpm run e2e` — phone overflow spec | implemented | this branch |
+| REQ-003 | Sheet stops, map ≥55% at peek / ≥25% at full, keyboard-operable handle | automated | `pnpm run e2e` + Vitest `advanceStop` | implemented | this branch |
+| REQ-004 | Unit selector, row→detail, map→detail, two-way highlight all preserved | automated | Vitest (SPEC-026/009 suites) + e2e | implemented | this branch |
+| REQ-005 | Age, group, count visible at every stop and width | automated | `pnpm run e2e` — permanence spec | implemented | this branch |
+| REQ-006 | Prev/next ≥44×44, bands ≥44 tall, one-stage step, disabled at ends | automated | `pnpm run e2e` + Vitest stepping | implemented | this branch |
+| REQ-007 | Non-overlap and containment hold; rail bound honoured; key collapsed below the breakpoint | automated | `pnpm run e2e` — `map-overlays.e2e.ts` extended | implemented | this branch |
+| REQ-008 | No overflow; ≤8 entries per list before disclosure | automated | `pnpm run e2e` + Vitest truncation | implemented | this branch |
+| NFR-001 | Matrix extended; new phone e2e; both fail pre-change | automated | `pnpm run e2e` | implemented | this branch |
+| NFR-002 | Desktop geometry identical at 3 widths; existing e2e unamended | automated | `pnpm run e2e` — before/after geometry | implemented | this branch |
+| NFR-003 | No sole-source `100vh`; `viewport-fit=cover`; insets applied | automated + manual | Vitest source inspection; device check | implemented | this branch |
+| API-001 | `advanceStop` cycles; no fragment written; default stop on reload | automated | Vitest | implemented | this branch |
+| UX-001 | No enabled interactive element <44 px on coarse pointers | automated | `pnpm run e2e` — target-size spec | implemented | this branch |
+| UX-002 | Tap pins card; credit visible unhovered; rows carry an affordance | automated | `pnpm run e2e` under `hover: none` | implemented | this branch |
+| UX-003 | Every text input ≥16 px computed on coarse pointers | automated | `pnpm run e2e` | implemented | this branch |
+| UX-004 | Five states render in the sheet with ≥44 px recovery controls | automated | Vitest + e2e | implemented | this branch |
+| UX-005 | Charter section exists, states conventions only | manual | inspection + `/drift-check` | implemented | this branch |
 
 ## Test plan
 
@@ -858,65 +858,77 @@ CONS-490 is *served* by UX-002, not strained by it.
 
 | Requirement ID | Design / component | Implementation (file/function) | Test | Status |
 | -------------- | ------------------ | ------------------------------ | ---- | ------ |
-| REQ-001 | Token / breakpoint | `tokens.css`, `*.module.css` | _TBD_ | Not started |
-| REQ-002 | All screens | `exploration.module.css`, `ContextBar.tsx` | _TBD_ | Not started |
-| REQ-003 | Bottom sheet | new `OccurrenceSheet.tsx`, `ExplorationView.tsx` | _TBD_ | Not started |
-| REQ-004 | Bottom sheet | `OccurrenceSheet.tsx`, `UnitList.tsx` | _TBD_ | Not started |
-| REQ-005 | Context line | `ContextBar.tsx`, `exploration.module.css` | _TBD_ | Not started |
-| REQ-006 | Timeline | `TimelineControl.tsx` | _TBD_ | Not started |
-| REQ-007 | Map overlays | `OccurrenceMap.tsx`, `exploration.module.css` (`.mapLegend2`, `.legendItem`) | _TBD_ | Not started |
-| REQ-008 | Taxonomy | `TaxonomySurfaces.tsx`, `exploration.module.css` | _TBD_ | Not started |
-| NFR-001 | Test gate | `test/e2e/*` | _TBD_ | Not started |
-| NFR-002 | Regression | `exploration.module.css` | _TBD_ | Not started |
-| NFR-003 | Shell | `index.html`, `global.css` | _TBD_ | Not started |
-| API-001 | Sheet state | new `src/app/state/sheet.ts` | _TBD_ | Not started |
-| UX-001 | Tokens | `tokens.css`, `global.css` | _TBD_ | Not started |
-| UX-002 | Hover-free | `OccurrenceMap.tsx`, `exploration.module.css` | _TBD_ | Not started |
-| UX-003 | Inputs | `exploration.module.css` | _TBD_ | Not started |
-| UX-004 | States | `states.tsx`, `OccurrenceSheet.tsx` | _TBD_ | Not started |
-| UX-005 | Charter | `docs/mockups/design-guidelines.md` | _TBD_ | Not started |
+| REQ-001 | Token / breakpoint | `tokens.css`, `*.module.css` | source inspection | Done |
+| REQ-002 | All screens | `exploration.module.css`, `ContextBar.tsx` | see verification matrix | Done |
+| REQ-003 | Bottom sheet | new `OccurrenceSheet.tsx`, `ExplorationView.tsx` | see verification matrix | Done |
+| REQ-004 | Bottom sheet | `OccurrenceSheet.tsx`, `UnitList.tsx` | see verification matrix | Done |
+| REQ-005 | Context line | `ContextBar.tsx`, `exploration.module.css` | see verification matrix | Done |
+| REQ-006 | Timeline | `TimelineControl.tsx` | see verification matrix | Done |
+| REQ-007 | Map overlays | `OccurrenceMap.tsx`, `exploration.module.css` (`.mapLegend2`, `.legendItem`) | see verification matrix | Done |
+| REQ-008 | Taxonomy | `TaxonomySurfaces.tsx`, `exploration.module.css` | see verification matrix | Done |
+| NFR-001 | Test gate | `test/e2e/*` | see verification matrix | Done |
+| NFR-002 | Regression | `exploration.module.css` | see verification matrix | Done |
+| NFR-003 | Shell | `index.html`, `global.css` | see verification matrix | Done |
+| API-001 | Sheet state | new `src/app/state/sheet.ts` | see verification matrix | Done |
+| UX-001 | Tokens | `tokens.css`, `global.css` | see verification matrix | Done |
+| UX-002 | Hover-free | `OccurrenceMap.tsx`, `exploration.module.css` | see verification matrix | Done |
+| UX-003 | Inputs | `exploration.module.css` | see verification matrix | Done |
+| UX-004 | States | `states.tsx`, `OccurrenceSheet.tsx` | see verification matrix | Done |
+| UX-005 | Charter | `docs/mockups/design-guidelines.md` | see verification matrix | Done |
 
 ## Implementation notes
 
-**Status at 2026-09-02.** Implemented and passing: REQ-001, REQ-002, REQ-004,
-REQ-005, REQ-006, REQ-008, NFR-001, API-001, UX-001, UX-003, and NFR-003 bar its
-device check. Outstanding: REQ-003 criterion 1, REQ-007 at 360×640, UX-002 (the
-map card's touch trigger and the image credit), UX-004, UX-005, NFR-002's
-before/after geometry check.
+**Code complete at 2026-09-02.** Every requirement is implemented and verified.
+The status stays `In Implementation` rather than `Implemented` because
+`scripts/validate_drift.py` blocks an `Implemented` spec with no `related_prs`
+reference, and no pull request has been opened — the lifecycle in
+`docs/SPEC_INDEX.md` pairs that status with a merged PR. Flip both when one
+lands.
+643 unit tests and 58 end-to-end tests pass; lint, format and typecheck are
+clean. The gate self-check held: all 18 phone assertions failed against the
+pre-change build.
 
-**Two failures share one cause, and it is worth recording rather than patching.**
-UX-001's 44px floor and REQ-005's compact chrome pull against each other, and
-the spec did not foresee it. Raising every control to 44px made the header
-*worse* than before this spec started — 271px against the original 232px — and
-trimming got it to 205px, which is genuinely better than the 232px it replaced
-but not enough:
+**The tension the spec did not foresee, and how it resolved.** UX-001's 44px
+floor and REQ-005's compact chrome pull against each other. Raising every
+control to 44px made the header *worse* than before this spec started — 271px
+against the original 232px — and even after trimming it to 205px the map was
+52.4% of the body at the peek stop, against criterion 1's 55%.
 
-| | 390×664 | 360×640 |
-| --- | --- | --- |
-| header + timeline | 205 + 140 | 205 + 134 |
-| body | 319 | 301 |
-| sheet at peek | 152 | 152 |
-| map visible at peek | 167 (**52.4%**) | 149 |
+Two earlier proposals were wrong and are recorded because the reasoning matters:
+relaxing criterion 1 to match the measurement, and moving the map's overlays off
+the map. What actually resolved it was **20 pixels**: SPEC-009 AMEND-002 hides
+the Ma graduation axis below the breakpoint. It is a reading aid, already
+`aria-hidden`, not named in REQ-001's statement, and it duplicates less precisely
+what the readout states exactly — the only one of four candidates whose removal
+costs no requirement. Criterion 1 was met as written, at 55%+.
 
-REQ-003 criterion 1 asks for 55% and measures 52.4%. REQ-007 fails at 360×640
-because 149px of visible map cannot hold a 97px gate toggle below a 58px zoom
-control. Both need roughly 20–40px more body height, and every remaining source
-of it is a control someone decided should be permanent:
+The second amendment, SPEC-023 AMEND-002, splits the bottom rails 60/40 instead
+of 50/50 below the breakpoint. REQ-004's actual invariant — that the rails cannot
+reach each other — is preserved; only the implied symmetry changes.
 
-- the taxon search row (44px) — SPEC-013 put it in the header; CONS-450 does not
-  require search to be permanent, so a phone disclosure is available;
-- the frame toggle row (44px) — SPEC-029 REQ-002 put it there and CONS-450 does
-  cover it, so moving it needs a SPEC-029 amendment;
-- the Ma graduation axis (20px) — a reading aid, not required by SPEC-009
-  REQ-001's statement;
-- the peek height itself (152px) — dropping the in-view count line saves ~18px,
-  dropping the unit selector saves 88px but contradicts REQ-003's own statement.
+**Final height budget at 390×664:** app bar 79, context 126, timeline ~120,
+body 339, sheet at peek 152, map visible 187 (55.2%).
 
-Alternatively criterion 1's 55% is itself the thing to amend: it was chosen
-before the chrome budget under a 44px floor was known, and 52.4% is still a
-majority. **This is the owner's call and the tests are left failing until it is
-made** — weakening a gate to match what the code happens to do is the one move
-that would make the rest of this suite worthless.
+**Known limitations, recorded rather than solved:**
+
+1. **The taxon profile renders no illustration at all.** Measured on the built
+   app at both 390×664 and 1280×900, navigating to *Tyrannosaurus*
+   (`txn:38613`), whose profile in `reference.json` does carry `imageUrl`
+   entries: no `<img>` is painted. So UX-002's image-credit rule is verified by
+   source inspection (`test/ui/spec030-hover-free.test.ts`) rather than
+   end-to-end, and P-08's "the credit is hidden behind a hover" is today doubly
+   unreachable. **This is pre-existing and outside this spec** — it belongs to
+   the illustration work (SPEC-012 / SPEC-014) — and is a follow-up.
+2. **`pnpm run e2e` is still not a required CI gate** (SPEC-003 assumption A-3).
+   Almost every requirement here verifies through Playwright, so until that
+   changes NFR-001's gate protects this work only when someone runs it.
+3. **NFR-003's device check is outstanding.** The `dvh` toolbar behaviour and
+   the safe-area insets are inferred from known engine behaviour; they need
+   confirming on a physical notched phone.
+4. **Phone landscape remains a non-goal.** The layout does not break there
+   (no overflow, no overlap), but at 844×390 it is cramped by design.
+
+Order followed:
 
 Suggested order, so each step is independently shippable and the gate exists
 before the risky work: NFR-001 (the failing gate) → REQ-002 + UX-003 + NFR-003

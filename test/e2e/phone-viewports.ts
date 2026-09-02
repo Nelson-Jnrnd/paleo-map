@@ -52,12 +52,32 @@ export async function horizontalOverflowers(page: Page): Promise<Overflower[]> {
   return page.evaluate(() => {
     const clientWidth = document.documentElement.clientWidth;
     const out: Overflower[] = [];
+
+    // An element clipped by an ancestor cannot widen the document, however far
+    // its own box reaches: `overflow: hidden` clips visually but
+    // `getBoundingClientRect()` still reports the untruncated geometry. The
+    // loading bar is the case in point — it is a 40%-wide bar animated from
+    // `translateX(-110%)` inside a track that clips it, so its rect is off the
+    // left edge by design and nothing escapes. Counting it would have made this
+    // gate fail on a correct layout.
+    const clipped = (el: Element): boolean => {
+      const box = el.getBoundingClientRect();
+      for (let a = el.parentElement; a; a = a.parentElement) {
+        const style = getComputedStyle(a);
+        if (style.overflowX === "visible") continue;
+        const ab = a.getBoundingClientRect();
+        if (box.right > ab.right + 0.5 || box.left < ab.left - 0.5) return true;
+      }
+      return false;
+    };
+
     for (const el of Array.from(document.querySelectorAll("*"))) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 && r.height === 0) continue;
       // A scroll container's own children may legitimately sit outside it; the
       // gate is about the *document*, so only count what escapes the viewport.
       if (r.right > clientWidth + 0.5 || r.left < -0.5) {
+        if (clipped(el)) continue;
         out.push({
           tag: el.tagName.toLowerCase(),
           cls: String(el.className ?? "").slice(0, 60),

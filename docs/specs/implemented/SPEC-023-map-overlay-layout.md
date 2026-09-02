@@ -817,6 +817,31 @@ all ten**, with the region focusable and labelled in each.
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-002: An asymmetric rail split at phone widths
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-007. With the map full-bleed under the occurrence
+  sheet, halving a 360px-wide map gave each bottom rail 168px. The
+  Wikipedia-gate toggle's label is long and wrapped to four lines (97px tall),
+  which — once the rails were raised to clear the sheet's peek — walked it into
+  the top-right corner REQ-002 reserves for MapLibre's own controls.
+- **Changed requirements:** REQ-004, its "a rail can never grow into the
+  opposite rail's half" clause.
+- **Behavioral impact:** at `max-width: 40rem` the bottom-right rail may take
+  60% of the pane and the left rails 40%, instead of 50/50. At 60% the gate
+  toggle wraps to two lines. **REQ-004's actual invariant is preserved**: 40 + 60
+  still leaves the gutter, so the rails cannot reach each other, and the
+  automated non-overlap gate covers exactly that. Above the breakpoint the split
+  is unchanged.
+- **Behavioral impact, second part:** the bottom rails are additionally offset
+  by the sheet's peek height so no overlay is covered by the sheet at rest, and
+  their max-height is capped by what remains after that offset — raising a rail
+  moves its top up as well as its bottom, which is what produced the collision
+  in the first place.
+- **Test impact:** `test/e2e/map-overlays.e2e.ts` gained 390×664 and 360×640
+  (SPEC-030 NFR-001); the collision above is what those two widths caught.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su` — "ammend what needs to be ammended and finish the work".
+
 ### AMEND-001: The clade key's default state on a phone
 
 - **Date:** 2026-09-02

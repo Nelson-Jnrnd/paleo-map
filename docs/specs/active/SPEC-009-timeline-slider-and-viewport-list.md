@@ -426,6 +426,33 @@ transient id set by hover/focus on either surface, visually weaker than selectio
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-002: The Ma graduation axis is hidden at phone widths
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-003 acceptance criterion 1 — the map must still be at
+  least 55% of the space below the timeline when the occurrence sheet rests at
+  its peek stop. Measured at 390×664 it was **52.4%**, and every other candidate
+  for the missing 20px was a control the functional specification makes
+  permanent (FONC-040/050/060, CONS-450) or one belonging to another spec.
+- **Changed requirements:** REQ-001, by omission — the axis is drawn beneath the
+  track today but is not named in REQ-001's statement.
+- **Behavioral impact:** at `max-width: 40rem` the Ma tick axis is not rendered.
+  REQ-001's actual requirements are untouched: the to-scale track, the
+  proportional stage steps, the selected stage's **name and Ma span as
+  always-present text** (in the readout), REQ-002's period bands and the
+  keyboard slider all remain. The axis is already `aria-hidden`, so nothing
+  changes in the accessibility tree. Above the breakpoint it is drawn exactly as
+  before, and NFR-002's desktop gate asserts that.
+- **Why this and not something else:** the axis is a reading aid that duplicates,
+  less precisely, what the readout states exactly. Of the four candidates, it was
+  the only one whose removal costs no requirement — the taxon search row belongs
+  to SPEC-013, the frame toggle to SPEC-029 and CONS-450, and shrinking the
+  sheet's peek would contradict SPEC-030 REQ-003's own statement.
+- **Test impact:** `test/e2e/phone-sheet.e2e.ts` asserts the 55%;
+  `test/e2e/phone-states.e2e.ts` asserts the axis is still drawn above the
+  breakpoint.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su` — "ammend what needs to be ammended and finish the work".
+
 ### AMEND-001: Discrete stage stepping at phone widths
 
 - **Date:** 2026-09-02
