@@ -33,7 +33,8 @@ depends_on:
   - SPEC-023
   - SPEC-026
   - SPEC-029
-conflicts_with: []
+conflicts_with:
+  - SPEC-023
 last_verified_at:
 ---
 
@@ -58,7 +59,9 @@ The measured current state is recorded in
 360×640, 390×664, 430×730 and 844×390. Its findings are referenced below as
 **P-01 … P-21**. That report introduces no requirements; this spec does.
 
-Three prior specs constrain the design and are not being reopened:
+Three prior specs constrain the design. SPEC-023 is **reopened** by REQ-007,
+under the owner's authorisation of 2026-09-02 — see "Specs this spec amends";
+the other two are extended without their behaviour changing:
 
 - **SPEC-009** gives the timeline its to-scale stepped track and the two-way
   map↔list highlight (REQ-005/REQ-006).
@@ -276,6 +279,13 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   painted across the clade key. P-14 — four persistent overlays on a 226 px canvas
   cover most of the visible ocean. With one rail child, collision is structurally
   impossible rather than merely avoided.
+
+  This is the one requirement here that **contradicts** an existing spec rather
+  than extending it: SPEC-023 UX-001 forbids moving these overlays and forbids
+  collapsing based on viewport size. It is resolved by an amendment to SPEC-023,
+  authorised by the owner on 2026-09-02 and staged in "Specs this spec amends".
+  SPEC-023's own rationale for the exclusion — that REQ-004's rail bounding makes
+  it unnecessary — is precisely what P-10 shows failing at phone widths.
 - **Acceptance criteria:**
   1. At 320, 360, 390 and 430 px wide, `[data-map-rail] > [data-map-overlay]`
      yields exactly one visible element.
@@ -618,10 +628,12 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
       (≈ 152 px). The alternative — one horizontally scrollable row — was rejected
       because it puts options out of sight, which sits badly with CONS-450 and with
       SPEC-026's "the option set is identical in every state". Confirm the trade.
-- [ ] **Does CONS-490 permit the clade key to be collapsible in the sheet?**
-      REQ-007 assumes yes: the clade key is a legend, not uncertainty information,
-      and SPEC-023 UX-001 already lets it collapse on the desktop. Flagged because
-      it is the one place this spec moves something out of permanent view.
+- [x] **May the clade key and the gate toggle move off the map on a phone?**
+      *Resolved 2026-09-02:* yes — the owner authorised amending existing specs
+      for the phone layout, and the amendment to SPEC-023 UX-001 is staged above.
+      Worth restating what the resolution is not: neither control is hidden,
+      collapsed or put behind a hover. Both stay permanently visible in the sheet,
+      so CONS-490 and charter §2 are satisfied by availability, not by permission.
 - [ ] **e2e is not currently a required CI gate** (SPEC-003 assumption A-3, echoed
       in `playwright.config.ts`). Almost every requirement here verifies through
       e2e, so this spec's gate is only as real as that decision. Promoting
@@ -637,34 +649,141 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
       non-goal and a follow-up.
 - [x] **Touch-target minimum** — *Answered 2026-09-02: coarse pointers only*, via
       a new token, leaving the desktop layout unchanged.
+- [x] **Amending existing specs for the phone layout** — *Answered 2026-09-02:
+      authorised.* Four amendments are staged in "Specs this spec amends" above
+      and land in their home specs on approval. Note what the authorisation was
+      **not** spent on: FONC-040/050/060 and CONS-450 are left untouched, because
+      REQ-005 meets them as written (see the conflict check).
 - [ ] **Approval of this spec** (status → `Approved`, moved to
-      `docs/specs/approved/`) before any implementation begins.
+      `docs/specs/approved/`) before any implementation begins. Approving it also
+      approves the four staged amendments.
 - [ ] **Whether `pnpm run e2e` becomes a required CI gate** as part of this work
       (see the last open question).
 
+## Specs this spec amends
+
+The owner authorised amending existing specs to accommodate the phone layout
+(2026-09-02). Four post-approval specs need an amendment entry. `CLAUDE.md`
+requires that entry in the **home** spec, so the exact text to be added is
+staged here rather than written into those files now: SPEC-030 is still `Draft`,
+and an amendment landing in an `Implemented` spec before this one is approved
+would make that spec describe behaviour the code does not have — drift of exactly
+the kind `/drift-check` exists to catch.
+
+**Each block below is copied into its home spec's "Spec amendments" section when
+SPEC-030 reaches `Approved`**, dated then, referencing the owner's approval. All
+four are scoped to `max-width: 40rem` and/or `pointer: coarse`: none changes
+behaviour above the breakpoint on a fine pointer.
+
+### To SPEC-023 (Implemented) — the map-overlay scheme
+
+- **Reason:** SPEC-030 REQ-007. UX-001's exclusion of viewport-driven collapsing
+  was written on the assumption that REQ-004's rail bounding keeps overlays apart.
+  At phone widths it does not — P-10 measures an 18 px overlap between the
+  bottom-left rail and the Wikipedia-gate toggle on a 226 px map.
+- **Changed requirements:** UX-001 (statement and acceptance criterion 3) and
+  REQ-002's corner-ownership table.
+- **Behavioural impact:** At `max-width: 40rem` only, the clade key and the
+  Wikipedia-gate toggle are not map overlays at all — they render in the
+  occurrence sheet, where both stay permanently visible and operable. The basemap
+  ⓘ remains the map's single rail child, unmoved and uncollapsed. Above the
+  breakpoint UX-001 is unchanged in every particular, including its ban on
+  automatic collapse. Nothing is hidden, faded, or put behind a hover at any
+  width; this is a change of *location*, not of *availability* — which is what
+  keeps it compatible with charter §2 and CONS-490.
+- **Test impact:** `test/e2e/map-overlays.e2e.ts` gains 390×664 and 360×640 and a
+  single-rail-child assertion at those widths (SPEC-030 NFR-001); the Vitest
+  collapse test is scoped to the fine-pointer layout.
+
+### To SPEC-015 (In Implementation) — the marker preview card
+
+- **Reason:** SPEC-030 UX-002. REQ-003 is written in mouse vocabulary — "Hovering
+  a marker shows…", "dismisses on mouse-out" — so on a touch device the
+  "answer before the click" guarantee is not weakened but simply absent.
+- **Changed requirements:** REQ-003 (trigger and dismissal only).
+- **Behavioural impact:** Under `hover: none`, a first tap on a marker pins the
+  card and a tap elsewhere dismisses it. Content, anchoring and the SPEC-009
+  cross-highlight are unchanged. Hover behaviour on a fine pointer is untouched.
+- **Test impact:** A new e2e asserts the card's content after a tap with
+  `hasTouch` and `hover: none`; the existing jsdom hover test is unchanged.
+
+### To SPEC-009 (In Implementation) — the timeline
+
+- **Reason:** SPEC-030 REQ-006. REQ-001's to-scale track cannot be aimed at phone
+  widths: 30 stages across 214 px gives a narrowest step of 0.0 px, and 30 × 44 px
+  of target is 1,320 px — the geometry does not admit a per-stage touch target.
+- **Changed requirements:** REQ-001 (composition of the control; the track itself
+  is unchanged).
+- **Behavioural impact:** At `max-width: 40rem` the control gains explicit
+  previous-stage and next-stage buttons beside the track, disabled at the ends of
+  the range with a stated reason. The to-scale track, the selection bar, the
+  REQ-005 range highlight, the period bands (REQ-002) and the keyboard slider
+  semantics are all retained unchanged. Purely additive.
+- **Test impact:** New e2e geometry assertions and a Vitest stepping test; no
+  existing SPEC-009 test changes.
+
+### To SPEC-026 (Implemented) — the sidebar
+
+- **Reason:** SPEC-030 REQ-003/REQ-004. REQ-001 and REQ-003 are written in terms
+  of "the sidebar" and "the same column", which on a phone is the sheet.
+- **Changed requirements:** REQ-001 and REQ-003 (vocabulary only).
+- **Behavioural impact:** **None.** Every behaviour REQ-001 and REQ-003 specify —
+  the always-visible five-unit selector, a selection replacing the list in the
+  same container, the named back control, `Escape`, scroll restoration, focus
+  handling — holds identically in the sheet. This amendment exists so the two
+  specs cannot be read as contradicting each other, not because anything changes.
+- **Test impact:** The existing SPEC-026 suites run against both containers.
+
 ## Conflict check
 
-No contradiction found with any existing spec. Four specs are **extended** at
-phone widths, each keeping its desktop behaviour intact:
+**One direct contradiction exists, and it is resolved by amendment under the
+owner's authorisation of 2026-09-02.** An earlier draft of this section claimed
+no contradiction; that was wrong, and the correction is the reason the
+`conflicts_with` frontmatter now names SPEC-023.
 
-- **SPEC-009** — the to-scale track and the two-way highlight are preserved;
-  REQ-006 adds discrete stepping controls beside the track rather than replacing
-  it. Direction of travel matches SPEC-009's own goal of an *ergonomic* timeline.
-- **SPEC-023** — the corner-rail scheme is unchanged; REQ-007 reduces the phone
-  map to a single rail child, which satisfies the scheme's invariant rather than
-  bending it, and NFR-001 extends the gate SPEC-023 created.
-- **SPEC-026** — the sidebar's contract is carried into the sheet unchanged
-  (REQ-004). The sheet is a different container for the same column.
-- **SPEC-015** — REQ-003's "identity before any click" is *restored* on touch by
-  UX-002; today it is silently absent there.
+**SPEC-023 UX-001 forbids what REQ-007 requires.** Its statement reads: "No other
+overlay may be collapsed, auto-hidden, faded, or moved behind a hover: the
+reconstruction label, the cluster-semantics note, the Wikipedia-gate toggle's
+hidden count and the basemap ⓘ **stay as they are**. Collapsing is a user action
+only — **the app must not collapse the key automatically based on viewport
+size**." Its acceptance criterion 3 adds: "No other overlay gains a collapse,
+dismiss, or hover-reveal control." REQ-007 moves the clade key and the
+Wikipedia-gate toggle off the map **because of the viewport size**. That is the
+excluded case, named almost word for word.
 
-`docs/mockups/design-guidelines.md` is extended, not contradicted, by UX-005: it
-is currently silent on viewport and touch (P-20), so there is nothing to conflict
-with. `conflicts_with` is therefore empty.
+It is worth saying why SPEC-023 wrote that exclusion, because the reason does not
+survive the phone. Its rationale rejects auto-collapse as something that "needs
+measurement, adds a state machine, and REQ-004's scroll behaviour already keeps
+the key inside its rail". On a 226 px-wide map REQ-004's bounding is precisely
+what fails — P-10 measures an 18 px overlap between the bottom-left rail and the
+gate toggle. The exclusion was written for a pane wide enough for the rails to
+work, and it holds there.
 
-One tension is recorded rather than resolved silently: FONC-040/050/060 and
-CONS-450 require permanence, and the cheapest way to reclaim phone height is to
-break that. REQ-005 exists specifically to forbid it.
+The three remaining specs are **extended**, but each is post-approval, so each
+still takes an amendment entry:
+
+- **SPEC-009** (In Implementation) — the to-scale track, the keyboard slider and
+  the two-way highlight are all preserved; REQ-006 adds discrete stepping
+  controls beside the track rather than replacing it. Additive, and in the
+  direction of SPEC-009's own goal of an *ergonomic* timeline.
+- **SPEC-015** (In Implementation) — REQ-003 is written in mouse terms
+  ("Hovering a marker shows…", "dismisses on mouse-out"). UX-002 gives the same
+  card a touch trigger. This *restores* REQ-003's "answer before the click"
+  guarantee on a device where it is currently absent altogether.
+- **SPEC-026** (Implemented) — the sidebar's contract is carried into the sheet
+  unchanged (REQ-004). The amendment is one of vocabulary: "the column" becomes
+  "the column, which on a phone is the sheet".
+
+**No conflict with the functional specification.** FONC-040/050/060 and CONS-450
+require the age, group, count and main controls to be permanent, and REQ-005
+keeps all of them permanently visible rather than seeking relief from them. The
+owner's authorisation to amend covers this too, and REQ-005 deliberately does not
+use it: a compact line satisfies the requirement as written, so there is nothing
+here to amend.
+
+**No conflict with the charter.** `docs/mockups/design-guidelines.md` is silent
+on viewport and touch (P-20), so UX-005 adds a section rather than changing one.
+CONS-490 is *served* by UX-002, not strained by it.
 
 ## Traceability table
 
@@ -708,8 +827,8 @@ _None. This spec is Draft; amendments are required only after approval._
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred. — **four open**, see
-      above; all four need the owner.
+- [ ] Open questions are resolved or explicitly deferred. — **three open**, see
+      above; all three need the owner. A fourth was resolved on 2026-09-02.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
 - [ ] Human approval recorded before status set to Approved. — **not yet.**
