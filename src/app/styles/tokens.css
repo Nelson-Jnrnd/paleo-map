@@ -102,6 +102,12 @@
      under `@media (pointer: coarse)` in global.css. */
   --target-min-coarse: 44px;
 
+  /* SPEC-030 REQ-003: the sheet's peek height. Mirrors PEEK_HEIGHT_PX in
+     src/app/state/sheet.ts — the map rails clear it (REQ-007 clause 2) and the
+     two must agree, so the number is named in both places rather than typed
+     into a `calc()` from memory. */
+  --sheet-peek: 152px;
+
   /* SPEC-030 REQ-001: the single phone breakpoint, 40rem (640px at the default
      root size). A custom property cannot be used in a media query, so the value
      is written literally in each `@media (max-width: 40rem)` block — this

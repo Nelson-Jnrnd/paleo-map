@@ -272,17 +272,28 @@
     padding: var(--space-1) var(--space-3);
   }
 
-  /* The wordmark took a line of its own because `margin-right: auto` pushed the
-     nav below it. On a phone it shares the row with the destinations. */
+  /* The wordmark keeps its own line — SPEC-022 REQ-001 sanctions the bar
+     wrapping rather than hiding a destination — but it is a label, not a
+     control, so it does not need a 44px row. */
   .wordmark {
-    font-size: 14px;
-    margin-right: 0;
-    flex: 1 1 100%;
+    font-size: 12px;
+    line-height: 1.2;
+    /* Shares the row with the destinations where it fits, and wraps to its own
+       line where it does not — which is SPEC-022 REQ-001's sanctioned
+       behaviour, not a special case. Forcing `1 1 100%` cost a permanent extra
+       row at every width. */
+    flex: 0 1 auto;
+    margin-right: auto;
+    min-width: 0;
+  }
+
+  .appNav {
+    gap: var(--space-4);
   }
 
   .header {
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-1) var(--space-3) var(--space-2);
   }
 
   .search {
@@ -336,11 +347,11 @@
     margin-right: var(--space-1);
   }
 
-  /* The frame choice and Reset are controls, not readouts: they take the second
-     line at full touch size rather than crowding the values. */
+  /* The frame choice and Reset are controls, not readouts: they share a line at
+     full touch size rather than crowding the values. `1 1 100%` here cost a
+     whole extra 44px row by pushing Reset onto a third line. */
   .context .frameStat {
-    flex: 1 1 100%;
-    margin-top: var(--space-1);
+    flex: 1 1 auto;
   }
 
   .context .frameStat::before {
@@ -646,8 +657,8 @@
 @media (max-width: 40rem) {
   .timeline {
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3) var(--space-2);
   }
 
   .timelineLabel {
@@ -655,9 +666,21 @@
     flex-direction: row;
     align-items: baseline;
     gap: var(--space-2);
+    line-height: 1.2;
+  }
+
+  .timelineReadout {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
+  .timelineReadoutName {
+    font-size: 14px;
   }
 
   .timelineBody {
+    gap: var(--space-1);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
@@ -1213,6 +1236,134 @@
   border-left: 1px solid var(--color-border);
   background: var(--color-surface);
   overflow-y: auto;
+}
+
+/* --- The occurrence sheet (SPEC-030 REQ-003, REQ-004) ---------------------
+   The phone form of the sidebar column. Rendered only below the breakpoint, so
+   these rules never apply to the desktop layout (NFR-002).
+
+   It is positioned, not in flow: the map takes the whole body and the sheet is
+   drawn over it. That is what makes the map full-bleed without the sheet
+   stealing height from it — and why the map stays visible at every stop. */
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  box-shadow: var(--shadow-panel);
+  /* NFR-003: clear the home indicator without eating the peek height. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* The height is set inline from the stop; animate the settle, not the drag. */
+  transition: height 160ms ease;
+}
+
+.sheet[data-dragging="true"] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+}
+
+/* The handle is a real button — that is the whole keyboard story for the sheet
+   (REQ-003 acceptance criterion 4): Tab to it, Enter or Space to advance the
+   stop. `touch-action: none` lets a drag resize instead of scrolling the page,
+   the same trade the timeline track makes. */
+.sheetHandle {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--target-min-coarse);
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheetHandle:active {
+  cursor: grabbing;
+}
+
+.sheetHandle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.sheetGrip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.sheetHandle:hover .sheetGrip,
+.sheetHandle:focus-visible .sheetGrip {
+  background: var(--color-text-faint);
+}
+
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Momentum scrolling inside the sheet must not chain to the document behind
+     it, or a flick at the end of the list drags the whole page. */
+  overscroll-behavior: contain;
+}
+
+/* --- Phone: a full-bleed map under the sheet (SPEC-030 REQ-003; P-09) ------
+   The defect: `.body` split 390px into a 226px map beside a 164px list, and
+   neither was usable. The map now takes the whole body and the sheet is drawn
+   over it. */
+@media (max-width: 40rem) {
+  .body {
+    position: relative;
+    display: block;
+  }
+
+  .mapPane {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* REQ-007 clause 2: the bottom rails clear the sheet's peek height, so no
+     overlay is ever covered by the sheet at rest. */
+  .railBottomLeft,
+  .railBottomRight {
+    bottom: calc(
+      var(--sheet-peek) + var(--space-2) + env(safe-area-inset-bottom, 0px)
+    );
+    /* Raising a rail by the peek height moves its *top* up too, and on a short
+       phone that walked the gate toggle straight into MapLibre's reserved
+       top-right band. This is SPEC-023 REQ-004's own rule — a rail may not grow
+       into the band opposite — restated for the offset the sheet introduces:
+       cap the height at what is left after the clearance below and the
+       library's controls above. */
+    max-height: calc(100% - var(--sheet-peek) - 76px);
+  }
+
+  /* The unit selector takes two rows at the peek stop rather than one scrolling
+     row: five options at the 44px floor do not fit 320px, and options out of
+     sight sit badly with CONS-450 and with SPEC-026's "the option set is
+     identical in every state" (owner decision, 2026-09-02). */
+  .unitBar {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .unitGroup {
+    gap: var(--space-1) var(--space-4);
+  }
 }
 
 /* --- Occurrence list (SPEC-009: viewport-linked, cross-highlighted) --- */

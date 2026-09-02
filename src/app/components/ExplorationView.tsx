@@ -65,6 +65,8 @@ import { fragmentFor, parseFragment } from "../state/screenFragment.js";
 import { TaxonProfile } from "./TaxonProfile.js";
 import { TaxonomyScreen } from "./TaxonomyScreen.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
+import { OccurrenceSheet } from "./OccurrenceSheet.js";
+import { usePhoneLayout } from "../state/media.js";
 import styles from "./exploration.module.css";
 
 interface ExplorationViewProps {
@@ -194,6 +196,10 @@ export function ExplorationView({
   // no frame control is offered at all.
   const [presentFrameAvailable, setPresentFrameAvailable] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  // SPEC-030 REQ-003: below the breakpoint the sidebar column becomes a sheet
+  // over a full-bleed map. Layout only — what the column *contains* is
+  // identical, so this branches the container and nothing else.
+  const phoneLayout = usePhoneLayout();
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
   // indeterminate occurrences). The toggle below reveals them.
   const [showAll, setShowAll] = useState(false);
@@ -745,6 +751,68 @@ export function ExplorationView({
         ? spanRange(selectedLocality)
         : (selectedOccurrence?.timeRange.value ?? null);
 
+  const columnContents = (
+    <>
+      {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
+        <div className={styles.stateWrap} role="status">
+          <p className={styles.stateTitle}>
+            {stageStatus.kind === "error"
+              ? "Could not load this stage."
+              : `Loading ${state.stageName}…`}
+          </p>
+        </div>
+      ) : occurrences.length === 0 ? (
+        <EmptyState onReset={() => dispatch({ type: "reset" })} />
+      ) : (
+        <>
+          <GroupingControls
+            unit={unit}
+            onSelectUnit={(next) => dispatch({ type: "setUnit", unit: next })}
+          />
+
+          {/* SPEC-027 REQ-004: the app tells the Explorer what it did
+                with their search when that is not what they typed. Both sit
+                above the detail-or-list block, because in each case there is
+                no detail to carry them: the first made no selection at all,
+                the second selected a group with nothing at this age. */}
+          {unreachable && (
+            <p className={styles.notice} role="status">
+              <span className="sciName">{unreachable.searched}</span> isn’t a
+              level the map groups by, and none of the groups above it are
+              either — so it can’t be selected. Try a genus, a family, or a
+              major group.
+            </p>
+          )}
+          {absentTaxonName && (
+            <p className={styles.notice} role="status">
+              <span className="sciName">{absentTaxonName}</span> has no records
+              in the {state.stageName}. Step the timeline to an age within its
+              range, or clear the selection.
+            </p>
+          )}
+
+          {/* REQ-003: a selection *replaces* the list in the same column
+                rather than stacking above it. Stacking pushed the list out of
+                a 360px column, so choosing a row cost you the list you were
+                reading. The unit selector above stays operable throughout. */}
+          {detail ?? (
+            <UnitList
+              label={unitLabel}
+              noun={unitNoun}
+              rows={unitRows}
+              totalAtAge={unitOccurrences.length}
+              viewportActive={viewport !== null}
+              selectedKey={selectedKey}
+              highlightedKey={highlightedKey}
+              onSelect={selectRow}
+              onHighlight={highlightRow}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+
   return shell(
     "map",
     <>
@@ -838,67 +906,22 @@ export function ExplorationView({
             />
           )}
         </div>
-        <aside className={styles.sidebar} aria-label="Occurrence details">
-          {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
-            <div className={styles.stateWrap} role="status">
-              <p className={styles.stateTitle}>
-                {stageStatus.kind === "error"
-                  ? "Could not load this stage."
-                  : `Loading ${state.stageName}…`}
-              </p>
-            </div>
-          ) : occurrences.length === 0 ? (
-            <EmptyState onReset={() => dispatch({ type: "reset" })} />
-          ) : (
-            <>
-              <GroupingControls
-                unit={unit}
-                onSelectUnit={(next) =>
-                  dispatch({ type: "setUnit", unit: next })
-                }
-              />
-
-              {/* SPEC-027 REQ-004: the app tells the Explorer what it did
-                  with their search when that is not what they typed. Both sit
-                  above the detail-or-list block, because in each case there is
-                  no detail to carry them: the first made no selection at all,
-                  the second selected a group with nothing at this age. */}
-              {unreachable && (
-                <p className={styles.notice} role="status">
-                  <span className="sciName">{unreachable.searched}</span> isn’t
-                  a level the map groups by, and none of the groups above it are
-                  either — so it can’t be selected. Try a genus, a family, or a
-                  major group.
-                </p>
-              )}
-              {absentTaxonName && (
-                <p className={styles.notice} role="status">
-                  <span className="sciName">{absentTaxonName}</span> has no
-                  records in the {state.stageName}. Step the timeline to an age
-                  within its range, or clear the selection.
-                </p>
-              )}
-
-              {/* REQ-003: a selection *replaces* the list in the same column
-                  rather than stacking above it. Stacking pushed the list out of
-                  a 360px column, so choosing a row cost you the list you were
-                  reading. The unit selector above stays operable throughout. */}
-              {detail ?? (
-                <UnitList
-                  label={unitLabel}
-                  noun={unitNoun}
-                  rows={unitRows}
-                  totalAtAge={unitOccurrences.length}
-                  viewportActive={viewport !== null}
-                  selectedKey={selectedKey}
-                  highlightedKey={highlightedKey}
-                  onSelect={selectRow}
-                  onHighlight={highlightRow}
-                />
-              )}
-            </>
-          )}
-        </aside>
+        {/* SPEC-030 REQ-003/REQ-004: one set of contents, two containers. The
+            sheet is the phone form of the SPEC-026 column, not a second surface
+            — writing the column out twice would be the fastest way to let the
+            two drift apart. */}
+        {phoneLayout ? (
+          <OccurrenceSheet
+            label="Occurrence details"
+            detailKey={detail ? (selectedKey ?? "detail") : null}
+          >
+            {columnContents}
+          </OccurrenceSheet>
+        ) : (
+          <aside className={styles.sidebar} aria-label="Occurrence details">
+            {columnContents}
+          </aside>
+        )}
       </div>
     </>,
     <ContextBar
