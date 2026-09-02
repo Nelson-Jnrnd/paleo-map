@@ -81,6 +81,16 @@ button {
    phone *layout* (width-driven) but keeps the 24px floor (pointer-driven), and
    a touch laptop gets the targets without the layout. */
 @media (pointer: coarse) {
+  /* The components already size their controls from `--target-min`, so pointing
+     that token at the coarse floor raises every one of them at once instead of
+     restating 44px in a dozen module rules — where, being class selectors, they
+     would beat the element rules below anyway. The token's *declared* value in
+     tokens.css is untouched, so a fine pointer still gets 24px and the desktop
+     layout is unchanged (NFR-002). PERF-120's 24px is a floor this raises. */
+  :root {
+    --target-min: var(--target-min-coarse);
+  }
+
   button,
   a[href],
   input,

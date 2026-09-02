@@ -90,6 +90,21 @@ export async function smallTargets(
       for (const el of Array.from(document.querySelectorAll(sel))) {
         if (exempt.some((e) => el.matches(e))) continue;
         if ((el as HTMLButtonElement).disabled) continue;
+        // A checkbox or radio wrapped in its own label is not a 13px target:
+        // the label is clickable and carries the hit area, which is what WCAG
+        // 2.5.8 measures. Skip the inner control and let the label be judged on
+        // its own — it is matched by this same query when it has a role, and by
+        // the containing row otherwise. Blowing the checkbox itself up to 44px
+        // would satisfy a literal reading and make the control worse.
+        const label = el.closest("label");
+        if (
+          label &&
+          (el as HTMLInputElement).type &&
+          ["checkbox", "radio"].includes((el as HTMLInputElement).type)
+        ) {
+          const lr = label.getBoundingClientRect();
+          if (lr.width >= min - 0.5 && lr.height >= min - 0.5) continue;
+        }
         const style = getComputedStyle(el);
         if (style.visibility === "hidden" || style.display === "none") continue;
         const r = el.getBoundingClientRect();

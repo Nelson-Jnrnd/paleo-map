@@ -188,6 +188,16 @@ export function TimelineControl({
     }
   };
 
+  // SPEC-030 REQ-006: the discrete stepping controls. `stages` runs oldest →
+  // youngest, so "older" is one index down and "younger" one up — the same
+  // ordering the keyboard slider uses, derived here rather than duplicated.
+  const selectedIndex = stages.findIndex((s) => s.name === selected);
+  const olderStage = selectedIndex > 0 ? stages[selectedIndex - 1] : undefined;
+  const youngerStage =
+    selectedIndex >= 0 && selectedIndex < stages.length - 1
+      ? stages[selectedIndex + 1]
+      : undefined;
+
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
     const index = stages.findIndex((s) => s.name === selected);
     switch (event.key) {
@@ -229,6 +239,46 @@ export function TimelineControl({
       </div>
 
       <div className={styles.timelineBody}>
+        {/* SPEC-030 REQ-006: precise stage selection on a coarse pointer. The
+            to-scale track cannot carry it — ~30 stages across a 214px track
+            gives a narrowest step of 0.0px, and 30 × 44px is 1,320px, which no
+            phone has. These are hidden above the breakpoint (NFR-002), and at
+            the ends of the range they are disabled with a reason rather than
+            hidden (charter §7). Words, not an icon alone. */}
+        <button
+          type="button"
+          className={`${styles.stageStepper} ${styles.stepOlder}`}
+          // The destination stays in the title, not the accessible name: naming
+          // it here made two buttons answer to "Campanian" — this control and
+          // the Campanian step itself — which is ambiguous to a screen reader
+          // and to anything else querying by name. The readout announces where
+          // the step landed.
+          aria-label="Older stage"
+          disabled={!olderStage}
+          title={
+            olderStage
+              ? `Older stage · ${olderStage.name}`
+              : "Already at the oldest stage in the window"
+          }
+          onClick={() => selectByIndex(selectedIndex - 1)}
+        >
+          Older
+        </button>
+        <button
+          type="button"
+          className={`${styles.stageStepper} ${styles.stepYounger}`}
+          aria-label="Younger stage"
+          disabled={!youngerStage}
+          title={
+            youngerStage
+              ? `Younger stage · ${youngerStage.name}`
+              : "Already at the youngest stage in the window"
+          }
+          onClick={() => selectByIndex(selectedIndex + 1)}
+        >
+          Younger
+        </button>
+
         <div
           className={styles.periodBands}
           role="group"

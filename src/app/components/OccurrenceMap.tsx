@@ -520,9 +520,22 @@ export function OccurrenceMap({
   const multiRef = useRef(multi);
   multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
-  // UX-001: open by default, remembered for the session only — no storage, and
-  // never collapsed automatically by viewport size.
-  const [cladeKeyOpen, setCladeKeyOpen] = useState(true);
+  // SPEC-023 UX-001 as amended by SPEC-030 (AMEND-001, owner decision
+  // 2026-09-02): open by default above the 40rem breakpoint, **collapsed** below
+  // it — expanded the key is 183 × 193px, 26% of the map at 320px. Remembered
+  // for the session only, no storage, and one tap from expanded either way.
+  //
+  // Read once at mount rather than tracked: a viewport crossing the breakpoint
+  // mid-session must not yank the key shut under a reader who just opened it,
+  // which is the "collapse is a user action" half of UX-001 that survives.
+  const [cladeKeyOpen, setCladeKeyOpen] = useState(
+    () =>
+      !(
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(max-width: 40rem)").matches
+      ),
+  );
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
   >([]);

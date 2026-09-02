@@ -206,7 +206,7 @@
 
 .frameOption {
   padding: 0 0 2px;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -233,7 +233,7 @@
 
 .reset {
   padding: var(--space-2) 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   color: var(--color-text-muted);
   border: none;
@@ -417,6 +417,33 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+}
+
+/* SPEC-030 REQ-006: the discrete stage controls. Not rendered at all above the
+   breakpoint — `display: none` keeps them out of the accessibility tree too, so
+   the desktop control is unchanged in shape and in what a screen reader hears
+   (NFR-002). The phone block below gives them their place in the grid. */
+.stageStepper {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-min);
+  cursor: pointer;
+}
+
+.stageStepper:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.stageStepper:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 /* Period delimitations — large, labelled, to-scale bands doubling as the jump
@@ -605,6 +632,76 @@
   top: 5px;
   font-size: 10px;
   color: var(--color-text-faint);
+}
+
+/* --- Phone: the timeline (SPEC-030 REQ-006; P-12) --------------------------
+   The defect: `.timelineLabel`'s fixed 128px left the track 214px at 390px and
+   144px at 320px for ~30 to-scale stages, and the narrowest stage step measured
+   0.0px. Stepping the age is the central verb of the map loop and it could not
+   be aimed.
+
+   The readout moves full width above the track, and the two discrete controls
+   flank it. Bands, track and axis share one grid column so they stay aligned to
+   each other — the to-scale reading survives; only the aiming moves. */
+@media (max-width: 40rem) {
+  .timeline {
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .timelineLabel {
+    min-width: 0;
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
+  .timelineBody {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "prev bands next"
+      "prev track next"
+      "prev axis  next";
+    align-items: center;
+    column-gap: var(--space-2);
+  }
+
+  .stageStepper {
+    display: inline-flex;
+    min-width: var(--target-min-coarse);
+    min-height: var(--target-min-coarse);
+  }
+
+  .stepOlder {
+    grid-area: prev;
+  }
+
+  .stepYounger {
+    grid-area: next;
+  }
+
+  .periodBands {
+    grid-area: bands;
+    /* REQ-006: a period band is a real target, not a 24px sliver. */
+    height: var(--target-min-coarse);
+  }
+
+  .stageTrack {
+    grid-area: track;
+  }
+
+  .stageAxis {
+    grid-area: axis;
+  }
+
+  /* The period name is what the band is for; at 320px the Triassic band is
+     58px, so the label has to be allowed to shrink rather than clip. */
+  .periodBand {
+    padding: 0 var(--space-1);
+    font-size: 11px;
+  }
 }
 
 /* --- Body split --- */
@@ -1027,6 +1124,14 @@
   color: var(--color-text-muted);
   max-height: 45%;
   overflow-y: auto;
+  /* SPEC-030 REQ-007 clause 1 — the defect behind P-10. As a flex item this box
+     took its automatic minimum size (its 183px min-content width), which
+     defeated `.mapRail`'s `max-width: calc(50% - var(--space-3))` outright: the
+     gate toggle honoured the bound at 148px while the key sat at 183px at every
+     width, and the two overlapped by 18px. REQ-004 bounded this box's *height*
+     and nothing bounded its width. */
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* SPEC-023 UX-001: the key's own disclosure control. Words, not an icon alone;
@@ -1036,7 +1141,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -1074,7 +1179,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  white-space: nowrap;
+  /* `nowrap` is what made the box's min-content width 183px. The clade names are
+     short; letting the longest wrap costs a line and keeps the key inside its
+     rail (REQ-007 clause 1). */
+  min-width: 0;
+}
+
+.legendItem > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .legendSwatch {
@@ -1190,7 +1303,7 @@
 
 .unitOption {
   padding: var(--space-1) 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;

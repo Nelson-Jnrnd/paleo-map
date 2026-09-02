@@ -187,18 +187,23 @@ test.describe("phone overlays at 320px", () => {
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
 
     // Expanded, it must still honour its rail's width bound (REQ-007 clause 1) —
-    // the defect that produced P-10's overlap.
+    // the defect that produced P-10's overlap. Measured against boxes rather
+    // than against the computed `max-width`, which resolves to an unparseable
+    // `calc()` string: the bound that matters is `calc(50% - var(--space-3))`
+    // of the map pane, so assert the rail obeys it and the key obeys the rail.
     const bounded = await page.evaluate(() => {
       const key = document.querySelector("[data-map-overlay='clade-key']");
-      if (!key) return null;
-      const rail = key.closest("[data-map-rail]");
-      if (!rail) return null;
+      const rail = key?.closest("[data-map-rail]");
+      const pane = document.querySelector("[data-map-pane]");
+      if (!key || !rail || !pane) return null;
       return {
         key: key.getBoundingClientRect().width,
-        max: parseFloat(getComputedStyle(rail).maxWidth),
+        rail: rail.getBoundingClientRect().width,
+        bound: pane.getBoundingClientRect().width * 0.5 - 12,
       };
     });
     expect(bounded).not.toBeNull();
-    expect(bounded!.key).toBeLessThanOrEqual(bounded!.max + 0.5);
+    expect(bounded!.key).toBeLessThanOrEqual(bounded!.rail + 0.5);
+    expect(bounded!.rail).toBeLessThanOrEqual(bounded!.bound + 0.5);
   });
 });
