@@ -2,7 +2,7 @@
 doc_type: spec
 spec_id: SPEC-030
 title: Phone layout — a portrait-phone form for the atlas
-status: Draft
+status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
 related_prs: []
@@ -35,7 +35,7 @@ depends_on:
   - SPEC-029
 conflicts_with:
   - SPEC-023
-last_verified_at:
+last_verified_at: 2026-09-02
 ---
 
 # SPEC-030: Phone layout — a portrait-phone form for the atlas
@@ -661,24 +661,24 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
 
 ## Open questions
 
-- [ ] **Breakpoint value.** Assumed `40rem`, reusing Dinordle's existing query so
-      the system has one number rather than two (REQ-001). Confirm, or name a
-      different value, before implementation starts.
-- [ ] **Peek height.** The unit selector's five options will not fit one 44 px row
-      at 320 px, so peek is assumed to carry the selector on **two** rows
-      (≈ 152 px). The alternative — one horizontally scrollable row — was rejected
-      because it puts options out of sight, which sits badly with CONS-450 and with
-      SPEC-026's "the option set is identical in every state". Confirm the trade.
+- [x] **Breakpoint value.** *Resolved by approval, 2026-09-02:* `40rem` as
+      specified, reusing Dinordle's existing query so the system has one number.
+- [x] **Peek height.** *Resolved by approval, 2026-09-02:* the selector sits on
+      two rows at peek (≈ 152 px), as specified. The rejected alternative — one
+      horizontally scrollable row — stays rejected: it puts options out of sight,
+      against CONS-450 and SPEC-026's "the option set is identical in every state".
 - [x] **Should the clade key open collapsed on a phone?** *Answered 2026-09-02:
       yes.* REQ-007 clause 3 and a narrow amendment to SPEC-023 UX-001 (one
       sentence plus acceptance criterion 1, scoped by viewport). The key still
       names itself collapsed and is one tap from expanded, and no other overlay
       changes. Carries a hard dependency on UX-002 — see the conflict check.
-- [ ] **e2e is not currently a required CI gate** (SPEC-003 assumption A-3, echoed
-      in `playwright.config.ts`). Almost every requirement here verifies through
-      e2e, so this spec's gate is only as real as that decision. Promoting
-      `pnpm run e2e` to a required check is arguably a precondition rather than a
-      follow-up.
+- [~] **e2e is not currently a required CI gate** (SPEC-003 assumption A-3,
+      echoed in `playwright.config.ts`). *Explicitly deferred, 2026-09-02:* the
+      tests are written and must pass locally before each commit, but promoting
+      `pnpm run e2e` to a required check is left as a follow-up. **Known
+      limitation, recorded rather than solved:** until that happens, NFR-001's
+      gate protects this work only when someone runs it. Every requirement whose
+      verification method is "Playwright e2e" carries that caveat.
 
 ## Human decisions required
 
@@ -699,9 +699,10 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
       itself a reason to.
 - [x] **The clade key's default state on a phone** — *Answered 2026-09-02:
       collapsed.*
-- [ ] **Approval of this spec** (status → `Approved`, moved to
-      `docs/specs/approved/`) before any implementation begins. Approving it also
-      approves the four staged amendments.
+- [x] **Approval of this spec** — *Approved by the owner on 2026-09-02*, in
+      session `session_01GvwYfnCtWQGcynW17zS4su`, together with the four staged
+      amendments. Status moved Draft → In Implementation; the amendments were
+      landed in their home specs on the same date.
 - [ ] **Whether `pnpm run e2e` becomes a required CI gate** as part of this work
       (see the last open question).
 
@@ -710,14 +711,15 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
 The owner authorised amending existing specs to accommodate the phone layout
 (2026-09-02). **Four** post-approval specs take an amendment entry.
 
-`CLAUDE.md` requires the entry in the **home** spec, so the exact text is staged
-here rather than written into those files now: SPEC-030 is still `Draft`, and an
-amendment landing in an `Implemented` spec before this one is approved would make
-that spec describe behaviour the code does not have — drift of exactly the kind
+`CLAUDE.md` requires the entry in the **home** spec. Until approval the text was
+staged here rather than written into those files, because an amendment landing in
+an `Implemented` spec before this one was approved would have made that spec
+describe behaviour the code did not have — drift of exactly the kind
 `/drift-check` exists to catch.
 
-**Each block below is copied into its home spec's "Spec amendments" section when
-SPEC-030 reaches `Approved`**, dated then, referencing the owner's approval. All
+**Landed 2026-09-02.** Each block below was copied into its home spec's "Spec
+amendments" section on approval: SPEC-023 AMEND-001, SPEC-015 AMEND-002,
+SPEC-009 AMEND-001, SPEC-026 AMEND-001. They are kept here as the review record. All
 four are scoped to `max-width: 40rem` and/or `pointer: coarse`: none changes
 behaviour above the breakpoint on a fine pointer.
 
@@ -886,7 +888,8 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
-_None. This spec is Draft; amendments are required only after approval._
+_None yet. This spec is approved as of 2026-09-02; any behavioural change from
+here requires an AMEND entry below._
 
 ## Review checklist
 
@@ -894,8 +897,9 @@ _None. This spec is Draft; amendments are required only after approval._
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred. — **three open**, see
-      above; all three need the owner, and none blocks the others.
+- [x] Open questions are resolved or explicitly deferred. — two resolved by the
+      approval, one (the e2e CI gate) explicitly deferred with its limitation
+      recorded.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
-- [ ] Human approval recorded before status set to Approved. — **not yet.**
+- [x] Human approval recorded before status set to Approved. — owner, 2026-09-02.

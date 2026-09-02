@@ -1186,9 +1186,26 @@ clade word on a row under UX-002.
 
 ## Spec amendments
 
-> Required for any behavioral change after the spec is Approved. None yet — the
-> spec reached Approved with the owner's review changes already folded in
-> (2026-08-14), so there is no post-approval behavioral change to record.
+> Required for any behavioral change after the spec is Approved.
+
+### AMEND-001: "The column" is a bottom sheet on a phone
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-003/REQ-004. REQ-001 and REQ-003 are written in terms
+  of "the sidebar" and "the same column"; at `max-width: 40rem` that column is a
+  draggable bottom sheet over a full-bleed map, because a 164 px-wide sidebar
+  beside a 226 px map serves neither.
+- **Changed requirements:** REQ-001 and REQ-003, **vocabulary only** — "the
+  column" reads as "the column, which on a phone is the sheet".
+- **Behavioral impact:** **none.** Every behaviour these two requirements specify
+  holds identically in the sheet: the always-visible five-unit selector with an
+  identical option set in every state, a selection replacing the list in the same
+  container, the back control naming the list it returns to, `Escape`, scroll
+  restoration to the previously selected row, `aria-current`, and focus handling.
+  This amendment exists so the two specs cannot be read as contradicting each
+  other, not because anything changes.
+- **Test impact:** the existing SPEC-026 suites run against both containers.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 

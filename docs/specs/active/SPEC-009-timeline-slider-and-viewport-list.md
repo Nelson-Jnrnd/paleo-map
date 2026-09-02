@@ -426,14 +426,26 @@ transient id set by hover/focus on either surface, visually weaker than selectio
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-001: Discrete stage stepping at phone widths
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-006. REQ-001's to-scale track cannot be aimed on a
+  phone: ~30 stages across a 214 px track gives a narrowest step of **0.0 px**,
+  and 30 × 44 px of touch target is 1,320 px — the geometry simply does not admit
+  a per-stage touch target at phone widths.
+- **Changed requirements:** REQ-001, the composition of the control only. The
+  track itself is unchanged.
+- **Behavioral impact:** at `max-width: 40rem` the control gains explicit
+  previous-stage and next-stage buttons beside the track, each ≥ 44 × 44 px,
+  disabled at the ends of the range with a stated reason. The stage readout moves
+  full-width above the track instead of into a fixed 128 px side column. The
+  to-scale track, the selection bar, the REQ-005 range highlight, the REQ-002
+  period bands and the keyboard slider semantics are all retained unchanged, and
+  the track still accepts a direct tap and a drag-scrub. **Purely additive**; above
+  the breakpoint nothing changes.
+- **Test impact:** new e2e geometry assertions and a Vitest stepping test. No
+  existing SPEC-009 test changes.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 

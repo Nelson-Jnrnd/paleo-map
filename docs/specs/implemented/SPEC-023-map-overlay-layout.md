@@ -817,7 +817,42 @@ all ten**, with the region focusable and labelled in each.
 
 > Required for any behavioral change after the spec is Approved.
 
-_None. The spec has not been approved yet._
+### AMEND-001: The clade key's default state on a phone
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-007 clause 3, on the owner's decision. Expanded, the
+  clade key measures 183 × 193 px and covers **26% of the map at 320 px** and 22%
+  at 390 px — on the screen where map area is scarcest.
+- **Changed requirements:** UX-001 — its statement's final sentence ("Collapsing
+  is a user action only — the app must not collapse the key automatically based on
+  viewport size") and acceptance criterion 1 ("The key renders expanded on load").
+  Both are **scoped by viewport, not removed**.
+- **Behavioral impact:** At `max-width: 40rem` the clade key renders **collapsed**
+  on load, to its labelled "Clade key" affordance, and expands on one tap. Above
+  the breakpoint it renders expanded exactly as before, and the ban on
+  viewport-driven collapse continues to apply there. Acceptance criteria 2
+  (collapsed, it still names itself), 3 (no other overlay gains a collapse or
+  dismiss control) and 4 (state is not persisted across a reload) are unchanged at
+  every width. **No overlay moves, is hidden, is faded, or is put behind a hover.**
+  The key remains the only collapsible overlay, and remains one tap from expanded.
+
+  A broader amendment was proposed and **withdrawn**: SPEC-030 first intended to
+  move the clade key and the Wikipedia-gate toggle off the map entirely. Measuring
+  a full-bleed phone map showed that unnecessary — the overlays do not collide at
+  390 px or above, and the 320–360 px collision is a defect against **REQ-004**
+  (`.mapLegend2` cannot shrink below its min-content width, so `.mapRail`'s
+  `max-width` is defeated), fixed under this spec rather than around it. The
+  corner-rail scheme is untouched.
+- **Why this does not weaken charter §2 / CONS-490:** on this spec's own
+  reasoning the clade key is a reading aid, not provenance, because each marker's
+  shape and the hover card's clade name carry the same information. **On touch the
+  hover card does not exist**, so this amendment depends on SPEC-030 UX-002 (tap
+  pins the card) shipping with it. The two must land together.
+- **Test impact:** the Vitest collapse test gains a viewport-scoped default-state
+  case rather than being replaced; SPEC-030's phone e2e asserts the collapsed
+  default at four widths and the expanded default above the breakpoint. NFR-001's
+  matrix is extended to 390×664 and 360×640.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 
