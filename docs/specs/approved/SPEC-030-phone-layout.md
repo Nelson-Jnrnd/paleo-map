@@ -143,7 +143,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   `src/app/**/*.css` after this change, except the taxon profile's existing
   `640px` `heroGrid` query, which is converted to `40rem` for consistency.
 - **Verification method:** automated test (source inspection, Vitest)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `src/app/styles/tokens.css` (`--breakpoint-phone`); the only width queries are `40rem`
 
 ### REQ-002: No horizontal overflow
 
@@ -159,7 +159,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   element finds none whose `getBoundingClientRect().right` exceeds `clientWidth`
   or whose `.left` is negative.
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` — passes at 320/360/390/430
 
 ### REQ-003: The phone map screen — full-bleed map, list as a bottom sheet
 
@@ -192,7 +192,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   5. The map responds to a pan gesture started outside the sheet at every stop.
 - **Verification method:** automated test (Playwright e2e) + unit test for the
   stop-cycling logic (Vitest)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-sheet.e2e.ts`, `test/ui/spec030-sheet.test.ts` — **criterion 1 not met**, see notes
 
 ### REQ-004: The sheet preserves every selection behaviour
 
@@ -214,7 +214,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   half or higher; highlight a row → the corresponding map feature highlights.
 - **Verification method:** automated test (Vitest for behaviour, Playwright e2e
   for the sheet interaction)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-sheet.e2e.ts` — passes
 
 ### REQ-005: Age, group and count stay permanently visible
 
@@ -232,7 +232,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   present in the accessibility tree and visible in the viewport. The count still
   updates live (`aria-live="polite"`).
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` — passes at all four widths
 
 ### REQ-006: A timeline that can be aimed with a thumb
 
@@ -262,7 +262,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   5. Keyboard stepping (SPEC-009's roving tabindex) is unchanged.
 - **Verification method:** automated test (Playwright e2e for geometry, Vitest
   for stepping behaviour)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` — passes
 
 ### REQ-007: The map's overlays stay on the map and obey their rail's bound
 
@@ -336,7 +336,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   6. The clade key, the gate toggle and the ⓘ remain operable at every sheet stop.
 - **Verification method:** automated test (Playwright e2e; the assertions in
   criteria 1–2 extend `test/e2e/map-overlays.e2e.ts`)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts`, `test/e2e/map-overlays.e2e.ts` — **fails at 360×640**, see notes
 
 ### REQ-008: The taxonomy screen at phone width
 
@@ -354,7 +354,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   reveals the full list.
 - **Verification method:** automated test (Playwright e2e + Vitest for the
   truncation count)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` (overflow) — passes
 
 ## Non-functional requirements
 
@@ -372,7 +372,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
 - **Acceptance criteria:** The extended matrix and the new phone e2e pass; and,
   as a self-check, both fail when run against the pre-change build.
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts`, `phone-sheet.e2e.ts`, `map-overlays.e2e.ts`; 18/18 failed pre-change
 
 ### NFR-002: The desktop layout is unchanged
 
@@ -407,7 +407,7 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   simulated.
 - **Verification method:** automated test (source inspection, Vitest) + manual
   check on a physical notched device
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `index.html`, `exploration.module.css` `.app`; device check outstanding
 
 ## Security and privacy considerations
 
@@ -438,7 +438,7 @@ breakpoint and the touch tokens are layout and input only. The existing
   `advanceStop("half") === "full"`, `advanceStop("full") === "peek"`; no new
   fragment is written by the sheet; reloading the page restores the default stop.
 - **Verification method:** automated test (Vitest)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/ui/spec030-sheet.test.ts` — 12 tests pass
 
 ## UI or UX impact
 
@@ -459,7 +459,7 @@ breakpoint and the touch tokens are layout and input only. The existing
   to-scale stage steps, whose precise selection is served by REQ-006's discrete
   controls and which remain ≥ 24 px tall for PERF-120.
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` — passes at all four widths
 
 ### UX-002: Nothing is hover-only
 
@@ -492,7 +492,7 @@ breakpoint and the touch tokens are layout and input only. The existing
 - **Acceptance criteria:** In a coarse-pointer context, every `input[type=text]`
   and `input[type=search]` has a computed `font-size` ≥ 16 px.
 - **Verification method:** automated test (Playwright e2e)
-- **Evidence location:** _filled at implementation_
+- **Evidence location:** `test/e2e/phone-layout.e2e.ts` — passes at all four widths
 
 ### UX-004: The phone's real states are designed
 
@@ -878,7 +878,45 @@ CONS-490 is *served* by UX-002, not strained by it.
 
 ## Implementation notes
 
-_Filled during implementation._
+**Status at 2026-09-02.** Implemented and passing: REQ-001, REQ-002, REQ-004,
+REQ-005, REQ-006, REQ-008, NFR-001, API-001, UX-001, UX-003, and NFR-003 bar its
+device check. Outstanding: REQ-003 criterion 1, REQ-007 at 360×640, UX-002 (the
+map card's touch trigger and the image credit), UX-004, UX-005, NFR-002's
+before/after geometry check.
+
+**Two failures share one cause, and it is worth recording rather than patching.**
+UX-001's 44px floor and REQ-005's compact chrome pull against each other, and
+the spec did not foresee it. Raising every control to 44px made the header
+*worse* than before this spec started — 271px against the original 232px — and
+trimming got it to 205px, which is genuinely better than the 232px it replaced
+but not enough:
+
+| | 390×664 | 360×640 |
+| --- | --- | --- |
+| header + timeline | 205 + 140 | 205 + 134 |
+| body | 319 | 301 |
+| sheet at peek | 152 | 152 |
+| map visible at peek | 167 (**52.4%**) | 149 |
+
+REQ-003 criterion 1 asks for 55% and measures 52.4%. REQ-007 fails at 360×640
+because 149px of visible map cannot hold a 97px gate toggle below a 58px zoom
+control. Both need roughly 20–40px more body height, and every remaining source
+of it is a control someone decided should be permanent:
+
+- the taxon search row (44px) — SPEC-013 put it in the header; CONS-450 does not
+  require search to be permanent, so a phone disclosure is available;
+- the frame toggle row (44px) — SPEC-029 REQ-002 put it there and CONS-450 does
+  cover it, so moving it needs a SPEC-029 amendment;
+- the Ma graduation axis (20px) — a reading aid, not required by SPEC-009
+  REQ-001's statement;
+- the peek height itself (152px) — dropping the in-view count line saves ~18px,
+  dropping the unit selector saves 88px but contradicts REQ-003's own statement.
+
+Alternatively criterion 1's 55% is itself the thing to amend: it was chosen
+before the chrome budget under a 44px floor was known, and 52.4% is still a
+majority. **This is the owner's call and the tests are left failing until it is
+made** — weakening a gate to match what the code happens to do is the one move
+that would make the rest of this suite worthless.
 
 Suggested order, so each step is independently shippable and the gate exists
 before the risky work: NFR-001 (the failing gate) → REQ-002 + UX-003 + NFR-003
