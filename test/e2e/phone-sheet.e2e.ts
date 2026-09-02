@@ -58,10 +58,14 @@ test.describe("the occurrence sheet at 390×664", () => {
     );
 
     // Criterion 3: the cycle wraps, and returns to the geometry it started at.
+    // Polled rather than read once: the settle is a 160ms height transition, so
+    // a single read lands mid-animation and compares against a height the sheet
+    // is still travelling through.
     await handle.click();
     await expect(sheet).toHaveAttribute("data-sheet-stop", "peek");
-    const back = await geometry();
-    expect(back.sheet).toBeCloseTo(atPeek.sheet, 0);
+    await expect
+      .poll(async () => Math.round((await geometry()).sheet))
+      .toBe(Math.round(atPeek.sheet));
   });
 
   test("REQ-003: the handle is operable from the keyboard", async ({
