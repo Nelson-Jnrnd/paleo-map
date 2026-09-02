@@ -17,14 +17,21 @@ import type { Box } from "./geometry.js";
  * "not overlapping" means.
  */
 
-/** The viewport matrix. The last two give a genuinely narrow map pane, because
- *  the sidebar takes 360px or 42vw, whichever is smaller. */
+/** The viewport matrix.
+ *
+ *  SPEC-030 NFR-001 added the last two. The matrix used to stop at 820px, with a
+ *  comment claiming that gave "a genuinely narrow map pane" — it does not, and
+ *  that blind spot is why P-10 (an 18px overlap between the clade key and the
+ *  Wikipedia-gate toggle at 390px) shipped inside the very spec this gate
+ *  polices. Narrow is 390, not 820. */
 const VIEWPORTS = [
   { width: 1440, height: 900 },
   { width: 1280, height: 800 },
   { width: 1024, height: 768 },
   { width: 900, height: 700 },
   { width: 820, height: 640 },
+  { width: 390, height: 664 },
+  { width: 360, height: 640 },
 ];
 
 /** Every persistent overlay box, plus the map library's own controls. */
