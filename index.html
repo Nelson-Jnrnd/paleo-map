@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover lets the full-bleed phone map reach the screen edges;
+         the safe-area insets are then applied per-element in CSS (SPEC-030
+         NFR-003). Without it, env(safe-area-inset-*) is always 0. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <title>Interactive Mesozoic Dinosaur Atlas — Exploration</title>
     <meta
@@ -18,7 +24,10 @@
       property="og:description"
       content="Explore where and when non-avian dinosaurs are known from fossil evidence across the Mesozoic, with sources and uncertainty always visible."
     />
-    <meta property="og:image" content="https://paleomap.nelson-j.ch/og-image.png" />
+    <meta
+      property="og:image"
+      content="https://paleomap.nelson-j.ch/og-image.png"
+    />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -27,7 +36,10 @@
       name="twitter:description"
       content="Explore where and when non-avian dinosaurs are known from fossil evidence across the Mesozoic, with sources and uncertainty always visible."
     />
-    <meta name="twitter:image" content="https://paleomap.nelson-j.ch/og-image.png" />
+    <meta
+      name="twitter:image"
+      content="https://paleomap.nelson-j.ch/og-image.png"
+    />
     <!--
       Pre-JS splash (SPEC-006 UX-001). Painted before the app bundle executes so
       the first frame is never a blank white page. Self-contained: inline CSS

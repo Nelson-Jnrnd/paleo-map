@@ -74,3 +74,49 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* --- Coarse pointers (SPEC-030 UX-001, UX-002, UX-003) --------------------
+   Scoped to `pointer: coarse` rather than to a width, deliberately: the two
+   conditions are independent. A desktop browser narrowed below 40rem gets the
+   phone *layout* (width-driven) but keeps the 24px floor (pointer-driven), and
+   a touch laptop gets the targets without the layout. */
+@media (pointer: coarse) {
+  button,
+  a[href],
+  input,
+  select,
+  summary,
+  [role="radio"],
+  [role="button"] {
+    min-height: var(--target-min-coarse);
+  }
+
+  /* Width too, not only height: "Reset view" measured 36 × 44px — tall enough
+     to pass a height-only rule and still too narrow for a thumb. */
+  button,
+  [role="radio"],
+  [role="button"] {
+    min-width: var(--target-min-coarse);
+  }
+
+  /* The one exemption, and it is geometric rather than a concession: the
+     timeline's ~30 to-scale stage steps cannot each be 44px on a 390px screen
+     (that needs 1,320px), and forcing it pushes these absolutely-positioned
+     steps past the viewport edge. SPEC-030 REQ-006 serves precise selection
+     with discrete previous/next controls instead, which are *not* exempt.
+     PERF-120's 24px floor still holds here. */
+  [data-stage-step] {
+    min-width: 0;
+    min-height: var(--target-min);
+  }
+
+  /* UX-003: Safari zooms the page in when a focused input is under 16px and
+     never zooms back out, which turns one tap on search into a magnified,
+     sideways-scrolling page. Dinordle's entry field was already 1rem; this makes
+     that the rule rather than the exception. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+}

@@ -79,6 +79,10 @@ export function ContextBar({
           <span
             className={`${styles.statValue} ${styles.countValue} mono`}
             aria-live="polite"
+            // SPEC-030 REQ-005 asserts this value stays in the viewport at every
+            // width and sheet stop; the gate needs a hook that does not depend
+            // on the number itself.
+            data-occurrence-count
           >
             {count}
           </span>
@@ -89,7 +93,7 @@ export function ContextBar({
             entirely when the index carries no present-day frame (UX-002),
             because a control that cannot do anything is worse than none. */}
         {onFrameModeChange && (
-          <div className={styles.stat}>
+          <div className={`${styles.stat} ${styles.frameStat}`}>
             <span className={styles.statLabel} id="frame-mode-label">
               Map
             </span>

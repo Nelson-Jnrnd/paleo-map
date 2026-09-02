@@ -5,7 +5,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  /* SPEC-030 NFR-003: `vh` is sized to the *largest* viewport on mobile
+     browsers, so with `100vh` the bottom of the map sat under the browser
+     toolbar and the layout jumped as the toolbar collapsed. `dvh` follows the
+     viewport that is actually visible. The `vh` line stays as the fallback for
+     engines without `dvh` — it is today's behaviour, not a broken one. */
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* --- Context bar (permanent age / group / count) --- */
@@ -91,6 +97,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-5);
+  /* SPEC-030 REQ-002: this row is what made the whole document 607px wide in a
+     390px window — four stats plus the frame radio group on one unwrappable
+     line, with "Reset view" ending up off-screen at x=571. `.header` above it
+     wraps; the overflow was one level down. */
+  flex-wrap: wrap;
 }
 
 /* --- Taxon search (SPEC-013) --- */
@@ -244,6 +255,118 @@
 .reset:hover {
   border-color: var(--color-accent);
   color: var(--color-accent-deep);
+}
+
+/* --- Phone: the header row (SPEC-030 REQ-002, REQ-005; P-01, P-05) ---------
+   The header measured 232px at *every* portrait width — 35% of a 664px screen
+   before the timeline had its say. It does not adapt at all today.
+
+   REQ-005 forbids the cheap fix. FONC-040/050/060 and CONS-450 make the age,
+   group and count permanent, so they are re-laid-out, never collapsed: the
+   labels ("SELECTED AGE", "GROUP", "OCCURRENCES") are chrome and go visually
+   hidden — they stay in the accessibility tree as each stat's accessible name —
+   while every *value* stays on screen, on one compact line. */
+@media (max-width: 40rem) {
+  .appBar {
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+  }
+
+  /* The wordmark took a line of its own because `margin-right: auto` pushed the
+     nav below it. On a phone it shares the row with the destinations. */
+  .wordmark {
+    font-size: 14px;
+    margin-right: 0;
+    flex: 1 1 100%;
+  }
+
+  .header {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
+
+/* UX-003: the module's class beats global.css's element rule, so the 16px floor
+   has to be restated here or Safari still zooms on focus. */
+@media (pointer: coarse) {
+  .searchInput {
+    font-size: max(16px, 1rem);
+  }
+}
+
+@media (max-width: 40rem) {
+  .context {
+    gap: var(--space-1) var(--space-2);
+    width: 100%;
+  }
+
+  /* Label above value becomes label-in-a11y-tree, value on the line. */
+  .context .stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+
+  .context .statLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .context .statValue {
+    font-size: 13px;
+  }
+
+  /* A separator between values, since the labels no longer divide them. Purely
+     decorative — the accessible name still comes from the hidden label. */
+  .context .stat + .stat::before {
+    content: "·";
+    color: var(--color-border);
+    margin-right: var(--space-1);
+  }
+
+  /* The frame choice and Reset are controls, not readouts: they take the second
+     line at full touch size rather than crowding the values. */
+  .context .frameStat {
+    flex: 1 1 100%;
+    margin-top: var(--space-1);
+  }
+
+  .context .frameStat::before {
+    content: none;
+  }
+
+  .reset {
+    margin-left: auto;
+  }
+}
+
+/* --- Phone: the taxonomy screen (SPEC-030 REQ-008; P-16, P-17) ------------ */
+@media (max-width: 40rem) {
+  .profile {
+    margin: var(--space-3) 0;
+    padding: var(--space-4) var(--space-3) var(--space-5);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* The indent is capped rather than dropped: it still shows the branching, but
+     four levels of 8px cannot push a row off a 320px screen. */
+  .fanList li {
+    margin-left: calc(min(var(--fan-depth, 0), 4) * 8px);
+  }
 }
 
 /* --- Timeline (to-scale stepped slider, SPEC-009) --- */
@@ -2361,9 +2484,23 @@
   list-style: none;
 }
 
+/* SPEC-030 REQ-008: a flex item's automatic minimum size is its *content's*
+   min-width, so one long taxon name made the chip wider than the column it sits
+   in and pushed past the viewport. The same defect, in a different list, as the
+   one that defeated `.mapRail`'s max-width (REQ-007). */
+.neighbourList > li {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .neighbourItem {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
   gap: 0.45rem;
   padding: 0.3rem 0.55rem;
   background: none;
@@ -2492,6 +2629,13 @@
   list-style: none;
 }
 
+/* SPEC-030 REQ-008: the tree depth arrives as `--fan-depth` from the component
+   so the breakpoint can cap it (see the phone block below). */
+.fanList li {
+  margin-left: calc(var(--fan-depth, 0) * 12px);
+  min-width: 0;
+}
+
 .fanListItem {
   display: flex;
   align-items: baseline;
@@ -2503,10 +2647,31 @@
   cursor: pointer;
   font: inherit;
   font-size: 0.82rem;
+  /* SPEC-030 REQ-008: without these the row is an unwrappable flex line whose
+     min-content width wins, and a long name plus its counts ran to x=415 in a
+     390px window. */
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+.fanListItem > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .fanListItem:hover {
   text-decoration: underline;
+}
+
+/* SPEC-030 UX-002: on touch there is no hover, so the underline was the only
+   cue that these rows are tappable and nobody on a phone ever saw it. */
+@media (hover: none) {
+  .fanListItem {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 /* Avian coverage marker (REQ-006) — text, never styling alone (PERF-250).

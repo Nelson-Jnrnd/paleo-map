@@ -338,6 +338,13 @@ export function TimelineControl({
                 ref={isSelected ? selectedRef : undefined}
                 className={styles.stageStep}
                 style={{ left: pct(left), width: pct(width) }}
+                // SPEC-030 UX-001 exempts the to-scale steps from the 44px
+                // coarse-pointer floor by ID rather than by accident: 30 stages
+                // × 44px is 1,320px, which no phone has, and forcing it here
+                // pushes the absolutely-positioned steps past the viewport.
+                // Precise stage selection is served by REQ-006's discrete
+                // controls; these keep PERF-120's 24px height.
+                data-stage-step
                 aria-pressed={isSelected}
                 aria-label={`${stage.name}, ${formatStageSpan(stage)}`}
                 title={`${stage.name} · ${formatStageSpan(stage)}`}

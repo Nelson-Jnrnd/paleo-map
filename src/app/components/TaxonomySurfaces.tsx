@@ -10,7 +10,7 @@
  * basemap (SPEC-018) and does **not** apply here.
  */
 
-import type { ReactElement } from "react";
+import type { ReactElement, CSSProperties } from "react";
 import type { ReadProfile, ReadTaxon } from "../../domain/index.js";
 import type { TaxonomyIndex } from "../state/taxonomy.js";
 import { relatedness } from "../state/taxonomy.js";
@@ -549,7 +549,10 @@ export function CladeFan({
           {wedges.map((w) => (
             <li
               key={`row-${w.taxonId}`}
-              style={{ marginLeft: `${(w.depth - 1) * 12}px` }}
+              // SPEC-030 REQ-008: the depth is handed to CSS rather than
+              // resolved to pixels here, so the phone breakpoint can cap the
+              // indent. At 390px an uncapped depth pushed rows to x=415.
+              style={{ "--fan-depth": w.depth - 1 } as CSSProperties}
             >
               <button
                 type="button"
