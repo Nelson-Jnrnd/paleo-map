@@ -33,7 +33,8 @@ depends_on:
   - SPEC-023
   - SPEC-026
   - SPEC-029
-conflicts_with: []
+conflicts_with:
+  - SPEC-023
 last_verified_at:
 ---
 
@@ -263,20 +264,21 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   for stepping behaviour)
 - **Evidence location:** _filled at implementation_
 
-### REQ-007: The map's overlays obey SPEC-023's existing bound
+### REQ-007: The map's overlays stay on the map and obey their rail's bound
 
 - **Statement:** The clade key, the Wikipedia-gate toggle and the basemap ⓘ
-  **stay on the map**, in the corner rails SPEC-023 assigns them. Two things
-  change, both inside SPEC-023's existing requirements:
+  **stay on the map**, in the corner rails SPEC-023 assigns them. Three things
+  change — the first two inside SPEC-023's existing requirements, the third by a
+  narrow amendment to it:
   1. **Every rail child honours its rail's width bound.** `.mapLegend2` must not
      exceed `.mapRail`'s `max-width: calc(50% - var(--space-3))`; its labels wrap
      or ellipsize inside that bound rather than forcing the box wider.
   2. **The bottom rails clear the sheet.** Their bottom offset accounts for the
      sheet's peek height, so no rail child is ever covered by the sheet at rest.
-
-  The clade key stays expanded on load at every viewport, and stays collapsible
-  **only by a user action** — SPEC-023 UX-001 is honoured exactly as written,
-  including its ban on collapsing automatically by viewport size.
+  3. **The clade key opens collapsed at or below the breakpoint** (owner
+     decision, 2026-09-02), expanded above it — in both cases to its labelled
+     "Clade key" affordance, expandable by one tap. This is the single point at
+     which this spec amends SPEC-023; see "Specs this spec amends".
 - **Rationale:** An earlier draft of this requirement moved the clade key and the
   gate toggle off the map, which would have required amending SPEC-023 UX-001.
   Re-measuring on 2026-09-02 showed that was unnecessary and wrong. P-10's 18 px
@@ -300,6 +302,23 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
   key's *height* (`max-height: 45%`, `overflow-y: auto`) and nothing bounds its
   *width*. Fixing that satisfies SPEC-023 rather than amending it, and it fixes
   the desktop case P-10 found too.
+
+  Clause 3 is the exception, and it rests on the owner's judgement rather than on
+  a measurement. Expanded, the key is 183 × 193 px — **26% of the map at 320 px**,
+  22% at 390 px — on the one screen where map area is scarcest. SPEC-023 UX-001's
+  last sentence forbids collapsing it by viewport size, so this does need an
+  amendment; that amendment is narrow and changes nothing about which overlays
+  live where.
+
+  Collapsing it stays compatible with charter §2 and CONS-490 for the reason
+  SPEC-023 itself gives: the clade key is "a *reading aid* — the same information
+  is already carried by each marker's shape and by the hover card's clade name",
+  not provenance. **That reasoning has a dependency on a phone**, worth stating
+  rather than assuming: there is no hover card on touch. UX-002 is what restores
+  the card by tap, keeping the clade name reachable. Clause 3 is therefore only
+  safe to ship *together with* UX-002 — were UX-002 dropped, the key would become
+  the sole carrier of clade names on a phone and would have to open expanded
+  again.
 - **Acceptance criteria:**
   1. At 320, 360, 390 and 430 px wide, no two elements matched by
      `[data-map-rail] > [data-map-overlay]` or `.maplibregl-ctrl` intersect, and
@@ -308,9 +327,13 @@ portrait, one-handed, on a device with a coarse pointer and no hover.
      viewport.
   3. Every rail child is fully visible with the sheet at its peek stop, and the
      basemap ⓘ's popover opens inside the map pane at every stop.
-  4. The clade key renders **expanded** on load at 320 px, and no code path
-     collapses it as a function of viewport width.
-  5. The clade key, the gate toggle and the ⓘ remain operable at every sheet stop.
+  4. The clade key renders **collapsed** on load at 320/360/390/430 px and
+     **expanded** on load above the breakpoint; in both cases it names itself when
+     collapsed, expands on one tap, and its state is not persisted across a reload
+     (SPEC-023 UX-001 acceptance criteria 2 and 4, unchanged).
+  5. Expanded by the reader at 320 px, the key still honours criterion 2's width
+     bound and does not overlap the gate toggle.
+  6. The clade key, the gate toggle and the ⓘ remain operable at every sheet stop.
 - **Verification method:** automated test (Playwright e2e; the assertions in
   criteria 1–2 extend `test/e2e/map-overlays.e2e.ts`)
 - **Evidence location:** _filled at implementation_
@@ -557,8 +580,9 @@ This spec is satisfied when, at 320/360/390/430 px wide in portrait:
 3. Age, group and count are visible at all times on the map screen.
 4. Every interactive element on a coarse pointer is at least 44 px, except the
    enumerated to-scale stage steps.
-5. Exactly one map overlay rail child is visible, and the SPEC-023 non-overlap
-   assertions pass at phone widths.
+5. Every map overlay stays on the map, honours its rail's width bound, and clears
+   the sheet; the SPEC-023 non-overlap assertions pass at phone widths; and the
+   clade key opens collapsed below the breakpoint and expanded above it.
 6. Nothing is hover-only.
 7. The desktop layout above `40rem` is unchanged.
 8. The extended e2e matrix and the new phone e2e pass, and both fail against the
@@ -574,7 +598,7 @@ This spec is satisfied when, at 320/360/390/430 px wide in portrait:
 | REQ-004 | Unit selector, row→detail, map→detail, two-way highlight all preserved | automated | Vitest (SPEC-026/009 suites) + e2e | _TBD_ | _TBD_ |
 | REQ-005 | Age, group, count visible at every stop and width | automated | `pnpm run e2e` — permanence spec | _TBD_ | _TBD_ |
 | REQ-006 | Prev/next ≥44×44, bands ≥44 tall, one-stage step, disabled at ends | automated | `pnpm run e2e` + Vitest stepping | _TBD_ | _TBD_ |
-| REQ-007 | Exactly one rail child; non-overlap and containment hold | automated | `pnpm run e2e` — `map-overlays.e2e.ts` extended | _TBD_ | _TBD_ |
+| REQ-007 | Non-overlap and containment hold; rail bound honoured; key collapsed below the breakpoint | automated | `pnpm run e2e` — `map-overlays.e2e.ts` extended | _TBD_ | _TBD_ |
 | REQ-008 | No overflow; ≤8 entries per list before disclosure | automated | `pnpm run e2e` + Vitest truncation | _TBD_ | _TBD_ |
 | NFR-001 | Matrix extended; new phone e2e; both fail pre-change | automated | `pnpm run e2e` | _TBD_ | _TBD_ |
 | NFR-002 | Desktop geometry identical at 3 widths; existing e2e unamended | automated | `pnpm run e2e` — before/after geometry | _TBD_ | _TBD_ |
@@ -645,13 +669,11 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
       (≈ 152 px). The alternative — one horizontally scrollable row — was rejected
       because it puts options out of sight, which sits badly with CONS-450 and with
       SPEC-026's "the option set is identical in every state". Confirm the trade.
-- [ ] **Should the clade key open collapsed on a phone?** REQ-007 says no,
-      because SPEC-023 UX-001 bans collapsing by viewport size and this spec found
-      no need to amend it. The cost is measured: at 320 px the key is 183 × 193 px
-      and covers **26%** of the map (22% at 390 px). It is one tap to collapse.
-      Changing this is the *only* thing an amendment to SPEC-023 would still buy,
-      it is narrow, and it is entirely the owner's call — the answer does not
-      block anything else in this spec.
+- [x] **Should the clade key open collapsed on a phone?** *Answered 2026-09-02:
+      yes.* REQ-007 clause 3 and a narrow amendment to SPEC-023 UX-001 (one
+      sentence plus acceptance criterion 1, scoped by viewport). The key still
+      names itself collapsed and is one tap from expanded, and no other overlay
+      changes. Carries a hard dependency on UX-002 — see the conflict check.
 - [ ] **e2e is not currently a required CI gate** (SPEC-003 assumption A-3, echoed
       in `playwright.config.ts`). Almost every requirement here verifies through
       e2e, so this spec's gate is only as real as that decision. Promoting
@@ -668,43 +690,74 @@ alone is safe and leaves layers 1 and 3 as genuine improvements.
 - [x] **Touch-target minimum** — *Answered 2026-09-02: coarse pointers only*, via
       a new token, leaving the desktop layout unchanged.
 - [x] **Amending existing specs for the phone layout** — *Answered 2026-09-02:
-      authorised.* Three amendments are staged in "Specs this spec amends" above
-      and land in their home specs on approval. Note what the authorisation was
-      **not** spent on: SPEC-023 (the proposed amendment was withdrawn once
-      re-measurement showed it unnecessary) and FONC-040/050/060 / CONS-450
-      (REQ-005 meets them as written). Permission to amend is not a reason to.
+      authorised.* Four amendments are staged in "Specs this spec amends" above
+      and land in their home specs on approval. The SPEC-023 one was first drafted
+      broad (relocating overlays), withdrawn on re-measurement, and re-drafted
+      narrow (one sentence of UX-001) once the owner asked for the collapsed
+      default. Note what the authorisation was **not** spent on: FONC-040/050/060
+      and CONS-450, which REQ-005 meets as written. Permission to amend is not by
+      itself a reason to.
+- [x] **The clade key's default state on a phone** — *Answered 2026-09-02:
+      collapsed.*
 - [ ] **Approval of this spec** (status → `Approved`, moved to
       `docs/specs/approved/`) before any implementation begins. Approving it also
-      approves the three staged amendments.
+      approves the four staged amendments.
 - [ ] **Whether `pnpm run e2e` becomes a required CI gate** as part of this work
       (see the last open question).
 
 ## Specs this spec amends
 
 The owner authorised amending existing specs to accommodate the phone layout
-(2026-09-02). **Three** post-approval specs need an amendment entry; a fourth was
-proposed and then withdrawn.
+(2026-09-02). **Four** post-approval specs take an amendment entry.
 
-**Withdrawn: SPEC-023.** An earlier draft moved the clade key and the gate toggle
-off the map, which UX-001 forbids, and proposed amending UX-001 to allow it. The
-re-measurement in REQ-007 removed the need: on a full-bleed map the overlays do
-not collide at 390 px or above, and what remains at 320–360 px is a defect
-against SPEC-023 REQ-004 rather than a limit of its design. SPEC-023 is now
-**satisfied, not amended** — its ban on viewport-driven collapsing stands
-untouched. Recorded here rather than deleted, because "we considered amending
-this and decided we did not need to" is worth more to the next reader than
-silence. The authorisation was available and deliberately went unused.
-
-`CLAUDE.md` requires the amendment entry in the **home** spec, so the exact text
-for the remaining three is staged here rather than written into those files now:
-SPEC-030 is still `Draft`, and an amendment landing in an `Implemented` spec
-before this one is approved would make that spec describe behaviour the code does
-not have — drift of exactly the kind `/drift-check` exists to catch.
+`CLAUDE.md` requires the entry in the **home** spec, so the exact text is staged
+here rather than written into those files now: SPEC-030 is still `Draft`, and an
+amendment landing in an `Implemented` spec before this one is approved would make
+that spec describe behaviour the code does not have — drift of exactly the kind
+`/drift-check` exists to catch.
 
 **Each block below is copied into its home spec's "Spec amendments" section when
 SPEC-030 reaches `Approved`**, dated then, referencing the owner's approval. All
-three are scoped to `max-width: 40rem` and/or `pointer: coarse`: none changes
+four are scoped to `max-width: 40rem` and/or `pointer: coarse`: none changes
 behaviour above the breakpoint on a fine pointer.
+
+A note on the SPEC-023 entry, because it has a history. A first draft proposed a
+*broad* amendment — moving the clade key and the gate toggle off the map
+entirely. Re-measurement (REQ-007) showed that was unnecessary, and it was
+withdrawn: on a full-bleed map the overlays do not collide at 390 px or above,
+and what remains at 320–360 px is a defect against SPEC-023 REQ-004 rather than a
+limit of its design. What survives is a much narrower amendment covering **one
+sentence** of UX-001, taken on the owner's decision of 2026-09-02. The
+distinction matters: SPEC-023's overlay *scheme* is untouched and satisfied; only
+its default collapse state on a phone changes.
+
+### To SPEC-023 (Implemented) — the clade key's default state on a phone
+
+- **Reason:** SPEC-030 REQ-007 clause 3, owner decision of 2026-09-02. Expanded,
+  the clade key measures 183 × 193 px and covers 26% of the map at 320 px and 22%
+  at 390 px, on the screen where map area is scarcest.
+- **Changed requirements:** UX-001 — its statement's final sentence ("Collapsing
+  is a user action only — the app must not collapse the key automatically based on
+  viewport size") and acceptance criterion 1 ("The key renders expanded on load"),
+  both scoped by viewport rather than removed.
+- **Behavioural impact:** At `max-width: 40rem` the clade key renders
+  **collapsed** on load, to its labelled "Clade key" affordance, and expands on
+  one tap. Above the breakpoint it renders expanded exactly as today, and the ban
+  on viewport-driven collapse continues to apply there. Acceptance criteria 2
+  (collapsed, it still names itself), 3 (no other overlay gains a collapse or
+  dismiss control) and 4 (state is not persisted across a reload) are unchanged at
+  every width. **No overlay moves, is hidden, is faded, or is put behind a hover.**
+  The key remains the only collapsible overlay, and remains one tap from expanded.
+- **Why this does not weaken charter §2 / CONS-490:** on SPEC-023's own reasoning
+  the clade key is a reading aid, not provenance, because each marker's shape and
+  the hover card's clade name carry the same information. On touch the hover card
+  does not exist, so this amendment **depends on SPEC-030 UX-002** shipping with
+  it (tap pins the card). The two must land together; UX-002 alone is fine, this
+  alone is not.
+- **Test impact:** The existing Vitest collapse test is extended with a
+  viewport-scoped default-state case rather than replaced; the new phone e2e
+  asserts the collapsed default at four widths and the expanded default above the
+  breakpoint.
 
 ### To SPEC-015 (In Implementation) — the marker preview card
 
@@ -747,21 +800,28 @@ behaviour above the breakpoint on a fine pointer.
 
 ## Conflict check
 
-**No contradiction with any existing spec.** This section has now been wrong in
-both directions, so it states its reasoning rather than its conclusion.
+**One contradiction, narrow and resolved by amendment.** This section has been
+wrong in both directions already, so it states its reasoning rather than its
+conclusion.
 
-The first draft claimed "extended, not contradicted" without checking SPEC-023
-UX-001, which in fact forbids moving the gate toggle and the ⓘ ("stay as they
-are") and forbids collapsing the key "automatically based on viewport size" —
-word for word what that draft's REQ-007 did. The second draft found the
-contradiction and proposed amending UX-001. Both were wrong, because both took
-P-10's overlap as a property of SPEC-023's design. It is not: it is a property of
-a 226 px map, plus a width-bounding defect in one rail child. REQ-007 now fixes
-the defect and leaves SPEC-023 alone, and `conflicts_with` is empty on the
-merits rather than by assumption.
+The first draft claimed "extended, not contradicted" without reading SPEC-023
+UX-001. The second read it, found a broad contradiction — that draft's REQ-007
+moved the gate toggle and the ⓘ off the map, which UX-001 forbids — and proposed
+amending UX-001 wholesale. Both were wrong in the same way: both treated P-10's
+overlap as a property of SPEC-023's *design*. It is a property of a 226 px map
+plus a width-bounding defect in one rail child. REQ-007 now fixes the defect and
+leaves the scheme alone.
 
-Three specs are **extended**, each post-approval, so each takes an amendment
-entry (staged above):
+What remains is genuinely a contradiction, and a small one. **SPEC-023 UX-001's
+final sentence** — "the app must not collapse the key automatically based on
+viewport size" — is exactly what REQ-007 clause 3 does, on the owner's decision
+of 2026-09-02. That single sentence and acceptance criterion 1 are amended, scoped
+by viewport rather than removed; UX-001's other three acceptance criteria, its ban
+on collapsing anything *else*, and the whole corner-rail scheme are untouched.
+`conflicts_with` names SPEC-023 for that one sentence.
+
+Three further specs are **extended**, each post-approval, so each takes an
+amendment entry (all staged above):
 
 - **SPEC-009** (In Implementation) — the to-scale track, the keyboard slider and
   the two-way highlight are all preserved; REQ-006 adds discrete stepping
@@ -775,17 +835,18 @@ entry (staged above):
   unchanged (REQ-004). The amendment is one of vocabulary: "the column" becomes
   "the column, which on a phone is the sheet".
 
-**SPEC-023 is satisfied, not extended.** REQ-007 honours UX-001 exactly, ban on
-automatic collapse included, and NFR-001 extends the gate SPEC-023 built rather
-than relaxing it. The one thing SPEC-023 costs the phone layout is recorded
-honestly as an open question below: the clade key opens expanded at 320 px, where
-it covers about 26% of the map.
+**One internal dependency, recorded so it is not lost in implementation:** the
+SPEC-023 amendment is only compatible with charter §2 and CONS-490 because UX-002
+restores the clade name by tap. The two must ship together. REQ-007's rationale
+carries the same note.
 
 **No conflict with the functional specification.** FONC-040/050/060 and CONS-450
 require the age, group, count and main controls to be permanent, and REQ-005
 keeps all of them permanently visible rather than seeking relief from them. The
 owner's authorisation to amend covers these too, and REQ-005 deliberately does
-not use it: a compact line satisfies the requirement as written.
+not use it: a compact line satisfies the requirement as written. The clade key is
+not among them — it is a legend, and CONS-450's "map controls" are the timeline,
+the frame toggle and the filters, all of which stay permanent.
 
 **No conflict with the charter.** `docs/mockups/design-guidelines.md` is silent
 on viewport and touch (P-20), so UX-005 adds a section rather than changing one.
@@ -801,7 +862,7 @@ CONS-490 is *served* by UX-002, not strained by it.
 | REQ-004 | Bottom sheet | `OccurrenceSheet.tsx`, `UnitList.tsx` | _TBD_ | Not started |
 | REQ-005 | Context line | `ContextBar.tsx`, `exploration.module.css` | _TBD_ | Not started |
 | REQ-006 | Timeline | `TimelineControl.tsx` | _TBD_ | Not started |
-| REQ-007 | Map overlays | `OccurrenceMap.tsx`, `ExplorationView.tsx` | _TBD_ | Not started |
+| REQ-007 | Map overlays | `OccurrenceMap.tsx`, `exploration.module.css` (`.mapLegend2`, `.legendItem`) | _TBD_ | Not started |
 | REQ-008 | Taxonomy | `TaxonomySurfaces.tsx`, `exploration.module.css` | _TBD_ | Not started |
 | NFR-001 | Test gate | `test/e2e/*` | _TBD_ | Not started |
 | NFR-002 | Regression | `exploration.module.css` | _TBD_ | Not started |
@@ -833,8 +894,8 @@ _None. This spec is Draft; amendments are required only after approval._
 - [x] Every requirement has an ID, statement, rationale, acceptance criteria,
       verification method, and evidence location.
 - [x] Non-goals are listed.
-- [ ] Open questions are resolved or explicitly deferred. — **four open**, see
-      above; all four need the owner, and none blocks the others.
+- [ ] Open questions are resolved or explicitly deferred. — **three open**, see
+      above; all three need the owner, and none blocks the others.
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
 - [ ] Human approval recorded before status set to Approved. — **not yet.**
