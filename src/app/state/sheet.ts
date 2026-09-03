@@ -33,6 +33,18 @@ export const PEEK_HEIGHT_PX = 152;
 export const FULL_MAX_FRACTION = 0.75;
 const HALF_FRACTION = 0.5;
 
+/**
+ * REQ-003 acceptance criterion 1: at the peek stop the map keeps at least 55% of
+ * the container, so the sheet at rest never becomes the screen.
+ *
+ * This is a *clamp*, not just a nominal height, and that distinction was a bug.
+ * `PEEK_HEIGHT_PX` is what the peek contents need; on a tall phone it is well
+ * under the cap and the cap does nothing. On a 320×568 screen the container is
+ * only ~200px, and clamping the fixed 152px against `FULL_MAX_FRACTION` instead
+ * left the map at 25% — criterion 1 violated at a width the gate did not check.
+ */
+const PEEK_MAX_FRACTION = 1 - 0.55;
+
 /** Cycle to the next stop, wrapping from full back to peek (REQ-003). */
 export function advanceStop(stop: SheetStop): SheetStop {
   const next = SHEET_STOPS.indexOf(stop) + 1;
@@ -43,10 +55,11 @@ export function advanceStop(stop: SheetStop): SheetStop {
 export function stopHeight(stop: SheetStop, containerPx: number): number {
   if (containerPx <= 0) return 0;
   const full = containerPx * FULL_MAX_FRACTION;
-  // A short container (a small phone in landscape, or a browser with a lot of
-  // chrome) can make the fixed peek taller than the capped full stop. Clamping
-  // keeps the ordering peek ≤ half ≤ full, so a drag can never invert.
-  const peek = Math.min(PEEK_HEIGHT_PX, full);
+  // Clamped so the map keeps its 55% at rest whatever the container, and so the
+  // ordering peek ≤ half ≤ full holds even on a container short enough that the
+  // fixed peek would otherwise exceed the capped full stop — a drag can then
+  // never invert them.
+  const peek = Math.min(PEEK_HEIGHT_PX, containerPx * PEEK_MAX_FRACTION, full);
   switch (stop) {
     case "peek":
       return peek;

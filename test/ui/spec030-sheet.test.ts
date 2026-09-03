@@ -44,6 +44,16 @@ describe("stopHeight (REQ-003)", () => {
     expect(stopHeight("peek", container)).toBe(PEEK_HEIGHT_PX);
   });
 
+  it("keeps the map's 55% at peek on a container too short for the fixed peek", () => {
+    // 320×568 leaves a ~200px container. Clamping the 152px peek against the
+    // *full* fraction instead of this one left the map at 25% there — criterion
+    // 1 violated at a width the gate did not check.
+    for (const px of [180, 200, 240, 275]) {
+      const visibleMap = px - stopHeight("peek", px);
+      expect(visibleMap / px).toBeGreaterThanOrEqual(0.55 - 1e-9);
+    }
+  });
+
   it("leaves the map the majority of the container at peek", () => {
     // REQ-003 acceptance criterion 1: at least 55% of the space below the
     // timeline is still map when the sheet is resting.

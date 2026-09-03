@@ -206,4 +206,40 @@ test.describe("phone overlays at 320px", () => {
     expect(bounded!.key).toBeLessThanOrEqual(bounded!.rail + 0.5);
     expect(bounded!.rail).toBeLessThanOrEqual(bounded!.bound + 0.5);
   });
+
+  test("REQ-007: no overlay escapes the map pane at the narrowest width", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+
+    // The case this exists for: 320×568 leaves a ~200px map pane, and the rails
+    // are offset upward to clear the resting sheet. Offsetting a rail moves its
+    // *top* up as well, so a sheet that was taller than the pane could afford
+    // pushed all three overlays out of the map and over the timeline — while
+    // every other assertion in this file still passed.
+    const escaped = await page.evaluate(() => {
+      const pane = document.querySelector("[data-map-pane]");
+      if (!pane) return ["no map pane"];
+      const p = pane.getBoundingClientRect();
+      const out: string[] = [];
+      for (const el of document.querySelectorAll(
+        "[data-map-rail] > [data-map-overlay]",
+      )) {
+        const b = el.getBoundingClientRect();
+        if (
+          b.top < p.top - 0.5 ||
+          b.bottom > p.bottom + 0.5 ||
+          b.left < p.left - 0.5 ||
+          b.right > p.right + 0.5
+        ) {
+          out.push(
+            `${(el as HTMLElement).dataset["mapOverlay"]} at ${Math.round(b.top)}–${Math.round(b.bottom)} vs pane ${Math.round(p.top)}–${Math.round(p.bottom)}`,
+          );
+        }
+      }
+      return out;
+    });
+    expect(escaped).toEqual([]);
+  });
 });

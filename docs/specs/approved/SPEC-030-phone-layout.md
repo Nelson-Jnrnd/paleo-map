@@ -909,6 +909,28 @@ reach each other — is preserved; only the implied symmetry changes.
 **Final height budget at 390×664:** app bar 79, context 126, timeline ~120,
 body 339, sheet at peek 152, map visible 187 (55.2%).
 
+**What the screenshots caught that the gates did not (2026-09-03).** Reviewing
+rendered screens at 320×568 found the narrowest width visibly broken while every
+assertion passed. Three real defects, all now gated:
+
+1. **REQ-003 criterion 1 was violated at 320 and unmeasured.** `stopHeight`
+   clamped the peek against `FULL_MAX_FRACTION` (75%) rather than against the
+   criterion's own 55%, so on a ~200px container the sheet took 152px and left
+   the map **25%**. The clamp now enforces the criterion at every container
+   height, and a unit test covers short containers.
+2. **The map rails used the nominal peek, not the real one**, so on a short
+   viewport they were offset by 152px while the sheet rendered at 132px, pushing
+   all three overlays out of the pane and over the timeline. The sheet now
+   publishes its live height and the rails track it, which also means they ride
+   above the sheet at every stop rather than only at rest.
+3. **The gate toggle does not fit on a 320px map at all** — SPEC-023 AMEND-003
+   moves it into the sheet below the breakpoint.
+
+The lesson is worth keeping: every one of these passed a suite that enumerates
+elements and measures boxes. Containment of overlays *within the map pane* was
+simply not asserted at the width where it broke, and no amount of enumeration
+substitutes for looking at the screen.
+
 **Known limitations, recorded rather than solved:**
 
 1. **The taxon profile renders no illustration at all.** Measured on the built
@@ -925,7 +947,13 @@ body 339, sheet at peek 152, map visible 187 (55.2%).
 3. **NFR-003's device check is outstanding.** The `dvh` toolbar behaviour and
    the safe-area insets are inferred from known engine behaviour; they need
    confirming on a physical notched phone.
-4. **Phone landscape remains a non-goal.** The layout does not break there
+4. **At 320×568 the clade key is reachable only by scrolling its rail.** The
+   usable rail band there is ~34px, enough for the 30px basemap ⓘ but not for
+   the collapsed key beneath it. SPEC-023 REQ-004 sanctions a rail scrolling its
+   children rather than spilling them, so this is within the scheme, but a
+   reader at that width will not see the key without scrolling. Wider phones are
+   unaffected.
+5. **Phone landscape remains a non-goal.** The layout does not break there
    (no overflow, no overlap), but at 844×390 it is cramped by design.
 
 Order followed:

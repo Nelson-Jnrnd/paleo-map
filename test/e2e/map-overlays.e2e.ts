@@ -32,6 +32,7 @@ const VIEWPORTS = [
   { width: 820, height: 640 },
   { width: 390, height: 664 },
   { width: 360, height: 640 },
+  { width: 320, height: 568 },
 ];
 
 /** Every persistent overlay box, plus the map library's own controls. */

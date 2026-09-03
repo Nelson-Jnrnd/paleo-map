@@ -268,8 +268,8 @@
    while every *value* stays on screen, on one compact line. */
 @media (max-width: 40rem) {
   .appBar {
-    gap: var(--space-3);
-    padding: var(--space-1) var(--space-3);
+    gap: var(--space-2);
+    padding: 0 var(--space-3) var(--space-1);
   }
 
   /* The wordmark keeps its own line — SPEC-022 REQ-001 sanctions the bar
@@ -292,8 +292,8 @@
   }
 
   .header {
-    gap: var(--space-1) var(--space-2);
-    padding: var(--space-1) var(--space-3) var(--space-2);
+    gap: 2px var(--space-2);
+    padding: 0 var(--space-3) var(--space-1);
   }
 
   .search {
@@ -350,8 +350,11 @@
   /* The frame choice and Reset are controls, not readouts: they share a line at
      full touch size rather than crowding the values. `1 1 100%` here cost a
      whole extra 44px row by pushing Reset onto a third line. */
+  /* `1 1 auto` still took the whole remaining line, so Reset wrapped to a third
+     44px row. `0 1 auto` lets the two share one. At 320px the context row was
+     three rows and 132px tall; this is what makes it two. */
   .context .frameStat {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
   }
 
   .context .frameStat::before {
@@ -657,8 +660,8 @@
 @media (max-width: 40rem) {
   .timeline {
     flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-3) var(--space-2);
+    gap: 2px;
+    padding: 2px var(--space-3) var(--space-1);
   }
 
   .timelineLabel {
@@ -726,8 +729,17 @@
   /* The period name is what the band is for; at 320px the Triassic band is
      58px, so the label has to be allowed to shrink rather than clip. */
   .periodBand {
-    padding: 0 var(--space-1);
-    font-size: 11px;
+    padding: 0 2px;
+    font-size: 10px;
+    gap: 3px;
+    /* At 320px the Triassic band is 58px wide and its label was clipped
+       mid-word. The dot repeats the band's own period colour, which the band
+       already carries, so it is the part that goes. */
+    justify-content: center;
+  }
+
+  .periodBand .stageDot {
+    display: none;
   }
 }
 
@@ -1345,8 +1357,14 @@
      overlay is ever covered by the sheet at rest. */
   .railBottomLeft,
   .railBottomRight {
+    /* Track the sheet's *live* height, published by OccurrenceSheet, falling
+       back to the nominal peek before the first measurement. The rails then
+       ride just above the sheet at every stop instead of assuming it rests at
+       152px — which it does not on a short viewport, where `stopHeight` clamps
+       it. */
     bottom: calc(
-      var(--sheet-peek) + var(--space-2) + env(safe-area-inset-bottom, 0px)
+      var(--sheet-height, var(--sheet-peek)) + var(--space-2) +
+        env(safe-area-inset-bottom, 0px)
     );
     /* Raising a rail by the peek height moves its *top* up too, and on a short
        phone that walked the gate toggle straight into MapLibre's reserved
@@ -1354,7 +1372,18 @@
        into the band opposite — restated for the offset the sheet introduces:
        cap the height at what is left after the clearance below and the
        library's controls above. */
-    max-height: calc(100% - var(--sheet-peek) - 76px);
+    /* `max()` floors this at zero: on a 175px-tall pane the old expression went
+       *negative*, and a `column-reverse` rail with a negative cap grows upward —
+       straight out of the map and over the timeline. SPEC-023 REQ-001 requires a
+       rail child to stay inside the pane, so this is that rule holding, not a
+       new one. */
+    max-height: max(
+      0px,
+      calc(100% - var(--sheet-height, var(--sheet-peek)) - 76px)
+    );
+    /* A rail that cannot fit its children scrolls them rather than spilling —
+       REQ-004's "children wrap or scroll inside their own box". */
+    overflow-y: auto;
   }
 
   /* SPEC-023 AMEND-002: an asymmetric split instead of REQ-004's implied 50/50.
@@ -1382,6 +1411,27 @@
 
   .unitGroup {
     gap: var(--space-1) var(--space-4);
+  }
+
+  /* SPEC-023 AMEND-003: the gate's phone home. Flat in the flow of the sheet,
+     not a floating card — on the map it needed a surface of its own, here it is
+     just another control in the column. */
+  .sheetGate {
+    padding: 0 var(--space-3) var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sheetGate .wikiGateToggle {
+    background: none;
+    border: none;
+    padding: var(--space-1) 0;
+    width: 100%;
+  }
+
+  /* Reset joins the readout line instead of taking a 44px row of its own: at
+     320px the context row was three rows and 132px tall. */
+  .context .reset {
+    margin-left: auto;
   }
 }
 

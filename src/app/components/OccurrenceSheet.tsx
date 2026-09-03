@@ -122,6 +122,21 @@ export function OccurrenceSheet({
 
   const heightPx = dragPx ?? stopHeight(stop, containerPx);
 
+  // Publish the sheet's live height to the container as a custom property, so
+  // the map's bottom rails can sit just above it (SPEC-030 REQ-007 clause 2).
+  //
+  // Written imperatively rather than lifted into React state on purpose: the
+  // value changes on every frame of a drag, and routing that through the parent
+  // would re-render the map with it. It is also the *actual* height, not the
+  // nominal peek — `stopHeight` clamps peek on a short viewport, and a rail
+  // offset by the nominal 152px while the sheet rendered at 132px pushed all
+  // three overlays up out of the map pane at 320×568.
+  useEffect(() => {
+    const parent = sheetRef.current?.parentElement;
+    if (!parent) return;
+    parent.style.setProperty("--sheet-height", `${Math.round(heightPx)}px`);
+  }, [heightPx]);
+
   return (
     <section
       ref={sheetRef}

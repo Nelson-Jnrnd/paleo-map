@@ -751,6 +751,33 @@ export function ExplorationView({
         ? spanRange(selectedLocality)
         : (selectedOccurrence?.timeRange.value ?? null);
 
+  // SPEC-023 AMEND-003. On the map it is a rail child; on a phone it renders in
+  // the sheet, with the unit selector.
+  //
+  // Measured at 320×568: the toggle's label wraps to four lines (80px tall) on a
+  // map pane that is 175px tall, of which the resting sheet leaves ~60px above
+  // it. No chrome trim closes that gap — the control does not fit on the map at
+  // the narrowest supported width. It is also the one overlay that is a *list
+  // filter* rather than a statement about the map, so the sheet is where it
+  // belongs anyway: it gives the map back 80px at every phone width, and
+  // CONS-450 is better served by a control visible beside the list it filters
+  // than by one pushed off the map.
+  const wikipediaGate = (
+    <label className={styles.wikiGateToggle} data-map-overlay="wikipedia-gate">
+      <input
+        type="checkbox"
+        checked={showAll}
+        onChange={(e) => setShowAll(e.target.checked)}
+      />
+      <span>
+        Show taxa without a Wikipedia article
+        {!showAll && hiddenCount > 0 && (
+          <span className={styles.wikiGateCount}> · {hiddenCount} hidden</span>
+        )}
+      </span>
+    </label>
+  );
+
   const columnContents = (
     <>
       {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
@@ -769,6 +796,10 @@ export function ExplorationView({
             unit={unit}
             onSelectUnit={(next) => dispatch({ type: "setUnit", unit: next })}
           />
+
+          {phoneLayout && (
+            <div className={styles.sheetGate}>{wikipediaGate}</div>
+          )}
 
           {/* SPEC-027 REQ-004: the app tells the Explorer what it did
                 with their search when that is not what they typed. Both sit
@@ -844,30 +875,16 @@ export function ExplorationView({
               The top-left rail has no children since SPEC-021 removed the
               reconstruction label and the cluster note, so it does not render at
               all (REQ-001 — no empty box). */}
-          <div
-            className={`${styles.mapRail} ${styles.railBottomRight}`}
-            data-map-rail="bottom-right"
-          >
-            <label
-              className={styles.wikiGateToggle}
-              data-map-overlay="wikipedia-gate"
+          {/* SPEC-023 AMEND-003: on a phone this control lives in the sheet
+              instead, beside the unit selector it belongs with. */}
+          {!phoneLayout && (
+            <div
+              className={`${styles.mapRail} ${styles.railBottomRight}`}
+              data-map-rail="bottom-right"
             >
-              <input
-                type="checkbox"
-                checked={showAll}
-                onChange={(e) => setShowAll(e.target.checked)}
-              />
-              <span>
-                Show taxa without a Wikipedia article
-                {!showAll && hiddenCount > 0 && (
-                  <span className={styles.wikiGateCount}>
-                    {" "}
-                    · {hiddenCount} hidden
-                  </span>
-                )}
-              </span>
-            </label>
-          </div>
+              {wikipediaGate}
+            </div>
+          )}
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}

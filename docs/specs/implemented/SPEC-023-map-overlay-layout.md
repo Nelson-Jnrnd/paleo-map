@@ -817,6 +817,37 @@ all ten**, with the region focusable and labelled in each.
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-003: The Wikipedia-gate toggle leaves the map on a phone
+
+- **Date:** 2026-09-03
+- **Reason:** SPEC-030 REQ-007, found by screenshotting rather than by the gate.
+  At 320×568 the map pane is ~200px tall and the toggle's label wraps to four
+  lines (80px). With the rails offset to clear the resting occurrence sheet,
+  there is no arrangement in which an 80px control, a 30px ⓘ, a 35px clade key
+  and MapLibre's 58px zoom control all fit. No chrome trim closes that gap.
+- **Changed requirements:** REQ-001 ("every overlay that is persistently visible
+  over the map must be a child of exactly one rail") and REQ-002's
+  corner-ownership table, for this one control at `max-width: 40rem`.
+- **Behavioral impact:** below the breakpoint the toggle renders **in the
+  occurrence sheet**, directly under the unit selector, and the bottom-right
+  rail is not rendered at all (REQ-001's "a rail with no visible children must
+  not render" holds). Above the breakpoint nothing changes. The control is not
+  hidden, collapsed or hover-gated — it moves to the column whose contents it
+  filters, which is arguably where a list filter belonged all along, and it
+  gives the map back 80px at *every* phone width.
+- **Why this and not the alternatives:** clipping the rail would have hidden the
+  basemap ⓘ, which UX-001 requires to stay; shrinking the sheet further would
+  have broken SPEC-030 REQ-003's peek contents. Of the four overlays this is the
+  only one that describes the *list* rather than the map.
+- **Note on process:** an earlier draft of SPEC-030 proposed exactly this
+  relocation, and it was **withdrawn** when re-measurement showed the overlays do
+  not collide at 390px or above. That withdrawal was right on the evidence then
+  available; 320×568 is new evidence and it reverses the conclusion.
+- **Test impact:** `test/e2e/phone-layout.e2e.ts` gains a containment assertion
+  at 320×568 — no rail child may escape the map pane — and
+  `test/e2e/map-overlays.e2e.ts`'s matrix gains 320×568.
+- **Human approval reference:** Owner approval: 2026-09-02/03, session `session_01GvwYfnCtWQGcynW17zS4su` — "amend if necessary, until it's satisfactory".
+
 ### AMEND-002: An asymmetric rail split at phone widths
 
 - **Date:** 2026-09-02
