@@ -16,13 +16,14 @@ export type SheetStop = "peek" | "half" | "full";
 export const SHEET_STOPS: readonly SheetStop[] = ["peek", "half", "full"];
 
 /**
- * Peek shows the handle, the in-view count and the five-unit selector — the
- * "filter controls" CONS-450 requires to stay visible. The selector needs two
- * rows at 320px, since five options at the 44px coarse floor do not fit one
- * (owner decision, 2026-09-02: two rows, not a scrolling row that puts options
- * out of sight).
+ * Peek shows the handle and the in-view count, and nothing else.
+ *
+ * It carried the five-unit selector too until 2026-09-03, at 152px. The owner's
+ * verdict on the result was that the map has to be the star of the screen, so
+ * the selector moved below the fold: it is one drag away at the half stop, and
+ * the 80px it cost is the single largest piece of map this layout got back.
  */
-export const PEEK_HEIGHT_PX = 152;
+export const PEEK_HEIGHT_PX = 76;
 
 /**
  * REQ-003: at the full stop the map keeps at least 25% of the space below the

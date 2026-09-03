@@ -257,6 +257,155 @@
   color: var(--color-accent-deep);
 }
 
+/* --- Phone: the age strip and the controls drawer ------------------------
+   SPEC-030 REQ-005/REQ-006 as amended (owner, 2026-09-03: "the map needs to be
+   the star of the show"). The header was 205px of a 664px screen and the
+   reviewer's verdict on the result was "way too cluttered". What is left is two
+   rows: step the age, and read where you are. */
+.ageStrip {
+  display: none;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.ageStripRow {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+}
+
+/* The readout is the drawer's trigger: the age is most of what the drawer is
+   for, so the thing you tap to change it precisely is the thing showing it. */
+.ageReadout {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min-coarse);
+  padding: 0 var(--space-1);
+  background: none;
+  border: none;
+  color: var(--color-text-hi);
+  cursor: pointer;
+}
+
+.ageReadoutName {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ageReadoutSpan {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.ageReadoutHint {
+  color: var(--color-text-faint);
+  font-size: 11px;
+}
+
+.ageReadout:focus-visible,
+.drawerClose:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.ageStripMeta {
+  margin: 0;
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* The drawer expands in normal flow above the map rather than floating over it:
+   no scrim, no focus trap, and the map simply gets its space back on close. */
+.controlsDrawer {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-3);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-panel);
+}
+
+.controlsDrawer:focus {
+  outline: none;
+}
+
+.drawerClose {
+  align-self: flex-end;
+  margin: var(--space-2) var(--space-3) 0 0;
+  min-height: var(--target-min-coarse);
+  padding: 0 var(--space-4);
+  background: var(--color-accent-deep);
+  color: var(--color-on-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-min);
+  cursor: pointer;
+}
+
+@media (max-width: 40rem) {
+  .ageStrip,
+  .controlsDrawer {
+    display: flex;
+  }
+
+  /* Inside the drawer the context row is a stack, not a wrapped line. */
+  .controlsDrawer .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    /* `.header` carries `flex-wrap: wrap` for the desktop row. Turned to a
+       column it keeps wrapping — into *columns* — so the context row flowed
+       beside the search box instead of under it and ran to x=619 in a 390px
+       drawer. A column here is a single column. */
+    flex-wrap: nowrap;
+  }
+
+  /* The context row is a flex *item* here, so its automatic minimum size is its
+     content's — the same trap as `.mapLegend2` and `.fanListItem`. Without
+     `min-width: 0` it measured 619px inside a 390px drawer and took the whole
+     document sideways with it. */
+  .controlsDrawer .context {
+    gap: var(--space-2);
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .controlsDrawer .search,
+  .controlsDrawer .stat {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* The drawer already carries the age readout in the strip above it, and the
+     strip's ◀ ▶ do the stepping — so the timeline inside the drawer is the
+     to-scale track and the period jumps, not a second pair of steppers. */
+  .controlsDrawer .stageStepper {
+    display: none;
+  }
+
+  .controlsDrawer .timelineBody {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "bands"
+      "track";
+  }
+}
+
 /* --- Phone: the header row (SPEC-030 REQ-002, REQ-005; P-01, P-05) ---------
    The header measured 232px at *every* portrait width — 35% of a 664px screen
    before the timeline had its say. It does not adapt at all today.

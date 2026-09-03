@@ -281,10 +281,20 @@ specification and in SPEC-030.
   to the map rather than the subject. The map itself may not: it is the subject.
   A sheet is never a modal — the surface behind it stays interactive, and it
   never covers that surface entirely.
-- **Permanence survives the small screen.** Anything the functional
-  specification makes permanent (the age, the group, the count, the main
-  controls) may be re-laid-out but not collapsed, disclosed or deferred. Losing
-  a 44px row is not a reason; find the space elsewhere.
+- **The subject of a screen gets the screen.** On the map screen the map is the
+  subject and everything else is a companion. Chrome that is permanently visible
+  is chrome measured against the *viewport*, not against whatever is left after
+  it: a header that leaves the map 28% of the phone has already lost, whatever
+  the ratios inside the remainder say.
+- **Permanence is for what the reader is reading, not for every control.** The
+  age, the group and the count stay on screen at every width — they say what you
+  are looking at. Controls that *change* what you are looking at may sit one tap
+  behind a disclosure when the screen is small, and on a phone the timeline, the
+  frame toggle and Reset do (SPEC-030 AMEND-001, amending CONS-450). The verb
+  the loop turns on — stepping the age — is the exception: it stays one tap.
+- **A drawer is a disclosure, not a modal.** It expands in flow, takes the space
+  it needs and gives it back; no scrim, no focus trap, nothing left `inert`
+  behind it.
 
 ## 9. Before designing any screen
 

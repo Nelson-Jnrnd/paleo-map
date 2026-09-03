@@ -966,8 +966,49 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
-_None yet. This spec is approved as of 2026-09-02; any behavioural change from
-here requires an AMEND entry below._
+### AMEND-001: The map is the screen; the rest goes behind a drawer
+
+- **Date:** 2026-09-03
+- **Reason:** the layout this spec described was built, measured against every
+  criterion, and reviewed — and the verdict on the rendered screen was that it
+  is "way too cluttered" and "not possible as is". The numbers agreed once
+  measured against the right denominator: at 390×664 the map was **187px of a
+  664px viewport — 28%** — under 205px of permanent header and above a 152px
+  sheet. Every acceptance criterion passed, because REQ-003 criterion 1 measures
+  the map against the *body* rather than against the screen, and the body is
+  what the chrome had already eaten.
+- **Changed requirements:** REQ-003 (peek contents), REQ-005 (what the header
+  carries) and REQ-006 (where the to-scale timeline lives).
+- **Behavioral impact**, all at `max-width: 40rem` and none above it:
+  1. The exploration header becomes an **age strip**: one row of ◀ / age
+     readout / ▶, plus a line carrying the group and the count. 71px, against
+     205.
+  2. The taxon search, the full to-scale timeline (track, period bands, axis),
+     the frame toggle and Reset view move into a **controls drawer**, opened
+     from the readout and closed on load. It is a disclosure in normal flow, not
+     a modal: no scrim, no focus trap, and the map simply gets its space back.
+  3. The sheet's peek stop drops the five-unit selector, 152px → 76px. The
+     selector is one drag away at the half stop.
+- **What is *not* relaxed:** FONC-040/050/060 still hold literally — the age,
+  the group and the count are on screen at all times, in the strip. Stepping the
+  age, the loop's central verb, stays a single tap and does not go behind the
+  drawer.
+- **CONS-450 is amended, and this is the substantive cost.** "The system must
+  keep the main time, map and filter controls visible on the exploration view"
+  no longer holds on a phone for the *to-scale timeline*, the *frame toggle* and
+  *Reset view*: each is one tap away rather than visible. The age itself, the
+  map, and the list's own filters remain. The constraint was written for a
+  desktop viewport where visible and usable were the same thing; on a 664px
+  screen, keeping all of it visible is what made the map unusable, which is not
+  what CONS-450 exists to protect.
+- **Measured result:** map 187px → **450px at 390×664 (68% of the screen)**, and
+  110px → 354px at 320×568 (62%).
+- **Test impact:** a new gate measures the map's share against the *viewport*
+  rather than the body, and asserts the drawer is unrendered on load and whole
+  when opened. `phone-layout`'s UX-003 and `phone-touch` now open the drawer
+  before looking for the search field — an input that is not rendered cannot be
+  measured, and a gate that silently found zero of them would assert nothing.
+- **Human approval reference:** Owner approval: 2026-09-03, session `session_01GvwYfnCtWQGcynW17zS4su` — "the main view is not satisfactory… the map needs to be the star of the show. Other things need to become hidden behind drawers."
 
 ## Review checklist
 

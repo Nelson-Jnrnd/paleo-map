@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { settle } from "./phone-viewports.js";
+import { openControlsDrawer, settle } from "./phone-viewports.js";
 
 /**
  * SPEC-030 REQ-003 / REQ-004 — the occurrence sheet.
@@ -141,6 +141,61 @@ test.describe("the occurrence sheet at 390×664", () => {
 
     await back.click();
     await expect(sheet.locator("button[data-unit-row]").first()).toBeVisible();
+  });
+
+  test("REQ-005 (amended): the map is the majority of the whole screen at rest", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+
+    // The point of the 2026-09-03 amendment. Before it the map was 187px of a
+    // 664px screen — 28% — with 205px of permanent header above it and a 152px
+    // sheet below. The owner's verdict was that the map has to be the star, so
+    // this is measured against the *viewport*, not against the body: chrome
+    // that moved into a drawer is chrome that stopped counting.
+    const share = await page.evaluate(() => {
+      const pane = document.querySelector("[data-map-pane]");
+      const sheet = document.querySelector("[data-sheet-stop]");
+      if (!pane || !sheet) throw new Error("map screen not mounted");
+      const p = pane.getBoundingClientRect();
+      const s = sheet.getBoundingClientRect();
+      return (s.top - p.top) / window.innerHeight;
+    });
+    expect(share).toBeGreaterThanOrEqual(0.6);
+  });
+
+  test("REQ-005 (amended): the drawer is shut on load and opens on request", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+
+    // Closed means *not rendered*, not merely hidden: the search field is the
+    // tell, since UX-003's gate has to be able to find it once opened. Scoped
+    // to text fields — the Wikipedia-gate checkbox lives in the sheet and is
+    // on screen throughout (SPEC-023 AMEND-003).
+    const searchField = page.locator(
+      "input[type='search'], input[type='text'], input:not([type])",
+    );
+    await expect(searchField).toHaveCount(0);
+    await expect(
+      page.getByRole("group", { name: /age, search and map controls/i }),
+    ).toHaveCount(0);
+
+    await openControlsDrawer(page);
+    await expect(
+      page.getByRole("group", { name: /age, search and map controls/i }),
+    ).toBeVisible();
+    await expect(searchField.first()).toBeVisible();
+
+    // The to-scale timeline SPEC-009 REQ-001 requires is in here, whole.
+    await expect(
+      page.getByRole("group", { name: /jump to period/i }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(searchField).toHaveCount(0);
   });
 
   test("REQ-004: a detail opened while peeking raises the sheet", async ({

@@ -161,6 +161,24 @@ export async function textInputFontSizes(
   );
 }
 
+/**
+ * Open the phone map screen's controls drawer.
+ *
+ * Since SPEC-030's amended REQ-005/REQ-006 the taxon search, the to-scale
+ * timeline, the frame toggle and Reset view live behind the age strip's
+ * disclosure — the map is the subject of that screen, and 205px of permanent
+ * chrome on a 664px phone made it a companion instead. Tests that need any of
+ * those controls open the drawer first, exactly as a reader would.
+ */
+export async function openControlsDrawer(page: Page): Promise<void> {
+  const readout = page.locator("[aria-expanded]").filter({ hasText: /Ma$/ });
+  const toggle = (await readout.count())
+    ? readout.first()
+    : page.getByRole("button", { expanded: false }).first();
+  await toggle.click();
+  await page.waitForTimeout(250);
+}
+
 /** Wait for the map screen to be painted before measuring it. */
 export async function settle(page: Page): Promise<void> {
   await page.waitForSelector("canvas.maplibregl-canvas", { timeout: 20_000 });

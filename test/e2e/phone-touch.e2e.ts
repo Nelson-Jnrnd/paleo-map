@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { settle } from "./phone-viewports.js";
+import { openControlsDrawer, settle } from "./phone-viewports.js";
 
 /**
  * SPEC-030 UX-002 — nothing depends on hover where there is no hover.
@@ -38,6 +38,7 @@ test.describe("touch equivalents at 390×664", () => {
     // occurrences, so a blind tap almost always lands on a cluster big enough
     // that the app zooms in rather than carding it — the test would be hunting
     // a moving target. A search landing frames a handful of points instead.
+    await openControlsDrawer(page);
     await page.locator("input[type='search'], input").first().fill("Tyranno");
     await page.waitForTimeout(700);
     await page.keyboard.press("ArrowDown");

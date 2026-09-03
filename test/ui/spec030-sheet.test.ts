@@ -40,7 +40,7 @@ describe("stopHeight (REQ-003)", () => {
     expect(full).toBeCloseTo(container * FULL_MAX_FRACTION);
   });
 
-  it("shows the handle, count and unit selector at peek", () => {
+  it("shows the handle and the in-view count at peek", () => {
     expect(stopHeight("peek", container)).toBe(PEEK_HEIGHT_PX);
   });
 

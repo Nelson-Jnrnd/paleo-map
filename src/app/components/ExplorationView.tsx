@@ -67,6 +67,8 @@ import { TaxonomyScreen } from "./TaxonomyScreen.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
 import { OccurrenceSheet } from "./OccurrenceSheet.js";
 import { usePhoneLayout } from "../state/media.js";
+import { AgeStrip } from "./AgeStrip.js";
+import { MapControlsDrawer } from "./MapControlsDrawer.js";
 import styles from "./exploration.module.css";
 
 interface ExplorationViewProps {
@@ -200,6 +202,9 @@ export function ExplorationView({
   // over a full-bleed map. Layout only — what the column *contains* is
   // identical, so this branches the container and nothing else.
   const phoneLayout = usePhoneLayout();
+  // The phone controls drawer. Closed on load — the map is the subject of this
+  // screen, and everything in here is one tap away from the age strip.
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
   // indeterminate occurrences). The toggle below reveals them.
   const [showAll, setShowAll] = useState(false);
@@ -844,17 +849,75 @@ export function ExplorationView({
     </>
   );
 
+  // One ContextBar, two homes: the shell's banner on desktop, the drawer on a
+  // phone. Declared once so the two cannot drift.
+  const contextControls = (
+    <ContextBar
+      stage={stage}
+      stageName={state.stageName}
+      group={state.group}
+      count={occurrences.length}
+      frameMode={state.frameMode}
+      {...(presentFrameAvailable
+        ? {
+            onFrameModeChange: (frameMode: FrameMode) =>
+              dispatch({ type: "setFrameMode", frameMode }),
+          }
+        : {})}
+      searchIndex={searchIndex}
+      onSearchSelect={onSearchSelect}
+      onReset={() => dispatch({ type: "reset" })}
+    />
+  );
+
   return shell(
     "map",
     <>
-      <TimelineControl
-        stages={EXPLORATION_STAGES}
-        periods={EXPLORATION_PERIODS}
-        selected={state.stageName}
-        onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
-        onSelectPeriod={selectPeriod}
-        highlightRange={highlightRange}
-      />
+      {/* SPEC-030 REQ-005/REQ-006 as amended: on a phone the full to-scale
+          timeline and the context row's controls move into a drawer, and the
+          strip keeps the age readout, one-tap stepping and the group/count.
+          Above the breakpoint both render exactly as before (NFR-002). */}
+      {phoneLayout ? (
+        <>
+          <AgeStrip
+            stages={EXPLORATION_STAGES}
+            selected={state.stageName}
+            stage={stage}
+            onSelect={(stageName) =>
+              dispatch({ type: "selectStage", stageName })
+            }
+            group={state.group}
+            count={occurrences.length}
+            drawerOpen={drawerOpen}
+            onToggleDrawer={() => setDrawerOpen((open) => !open)}
+          />
+          <MapControlsDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+          >
+            {contextControls}
+            <TimelineControl
+              stages={EXPLORATION_STAGES}
+              periods={EXPLORATION_PERIODS}
+              selected={state.stageName}
+              onSelect={(stageName) =>
+                dispatch({ type: "selectStage", stageName })
+              }
+              onSelectPeriod={selectPeriod}
+              highlightRange={highlightRange}
+            />
+          </MapControlsDrawer>
+        </>
+      ) : (
+        <TimelineControl
+          stages={EXPLORATION_STAGES}
+          periods={EXPLORATION_PERIODS}
+          selected={state.stageName}
+          onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
+          onSelectPeriod={selectPeriod}
+          highlightRange={highlightRange}
+        />
+      )}
       {/* SPEC-029 REQ-004: in present-day mode the coastline stops changing with
           the age, which is exactly the cue a reader uses to see that the
           timeline is still filtering. So the screen says it instead — otherwise
@@ -941,21 +1004,6 @@ export function ExplorationView({
         )}
       </div>
     </>,
-    <ContextBar
-      stage={stage}
-      stageName={state.stageName}
-      group={state.group}
-      count={occurrences.length}
-      frameMode={state.frameMode}
-      {...(presentFrameAvailable
-        ? {
-            onFrameModeChange: (frameMode: FrameMode) =>
-              dispatch({ type: "setFrameMode", frameMode }),
-          }
-        : {})}
-      searchIndex={searchIndex}
-      onSearchSelect={onSearchSelect}
-      onReset={() => dispatch({ type: "reset" })}
-    />,
+    phoneLayout ? undefined : contextControls,
   );
 }

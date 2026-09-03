@@ -3,6 +3,7 @@ import {
   PHONE_VIEWPORTS,
   TARGET_MIN_COARSE,
   horizontalOverflowers,
+  openControlsDrawer,
   settle,
   smallTargets,
   textInputFontSizes,
@@ -97,6 +98,11 @@ for (const viewport of PHONE_VIEWPORTS) {
     }) => {
       await page.goto("/");
       await settle(page);
+
+      // The taxon search moved behind the age strip's drawer, so open it —
+      // an input that is not rendered cannot be measured, and a gate that
+      // silently found zero inputs would be asserting nothing.
+      await openControlsDrawer(page);
 
       const inputs = await textInputFontSizes(page);
       expect(

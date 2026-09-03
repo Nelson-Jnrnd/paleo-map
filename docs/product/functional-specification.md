@@ -394,6 +394,13 @@ taxon profile is two actions).
 ### 2.7 Interface and usability
 
 - **CONS-450** [MVP] — The system must keep the main time, map and filter controls visible on the exploration view.
+  - *Amended for phone viewports by SPEC-030 AMEND-001 (owner, 2026-09-03).* At
+    `max-width: 40rem` the to-scale timeline, the map frame toggle and Reset view
+    are one tap away behind the map screen's controls drawer rather than
+    permanently visible. The selected age, the map and the list's own filters
+    stay visible, and FONC-040/050/060 are unaffected. The rationale and the
+    measurements are in the amendment; recorded here so this constraint is not
+    read as still holding unqualified.
 - **CONS-460** [MVP] — The system must allow access to a taxon profile in a maximum of 2 actions from an occurrence visible on the map.
 - **CONS-470** [MVP] — The system must allow the user to return to the map from a taxon profile in a maximum of 1 action.
 - **CONS-480** [MVP] — The system must maintain consistent nomenclature for periods, groups and taxa throughout the interface.
