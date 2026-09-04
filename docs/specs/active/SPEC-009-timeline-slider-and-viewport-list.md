@@ -451,6 +451,12 @@ transient id set by hover/focus on either surface, visually weaker than selectio
 - **Test impact:** `test/e2e/phone-sheet.e2e.ts` asserts the 55%;
   `test/e2e/phone-states.e2e.ts` asserts the axis is still drawn above the
   breakpoint.
+- **Superseded in part, 2026-09-04:** SPEC-030 AMEND-001 moved the whole
+  timeline into a controls drawer, where the 20px this amendment was buying no
+  longer matters. The axis is drawn again there (SPEC-030 AMEND-002 item 7).
+  What stays hidden is the axis in the *strip* layout, where the timeline itself
+  is not rendered at all — so the amendment still holds, on a narrower footing
+  than when it was written.
 - **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su` — "ammend what needs to be ammended and finish the work".
 
 ### AMEND-001: Discrete stage stepping at phone widths

@@ -34,12 +34,22 @@ interface OccurrenceSheetProps {
    * row also raises it.
    */
   detailKey: string | null;
+  /**
+   * One line naming what is under the sheet — "938 occurrences in view".
+   *
+   * The peek stop used to render a 76px bar containing a grab handle and
+   * nothing else: the count sat in the scrollable body, below the fold, so the
+   * sheet at rest said nothing about itself. It is part of the handle rather
+   * than of the body precisely so that it cannot fall below the fold again.
+   */
+  summary: string;
 }
 
 export function OccurrenceSheet({
   children,
   label,
   detailKey,
+  summary,
 }: OccurrenceSheetProps): React.ReactElement {
   const [stop, setStop] = useState<SheetStop>("peek");
   const [containerPx, setContainerPx] = useState(0);
@@ -149,9 +159,10 @@ export function OccurrenceSheet({
       <button
         type="button"
         className={styles.sheetHandle}
-        // The control's job is stated in words for a screen reader; the grip is
-        // decorative. Naming the next stop would go stale mid-drag.
-        aria-label={`Occurrence list, ${stop} — activate to resize`}
+        // The whole header is the target, not just the grip: at rest this is the
+        // only part of the sheet on screen, so it has to be both the label and
+        // the thing you pull.
+        aria-label={`${summary} — activate to resize the list`}
         aria-expanded={stop !== "peek"}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -160,6 +171,9 @@ export function OccurrenceSheet({
         onClick={onClick}
       >
         <span className={styles.sheetGrip} aria-hidden="true" />
+        <span className={styles.sheetSummary} aria-hidden="true">
+          {summary}
+        </span>
       </button>
       <div className={styles.sheetBody}>{children}</div>
     </section>

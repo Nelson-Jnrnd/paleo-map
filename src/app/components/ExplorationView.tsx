@@ -491,7 +491,11 @@ export function ExplorationView({
         : `${LIST_UNIT_LABEL[unit]} on the map`;
   const unitNoun =
     unit === "occurrence"
-      ? "occurrence(s)"
+      ? // Pluralised properly rather than "occurrence(s)": since the sheet's
+        // resting label is now this string, it is read constantly.
+        occurrences.length === 1
+        ? "occurrence"
+        : "occurrences"
       : unit === "locality"
         ? "localities"
         : unit === "genus"
@@ -976,6 +980,7 @@ export function ExplorationView({
               focusIds={focusIds}
               focusOccurrences={focusOccurrences}
               fitToken={fitToken}
+              autoFit={phoneLayout}
               taxaById={taxaById}
               onOpenProfile={(taxonId) =>
                 dispatch({ type: "openProfile", taxonId })
@@ -994,6 +999,9 @@ export function ExplorationView({
           <OccurrenceSheet
             label="Occurrence details"
             detailKey={detail ? (selectedKey ?? "detail") : null}
+            summary={`${unitRows.length} ${unitNoun}${
+              viewport !== null ? " in view" : ""
+            }`}
           >
             {columnContents}
           </OccurrenceSheet>

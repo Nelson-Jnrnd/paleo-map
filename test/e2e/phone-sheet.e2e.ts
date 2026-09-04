@@ -45,7 +45,7 @@ test.describe("the occurrence sheet at 390×664", () => {
       0.55,
     );
 
-    const handle = page.getByRole("button", { name: /occurrence list/i });
+    const handle = page.getByRole("button", { name: /activate to resize/i });
     await handle.click();
     await expect(sheet).toHaveAttribute("data-sheet-stop", "half");
     await handle.click();
@@ -75,7 +75,7 @@ test.describe("the occurrence sheet at 390×664", () => {
     await settle(page);
 
     const sheet = page.locator("[data-sheet-stop]");
-    const handle = page.getByRole("button", { name: /occurrence list/i });
+    const handle = page.getByRole("button", { name: /activate to resize/i });
     await handle.focus();
     await expect(handle).toBeFocused();
 
@@ -91,7 +91,7 @@ test.describe("the occurrence sheet at 390×664", () => {
     await page.goto("/");
     await settle(page);
 
-    const handle = page.getByRole("button", { name: /occurrence list/i });
+    const handle = page.getByRole("button", { name: /activate to resize/i });
     await handle.click(); // half
 
     // Nothing behind the sheet is inert or aria-hidden: a reader panning the
@@ -117,7 +117,7 @@ test.describe("the occurrence sheet at 390×664", () => {
     await settle(page);
 
     const sheet = page.locator("[data-sheet-stop]");
-    const handle = page.getByRole("button", { name: /occurrence list/i });
+    const handle = page.getByRole("button", { name: /activate to resize/i });
     await handle.click(); // half, so the list has room
 
     // SPEC-026 REQ-001: the five-unit selector is present and operable.
@@ -163,6 +163,50 @@ test.describe("the occurrence sheet at 390×664", () => {
       return (s.top - p.top) / window.innerHeight;
     });
     expect(share).toBeGreaterThanOrEqual(0.6);
+  });
+
+  test("the sheet says what it holds while it is resting", async ({ page }) => {
+    await page.goto("/");
+    await settle(page);
+
+    // The regression this exists for: the peek stop rendered a 76px bar with a
+    // grab handle and nothing else, because the count sat in the scrollable
+    // body below the fold. The sheet at rest has to name itself, and a height
+    // assertion cannot tell you whether it does.
+    const sheet = page.locator("[data-sheet-stop]");
+    await expect(sheet).toHaveAttribute("data-sheet-stop", "peek");
+
+    const handle = sheet.locator("button").first();
+    await expect(handle).toBeInViewport();
+    await expect(handle).toContainText(/\d+\s+occurrences?/);
+  });
+
+  test("REQ-008 (amended): the map opens framed on the data, not on a fixed camera", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+    await page.waitForTimeout(1200);
+
+    // The map used to open at a `center`/`zoom` chosen for a wide desktop pane;
+    // on a portrait phone that crop put the markers against the left edge and
+    // filled the right half with empty ocean. Asserted through what the app
+    // itself reports rather than by reading the camera: the strip names the
+    // total at this age, the sheet names how many of them are on screen.
+    const total = Number(
+      (await page.locator("[data-occurrence-count]").innerText()).replace(
+        /\D/g,
+        "",
+      ),
+    );
+    const inView = Number(
+      (
+        (await page.locator("[data-sheet-stop] button").first().innerText()) ??
+        ""
+      ).replace(/\D/g, ""),
+    );
+    expect(total).toBeGreaterThan(0);
+    expect(inView / total).toBeGreaterThanOrEqual(0.5);
   });
 
   test("REQ-005 (amended): the drawer is shut on load and opens on request", async ({

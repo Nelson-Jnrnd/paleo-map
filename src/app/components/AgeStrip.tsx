@@ -68,6 +68,9 @@ export function AgeStrip({
         <button
           type="button"
           className={styles.ageReadout}
+          // A stable hook for the gates: the readout's text is the stage name,
+          // which also appears on list rows, so a text locator is ambiguous.
+          data-controls-toggle
           aria-expanded={drawerOpen}
           onClick={onToggleDrawer}
         >

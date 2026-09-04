@@ -63,10 +63,16 @@ export function MapControlsDrawer({
       aria-label="Age, search and map controls"
       tabIndex={-1}
     >
+      {/* A title and its close, at the top, so the panel reads as one thing.
+          "Done" alone at the bottom floated under the timeline with nothing
+          tying it to what it closed. */}
+      <div className={styles.drawerHead}>
+        <span className={styles.drawerTitle}>Age, search &amp; map</span>
+        <button type="button" className={styles.drawerClose} onClick={onClose}>
+          Done
+        </button>
+      </div>
       {children}
-      <button type="button" className={styles.drawerClose} onClick={onClose}>
-        Done
-      </button>
     </div>
   );
 }

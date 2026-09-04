@@ -171,11 +171,7 @@ export async function textInputFontSizes(
  * those controls open the drawer first, exactly as a reader would.
  */
 export async function openControlsDrawer(page: Page): Promise<void> {
-  const readout = page.locator("[aria-expanded]").filter({ hasText: /Ma$/ });
-  const toggle = (await readout.count())
-    ? readout.first()
-    : page.getByRole("button", { expanded: false }).first();
-  await toggle.click();
+  await page.locator("[data-controls-toggle]").click();
   await page.waitForTimeout(250);
 }
 

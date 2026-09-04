@@ -269,17 +269,22 @@
   border-bottom: 1px solid var(--color-divider);
 }
 
+/* One control, not three. The steppers used to be pushed to the screen edges by
+   a `flex: 1` readout, leaving a 44px box marooned in each corner with the age
+   floating between them — they read as unrelated. Centred and butted against
+   the readout, they read as the stepper they are. */
 .ageStripRow {
   display: flex;
   align-items: stretch;
+  justify-content: center;
   gap: var(--space-1);
-  padding: 0 var(--space-2);
+  padding: var(--space-1) var(--space-2) 0;
 }
 
 /* The readout is the drawer's trigger: the age is most of what the drawer is
    for, so the thing you tap to change it precisely is the thing showing it. */
 .ageReadout {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   display: flex;
   align-items: baseline;
@@ -293,23 +298,30 @@
   cursor: pointer;
 }
 
+/* The name is the value FONC-040 requires; the Ma span is a gloss on it and is
+   repeated in the drawer. So the span gives way first — at 320px the name used
+   to truncate to "Maastrichti…", losing the one thing this strip exists for. */
 .ageReadoutName {
+  flex: none;
   font-size: 15px;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.ageReadoutSpan {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ageReadoutSpan {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
 .ageReadoutHint {
-  color: var(--color-text-faint);
-  font-size: 11px;
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 13px;
 }
 
 .ageReadout:focus-visible,
@@ -342,16 +354,31 @@
   outline: none;
 }
 
-.drawerClose {
-  align-self: flex-end;
-  margin: var(--space-2) var(--space-3) 0 0;
-  min-height: var(--target-min-coarse);
-  padding: 0 var(--space-4);
-  background: var(--color-accent-deep);
-  color: var(--color-on-accent);
-  border: none;
-  border-radius: var(--radius-sm);
+.drawerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  padding-bottom: var(--space-1);
+}
+
+.drawerTitle {
   font-size: var(--text-min);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.drawerClose {
+  min-height: var(--target-min-coarse);
+  padding: 0 var(--space-3);
+  background: none;
+  color: var(--color-accent-deep);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -391,9 +418,13 @@
     max-width: 100%;
   }
 
-  /* The drawer already carries the age readout in the strip above it, and the
-     strip's ◀ ▶ do the stepping — so the timeline inside the drawer is the
-     to-scale track and the period jumps, not a second pair of steppers. */
+  /* The age was printed three times on one screen — in the strip, in the
+     context row's "Selected age" stat, and again in the timeline's own label —
+     and the group and count twice. The strip above is the readout; inside the
+     drawer these are duplicates, so they go. What is left in the context row is
+     what the strip does *not* carry: search, the frame choice, and Reset. */
+  .controlsDrawer .stat:not(.frameStat),
+  .controlsDrawer .timelineLabel,
   .controlsDrawer .stageStepper {
     display: none;
   }
@@ -402,7 +433,37 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "bands"
-      "track";
+      "track"
+      "axis";
+  }
+
+  /* The Ma axis comes back here. It was hidden to win 20px for a height problem
+     that the drawer removed (SPEC-009 AMEND-002 was scoped to the strip layout,
+     where the timeline no longer lives) — and a to-scale track with no scale is
+     half a control. */
+  .controlsDrawer .stageAxis {
+    display: block;
+    grid-area: axis;
+  }
+
+  /* One inset for the whole panel, so the search box, the values, the bands and
+     the footer line up instead of each carrying their own margin. */
+  .controlsDrawer > * {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  /* Both carry their own horizontal padding for their normal homes; here the
+     panel's single inset is the one that should win, so they contribute none of
+     their own and inherit it from the rule above. Zeroing it outright — as an
+     earlier cut did — pushed the search box, "Reset view" and the Ma axis to
+     the screen edges, clipping the last two. The inset also gives the axis's
+     first and last tick labels the ~9px of overhang they need, since each is
+     centred on its position. */
+  .controlsDrawer .header,
+  .controlsDrawer .timeline {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 
@@ -424,16 +485,33 @@
   /* The wordmark keeps its own line — SPEC-022 REQ-001 sanctions the bar
      wrapping rather than hiding a destination — but it is a label, not a
      control, so it does not need a 44px row. */
+  /* One row, always. Letting the wordmark wrap cost a permanent ~27px line for
+     a label rather than a control — the largest single piece of fixed chrome
+     left on the screen. It shrinks and ellipsises instead: SPEC-022 REQ-001
+     requires the bar to carry the wordmark, not to carry it whole. */
   .wordmark {
     font-size: 12px;
     line-height: 1.2;
-    /* Shares the row with the destinations where it fits, and wraps to its own
-       line where it does not — which is SPEC-022 REQ-001's sanctioned
-       behaviour, not a special case. Forcing `1 1 100%` cost a permanent extra
-       row at every width. */
     flex: 0 1 auto;
-    margin-right: auto;
     min-width: 0;
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .appBar {
+    flex-wrap: nowrap;
+  }
+
+  /* The nav must not be the thing that gives: as a shrinkable flex item its
+     min-content width is one button, so it collapsed and wrapped its three
+     destinations onto three rows — a 109px bar, worse than the wrapped wordmark
+     it replaced. It holds its width; the wordmark absorbs the shrink. */
+  .appNav {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: var(--space-3);
   }
 
   .appNav {
@@ -599,9 +677,16 @@
   cursor: pointer;
 }
 
+/* Disabled at the ends of the range — and the app *boots* at the youngest
+   stage, so the very first thing on screen was an empty bordered box. A ghosted
+   glyph still states the boundary (charter §7: disabled with a reason, not
+   hidden) without reading as a control waiting to be pressed. */
 .stageStepper:disabled {
   cursor: default;
-  opacity: 0.5;
+  background: none;
+  border-color: transparent;
+  color: var(--color-text-faint);
+  opacity: 0.55;
 }
 
 .stageStepper:focus-visible {
@@ -1446,15 +1531,28 @@
 .sheetHandle {
   flex: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-1);
   width: 100%;
   min-height: var(--target-min-coarse);
-  padding: 0;
+  padding: var(--space-2) var(--space-3);
   background: none;
   border: none;
   cursor: grab;
   touch-action: none;
+}
+
+/* At rest this line is the only part of the sheet on screen. Without it the
+   sheet was a grey pill that said nothing about what it held. */
+.sheetSummary {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .sheetHandle:active {
@@ -1558,8 +1656,11 @@
     padding: var(--space-2) var(--space-3);
   }
 
+  /* A 16px gap pushed the five options to 383px in a 366px column, wrapping
+     4 + 1 and orphaning "Major group". 8px fits them on one line at 390px and
+     still wraps cleanly below that. */
   .unitGroup {
-    gap: var(--space-1) var(--space-4);
+    gap: var(--space-1) var(--space-2);
   }
 
   /* SPEC-023 AMEND-003: the gate's phone home. Flat in the flow of the sheet,

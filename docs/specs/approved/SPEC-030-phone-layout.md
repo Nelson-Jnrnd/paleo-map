@@ -966,6 +966,70 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
+### AMEND-002: The screen reviewed, and eleven layout defects fixed
+
+- **Date:** 2026-09-04
+- **Reason:** AMEND-001 was measured, gated and shipped, and then *looked at*.
+  Eleven real layout defects survived every automated check, because each gate
+  asserted a dimension and none asserted what the screen said.
+- **Changed requirements:** REQ-003 (the peek stop's contents are now rendered
+  in the handle, not the body), REQ-006 (the drawer's timeline keeps its Ma
+  axis) and REQ-008 (the map's opening camera).
+- **Behavioral impact**, all at `max-width: 40rem`:
+  1. **The sheet at rest names itself.** The peek stop rendered a grab handle
+     and nothing else — the in-view count was in the scrollable body, below the
+     fold, so the sheet said nothing about what it held. The count moves into
+     the handle, where it cannot fall below a fold again. Its noun is pluralised
+     properly rather than "occurrence(s)", since this string is now read
+     constantly.
+  2. **The age stepper is one control.** A `flex: 1` readout pushed ◀ and ▶ to
+     the screen edges, leaving a 44px box marooned in each corner; they now sit
+     against the readout, centred.
+  3. **The disabled end of the range is a ghost, not an empty box.** The app
+     boots at the youngest stage, so the first thing on screen was a bordered
+     button that did nothing. Charter §7 still holds — it is disabled with a
+     stated reason, not hidden.
+  4. **The stage name no longer truncates.** At 320px the readout ellipsised to
+     "Maastrichti…", losing the one value the strip exists for; the Ma span
+     gives way first.
+  5. **The app bar is one row**, 71px → 49px. The wordmark shrinks and
+     ellipsises rather than wrapping to a line of its own; the nav holds its
+     width, since as a shrinkable flex item its min-content is one button and it
+     collapsed into three rows when first tried.
+  6. **The age is printed once, not three times.** The drawer repeated it in the
+     context row's "Selected age" stat and again in the timeline's own label,
+     with the group and count twice — the clutter the redesign was meant to
+     remove, relocated.
+  7. **The Ma axis returns** inside the drawer. It was hidden to win 20px for a
+     height problem the drawer removed, and a to-scale track with no scale is
+     half a control.
+  8. **The drawer has one inset**, so the search field, the frame options,
+     "Reset view", the period bands and the axis line up; "Reset view" and the
+     axis's end labels were being clipped at the screen edge.
+  9. **The drawer has a title and its close at the top**, so it reads as one
+     panel rather than a pile of controls with a "Done" floating under them.
+  10. **The five unit options fit one row** — a 16px gap made them 383px in a
+      366px column, wrapping 4 + 1 and orphaning "Major group".
+  11. **The map opens framed on the data.** See REQ-008 below.
+- **REQ-008 (new behaviour):** on a phone the map fits its camera to the stage's
+  occurrences once, on first paint, instead of opening at the fixed
+  `center: [-75, 55], zoom: 2.2` chosen for a wide desktop pane. On a 390×470
+  portrait pane that camera crops elsewhere: the markers crowded the left edge
+  and the right half was empty ocean. Measured after: 1,981 of 2,135
+  occurrences in view at load, against roughly a third before. Once per mount,
+  not per stage — re-framing on every age step would yank the camera away from a
+  reader who had panned somewhere deliberately, and stepping the age is the
+  loop's most common action. It reuses SPEC-027's search-landing fit rather than
+  adding a second camera path, and is off above the breakpoint, so the desktop's
+  opening view is unchanged (NFR-002).
+- **What this says about the gates.** Every one of these passed a suite that
+  measures boxes. The two new assertions are of a different kind — the sheet's
+  resting label must *contain a count*, and the app's own reported
+  in-view-to-total ratio must be at least half — because "76px tall" and "says
+  what it holds" are not the same claim, and only the second one is the
+  requirement.
+- **Human approval reference:** Owner approval: 2026-09-03/04, session `session_01GvwYfnCtWQGcynW17zS4su` — "look honestly at the screen… tell me all the issues" / "fix all that. Ammend spec if you need to".
+
 ### AMEND-001: The map is the screen; the rest goes behind a drawer
 
 - **Date:** 2026-09-03

@@ -210,6 +210,15 @@ interface OccurrenceMapProps {
    */
   fitToken?: number;
   /**
+   * Frame the camera on the stage's occurrences once, on first paint.
+   *
+   * The map opens at a fixed `center`/`zoom` chosen for a wide desktop pane. On
+   * a 390×470 portrait pane the same camera crops elsewhere: the markers crowd
+   * the left edge and the right half is empty ocean. Set on the phone layout
+   * only, so the desktop's opening view is byte-identical (SPEC-030 NFR-002).
+   */
+  autoFit?: boolean;
+  /**
    * Select a taxon from the cluster aggregate card (SPEC-027 REQ-005). Provided
    * only in taxon mode; when present, picking a species selects it on the map
    * instead of leaving for its profile.
@@ -467,6 +476,7 @@ export function OccurrenceMap({
   focusIds = null,
   focusOccurrences = NO_OCCURRENCES,
   fitToken = 0,
+  autoFit = false,
   taxaById = NO_TAXA,
   onOpenProfile,
   onSelectTaxon,
@@ -1309,6 +1319,30 @@ export function OccurrenceMap({
     // The camera fits the points it is about to draw, so a frame change is a
     // change of target (SPEC-029 REQ-003).
   }, [fitToken, focusOccurrences, frameMode]);
+
+  // SPEC-030 REQ-008 (AMEND-002): frame the opening view on the data, once.
+  //
+  // Deliberately once per mount rather than per stage: re-framing every time the
+  // age steps would yank the camera out from under a reader who had panned
+  // somewhere deliberately, and stepping the age is the loop's most common
+  // action. Reuses the search-landing machinery rather than a second code path.
+  const autoFittedRef = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!autoFit || autoFittedRef.current || !map || !loadedRef.current) return;
+    const points = framePoints(occurrences, frameMode);
+    if (points.length === 0) return; // wait for the stage's occurrences
+    const target = boundsOfPoints(points);
+    if (!target) return;
+    autoFittedRef.current = true;
+    map.fitBounds(
+      [
+        [target.west, target.south],
+        [target.east, target.north],
+      ],
+      { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, duration: 0 },
+    );
+  }, [autoFit, occurrences, frameMode, mapLoaded]);
 
   // Clear a hover/pinned card whose occurrence has left the view (e.g. stage step);
   // the multi card is dismissed on any occurrence change (its leaves may be stale).
