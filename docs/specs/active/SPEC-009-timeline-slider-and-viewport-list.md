@@ -426,6 +426,52 @@ transient id set by hover/focus on either surface, visually weaker than selectio
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-003: One period at a time at phone widths
+
+- **Date:** 2026-09-04
+- **Reason:** Owner request, 2026-09-04, after reviewing the controls drawer:
+  "If we show only the timestep band of the age currently selected it would give
+  us more breathing room. We could also change the 3 age buttons to a single
+  label with left and right arrows to change age." AMEND-001 gave the track
+  explicit stage steppers because it could not be aimed; it did not make the
+  track itself readable. Measured in the drawer at 390 x 664 the full Mesozoic
+  window puts ~30 stages across a 366 px track, narrowest step **1-2 px**. That
+  is a picture of a timescale, not a control.
+- **Changed requirements:** REQ-001 (the track spans the full Mesozoic window)
+  and REQ-002 (three period delimitations rendered side by side), both at
+  `max-width: 40rem` only.
+- **Behavioral impact:** below the breakpoint the track renders **only the stages
+  of the currently selected period**, still positioned and sized in proportion to
+  their durations within that window, and the Ma graduation re-scales to the
+  window it now shows. The three period bands are replaced by a single
+  `role="group"` "Jump to period" stepper — older-period button, the selected
+  period's name and ICS colour dot as text, younger-period button — disabled at
+  the ends with a stated reason. Measured after the change: **12 Cretaceous
+  stages** on the same 366 px track, narrowest step **13 px** (10 px at 320).
+  Above the breakpoint nothing changes: the full window and the three bands are
+  rendered exactly as REQ-001/REQ-002 state.
+- **What is not weakened:** the track is still to scale (proportionality is a
+  property of the window shown, not of the window's extent); the selected stage
+  name and Ma span are still always-present text; keyboard stepping still
+  traverses the **full** stage list, so Left/Right and Home/End cross period
+  boundaries and re-scope the track rather than stopping at its edges; the
+  REQ-005 range highlight is retained, clipped at the visible window's edges with
+  a marker that says the range continues (`data-clip-old` / `data-clip-young`);
+  every period remains reachable in one tap of the stepper, which is the
+  affordance REQ-002 exists to preserve.
+- **Why this and not something else:** the alternatives were a wider track (no
+  width to give — the drawer is the viewport), a scrollable track (a horizontal
+  scroll on a phone, which SPEC-030 REQ-002 forbids at the document level and
+  which hides the current age off-screen), or leaving it (a 1 px step is not a
+  target and reads as noise). Scoping the window is the only option that keeps
+  every stage aimable without taking width from anything else.
+- **Test impact:** new e2e assertion that the drawer's track carries only the
+  selected period's stages and that stepping the period re-scopes it; the
+  existing "Jump to period" group locator in `phone-sheet.e2e.ts` still resolves,
+  since the stepper keeps the group role and name. No desktop SPEC-009 test
+  changes.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
 ### AMEND-002: The Ma graduation axis is hidden at phone widths
 
 - **Date:** 2026-09-02

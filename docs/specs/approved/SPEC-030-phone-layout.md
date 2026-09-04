@@ -966,6 +966,28 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
+### AMEND-004: The drawer's age selector shows one period at a time
+
+- **Date:** 2026-09-04
+- **Reason:** Owner request, 2026-09-04: "If we show only the timestep band of
+  the age currently selected it would give us more breathing room. We could also
+  change the 3 age buttons to a single label with left and right arrows to change
+  age."
+- **Changed requirements:** REQ-005/REQ-006, in the composition of the drawer's
+  timeline only. The behaviour change itself belongs to SPEC-009 and is recorded
+  there as **SPEC-009 AMEND-003** — the track in the drawer is scoped to the
+  selected period, and the three period bands become a single stepper. This entry
+  exists so the phone layout's own spec points at it rather than looking silent.
+- **Behavioral impact:** inside the controls drawer the track carries the selected
+  period's stages only (12 instead of ~30 at the Cretaceous), the narrowest step
+  goes from 1-2 px to 13 px at 390 and 10 px at 320, and the period row drops from
+  three bands to `<older | Period | younger>`. The strip layout outside the drawer
+  is unchanged, and REQ-005's permanent age/group/count line is untouched.
+- **Test impact:** covered by SPEC-009 AMEND-003's assertions; the existing
+  REQ-005 drawer gate in `test/e2e/phone-sheet.e2e.ts` continues to locate the
+  "Jump to period" group, which the stepper keeps.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
 ### AMEND-003: The states behind the first screen, reviewed
 
 - **Date:** 2026-09-04

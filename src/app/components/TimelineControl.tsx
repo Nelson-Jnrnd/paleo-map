@@ -39,6 +39,17 @@ interface TimelineControlProps {
    * REQ-005). Null when no occurrence is selected.
    */
   highlightRange?: TimeRange | null;
+  /**
+   * Show only the selected stage's own period, instead of the whole Mesozoic
+   * (SPEC-009 AMEND-003, phone only).
+   *
+   * The full window puts ~30 stages across the track. Even in the phone's
+   * controls drawer that is a 366px track and a narrowest step of 1–2px. Scoped
+   * to one period it is 7–12 stages in the same width, which is the difference
+   * between a readout and a control. The three period bands are replaced by a
+   * ◀ label ▶ stepper, which is also how you leave the period.
+   */
+  scopeToPeriod?: boolean;
 }
 
 /** Fractional left offset + width (0…1) of a [maxMa, minMa] span on the track. */
@@ -65,18 +76,31 @@ export function TimelineControl({
   onSelect,
   onSelectPeriod,
   highlightRange = null,
+  scopeToPeriod = false,
 }: TimelineControlProps): ReactElement {
-  // The full window: oldest stage's older bound → youngest stage's younger bound.
-  const windowMaxMa = stages.reduce((m, s) => Math.max(m, s.startMa), 0);
-  const windowMinMa = stages.reduce(
+  const selectedStage = stages.find((s) => s.name === selected);
+  const selectedPeriod = selectedStage?.period;
+
+  // The stages the track draws. Scoped, that is the selected stage's own
+  // period; everything downstream — the window, the ticks, the steps and the
+  // drag mapping — derives from this list, so nothing else needs to know.
+  const visibleStages =
+    scopeToPeriod && selectedPeriod
+      ? stages.filter((s) => s.period === selectedPeriod)
+      : stages;
+
+  // The window: oldest stage's older bound → youngest stage's younger bound.
+  const windowMaxMa = visibleStages.reduce((m, s) => Math.max(m, s.startMa), 0);
+  const windowMinMa = visibleStages.reduce(
     (m, s) => Math.min(m, s.endMa),
     Number.POSITIVE_INFINITY,
   );
   const windowSpan = windowMaxMa - windowMinMa || 1;
 
-  // Ma graduation ticks at round values inside the window (REQ-001). 25 Ma steps
-  // give a readable density across the ~186 Myr Mesozoic; oldest (largest Ma) left.
-  const TICK_STEP_MA = 25;
+  // Ma graduation ticks at round values inside the window (REQ-001). The step
+  // follows the span: 25 Ma reads well across the ~186 Myr Mesozoic but would
+  // leave the 51 Myr Triassic with two ticks.
+  const TICK_STEP_MA = windowSpan > 120 ? 25 : windowSpan > 70 ? 20 : 10;
   const ticks: number[] = [];
   for (
     let ma = Math.ceil(windowMinMa / TICK_STEP_MA) * TICK_STEP_MA;
@@ -86,8 +110,15 @@ export function TimelineControl({
     ticks.push(ma);
   }
 
-  const selectedStage = stages.find((s) => s.name === selected);
-  const selectedPeriod = selectedStage?.period;
+  // Period stepping, for the scoped control's ◀ ▶. Ordered oldest → youngest,
+  // like `stages`, and it lands on the period's representative stage — the same
+  // destination a band tap has always had (SPEC-008 REQ-003).
+  const periodIndex = selectedPeriod ? periods.indexOf(selectedPeriod) : -1;
+  const olderPeriod = periodIndex > 0 ? periods[periodIndex - 1] : undefined;
+  const youngerPeriod =
+    periodIndex >= 0 && periodIndex < periods.length - 1
+      ? periods[periodIndex + 1]
+      : undefined;
 
   // Roving focus: after a keyboard step re-selects a stage, move focus to the
   // newly-selected step so the single-tab-stop slider keeps focus with it.
@@ -120,7 +151,7 @@ export function TimelineControl({
     const ma = windowMaxMa - fraction * windowSpan;
     let best: GeologicalStage | undefined;
     let bestDist = Number.POSITIVE_INFINITY;
-    for (const s of stages) {
+    for (const s of visibleStages) {
       if (ma <= s.startMa && ma >= s.endMa) return s.name;
       const centre = (s.startMa + s.endMa) / 2;
       const dist = Math.abs(centre - ma);
@@ -279,51 +310,106 @@ export function TimelineControl({
           Younger
         </button>
 
-        <div
-          className={styles.periodBands}
-          role="group"
-          aria-label="Jump to period"
-        >
-          {periods.map((period) => {
-            const inPeriod = stages.filter((s) => s.period === period);
-            if (inPeriod.length === 0) return null;
-            const maxMa = inPeriod.reduce((m, s) => Math.max(m, s.startMa), 0);
-            const minMa = inPeriod.reduce(
-              (m, s) => Math.min(m, s.endMa),
-              Number.POSITIVE_INFINITY,
-            );
-            const { left, width } = extent(
-              maxMa,
-              minMa,
-              windowMaxMa,
-              windowSpan,
-            );
-            const inRange = highlightRange
-              ? Math.max(minMa, highlightRange.minMa) <
-                Math.min(maxMa, highlightRange.maxMa)
-              : false;
-            return (
-              <button
-                key={period}
-                type="button"
-                className={styles.periodBand}
-                style={{ left: pct(left), width: pct(width) }}
-                aria-pressed={period === selectedPeriod}
-                data-inrange={inRange ? "true" : undefined}
-                onClick={() => onSelectPeriod(period)}
-              >
-                <span
-                  className={styles.stageDot}
-                  style={{
-                    background: PERIOD_COLOURS[period] ?? "currentColor",
-                  }}
-                  aria-hidden="true"
-                />{" "}
-                {period}
-              </button>
-            );
-          })}
-        </div>
+        {scopeToPeriod && selectedPeriod ? (
+          /* SPEC-009 AMEND-003: one label and two arrows, in place of three
+             to-scale bands. The bands are a jump control *and* a map of where
+             the periods sit; on a phone the second job was costing 48px to say
+             what the label says in one line, and the track below is now scoped
+             to whichever period this names. */
+          <div
+            className={styles.periodStepper}
+            role="group"
+            aria-label="Jump to period"
+          >
+            <button
+              type="button"
+              className={styles.stageStepper}
+              aria-label="Older period"
+              disabled={!olderPeriod}
+              title={
+                olderPeriod
+                  ? `Older period · ${olderPeriod}`
+                  : "Already at the oldest period"
+              }
+              onClick={() => olderPeriod && onSelectPeriod(olderPeriod)}
+            >
+              ◀
+            </button>
+            <span className={styles.periodStepperLabel}>
+              <span
+                className={styles.stageDot}
+                style={{
+                  background: PERIOD_COLOURS[selectedPeriod] ?? "currentColor",
+                }}
+                aria-hidden="true"
+              />
+              {selectedPeriod}
+            </span>
+            <button
+              type="button"
+              className={styles.stageStepper}
+              aria-label="Younger period"
+              disabled={!youngerPeriod}
+              title={
+                youngerPeriod
+                  ? `Younger period · ${youngerPeriod}`
+                  : "Already at the youngest period"
+              }
+              onClick={() => youngerPeriod && onSelectPeriod(youngerPeriod)}
+            >
+              ▶
+            </button>
+          </div>
+        ) : (
+          <div
+            className={styles.periodBands}
+            role="group"
+            aria-label="Jump to period"
+          >
+            {periods.map((period) => {
+              const inPeriod = stages.filter((s) => s.period === period);
+              if (inPeriod.length === 0) return null;
+              const maxMa = inPeriod.reduce(
+                (m, s) => Math.max(m, s.startMa),
+                0,
+              );
+              const minMa = inPeriod.reduce(
+                (m, s) => Math.min(m, s.endMa),
+                Number.POSITIVE_INFINITY,
+              );
+              const { left, width } = extent(
+                maxMa,
+                minMa,
+                windowMaxMa,
+                windowSpan,
+              );
+              const inRange = highlightRange
+                ? Math.max(minMa, highlightRange.minMa) <
+                  Math.min(maxMa, highlightRange.maxMa)
+                : false;
+              return (
+                <button
+                  key={period}
+                  type="button"
+                  className={styles.periodBand}
+                  style={{ left: pct(left), width: pct(width) }}
+                  aria-pressed={period === selectedPeriod}
+                  data-inrange={inRange ? "true" : undefined}
+                  onClick={() => onSelectPeriod(period)}
+                >
+                  <span
+                    className={styles.stageDot}
+                    style={{
+                      background: PERIOD_COLOURS[period] ?? "currentColor",
+                    }}
+                    aria-hidden="true"
+                  />{" "}
+                  {period}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Disclose that a period jumps to its most fossil-rich stage, so
             landing on (e.g.) the Rhaetian for the Triassic reads as intended
@@ -366,14 +452,27 @@ export function TimelineControl({
                 <span
                   className={styles.rangeHighlight}
                   aria-hidden="true"
+                  // Clamped to the window: scoped to one period, a range that
+                  // runs past the edge would otherwise be drawn outside the
+                  // track. The bracket is dropped on a clipped side, so the
+                  // band never claims a bound it does not have.
+                  data-clip-old={hiMax > windowMaxMa ? "true" : undefined}
+                  data-clip-young={hiMin < windowMinMa ? "true" : undefined}
                   style={{
-                    left: pct((windowMaxMa - hiMax) / windowSpan),
-                    width: pct((hiMax - hiMin) / windowSpan),
+                    left: pct(Math.max(0, (windowMaxMa - hiMax) / windowSpan)),
+                    width: pct(
+                      Math.min(
+                        1 - Math.max(0, (windowMaxMa - hiMax) / windowSpan),
+                        (Math.min(hiMax, windowMaxMa) -
+                          Math.max(hiMin, windowMinMa)) /
+                          windowSpan,
+                      ),
+                    ),
                   }}
                 />
               );
             })()}
-          {stages.map((stage) => {
+          {visibleStages.map((stage) => {
             const isSelected = stage.name === selected;
             const { left, width } = extent(
               stage.startMa,

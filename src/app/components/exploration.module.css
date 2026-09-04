@@ -424,9 +424,22 @@
      drawer these are duplicates, so they go. What is left in the context row is
      what the strip does *not* carry: search, the frame choice, and Reset. */
   .controlsDrawer .stat:not(.frameStat),
-  .controlsDrawer .timelineLabel,
-  .controlsDrawer .stageStepper {
+  .controlsDrawer .timelineLabel {
     display: none;
+  }
+
+  /* The strip above already steps the *stage*; the drawer's steppers are the
+     *period* ones, so the stage pair stays hidden here and the period pair is
+     shown. */
+  .controlsDrawer .stepOlder,
+  .controlsDrawer .stepYounger {
+    display: none;
+  }
+
+  .controlsDrawer .periodStepper .stageStepper {
+    display: inline-flex;
+    min-width: var(--target-min-coarse);
+    min-height: var(--target-min-coarse);
   }
 
   /* With the stats before it hidden, the separator rule still fired and left a
@@ -477,6 +490,13 @@
       "bands"
       "track"
       "axis";
+  }
+
+  /* The period hint explained that a band jumps to its most fossil-rich stage.
+     With the bands gone the sentence has no referent — the stepper moves to the
+     same stage, and the strip's readout names where it landed. */
+  .controlsDrawer .periodHint {
+    display: none;
   }
 
   /* The Ma axis comes back here. It was hidden to win 20px for a height problem
@@ -706,6 +726,38 @@
    breakpoint — `display: none` keeps them out of the accessibility tree too, so
    the desktop control is unchanged in shape and in what a screen reader hears
    (NFR-002). The phone block below gives them their place in the grid. */
+/* SPEC-009 AMEND-003: the period stepper that replaces the three bands on a
+   phone. Same shape as the stage stepper in the strip above, one level coarser —
+   two arrows either side of the thing they change. */
+.periodStepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  grid-area: bands;
+}
+
+.periodStepperLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rangeHighlight[data-clip-old="true"] {
+  border-inline-start: none;
+}
+
+.rangeHighlight[data-clip-young="true"] {
+  border-inline-end: none;
+}
+
 .stageStepper {
   display: none;
   align-items: center;

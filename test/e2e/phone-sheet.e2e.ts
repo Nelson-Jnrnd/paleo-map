@@ -306,6 +306,53 @@ test.describe("the occurrence sheet at 390×664", () => {
     await expect(searchField).toHaveCount(0);
   });
 
+  test("SPEC-009 AMEND-003: the drawer's track shows one period at a time", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+    await openControlsDrawer(page);
+
+    // The defect: the full Mesozoic window puts ~30 stages across the drawer's
+    // 366px track, so the narrowest step is 1-2px. Asserted through the steps
+    // themselves rather than through a width, because "readable" is a property
+    // of how many stages share the track, not of any one measurement.
+    const steps = page.locator("[data-stage-step]");
+    const atCretaceous = await steps.count();
+    expect(atCretaceous).toBeGreaterThan(0);
+    expect(atCretaceous).toBeLessThanOrEqual(15);
+
+    // Every step is wide enough to see and to aim at.
+    const narrowest = await page.evaluate(() =>
+      Math.min(
+        ...Array.from(document.querySelectorAll("[data-stage-step]")).map(
+          (el) => el.getBoundingClientRect().width,
+        ),
+      ),
+    );
+    expect(narrowest).toBeGreaterThanOrEqual(8);
+
+    // The three bands became a stepper, and it re-scopes the track: the group
+    // REQ-002's jump affordance lives in keeps its role and name.
+    const jump = page.getByRole("group", { name: /jump to period/i });
+    await expect(jump).toBeVisible();
+    await expect(jump).toContainText(/Cretaceous/);
+
+    await jump.getByRole("button", { name: /older period/i }).click();
+    await page.waitForTimeout(300);
+    await expect(jump).toContainText(/Jurassic/);
+    // Scoped, not merely relabelled: a Jurassic stage is on the track and the
+    // Cretaceous stages have left it.
+    // Matched on the step's accessible name: the steps are bars, not labels —
+    // the stage name is their `aria-label`, not their text.
+    await expect(
+      page.locator('[data-stage-step][aria-label^="Kimmeridgian,"]'),
+    ).toHaveCount(1);
+    await expect(
+      page.locator('[data-stage-step][aria-label^="Maastrichtian,"]'),
+    ).toHaveCount(0);
+  });
+
   test("REQ-004: a detail opened while peeking raises the sheet", async ({
     page,
   }) => {

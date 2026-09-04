@@ -933,6 +933,7 @@ export function ExplorationView({
               }
               onSelectPeriod={selectPeriod}
               highlightRange={highlightRange}
+              scopeToPeriod
             />
           </MapControlsDrawer>
         </>
