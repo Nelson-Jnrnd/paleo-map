@@ -371,6 +371,29 @@
   color: var(--color-text-muted);
 }
 
+/* SPEC-030 AMEND-005: Reset view, moved up out of the context row. Quiet text,
+   like the control it replaces (SPEC-022 REQ-006) — the head is a row of
+   actions, not a toolbar of buttons. `margin-left: auto` pushes both it and
+   "Done" to the trailing end, leaving the title alone on the left. */
+.drawerReset {
+  margin-left: auto;
+  min-height: var(--target-min-coarse);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-min);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.drawerReset:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
 .drawerClose {
   min-height: var(--target-min-coarse);
   padding: 0 var(--space-3);
@@ -471,8 +494,12 @@
     flex: 1 1 auto;
   }
 
+  /* The head carries Reset now, so the context row holds the frame choice
+     alone. Measured at 320: the frame choice is 215px and Reset 72px with a
+     12px gap between them — 299px into 296px — so the row wrapped and the
+     drawer stood at 358px of a 568px screen, leaving the map 91px. */
   .controlsDrawer .reset {
-    margin-left: 0;
+    display: none;
   }
 
   /* One rhythm for the panel: every block is separated by the same step. */
@@ -952,6 +979,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* SPEC-009 AMEND-003: a label centred on a tick that sits at the very end of
+   the window hangs off the track. Anchoring the end ticks to their own edge
+   keeps the number inside the axis without moving the tick mark itself. */
+.axisTick[data-axis-edge="start"] {
+  transform: none;
+  align-items: flex-start;
+}
+
+.axisTick[data-axis-edge="end"] {
+  transform: translateX(-100%);
+  align-items: flex-end;
 }
 
 .axisTick::before {
@@ -1727,6 +1767,38 @@
     overflow-y: auto;
   }
 
+  /* With the drawer open the sheet is not rendered (AMEND-005), so there is
+     nothing below for the rails to clear and `--sheet-height` is stale. They
+     return to the corner and to their unoffset cap. */
+  .body[data-drawer-open="true"] .railBottomLeft,
+  .body[data-drawer-open="true"] .railBottomRight {
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    max-height: 55%;
+  }
+
+  /* SPEC-030 AMEND-005: the two bottom-left overlays sit side by side while the
+     clade key is collapsed.
+
+     Measured at every phone width the rail was 106 × 114px — a vertical band
+     down the left of the map holding a 44px ⓘ and a 62px card whose only
+     content is the words "Clade key". Stacked, it read as two competing panels;
+     laid out as one row it is 44px tall and stops occupying a column of the
+     map. Expanded, the key needs its height back, so the rail returns to the
+     stack it was: the row is the *collapsed* state only.
+
+     The label stays a label — SPEC-023 UX-001 requires a labelled affordance,
+     not an icon — so what is reclaimed is the stacking and the card padding,
+     not the words. */
+  .railBottomLeft[data-clade-key="collapsed"] {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .railBottomLeft[data-clade-key="collapsed"] .mapLegend2 {
+    padding: 0 var(--space-2);
+    max-height: none;
+  }
+
   /* SPEC-023 AMEND-002: an asymmetric split instead of REQ-004's implied 50/50.
      The gate toggle's label is long and the ⓘ and the collapsed clade key are
      short, so halving a 360px map made the gate wrap to four lines (97px tall)
@@ -1737,9 +1809,26 @@
     max-width: calc(60% - var(--space-3));
   }
 
-  .railBottomLeft,
   .railTopLeft {
     max-width: calc(40% - var(--space-3));
+  }
+
+  /* SPEC-030 AMEND-005: the bottom-left rail is not held to the 40% share on a
+     phone. The bottom-right rail is empty here — SPEC-023 AMEND-003 moved the
+     Wikipedia gate into the sheet — so there is no opposite rail for the split
+     to keep it away from, and REQ-004's actual invariant (two rails can never
+     meet) is satisfied by the pane bounding the one rail that exists.
+
+     Measured before this: the expanded key was capped at `calc(40% - 12px)` =
+     144px at 390, its rows at 118px, and "Thyreophoran", "Ceratopsian" and
+     "Pachycephalosaur" were cut off mid-word. A key whose clade names are
+     unreadable is not a key.
+
+     Placed here, after the share rules, deliberately: an equal-specificity rule
+     earlier in this file loses, which is exactly how the first cut of this fix
+     silently did nothing. */
+  .railBottomLeft {
+    max-width: calc(100% - var(--space-3) * 2);
   }
 
   /* The unit selector takes two rows at the peek stop rather than one scrolling

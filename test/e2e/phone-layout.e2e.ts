@@ -195,22 +195,50 @@ test.describe("phone overlays at 320px", () => {
     // Expanded, it must still honour its rail's width bound (REQ-007 clause 1) —
     // the defect that produced P-10's overlap. Measured against boxes rather
     // than against the computed `max-width`, which resolves to an unparseable
-    // `calc()` string: the bound that matters is `calc(50% - var(--space-3))`
-    // of the map pane, so assert the rail obeys it and the key obeys the rail.
+    // `calc()` string.
+    //
+    // SPEC-030 AMEND-005 changed what that bound *is* on a phone, and did not
+    // relax it. REQ-004's invariant is that two rails can never meet; the
+    // Wikipedia gate moved into the sheet (SPEC-023 AMEND-003), so there is no
+    // bottom-right rail on this screen for the old 50/50 share to keep the key
+    // away from, and the pane is what bounds the one rail that exists. Asserted
+    // as both halves of that: the opposite rail really is absent, and the rail
+    // really is inside the pane. Holding the key to half a 320px pane capped it
+    // at 144px and cut "Pachycephalosaur" off mid-word.
     const bounded = await page.evaluate(() => {
       const key = document.querySelector("[data-map-overlay='clade-key']");
       const rail = key?.closest("[data-map-rail]");
       const pane = document.querySelector("[data-map-pane]");
       if (!key || !rail || !pane) return null;
+      const p = pane.getBoundingClientRect();
       return {
         key: key.getBoundingClientRect().width,
         rail: rail.getBoundingClientRect().width,
-        bound: pane.getBoundingClientRect().width * 0.5 - 12,
+        railRight: rail.getBoundingClientRect().right,
+        paneRight: p.right,
+        bound: p.width - 24,
+        opposite: document.querySelectorAll(
+          "[data-map-rail='bottom-right']",
+        ).length,
       };
     });
     expect(bounded).not.toBeNull();
     expect(bounded!.key).toBeLessThanOrEqual(bounded!.rail + 0.5);
     expect(bounded!.rail).toBeLessThanOrEqual(bounded!.bound + 0.5);
+    expect(bounded!.railRight).toBeLessThanOrEqual(bounded!.paneRight + 0.5);
+    expect(bounded!.opposite).toBe(0);
+
+    // And the key is wide enough to say what it says: every clade name renders
+    // in full rather than being clipped by its own box.
+    const clipped = await page.evaluate(() =>
+      Array.from(
+        document.querySelectorAll("[data-map-overlay='clade-key'] li, " +
+          "[data-map-overlay='clade-key'] [class*='legendItem']"),
+      )
+        .filter((el) => el.scrollWidth > el.clientWidth + 1)
+        .map((el) => (el.textContent ?? "").trim()),
+    );
+    expect(clipped).toEqual([]);
   });
 
   test("REQ-007: no overlay escapes the map pane at the narrowest width", async ({

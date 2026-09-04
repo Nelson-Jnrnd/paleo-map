@@ -19,12 +19,21 @@ import styles from "./exploration.module.css";
 interface MapControlsDrawerProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * Reset the map view (SPEC-022 REQ-006). It lives in the head rather than in
+   * the context row below because at 320px the row could not hold the frame
+   * choice and Reset together — 299px of controls in 296px — so Reset wrapped
+   * onto a 44px row of its own and the drawer grew to 358px of a 568px screen.
+   * The head row had the space already.
+   */
+  onReset: () => void;
   children: ReactNode;
 }
 
 export function MapControlsDrawer({
   open,
   onClose,
+  onReset,
   children,
 }: MapControlsDrawerProps): ReactElement | null {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -68,6 +77,9 @@ export function MapControlsDrawer({
           tying it to what it closed. */}
       <div className={styles.drawerHead}>
         <span className={styles.drawerTitle}>Age, search &amp; map</span>
+        <button type="button" className={styles.drawerReset} onClick={onReset}>
+          Reset view
+        </button>
         <button type="button" className={styles.drawerClose} onClick={onClose}>
           Done
         </button>

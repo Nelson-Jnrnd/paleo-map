@@ -966,6 +966,56 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
+### AMEND-005: The map overlays shrink, and the drawer stops squeezing the map
+
+- **Date:** 2026-09-04
+- **Reason:** Owner review, 2026-09-04: "Fix both also the information button and
+  clade key take too much of the map in the mobile version" — the two remaining
+  defects from the previous round plus a third the owner named.
+- **Changed requirements:** REQ-005 and REQ-007. SPEC-023 REQ-004's rail share is
+  amended for the phone case; SPEC-023 UX-001 is **not** amended — the clade key
+  keeps its words.
+- **Behavioral impact,** four changes, each measured:
+  1. **The bottom-left rail is one row while the key is collapsed.** It was 106 x
+     114 px at every phone width — a vertical band down the left of the map
+     holding a 44px ⓘ and a 62px card whose whole content is the words "Clade
+     key". Laid out side by side it is 150 x 46 px: 5% of the pane at 320 and 3%
+     at 390, down from 8% and 6%, and it no longer occupies a column. Expanded,
+     the rail returns to the stack, because then the key needs its height.
+  2. **The bottom-left rail is bounded by the pane, not by a 40% share.** The
+     Wikipedia gate moved into the sheet (SPEC-023 AMEND-003), so on this screen
+     there is no opposite rail for the share to keep the key away from. Held to
+     40% the expanded key was capped at 144px with 118px rows, and
+     "Thyreophoran", "Ceratopsian" and "Pachycephalosaur" were cut off mid-word.
+     It now sizes to its 183px min-content width. REQ-004's actual invariant —
+     two rails can never meet — is asserted directly instead, together with the
+     absence of the opposite rail.
+  3. **Reset view moves into the drawer head.** At 320 the context row held a
+     215px frame choice and a 72px Reset with a 12px gap: 299px into 296px, so
+     Reset wrapped onto a 44px row of its own and the drawer stood at 358px of a
+     568px screen. In the head — which had the space — the row fits and the
+     drawer is 306px. The control's words and behaviour are unchanged
+     (SPEC-022 REQ-006).
+  4. **The occurrence sheet stands down while the drawer is open.** With the
+     drawer open at 320 the sheet was clamped into 41px: a truncated grab handle
+     over a 91px sliver of map. The map takes the whole remainder instead —
+     **91px to 143px**, +57% — so the age being stepped is the thing that can be
+     seen changing. The sheet returns unchanged on Done, and the rails drop back
+     to the corner rather than clearing a sheet that is not there.
+- **What is not weakened:** the clade key keeps its label, not an icon
+  (SPEC-023 UX-001); the ⓘ, the gate count and the reconstruction note are
+  untouched (charter §2 — provenance and uncertainty stay legible); every
+  control keeps the 44px coarse-pointer floor; Reset stays permanently visible
+  whenever the drawer is open, as CONS-450 requires.
+- **What this does not fix:** at 320 x 568 the drawer still takes 306px of a
+  449px body, so the map is 143px while it is open. That is the honest floor for
+  a search field, a frame choice, a period stepper, a to-scale track and an axis
+  at a 44px touch target — the drawer is transient and Done returns the screen.
+- **Test impact:** `test/e2e/phone-layout.e2e.ts` REQ-007 restated against the
+  amended bound (the pane, plus the opposite rail's absence) and extended with a
+  clipped-label check on the expanded key. No test was relaxed or removed.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
 ### AMEND-004: The drawer's age selector shows one period at a time
 
 - **Date:** 2026-09-04

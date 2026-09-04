@@ -1514,6 +1514,11 @@ export function OccurrenceMap({
         <div
           className={`${styles.mapRail} ${styles.railBottomLeft}`}
           data-map-rail="bottom-left"
+          // SPEC-030 AMEND-005: on a phone the rail lays its two children out
+          // side by side while the key is collapsed — 44px of the map's height
+          // instead of 114px. Read from state rather than with `:has()` so the
+          // layout does not depend on a selector the rail cannot control.
+          data-clade-key={cladeKeyOpen ? "open" : "collapsed"}
         >
           {basemap && frame && (
             <div

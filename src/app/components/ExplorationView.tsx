@@ -922,6 +922,7 @@ export function ExplorationView({
           <MapControlsDrawer
             open={drawerOpen}
             onClose={() => setDrawerOpen(false)}
+            onReset={() => dispatch({ type: "reset" })}
           >
             {contextControls}
             <TimelineControl
@@ -959,7 +960,10 @@ export function ExplorationView({
           occurrences are shown — {state.stageName} here.
         </p>
       )}
-      <div className={styles.body}>
+      <div
+        className={styles.body}
+        data-drawer-open={phoneLayout && drawerOpen ? "true" : undefined}
+      >
         <div className={styles.mapPane} data-map-pane>
           {/* SPEC-023 REQ-002: app controls acting on what is plotted live in the
               bottom-right rail. The top-right corner is reserved for MapLibre's
@@ -1020,7 +1024,13 @@ export function ExplorationView({
             sheet is the phone form of the SPEC-026 column, not a second surface
             — writing the column out twice would be the fastest way to let the
             two drift apart. */}
-        {phoneLayout ? (
+        {/* SPEC-030 AMEND-005: while the controls drawer is open the sheet
+            stands down. At 320×568 the drawer leaves 132px below it, and a
+            sheet clamped into 41px of that is a truncated grab handle over a
+            sliver of map — two mushed surfaces where the reader asked for one
+            control panel. The map keeps the whole remainder instead, so the
+            age they are stepping is the thing they can see change. */}
+        {phoneLayout && drawerOpen ? null : phoneLayout ? (
           <OccurrenceSheet
             label="Occurrence details"
             detailKey={detail ? (selectedKey ?? "detail") : null}

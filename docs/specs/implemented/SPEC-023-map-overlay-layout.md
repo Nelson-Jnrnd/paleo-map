@@ -817,6 +817,35 @@ all ten**, with the region focusable and labelled in each.
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-004: The phone rail share, superseded by the pane
+
+- **Date:** 2026-09-04
+- **Reason:** AMEND-002 gave the bottom-left rail 40% and the bottom-right 60%
+  at phone widths, to stop the gate toggle wrapping to four lines. AMEND-003
+  then moved the gate off the map entirely, which left the 40% cap bounding the
+  clade key against a rail that no longer exists. Held to it, the expanded key
+  was 144px wide with 118px rows and "Thyreophoran", "Ceratopsian" and
+  "Pachycephalosaur" were cut off mid-word.
+- **Changed requirements:** REQ-004, at `max-width: 40rem` only. AMEND-002's
+  60% for the bottom-right rail is retired with it, having nothing left to
+  apply to.
+- **Behavioral impact:** below the breakpoint the bottom-left rail is bounded by
+  the map pane (`calc(100% - var(--space-3) * 2)`) rather than by a share of it,
+  and the key sizes to its 183px min-content width. The top-left rail keeps the
+  40% cap. Above the breakpoint nothing changes — the desktop 50/50 share and
+  both rails are exactly as REQ-004 states, and NFR-002's desktop gate asserts
+  it.
+- **Why this is not a weakening:** REQ-004's requirement is that a rail can
+  never grow into the opposite rail's half. The share was one way to enforce it,
+  chosen when there were two rails. With one rail the same invariant is
+  enforced by the pane, and the phone gate now asserts both halves of it — the
+  rail is inside the pane, and the opposite rail is absent. The rail's *height*
+  cap, its scroll behaviour and REQ-001's "no overlay leaves the pane" are all
+  unchanged and still asserted.
+- **See also:** SPEC-030 AMEND-005, which records this alongside the collapsed
+  rail's row layout.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
 ### AMEND-003: The Wikipedia-gate toggle leaves the map on a phone
 
 - **Date:** 2026-09-03

@@ -514,15 +514,25 @@ export function TimelineControl({
         {/* Ma graduation — decorative scale; the selected age is announced via the
             readout and the stage buttons, so the axis is hidden from a11y. */}
         <div className={styles.stageAxis} aria-hidden="true">
-          {ticks.map((ma) => (
+          {ticks.map((ma) => {
+            const at = (windowMaxMa - ma) / windowSpan;
+            // A tick label is centred on its position, so one within a label's
+            // half-width of either end hangs outside the track. On the full
+            // Mesozoic window the panel's inset absorbed it; scoped to a single
+            // period the last round value can land at 88% and its label ran
+            // into the edge. Ticks near an end anchor to that end instead.
+            const edge = at < 0.04 ? "start" : at > 0.94 ? "end" : undefined;
+            return (
             <span
               key={ma}
               className={styles.axisTick}
-              style={{ left: pct((windowMaxMa - ma) / windowSpan) }}
+              data-axis-edge={edge}
+              style={{ left: pct(at) }}
             >
               <span className={`${styles.axisTickLabel} mono`}>{ma}</span>
             </span>
-          ))}
+            );
+          })}
           <span className={styles.axisUnit}>Ma</span>
         </div>
       </div>
