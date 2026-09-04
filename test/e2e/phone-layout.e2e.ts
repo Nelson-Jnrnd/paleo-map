@@ -217,9 +217,8 @@ test.describe("phone overlays at 320px", () => {
         railRight: rail.getBoundingClientRect().right,
         paneRight: p.right,
         bound: p.width - 24,
-        opposite: document.querySelectorAll(
-          "[data-map-rail='bottom-right']",
-        ).length,
+        opposite: document.querySelectorAll("[data-map-rail='bottom-right']")
+          .length,
       };
     });
     expect(bounded).not.toBeNull();
@@ -232,8 +231,10 @@ test.describe("phone overlays at 320px", () => {
     // in full rather than being clipped by its own box.
     const clipped = await page.evaluate(() =>
       Array.from(
-        document.querySelectorAll("[data-map-overlay='clade-key'] li, " +
-          "[data-map-overlay='clade-key'] [class*='legendItem']"),
+        document.querySelectorAll(
+          "[data-map-overlay='clade-key'] li, " +
+            "[data-map-overlay='clade-key'] [class*='legendItem']",
+        ),
       )
         .filter((el) => el.scrollWidth > el.clientWidth + 1)
         .map((el) => (el.textContent ?? "").trim()),

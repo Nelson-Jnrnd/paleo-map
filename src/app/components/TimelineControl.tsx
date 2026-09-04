@@ -523,14 +523,14 @@ export function TimelineControl({
             // into the edge. Ticks near an end anchor to that end instead.
             const edge = at < 0.04 ? "start" : at > 0.94 ? "end" : undefined;
             return (
-            <span
-              key={ma}
-              className={styles.axisTick}
-              data-axis-edge={edge}
-              style={{ left: pct(at) }}
-            >
-              <span className={`${styles.axisTickLabel} mono`}>{ma}</span>
-            </span>
+              <span
+                key={ma}
+                className={styles.axisTick}
+                data-axis-edge={edge}
+                style={{ left: pct(at) }}
+              >
+                <span className={`${styles.axisTickLabel} mono`}>{ma}</span>
+              </span>
             );
           })}
           <span className={styles.axisUnit}>Ma</span>
