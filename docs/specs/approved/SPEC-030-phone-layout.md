@@ -5,7 +5,7 @@ title: Phone layout — a portrait-phone form for the atlas
 status: In Implementation
 owner: nelsonjeanrenaud@gmail.com
 related_issue:
-related_prs: []
+related_prs: [29]
 affected_components:
   - index.html
   - src/app/styles/tokens.css
