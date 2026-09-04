@@ -61,6 +61,10 @@ export function MapHoverCard({
     <div
       className={`${styles.mapHoverCard} ${pinned ? styles.mapHoverPinned : ""}`}
       style={{ left: x, top: y }}
+      // SPEC-030 UX-002 asserts that a *tap* produces this card on a device with
+      // no hover — SPEC-023 AMEND-001 leans on it, since the collapsed clade key
+      // stops being the only carrier of the clade name only if this appears.
+      data-map-card={pinned ? "pinned" : "hover"}
       role={pinned ? "dialog" : "tooltip"}
       aria-hidden={pinned ? undefined : "true"}
       aria-label={pinned ? `${content.taxon} details` : undefined}

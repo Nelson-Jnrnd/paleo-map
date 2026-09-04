@@ -269,6 +269,22 @@ additively; no requirement contradicts them. `conflicts_with` empty. Drift note
 
 ## Spec amendments
 
+### AMEND-001: The search sits behind the age strip's drawer on a phone
+
+- **Date:** 2026-09-03
+- **Reason:** SPEC-030 AMEND-001. The search row is 44px of permanent chrome on
+  a screen where the map had been reduced to 28% of the viewport.
+- **Changed requirements:** the search's placement only.
+- **Behavioral impact:** at `max-width: 40rem` the search field renders inside
+  the map screen's controls drawer, one tap from the age readout, instead of in
+  the always-visible context row. Its behaviour, index, matching and landing
+  semantics are untouched, as is its placement above the breakpoint. Nothing in
+  SPEC-013 requires the field to be permanently visible — CONS-450's permanence
+  list does not name search.
+- **Test impact:** `test/e2e/phone-layout.e2e.ts` opens the drawer before
+  asserting UX-003's 16px minimum on the field.
+- **Human approval reference:** Owner approval: 2026-09-03, session `session_01GvwYfnCtWQGcynW17zS4su` — "the main view is not satisfactory… the map needs to be the star of the show. Other things need to become hidden behind drawers."
+
 _None yet._
 
 ## Review checklist

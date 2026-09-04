@@ -250,6 +250,52 @@ state:
 - **Navigation context** — always show where the user is (selected age, group,
   count are permanent — FONC-040/050/060) and the single-action way back.
 
+## 8b. Viewport and touch
+
+Design conventions, not requirements — requirements live in the functional
+specification and in SPEC-030.
+
+- **One breakpoint: `40rem`.** At or below it the phone layout applies; above it
+  the desktop layout. There is no tablet tier. If a screen needs a second
+  number, that is a signal the layout is wrong, not that the system needs
+  another breakpoint.
+- **Width and pointer are separate questions.** A narrowed desktop window gets
+  the phone *layout*; a touch laptop gets the touch *targets*. Never collapse
+  them into one "is mobile" flag — each condition has its own media query
+  (`max-width: 40rem`, `pointer: coarse`, `hover: none`).
+- **44px targets on a coarse pointer.** `--target-min` (24px, PERF-120) is the
+  floor for a mouse; `--target-min-coarse` raises it for a finger. Size controls
+  from the token, never from a hard-coded pixel value, or the raise will not
+  reach them. One exemption exists and it is geometric: the timeline's ~30
+  to-scale stage steps cannot each be 44px on a 390px screen, so discrete
+  previous/next controls carry precise selection instead.
+- **Nothing is hover-only.** On touch, hover is not a secondary interaction — it
+  is no interaction. Any information or affordance a mouse user gets by hovering
+  needs a tap equivalent. For provenance and uncertainty this is not a nicety:
+  §2 and CONS-490 are broken by a hover-gated disclosure on a phone.
+- **A phone screen re-arranges; it does not squeeze.** Two columns become one
+  surface plus a sheet; a fixed side label becomes a full-width line above. A
+  layout that merely narrows produces the 226px map and the 164px list this
+  convention exists to prevent.
+- **What may become a sheet.** The exploration list, because it is a companion
+  to the map rather than the subject. The map itself may not: it is the subject.
+  A sheet is never a modal — the surface behind it stays interactive, and it
+  never covers that surface entirely.
+- **The subject of a screen gets the screen.** On the map screen the map is the
+  subject and everything else is a companion. Chrome that is permanently visible
+  is chrome measured against the *viewport*, not against whatever is left after
+  it: a header that leaves the map 28% of the phone has already lost, whatever
+  the ratios inside the remainder say.
+- **Permanence is for what the reader is reading, not for every control.** The
+  age, the group and the count stay on screen at every width — they say what you
+  are looking at. Controls that *change* what you are looking at may sit one tap
+  behind a disclosure when the screen is small, and on a phone the timeline, the
+  frame toggle and Reset do (SPEC-030 AMEND-001, amending CONS-450). The verb
+  the loop turns on — stepping the age — is the exception: it stays one tap.
+- **A drawer is a disclosure, not a modal.** It expands in flow, takes the space
+  it needs and gives it back; no scrim, no focus trap, nothing left `inert`
+  behind it.
+
 ## 9. Before designing any screen
 
 Answer these, in the mockup page or the design note:

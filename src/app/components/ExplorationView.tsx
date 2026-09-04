@@ -65,6 +65,10 @@ import { fragmentFor, parseFragment } from "../state/screenFragment.js";
 import { TaxonProfile } from "./TaxonProfile.js";
 import { TaxonomyScreen } from "./TaxonomyScreen.js";
 import { EmptyState, ErrorState, LoadingState } from "./states.js";
+import { OccurrenceSheet } from "./OccurrenceSheet.js";
+import { usePhoneLayout } from "../state/media.js";
+import { AgeStrip } from "./AgeStrip.js";
+import { MapControlsDrawer } from "./MapControlsDrawer.js";
 import styles from "./exploration.module.css";
 
 interface ExplorationViewProps {
@@ -194,6 +198,13 @@ export function ExplorationView({
   // no frame control is offered at all.
   const [presentFrameAvailable, setPresentFrameAvailable] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  // SPEC-030 REQ-003: below the breakpoint the sidebar column becomes a sheet
+  // over a full-bleed map. Layout only — what the column *contains* is
+  // identical, so this branches the container and nothing else.
+  const phoneLayout = usePhoneLayout();
+  // The phone controls drawer. Closed on load — the map is the subject of this
+  // screen, and everything in here is one tap away from the age strip.
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
   // indeterminate occurrences). The toggle below reveals them.
   const [showAll, setShowAll] = useState(false);
@@ -480,7 +491,11 @@ export function ExplorationView({
         : `${LIST_UNIT_LABEL[unit]} on the map`;
   const unitNoun =
     unit === "occurrence"
-      ? "occurrence(s)"
+      ? // Pluralised properly rather than "occurrence(s)": since the sheet's
+        // resting label is now this string, it is read constantly.
+        occurrences.length === 1
+        ? "occurrence"
+        : "occurrences"
       : unit === "locality"
         ? "localities"
         : unit === "genus"
@@ -745,17 +760,194 @@ export function ExplorationView({
         ? spanRange(selectedLocality)
         : (selectedOccurrence?.timeRange.value ?? null);
 
+  // SPEC-023 AMEND-003. On the map it is a rail child; on a phone it renders in
+  // the sheet, with the unit selector.
+  //
+  // Measured at 320×568: the toggle's label wraps to four lines (80px tall) on a
+  // map pane that is 175px tall, of which the resting sheet leaves ~60px above
+  // it. No chrome trim closes that gap — the control does not fit on the map at
+  // the narrowest supported width. It is also the one overlay that is a *list
+  // filter* rather than a statement about the map, so the sheet is where it
+  // belongs anyway: it gives the map back 80px at every phone width, and
+  // CONS-450 is better served by a control visible beside the list it filters
+  // than by one pushed off the map.
+  const wikipediaGate = (
+    <label className={styles.wikiGateToggle} data-map-overlay="wikipedia-gate">
+      <input
+        type="checkbox"
+        checked={showAll}
+        onChange={(e) => setShowAll(e.target.checked)}
+      />
+      <span>
+        Show taxa without a Wikipedia article
+        {!showAll && hiddenCount > 0 && (
+          <span className={styles.wikiGateCount}> · {hiddenCount} hidden</span>
+        )}
+      </span>
+    </label>
+  );
+
+  // What the sheet's handle says at rest. While a detail is open the list is not
+  // what is showing, so it names the selection rather than claiming a count of
+  // rows it is not displaying.
+  const detailName = selectedOccurrence
+    ? selectedOccurrence.taxonName
+    : selectedLocality
+      ? selectedLocality.name
+      : (selectedTaxonGroup?.name ?? null);
+  const sheetSummary =
+    detail && detailName
+      ? detailName
+      : `${unitRows.length} ${unitNoun}${viewport !== null ? " in view" : ""}`;
+
+  const columnContents = (
+    <>
+      {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
+        <div className={styles.stateWrap} role="status">
+          <p className={styles.stateTitle}>
+            {stageStatus.kind === "error"
+              ? "Could not load this stage."
+              : `Loading ${state.stageName}…`}
+          </p>
+        </div>
+      ) : occurrences.length === 0 ? (
+        <EmptyState onReset={() => dispatch({ type: "reset" })} />
+      ) : (
+        <>
+          {/* SPEC-026 AMEND-002: on a phone the list's own controls stand down
+              while a detail is open. REQ-003 keeps them beside the detail in a
+              full-height desktop column; in a 290px sheet they cost 130px of
+              the 160px the detail had, so tapping a row showed the same two
+              controls again and pushed the taxon and its back link off the
+              bottom. They return with the list. */}
+          {!(phoneLayout && detail) && (
+            <>
+              <GroupingControls
+                unit={unit}
+                onSelectUnit={(next) =>
+                  dispatch({ type: "setUnit", unit: next })
+                }
+              />
+              {phoneLayout && (
+                <div className={styles.sheetGate}>{wikipediaGate}</div>
+              )}
+            </>
+          )}
+
+          {/* SPEC-027 REQ-004: the app tells the Explorer what it did
+                with their search when that is not what they typed. Both sit
+                above the detail-or-list block, because in each case there is
+                no detail to carry them: the first made no selection at all,
+                the second selected a group with nothing at this age. */}
+          {unreachable && (
+            <p className={styles.notice} role="status">
+              <span className="sciName">{unreachable.searched}</span> isn’t a
+              level the map groups by, and none of the groups above it are
+              either — so it can’t be selected. Try a genus, a family, or a
+              major group.
+            </p>
+          )}
+          {absentTaxonName && (
+            <p className={styles.notice} role="status">
+              <span className="sciName">{absentTaxonName}</span> has no records
+              in the {state.stageName}. Step the timeline to an age within its
+              range, or clear the selection.
+            </p>
+          )}
+
+          {/* REQ-003: a selection *replaces* the list in the same column
+                rather than stacking above it. Stacking pushed the list out of
+                a 360px column, so choosing a row cost you the list you were
+                reading. The unit selector above stays operable throughout. */}
+          {detail ?? (
+            <UnitList
+              label={unitLabel}
+              noun={unitNoun}
+              rows={unitRows}
+              totalAtAge={unitOccurrences.length}
+              viewportActive={viewport !== null}
+              selectedKey={selectedKey}
+              highlightedKey={highlightedKey}
+              onSelect={selectRow}
+              onHighlight={highlightRow}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+
+  // One ContextBar, two homes: the shell's banner on desktop, the drawer on a
+  // phone. Declared once so the two cannot drift.
+  const contextControls = (
+    <ContextBar
+      stage={stage}
+      stageName={state.stageName}
+      group={state.group}
+      count={occurrences.length}
+      frameMode={state.frameMode}
+      {...(presentFrameAvailable
+        ? {
+            onFrameModeChange: (frameMode: FrameMode) =>
+              dispatch({ type: "setFrameMode", frameMode }),
+          }
+        : {})}
+      searchIndex={searchIndex}
+      onSearchSelect={onSearchSelect}
+      onReset={() => dispatch({ type: "reset" })}
+    />
+  );
+
   return shell(
     "map",
     <>
-      <TimelineControl
-        stages={EXPLORATION_STAGES}
-        periods={EXPLORATION_PERIODS}
-        selected={state.stageName}
-        onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
-        onSelectPeriod={selectPeriod}
-        highlightRange={highlightRange}
-      />
+      {/* SPEC-030 REQ-005/REQ-006 as amended: on a phone the full to-scale
+          timeline and the context row's controls move into a drawer, and the
+          strip keeps the age readout, one-tap stepping and the group/count.
+          Above the breakpoint both render exactly as before (NFR-002). */}
+      {phoneLayout ? (
+        <>
+          <AgeStrip
+            stages={EXPLORATION_STAGES}
+            selected={state.stageName}
+            stage={stage}
+            onSelect={(stageName) =>
+              dispatch({ type: "selectStage", stageName })
+            }
+            group={state.group}
+            count={occurrences.length}
+            drawerOpen={drawerOpen}
+            onToggleDrawer={() => setDrawerOpen((open) => !open)}
+          />
+          <MapControlsDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            onReset={() => dispatch({ type: "reset" })}
+          >
+            {contextControls}
+            <TimelineControl
+              stages={EXPLORATION_STAGES}
+              periods={EXPLORATION_PERIODS}
+              selected={state.stageName}
+              onSelect={(stageName) =>
+                dispatch({ type: "selectStage", stageName })
+              }
+              onSelectPeriod={selectPeriod}
+              highlightRange={highlightRange}
+              scopeToPeriod
+            />
+          </MapControlsDrawer>
+        </>
+      ) : (
+        <TimelineControl
+          stages={EXPLORATION_STAGES}
+          periods={EXPLORATION_PERIODS}
+          selected={state.stageName}
+          onSelect={(stageName) => dispatch({ type: "selectStage", stageName })}
+          onSelectPeriod={selectPeriod}
+          highlightRange={highlightRange}
+        />
+      )}
       {/* SPEC-029 REQ-004: in present-day mode the coastline stops changing with
           the age, which is exactly the cue a reader uses to see that the
           timeline is still filtering. So the screen says it instead — otherwise
@@ -768,7 +960,10 @@ export function ExplorationView({
           occurrences are shown — {state.stageName} here.
         </p>
       )}
-      <div className={styles.body}>
+      <div
+        className={styles.body}
+        data-drawer-open={phoneLayout && drawerOpen ? "true" : undefined}
+      >
         <div className={styles.mapPane} data-map-pane>
           {/* SPEC-023 REQ-002: app controls acting on what is plotted live in the
               bottom-right rail. The top-right corner is reserved for MapLibre's
@@ -776,30 +971,16 @@ export function ExplorationView({
               The top-left rail has no children since SPEC-021 removed the
               reconstruction label and the cluster note, so it does not render at
               all (REQ-001 — no empty box). */}
-          <div
-            className={`${styles.mapRail} ${styles.railBottomRight}`}
-            data-map-rail="bottom-right"
-          >
-            <label
-              className={styles.wikiGateToggle}
-              data-map-overlay="wikipedia-gate"
+          {/* SPEC-023 AMEND-003: on a phone this control lives in the sheet
+              instead, beside the unit selector it belongs with. */}
+          {!phoneLayout && (
+            <div
+              className={`${styles.mapRail} ${styles.railBottomRight}`}
+              data-map-rail="bottom-right"
             >
-              <input
-                type="checkbox"
-                checked={showAll}
-                onChange={(e) => setShowAll(e.target.checked)}
-              />
-              <span>
-                Show taxa without a Wikipedia article
-                {!showAll && hiddenCount > 0 && (
-                  <span className={styles.wikiGateCount}>
-                    {" "}
-                    · {hiddenCount} hidden
-                  </span>
-                )}
-              </span>
-            </label>
-          </div>
+              {wikipediaGate}
+            </div>
+          )}
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}
@@ -828,6 +1009,7 @@ export function ExplorationView({
               focusIds={focusIds}
               focusOccurrences={focusOccurrences}
               fitToken={fitToken}
+              autoFit={phoneLayout}
               taxaById={taxaById}
               onOpenProfile={(taxonId) =>
                 dispatch({ type: "openProfile", taxonId })
@@ -838,84 +1020,39 @@ export function ExplorationView({
             />
           )}
         </div>
-        <aside className={styles.sidebar} aria-label="Occurrence details">
-          {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
-            <div className={styles.stateWrap} role="status">
-              <p className={styles.stateTitle}>
-                {stageStatus.kind === "error"
-                  ? "Could not load this stage."
-                  : `Loading ${state.stageName}…`}
-              </p>
-            </div>
-          ) : occurrences.length === 0 ? (
-            <EmptyState onReset={() => dispatch({ type: "reset" })} />
-          ) : (
-            <>
-              <GroupingControls
-                unit={unit}
-                onSelectUnit={(next) =>
-                  dispatch({ type: "setUnit", unit: next })
-                }
-              />
-
-              {/* SPEC-027 REQ-004: the app tells the Explorer what it did
-                  with their search when that is not what they typed. Both sit
-                  above the detail-or-list block, because in each case there is
-                  no detail to carry them: the first made no selection at all,
-                  the second selected a group with nothing at this age. */}
-              {unreachable && (
-                <p className={styles.notice} role="status">
-                  <span className="sciName">{unreachable.searched}</span> isn’t
-                  a level the map groups by, and none of the groups above it are
-                  either — so it can’t be selected. Try a genus, a family, or a
-                  major group.
-                </p>
-              )}
-              {absentTaxonName && (
-                <p className={styles.notice} role="status">
-                  <span className="sciName">{absentTaxonName}</span> has no
-                  records in the {state.stageName}. Step the timeline to an age
-                  within its range, or clear the selection.
-                </p>
-              )}
-
-              {/* REQ-003: a selection *replaces* the list in the same column
-                  rather than stacking above it. Stacking pushed the list out of
-                  a 360px column, so choosing a row cost you the list you were
-                  reading. The unit selector above stays operable throughout. */}
-              {detail ?? (
-                <UnitList
-                  label={unitLabel}
-                  noun={unitNoun}
-                  rows={unitRows}
-                  totalAtAge={unitOccurrences.length}
-                  viewportActive={viewport !== null}
-                  selectedKey={selectedKey}
-                  highlightedKey={highlightedKey}
-                  onSelect={selectRow}
-                  onHighlight={highlightRow}
-                />
-              )}
-            </>
-          )}
-        </aside>
+        {/* SPEC-030 REQ-003/REQ-004: one set of contents, two containers. The
+            sheet is the phone form of the SPEC-026 column, not a second surface
+            — writing the column out twice would be the fastest way to let the
+            two drift apart. */}
+        {/* SPEC-030 AMEND-005: while the controls drawer is open the sheet
+            stands down. At 320×568 the drawer leaves 132px below it, and a
+            sheet clamped into 41px of that is a truncated grab handle over a
+            sliver of map — two mushed surfaces where the reader asked for one
+            control panel. The map keeps the whole remainder instead, so the
+            age they are stepping is the thing they can see change. */}
+        {phoneLayout && drawerOpen ? null : phoneLayout ? (
+          <OccurrenceSheet
+            label="Occurrence details"
+            detailKey={detail ? (selectedKey ?? "detail") : null}
+            // Only once the stage has actually resolved: `occurrences` is empty
+            // during the first fetch too, and raising on that made the sheet
+            // open at half on every load.
+            raised={
+              stageStatus.kind !== "loading" &&
+              stageStatus.kind !== "error" &&
+              occurrences.length === 0
+            }
+            summary={sheetSummary}
+          >
+            {columnContents}
+          </OccurrenceSheet>
+        ) : (
+          <aside className={styles.sidebar} aria-label="Occurrence details">
+            {columnContents}
+          </aside>
+        )}
       </div>
     </>,
-    <ContextBar
-      stage={stage}
-      stageName={state.stageName}
-      group={state.group}
-      count={occurrences.length}
-      frameMode={state.frameMode}
-      {...(presentFrameAvailable
-        ? {
-            onFrameModeChange: (frameMode: FrameMode) =>
-              dispatch({ type: "setFrameMode", frameMode }),
-          }
-        : {})}
-      searchIndex={searchIndex}
-      onSearchSelect={onSearchSelect}
-      onReset={() => dispatch({ type: "reset" })}
-    />,
+    phoneLayout ? undefined : contextControls,
   );
 }

@@ -466,6 +466,21 @@ Revert the PR. `present.geojson`/`present.meta.json` become unreferenced; the
 
 ## Spec amendments
 
+### AMEND-001: The frame toggle sits behind the age strip's drawer on a phone
+
+- **Date:** 2026-09-03
+- **Reason:** SPEC-030 AMEND-001.
+- **Changed requirements:** REQ-002's placement ("the control sits here rather
+  than as a map overlay"), at `max-width: 40rem` only.
+- **Behavioral impact:** the two options render inside the map screen's controls
+  drawer rather than in the always-visible context row. The choice, its wording,
+  its `radiogroup` semantics and UX-002's withholding when no present-day frame
+  exists are all unchanged, as is the desktop placement. REQ-004's present-day
+  note stays in normal flow above the map, visible without the drawer — so a
+  reader can still always tell which frame they are looking at, which is what
+  that requirement protects.
+- **Human approval reference:** Owner approval: 2026-09-03, session `session_01GvwYfnCtWQGcynW17zS4su` — "the main view is not satisfactory… the map needs to be the star of the show. Other things need to become hidden behind drawers."
+
 None yet.
 
 ## Review checklist

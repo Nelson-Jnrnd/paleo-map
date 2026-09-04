@@ -317,6 +317,28 @@ the simplifier — acceptable for a basemap.
 
 ## Spec amendments
 
+### AMEND-002: The phone's opening camera is fitted to the data
+
+- **Date:** 2026-09-04
+- **Reason:** SPEC-030 AMEND-002 / REQ-008. The map opens at a fixed
+  `center: [-75, 55]`, `zoom: 2.2` — a constant tuned to a wide desktop pane. The
+  same camera on a 390×470 portrait pane crops somewhere else entirely: the
+  markers crowd the left edge and the right half is empty ocean.
+- **Changed requirements:** the opening view only, at `max-width: 40rem`.
+- **Behavioral impact:** on a phone the camera fits the bounds of the stage's
+  occurrences once, on first paint, reusing SPEC-027's search-landing fit rather
+  than adding a second camera path. Once per mount and **not** per stage:
+  re-framing on every age step would move the camera out from under a reader who
+  had panned somewhere deliberately, and stepping the age is the loop's most
+  common action. The projection, the reconstruction frame, the basemap styling
+  and the desktop's opening camera are untouched, and SPEC-016's frame
+  consistency is unaffected — this changes where the camera looks, never what is
+  drawn or where a point is placed.
+- **Test impact:** a phone e2e asserts the app's own reported in-view count is at
+  least half the age's total at load. Measured 1,981 of 2,135 after; roughly a
+  third before.
+- **Human approval reference:** Owner approval: 2026-09-03/04, session `session_01GvwYfnCtWQGcynW17zS4su` — "fix all that. Ammend spec if you need to".
+
 ### AMEND-001: Real GPlates PALEOMAP coastlines instead of the schematic outline
 
 - **Date:** 2026-07-12

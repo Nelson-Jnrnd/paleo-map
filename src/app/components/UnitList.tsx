@@ -131,6 +131,10 @@ export function UnitList({
                 ref={isHighlighted ? highlightedRowRef : undefined}
                 className={styles.unitRow}
                 aria-label={row.accessibleName}
+                // SPEC-030 REQ-004 asserts the list/detail swap survives the
+                // move into the sheet; the gate needs a hook that does not
+                // depend on which unit is selected or what the rows say.
+                data-unit-row
                 aria-current={isSelected ? "true" : undefined}
                 data-highlighted={isHighlighted ? "true" : undefined}
                 style={

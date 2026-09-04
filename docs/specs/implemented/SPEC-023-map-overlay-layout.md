@@ -817,7 +817,127 @@ all ten**, with the region focusable and labelled in each.
 
 > Required for any behavioral change after the spec is Approved.
 
-_None. The spec has not been approved yet._
+### AMEND-004: The phone rail share, superseded by the pane
+
+- **Date:** 2026-09-04
+- **Reason:** AMEND-002 gave the bottom-left rail 40% and the bottom-right 60%
+  at phone widths, to stop the gate toggle wrapping to four lines. AMEND-003
+  then moved the gate off the map entirely, which left the 40% cap bounding the
+  clade key against a rail that no longer exists. Held to it, the expanded key
+  was 144px wide with 118px rows and "Thyreophoran", "Ceratopsian" and
+  "Pachycephalosaur" were cut off mid-word.
+- **Changed requirements:** REQ-004, at `max-width: 40rem` only. AMEND-002's
+  60% for the bottom-right rail is retired with it, having nothing left to
+  apply to.
+- **Behavioral impact:** below the breakpoint the bottom-left rail is bounded by
+  the map pane (`calc(100% - var(--space-3) * 2)`) rather than by a share of it,
+  and the key sizes to its 183px min-content width. The top-left rail keeps the
+  40% cap. Above the breakpoint nothing changes — the desktop 50/50 share and
+  both rails are exactly as REQ-004 states, and NFR-002's desktop gate asserts
+  it.
+- **Why this is not a weakening:** REQ-004's requirement is that a rail can
+  never grow into the opposite rail's half. The share was one way to enforce it,
+  chosen when there were two rails. With one rail the same invariant is
+  enforced by the pane, and the phone gate now asserts both halves of it — the
+  rail is inside the pane, and the opposite rail is absent. The rail's *height*
+  cap, its scroll behaviour and REQ-001's "no overlay leaves the pane" are all
+  unchanged and still asserted.
+- **See also:** SPEC-030 AMEND-005, which records this alongside the collapsed
+  rail's row layout.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
+### AMEND-003: The Wikipedia-gate toggle leaves the map on a phone
+
+- **Date:** 2026-09-03
+- **Reason:** SPEC-030 REQ-007, found by screenshotting rather than by the gate.
+  At 320×568 the map pane is ~200px tall and the toggle's label wraps to four
+  lines (80px). With the rails offset to clear the resting occurrence sheet,
+  there is no arrangement in which an 80px control, a 30px ⓘ, a 35px clade key
+  and MapLibre's 58px zoom control all fit. No chrome trim closes that gap.
+- **Changed requirements:** REQ-001 ("every overlay that is persistently visible
+  over the map must be a child of exactly one rail") and REQ-002's
+  corner-ownership table, for this one control at `max-width: 40rem`.
+- **Behavioral impact:** below the breakpoint the toggle renders **in the
+  occurrence sheet**, directly under the unit selector, and the bottom-right
+  rail is not rendered at all (REQ-001's "a rail with no visible children must
+  not render" holds). Above the breakpoint nothing changes. The control is not
+  hidden, collapsed or hover-gated — it moves to the column whose contents it
+  filters, which is arguably where a list filter belonged all along, and it
+  gives the map back 80px at *every* phone width.
+- **Why this and not the alternatives:** clipping the rail would have hidden the
+  basemap ⓘ, which UX-001 requires to stay; shrinking the sheet further would
+  have broken SPEC-030 REQ-003's peek contents. Of the four overlays this is the
+  only one that describes the *list* rather than the map.
+- **Note on process:** an earlier draft of SPEC-030 proposed exactly this
+  relocation, and it was **withdrawn** when re-measurement showed the overlays do
+  not collide at 390px or above. That withdrawal was right on the evidence then
+  available; 320×568 is new evidence and it reverses the conclusion.
+- **Test impact:** `test/e2e/phone-layout.e2e.ts` gains a containment assertion
+  at 320×568 — no rail child may escape the map pane — and
+  `test/e2e/map-overlays.e2e.ts`'s matrix gains 320×568.
+- **Human approval reference:** Owner approval: 2026-09-02/03, session `session_01GvwYfnCtWQGcynW17zS4su` — "amend if necessary, until it's satisfactory".
+
+### AMEND-002: An asymmetric rail split at phone widths
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-007. With the map full-bleed under the occurrence
+  sheet, halving a 360px-wide map gave each bottom rail 168px. The
+  Wikipedia-gate toggle's label is long and wrapped to four lines (97px tall),
+  which — once the rails were raised to clear the sheet's peek — walked it into
+  the top-right corner REQ-002 reserves for MapLibre's own controls.
+- **Changed requirements:** REQ-004, its "a rail can never grow into the
+  opposite rail's half" clause.
+- **Behavioral impact:** at `max-width: 40rem` the bottom-right rail may take
+  60% of the pane and the left rails 40%, instead of 50/50. At 60% the gate
+  toggle wraps to two lines. **REQ-004's actual invariant is preserved**: 40 + 60
+  still leaves the gutter, so the rails cannot reach each other, and the
+  automated non-overlap gate covers exactly that. Above the breakpoint the split
+  is unchanged.
+- **Behavioral impact, second part:** the bottom rails are additionally offset
+  by the sheet's peek height so no overlay is covered by the sheet at rest, and
+  their max-height is capped by what remains after that offset — raising a rail
+  moves its top up as well as its bottom, which is what produced the collision
+  in the first place.
+- **Test impact:** `test/e2e/map-overlays.e2e.ts` gained 390×664 and 360×640
+  (SPEC-030 NFR-001); the collision above is what those two widths caught.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su` — "ammend what needs to be ammended and finish the work".
+
+### AMEND-001: The clade key's default state on a phone
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-007 clause 3, on the owner's decision. Expanded, the
+  clade key measures 183 × 193 px and covers **26% of the map at 320 px** and 22%
+  at 390 px — on the screen where map area is scarcest.
+- **Changed requirements:** UX-001 — its statement's final sentence ("Collapsing
+  is a user action only — the app must not collapse the key automatically based on
+  viewport size") and acceptance criterion 1 ("The key renders expanded on load").
+  Both are **scoped by viewport, not removed**.
+- **Behavioral impact:** At `max-width: 40rem` the clade key renders **collapsed**
+  on load, to its labelled "Clade key" affordance, and expands on one tap. Above
+  the breakpoint it renders expanded exactly as before, and the ban on
+  viewport-driven collapse continues to apply there. Acceptance criteria 2
+  (collapsed, it still names itself), 3 (no other overlay gains a collapse or
+  dismiss control) and 4 (state is not persisted across a reload) are unchanged at
+  every width. **No overlay moves, is hidden, is faded, or is put behind a hover.**
+  The key remains the only collapsible overlay, and remains one tap from expanded.
+
+  A broader amendment was proposed and **withdrawn**: SPEC-030 first intended to
+  move the clade key and the Wikipedia-gate toggle off the map entirely. Measuring
+  a full-bleed phone map showed that unnecessary — the overlays do not collide at
+  390 px or above, and the 320–360 px collision is a defect against **REQ-004**
+  (`.mapLegend2` cannot shrink below its min-content width, so `.mapRail`'s
+  `max-width` is defeated), fixed under this spec rather than around it. The
+  corner-rail scheme is untouched.
+- **Why this does not weaken charter §2 / CONS-490:** on this spec's own
+  reasoning the clade key is a reading aid, not provenance, because each marker's
+  shape and the hover card's clade name carry the same information. **On touch the
+  hover card does not exist**, so this amendment depends on SPEC-030 UX-002 (tap
+  pins the card) shipping with it. The two must land together.
+- **Test impact:** the Vitest collapse test gains a viewport-scoped default-state
+  case rather than being replaced; SPEC-030's phone e2e asserts the collapsed
+  default at four widths and the expanded default above the breakpoint. NFR-001's
+  matrix is extended to 390×664 and 360×640.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 

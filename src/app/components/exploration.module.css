@@ -5,7 +5,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  /* SPEC-030 NFR-003: `vh` is sized to the *largest* viewport on mobile
+     browsers, so with `100vh` the bottom of the map sat under the browser
+     toolbar and the layout jumped as the toolbar collapsed. `dvh` follows the
+     viewport that is actually visible. The `vh` line stays as the fallback for
+     engines without `dvh` — it is today's behaviour, not a broken one. */
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* --- Context bar (permanent age / group / count) --- */
@@ -91,6 +97,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-5);
+  /* SPEC-030 REQ-002: this row is what made the whole document 607px wide in a
+     390px window — four stats plus the frame radio group on one unwrappable
+     line, with "Reset view" ending up off-screen at x=571. `.header` above it
+     wraps; the overflow was one level down. */
+  flex-wrap: wrap;
 }
 
 /* --- Taxon search (SPEC-013) --- */
@@ -195,7 +206,7 @@
 
 .frameOption {
   padding: 0 0 2px;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -222,7 +233,7 @@
 
 .reset {
   padding: var(--space-2) 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   color: var(--color-text-muted);
   border: none;
@@ -244,6 +255,448 @@
 .reset:hover {
   border-color: var(--color-accent);
   color: var(--color-accent-deep);
+}
+
+/* --- Phone: the age strip and the controls drawer ------------------------
+   SPEC-030 REQ-005/REQ-006 as amended (owner, 2026-09-03: "the map needs to be
+   the star of the show"). The header was 205px of a 664px screen and the
+   reviewer's verdict on the result was "way too cluttered". What is left is two
+   rows: step the age, and read where you are. */
+.ageStrip {
+  display: none;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+/* One control, not three. The steppers used to be pushed to the screen edges by
+   a `flex: 1` readout, leaving a 44px box marooned in each corner with the age
+   floating between them — they read as unrelated. Centred and butted against
+   the readout, they read as the stepper they are. */
+.ageStripRow {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) 0;
+}
+
+/* The readout is the drawer's trigger: the age is most of what the drawer is
+   for, so the thing you tap to change it precisely is the thing showing it. */
+.ageReadout {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min-coarse);
+  padding: 0 var(--space-1);
+  background: none;
+  border: none;
+  color: var(--color-text-hi);
+  cursor: pointer;
+}
+
+/* The name is the value FONC-040 requires; the Ma span is a gloss on it and is
+   repeated in the drawer. So the span gives way first — at 320px the name used
+   to truncate to "Maastrichti…", losing the one thing this strip exists for. */
+.ageReadoutName {
+  flex: none;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ageReadoutSpan {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ageReadoutHint {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.ageReadout:focus-visible,
+.drawerClose:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.ageStripMeta {
+  margin: 0;
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* The drawer expands in normal flow above the map rather than floating over it:
+   no scrim, no focus trap, and the map simply gets its space back on close. */
+.controlsDrawer {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-3);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-panel);
+}
+
+.controlsDrawer:focus {
+  outline: none;
+}
+
+.drawerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+  padding-bottom: var(--space-1);
+}
+
+.drawerTitle {
+  font-size: var(--text-min);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* SPEC-030 AMEND-005: Reset view, moved up out of the context row. Quiet text,
+   like the control it replaces (SPEC-022 REQ-006) — the head is a row of
+   actions, not a toolbar of buttons. `margin-left: auto` pushes both it and
+   "Done" to the trailing end, leaving the title alone on the left. */
+.drawerReset {
+  margin-left: auto;
+  min-height: var(--target-min-coarse);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-min);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.drawerReset:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+}
+
+.drawerClose {
+  min-height: var(--target-min-coarse);
+  padding: 0 var(--space-3);
+  background: none;
+  color: var(--color-accent-deep);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 40rem) {
+  .ageStrip,
+  .controlsDrawer {
+    display: flex;
+  }
+
+  /* Inside the drawer the context row is a stack, not a wrapped line. */
+  .controlsDrawer .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    /* `.header` carries `flex-wrap: wrap` for the desktop row. Turned to a
+       column it keeps wrapping — into *columns* — so the context row flowed
+       beside the search box instead of under it and ran to x=619 in a 390px
+       drawer. A column here is a single column. */
+    flex-wrap: nowrap;
+  }
+
+  /* The context row is a flex *item* here, so its automatic minimum size is its
+     content's — the same trap as `.mapLegend2` and `.fanListItem`. Without
+     `min-width: 0` it measured 619px inside a 390px drawer and took the whole
+     document sideways with it. */
+  .controlsDrawer .context {
+    gap: var(--space-2);
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .controlsDrawer .search,
+  .controlsDrawer .stat {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* The age was printed three times on one screen — in the strip, in the
+     context row's "Selected age" stat, and again in the timeline's own label —
+     and the group and count twice. The strip above is the readout; inside the
+     drawer these are duplicates, so they go. What is left in the context row is
+     what the strip does *not* carry: search, the frame choice, and Reset. */
+  .controlsDrawer .stat:not(.frameStat),
+  .controlsDrawer .timelineLabel {
+    display: none;
+  }
+
+  /* The strip above already steps the *stage*; the drawer's steppers are the
+     *period* ones, so the stage pair stays hidden here and the period pair is
+     shown. */
+  .controlsDrawer .stepOlder,
+  .controlsDrawer .stepYounger {
+    display: none;
+  }
+
+  .controlsDrawer .periodStepper .stageStepper {
+    display: inline-flex;
+    min-width: var(--target-min-coarse);
+    min-height: var(--target-min-coarse);
+  }
+
+  /* With the stats before it hidden, the separator rule still fired and left a
+     stray "·" floating to the left of "Paleogeographic". Scoped through
+     `.context` for specificity: the rule it overrides is itself
+     `.context .stat + .stat::before` and sits later in this file. */
+  .controlsDrawer .context .stat + .stat::before {
+    content: none;
+  }
+
+  /* The axis's trailing "Ma" is pinned to the right edge, where it collided
+     with the last tick label — "75Ma" ran together. The unit is stated twice
+     over in the strip's readout above ("72.1–66 Ma"), so the axis keeps its
+     numbers and drops the gloss. */
+  .controlsDrawer .axisUnit {
+    display: none;
+  }
+
+  /* The frame choice and Reset shared no line and no alignment: the options sat
+     left, Reset sat right on a row of its own, and the gap between them was
+     larger than the gap between anything else. One row, one baseline. */
+  .controlsDrawer .context {
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .controlsDrawer .frameStat {
+    flex: 1 1 auto;
+  }
+
+  /* The head carries Reset now, so the context row holds the frame choice
+     alone. Measured at 320: the frame choice is 215px and Reset 72px with a
+     12px gap between them — 299px into 296px — so the row wrapped and the
+     drawer stood at 358px of a 568px screen, leaving the map 91px. */
+  .controlsDrawer .reset {
+    display: none;
+  }
+
+  /* One rhythm for the panel: every block is separated by the same step. */
+  .controlsDrawer {
+    gap: var(--space-3);
+  }
+
+  .controlsDrawer .timelineBody {
+    gap: var(--space-2);
+  }
+
+  .controlsDrawer .timelineBody {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "bands"
+      "track"
+      "axis";
+  }
+
+  /* The period hint explained that a band jumps to its most fossil-rich stage.
+     With the bands gone the sentence has no referent — the stepper moves to the
+     same stage, and the strip's readout names where it landed. */
+  .controlsDrawer .periodHint {
+    display: none;
+  }
+
+  /* The Ma axis comes back here. It was hidden to win 20px for a height problem
+     that the drawer removed (SPEC-009 AMEND-002 was scoped to the strip layout,
+     where the timeline no longer lives) — and a to-scale track with no scale is
+     half a control. */
+  .controlsDrawer .stageAxis {
+    display: block;
+    grid-area: axis;
+  }
+
+  /* One inset for the whole panel, so the search box, the values, the bands and
+     the footer line up instead of each carrying their own margin. */
+  .controlsDrawer > * {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  /* Both carry their own horizontal padding for their normal homes; here the
+     panel's single inset is the one that should win, so they contribute none of
+     their own and inherit it from the rule above. Zeroing it outright — as an
+     earlier cut did — pushed the search box, "Reset view" and the Ma axis to
+     the screen edges, clipping the last two. The inset also gives the axis's
+     first and last tick labels the ~9px of overhang they need, since each is
+     centred on its position. */
+  .controlsDrawer .header,
+  .controlsDrawer .timeline {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* --- Phone: the header row (SPEC-030 REQ-002, REQ-005; P-01, P-05) ---------
+   The header measured 232px at *every* portrait width — 35% of a 664px screen
+   before the timeline had its say. It does not adapt at all today.
+
+   REQ-005 forbids the cheap fix. FONC-040/050/060 and CONS-450 make the age,
+   group and count permanent, so they are re-laid-out, never collapsed: the
+   labels ("SELECTED AGE", "GROUP", "OCCURRENCES") are chrome and go visually
+   hidden — they stay in the accessibility tree as each stat's accessible name —
+   while every *value* stays on screen, on one compact line. */
+@media (max-width: 40rem) {
+  .appBar {
+    gap: var(--space-2);
+    padding: 0 var(--space-3) var(--space-1);
+  }
+
+  /* The wordmark keeps its own line — SPEC-022 REQ-001 sanctions the bar
+     wrapping rather than hiding a destination — but it is a label, not a
+     control, so it does not need a 44px row. */
+  /* One row, always. Letting the wordmark wrap cost a permanent ~27px line for
+     a label rather than a control — the largest single piece of fixed chrome
+     left on the screen. It shrinks and ellipsises instead: SPEC-022 REQ-001
+     requires the bar to carry the wordmark, not to carry it whole. */
+  .wordmark {
+    font-size: 12px;
+    line-height: 1.2;
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .appBar {
+    flex-wrap: nowrap;
+  }
+
+  /* The nav must not be the thing that gives: as a shrinkable flex item its
+     min-content width is one button, so it collapsed and wrapped its three
+     destinations onto three rows — a 109px bar, worse than the wrapped wordmark
+     it replaced. It holds its width; the wordmark absorbs the shrink. */
+  .appNav {
+    flex: none;
+    flex-wrap: nowrap;
+    gap: var(--space-3);
+  }
+
+  .appNav {
+    gap: var(--space-4);
+  }
+
+  .header {
+    gap: 2px var(--space-2);
+    padding: 0 var(--space-3) var(--space-1);
+  }
+
+  .search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
+
+/* UX-003: the module's class beats global.css's element rule, so the 16px floor
+   has to be restated here or Safari still zooms on focus. */
+@media (pointer: coarse) {
+  .searchInput {
+    font-size: max(16px, 1rem);
+  }
+}
+
+@media (max-width: 40rem) {
+  .context {
+    gap: var(--space-1) var(--space-2);
+    width: 100%;
+  }
+
+  /* Label above value becomes label-in-a11y-tree, value on the line. */
+  .context .stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+
+  .context .statLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .context .statValue {
+    font-size: 13px;
+  }
+
+  /* A separator between values, since the labels no longer divide them. Purely
+     decorative — the accessible name still comes from the hidden label. */
+  .context .stat + .stat::before {
+    content: "·";
+    color: var(--color-border);
+    margin-right: var(--space-1);
+  }
+
+  /* The frame choice and Reset are controls, not readouts: they share a line at
+     full touch size rather than crowding the values. `1 1 100%` here cost a
+     whole extra 44px row by pushing Reset onto a third line. */
+  /* `1 1 auto` still took the whole remaining line, so Reset wrapped to a third
+     44px row. `0 1 auto` lets the two share one. At 320px the context row was
+     three rows and 132px tall; this is what makes it two. */
+  .context .frameStat {
+    flex: 0 1 auto;
+  }
+
+  .context .frameStat::before {
+    content: none;
+  }
+
+  .reset {
+    margin-left: auto;
+  }
+}
+
+/* --- Phone: the taxonomy screen (SPEC-030 REQ-008; P-16, P-17) ------------ */
+@media (max-width: 40rem) {
+  .profile {
+    margin: var(--space-3) 0;
+    padding: var(--space-4) var(--space-3) var(--space-5);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* The indent is capped rather than dropped: it still shows the branching, but
+     four levels of 8px cannot push a row off a 320px screen. */
+  .fanList li {
+    margin-left: calc(min(var(--fan-depth, 0), 4) * 8px);
+  }
 }
 
 /* --- Timeline (to-scale stepped slider, SPEC-009) --- */
@@ -294,6 +747,72 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+}
+
+/* SPEC-030 REQ-006: the discrete stage controls. Not rendered at all above the
+   breakpoint — `display: none` keeps them out of the accessibility tree too, so
+   the desktop control is unchanged in shape and in what a screen reader hears
+   (NFR-002). The phone block below gives them their place in the grid. */
+/* SPEC-009 AMEND-003: the period stepper that replaces the three bands on a
+   phone. Same shape as the stage stepper in the strip above, one level coarser —
+   two arrows either side of the thing they change. */
+.periodStepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  grid-area: bands;
+}
+
+.periodStepperLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rangeHighlight[data-clip-old="true"] {
+  border-inline-start: none;
+}
+
+.rangeHighlight[data-clip-young="true"] {
+  border-inline-end: none;
+}
+
+.stageStepper {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-min);
+  cursor: pointer;
+}
+
+/* Disabled at the ends of the range — and the app *boots* at the youngest
+   stage, so the very first thing on screen was an empty bordered box. A ghosted
+   glyph still states the boundary (charter §7: disabled with a reason, not
+   hidden) without reading as a control waiting to be pressed. */
+.stageStepper:disabled {
+  cursor: default;
+  background: none;
+  border-color: transparent;
+  color: var(--color-text-faint);
+  opacity: 0.55;
+}
+
+.stageStepper:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
 }
 
 /* Period delimitations — large, labelled, to-scale bands doubling as the jump
@@ -462,6 +981,19 @@
   align-items: center;
 }
 
+/* SPEC-009 AMEND-003: a label centred on a tick that sits at the very end of
+   the window hangs off the track. Anchoring the end ticks to their own edge
+   keeps the number inside the axis without moving the tick mark itself. */
+.axisTick[data-axis-edge="start"] {
+  transform: none;
+  align-items: flex-start;
+}
+
+.axisTick[data-axis-edge="end"] {
+  transform: translateX(-100%);
+  align-items: flex-end;
+}
+
 .axisTick::before {
   content: "";
   width: 1px;
@@ -482,6 +1014,101 @@
   top: 5px;
   font-size: 10px;
   color: var(--color-text-faint);
+}
+
+/* --- Phone: the timeline (SPEC-030 REQ-006; P-12) --------------------------
+   The defect: `.timelineLabel`'s fixed 128px left the track 214px at 390px and
+   144px at 320px for ~30 to-scale stages, and the narrowest stage step measured
+   0.0px. Stepping the age is the central verb of the map loop and it could not
+   be aimed.
+
+   The readout moves full width above the track, and the two discrete controls
+   flank it. Bands, track and axis share one grid column so they stay aligned to
+   each other — the to-scale reading survives; only the aiming moves. */
+@media (max-width: 40rem) {
+  .timeline {
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px var(--space-3) var(--space-1);
+  }
+
+  .timelineLabel {
+    min-width: 0;
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+    line-height: 1.2;
+  }
+
+  .timelineReadout {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
+  .timelineReadoutName {
+    font-size: 14px;
+  }
+
+  .timelineBody {
+    gap: var(--space-1);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "prev bands next"
+      "prev track next";
+    align-items: center;
+    column-gap: var(--space-2);
+  }
+
+  .stageStepper {
+    display: inline-flex;
+    min-width: var(--target-min-coarse);
+    min-height: var(--target-min-coarse);
+  }
+
+  .stepOlder {
+    grid-area: prev;
+  }
+
+  .stepYounger {
+    grid-area: next;
+  }
+
+  .periodBands {
+    grid-area: bands;
+    /* REQ-006: a period band is a real target, not a 24px sliver. */
+    height: var(--target-min-coarse);
+  }
+
+  .stageTrack {
+    grid-area: track;
+  }
+
+  /* SPEC-009 AMEND-002: the Ma graduation axis is a reading aid — already
+     `aria-hidden`, and not named in SPEC-009 REQ-001's statement, which requires
+     the to-scale track and the always-present stage name and Ma span (both
+     kept, in the readout). It costs 20px of a 319px body, and that 20px is what
+     puts the map back over half the screen at the peek stop. */
+  .stageAxis {
+    display: none;
+  }
+
+  /* The period name is what the band is for; at 320px the Triassic band is
+     58px, so the label has to be allowed to shrink rather than clip. */
+  .periodBand {
+    padding: 0 2px;
+    font-size: 10px;
+    gap: 3px;
+    /* At 320px the Triassic band is 58px wide and its label was clipped
+       mid-word. The dot repeats the band's own period colour, which the band
+       already carries, so it is the part that goes. */
+    justify-content: center;
+  }
+
+  .periodBand .stageDot {
+    display: none;
+  }
 }
 
 /* --- Body split --- */
@@ -904,6 +1531,14 @@
   color: var(--color-text-muted);
   max-height: 45%;
   overflow-y: auto;
+  /* SPEC-030 REQ-007 clause 1 — the defect behind P-10. As a flex item this box
+     took its automatic minimum size (its 183px min-content width), which
+     defeated `.mapRail`'s `max-width: calc(50% - var(--space-3))` outright: the
+     gate toggle honoured the bound at 148px while the key sat at 183px at every
+     width, and the two overlapped by 18px. REQ-004 bounded this box's *height*
+     and nothing bounded its width. */
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* SPEC-023 UX-001: the key's own disclosure control. Words, not an icon alone;
@@ -913,7 +1548,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -951,7 +1586,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  white-space: nowrap;
+  /* `nowrap` is what made the box's min-content width 183px. The clade names are
+     short; letting the longest wrap costs a line and keeps the key inside its
+     rail (REQ-007 clause 1). */
+  min-width: 0;
+}
+
+.legendItem > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .legendSwatch {
@@ -977,6 +1620,279 @@
   border-left: 1px solid var(--color-border);
   background: var(--color-surface);
   overflow-y: auto;
+}
+
+/* --- The occurrence sheet (SPEC-030 REQ-003, REQ-004) ---------------------
+   The phone form of the sidebar column. Rendered only below the breakpoint, so
+   these rules never apply to the desktop layout (NFR-002).
+
+   It is positioned, not in flow: the map takes the whole body and the sheet is
+   drawn over it. That is what makes the map full-bleed without the sheet
+   stealing height from it — and why the map stays visible at every stop. */
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  box-shadow: var(--shadow-panel);
+  /* NFR-003: clear the home indicator without eating the peek height. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* The height is set inline from the stop; animate the settle, not the drag. */
+  transition: height 160ms ease;
+}
+
+.sheet[data-dragging="true"] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+}
+
+/* The handle is a real button — that is the whole keyboard story for the sheet
+   (REQ-003 acceptance criterion 4): Tab to it, Enter or Space to advance the
+   stop. `touch-action: none` lets a drag resize instead of scrolling the page,
+   the same trade the timeline track makes. */
+.sheetHandle {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: var(--target-min-coarse);
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  cursor: grab;
+  touch-action: none;
+}
+
+/* At rest this line is the only part of the sheet on screen. Without it the
+   sheet was a grey pill that said nothing about what it held. */
+.sheetSummary {
+  font-size: var(--text-min);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.sheetHandle:active {
+  cursor: grabbing;
+}
+
+.sheetHandle:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: -2px;
+}
+
+.sheetGrip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.sheetHandle:hover .sheetGrip,
+.sheetHandle:focus-visible .sheetGrip {
+  background: var(--color-text-faint);
+}
+
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Momentum scrolling inside the sheet must not chain to the document behind
+     it, or a flick at the end of the list drags the whole page. */
+  overscroll-behavior: contain;
+}
+
+/* --- Phone: a full-bleed map under the sheet (SPEC-030 REQ-003; P-09) ------
+   The defect: `.body` split 390px into a 226px map beside a 164px list, and
+   neither was usable. The map now takes the whole body and the sheet is drawn
+   over it. */
+@media (max-width: 40rem) {
+  .body {
+    position: relative;
+    display: block;
+  }
+
+  .mapPane {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* REQ-007 clause 2: the bottom rails clear the sheet's peek height, so no
+     overlay is ever covered by the sheet at rest. */
+  .railBottomLeft,
+  .railBottomRight {
+    /* Track the sheet's *live* height, published by OccurrenceSheet, falling
+       back to the nominal peek before the first measurement. The rails then
+       ride just above the sheet at every stop instead of assuming it rests at
+       152px — which it does not on a short viewport, where `stopHeight` clamps
+       it. */
+    bottom: calc(
+      var(--sheet-height, var(--sheet-peek)) + var(--space-2) +
+        env(safe-area-inset-bottom, 0px)
+    );
+    /* Raising a rail by the peek height moves its *top* up too, and on a short
+       phone that walked the gate toggle straight into MapLibre's reserved
+       top-right band. This is SPEC-023 REQ-004's own rule — a rail may not grow
+       into the band opposite — restated for the offset the sheet introduces:
+       cap the height at what is left after the clearance below and the
+       library's controls above. */
+    /* `max()` floors this at zero: on a 175px-tall pane the old expression went
+       *negative*, and a `column-reverse` rail with a negative cap grows upward —
+       straight out of the map and over the timeline. SPEC-023 REQ-001 requires a
+       rail child to stay inside the pane, so this is that rule holding, not a
+       new one. */
+    max-height: max(
+      0px,
+      calc(100% - var(--sheet-height, var(--sheet-peek)) - 76px)
+    );
+    /* A rail that cannot fit its children scrolls them rather than spilling —
+       REQ-004's "children wrap or scroll inside their own box". */
+    overflow-y: auto;
+  }
+
+  /* With the drawer open the sheet is not rendered (AMEND-005), so there is
+     nothing below for the rails to clear and `--sheet-height` is stale. They
+     return to the corner and to their unoffset cap. */
+  .body[data-drawer-open="true"] .railBottomLeft,
+  .body[data-drawer-open="true"] .railBottomRight {
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    max-height: 55%;
+  }
+
+  /* SPEC-030 AMEND-005: the two bottom-left overlays sit side by side while the
+     clade key is collapsed.
+
+     Measured at every phone width the rail was 106 × 114px — a vertical band
+     down the left of the map holding a 44px ⓘ and a 62px card whose only
+     content is the words "Clade key". Stacked, it read as two competing panels;
+     laid out as one row it is 44px tall and stops occupying a column of the
+     map. Expanded, the key needs its height back, so the rail returns to the
+     stack it was: the row is the *collapsed* state only.
+
+     The label stays a label — SPEC-023 UX-001 requires a labelled affordance,
+     not an icon — so what is reclaimed is the stacking and the card padding,
+     not the words. */
+  .railBottomLeft[data-clade-key="collapsed"] {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .railBottomLeft[data-clade-key="collapsed"] .mapLegend2 {
+    padding: 0 var(--space-2);
+    max-height: none;
+  }
+
+  /* SPEC-023 AMEND-002: an asymmetric split instead of REQ-004's implied 50/50.
+     The gate toggle's label is long and the ⓘ and the collapsed clade key are
+     short, so halving a 360px map made the gate wrap to four lines (97px tall)
+     and walk into MapLibre's band. Giving it 60% and the left rail 40% wraps it
+     to two. The rails still cannot reach each other — 40 + 60 leaves the gap —
+     so REQ-004's actual invariant is preserved, not weakened. */
+  .railBottomRight {
+    max-width: calc(60% - var(--space-3));
+  }
+
+  .railTopLeft {
+    max-width: calc(40% - var(--space-3));
+  }
+
+  /* SPEC-030 AMEND-005: the bottom-left rail is not held to the 40% share on a
+     phone. The bottom-right rail is empty here — SPEC-023 AMEND-003 moved the
+     Wikipedia gate into the sheet — so there is no opposite rail for the split
+     to keep it away from, and REQ-004's actual invariant (two rails can never
+     meet) is satisfied by the pane bounding the one rail that exists.
+
+     Measured before this: the expanded key was capped at `calc(40% - 12px)` =
+     144px at 390, its rows at 118px, and "Thyreophoran", "Ceratopsian" and
+     "Pachycephalosaur" were cut off mid-word. A key whose clade names are
+     unreadable is not a key.
+
+     Placed here, after the share rules, deliberately: an equal-specificity rule
+     earlier in this file loses, which is exactly how the first cut of this fix
+     silently did nothing. */
+  .railBottomLeft {
+    max-width: calc(100% - var(--space-3) * 2);
+  }
+
+  /* The unit selector takes two rows at the peek stop rather than one scrolling
+     row: five options at the 44px floor do not fit 320px, and options out of
+     sight sit badly with CONS-450 and with SPEC-026's "the option set is
+     identical in every state" (owner decision, 2026-09-02). */
+  .unitBar {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  /* A 16px gap pushed the five options to 383px in a 366px column, wrapping
+     4 + 1 and orphaning "Major group". 8px fits them on one line at 390px and
+     still wraps cleanly below that. */
+  /* Scoped through `.sheet` for specificity, not for meaning: these phone rules
+     sit *earlier* in this file than `.unitBar` / `.unitGroup`'s own
+     declarations, so at equal specificity the base rules won and neither the
+     8px gap nor the reduced padding ever applied. Measured: 12px gaps in a
+     358px group against 317px of options — 365 into 358, and "Major group"
+     orphaned on a second row for the 7px. */
+  .sheet .unitGroup {
+    gap: var(--space-1) 6px;
+    justify-content: space-between;
+  }
+
+  .sheet .unitBar {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  /* SPEC-023 AMEND-003: the gate's phone home. Flat in the flow of the sheet,
+     not a floating card — on the map it needed a surface of its own, here it is
+     just another control in the column. */
+  .sheetGate {
+    padding: 0 var(--space-3) var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .sheetGate .wikiGateToggle {
+    background: none;
+    border: none;
+    padding: var(--space-1) 0;
+    width: 100%;
+  }
+
+  /* Reset joins the readout line instead of taking a 44px row of its own: at
+     320px the context row was three rows and 132px tall. */
+  .context .reset {
+    margin-left: auto;
+  }
+}
+
+/* SPEC-030: inside the sheet the handle already carries "N occurrences in
+   view" — permanently, at every stop — so the list's own header repeated the
+   same count three lines below it. The overflow note is not a duplicate and
+   stays. */
+@media (max-width: 40rem) {
+  .sheet .listHeader .statLabel,
+  .sheet .listHeader .listCount {
+    display: none;
+  }
+
+  .sheet .listHeader:not(:has(.source)) {
+    display: none;
+  }
 }
 
 /* --- Occurrence list (SPEC-009: viewport-linked, cross-highlighted) --- */
@@ -1067,7 +1983,7 @@
 
 .unitOption {
   padding: var(--space-1) 0;
-  min-height: 24px;
+  min-height: var(--target-min);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -2032,6 +2948,16 @@
 .leadFrame:focus-within .credReveal {
   opacity: 1;
 }
+
+/* SPEC-030 UX-002: where there is no hover, this credit was reachable by
+   nothing at all — the image's provenance simply did not exist on a phone. The
+   charter's §2 north star and CONS-490 both make that a compliance defect
+   rather than a rough edge, so on a touch device the credit is just visible. */
+@media (hover: none) {
+  .credReveal {
+    opacity: 1;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .credReveal {
     transition: none;
@@ -2361,9 +3287,23 @@
   list-style: none;
 }
 
+/* SPEC-030 REQ-008: a flex item's automatic minimum size is its *content's*
+   min-width, so one long taxon name made the chip wider than the column it sits
+   in and pushed past the viewport. The same defect, in a different list, as the
+   one that defeated `.mapRail`'s max-width (REQ-007). */
+.neighbourList > li {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .neighbourItem {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
   gap: 0.45rem;
   padding: 0.3rem 0.55rem;
   background: none;
@@ -2492,6 +3432,13 @@
   list-style: none;
 }
 
+/* SPEC-030 REQ-008: the tree depth arrives as `--fan-depth` from the component
+   so the breakpoint can cap it (see the phone block below). */
+.fanList li {
+  margin-left: calc(var(--fan-depth, 0) * 12px);
+  min-width: 0;
+}
+
 .fanListItem {
   display: flex;
   align-items: baseline;
@@ -2503,10 +3450,31 @@
   cursor: pointer;
   font: inherit;
   font-size: 0.82rem;
+  /* SPEC-030 REQ-008: without these the row is an unwrappable flex line whose
+     min-content width wins, and a long name plus its counts ran to x=415 in a
+     390px window. */
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+.fanListItem > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .fanListItem:hover {
   text-decoration: underline;
+}
+
+/* SPEC-030 UX-002: on touch there is no hover, so the underline was the only
+   cue that these rows are tappable and nobody on a phone ever saw it. */
+@media (hover: none) {
+  .fanListItem {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 /* Avian coverage marker (REQ-006) — text, never styling alone (PERF-250).

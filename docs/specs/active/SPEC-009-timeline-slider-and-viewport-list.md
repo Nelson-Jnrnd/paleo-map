@@ -426,14 +426,105 @@ transient id set by hover/focus on either surface, visually weaker than selectio
 
 > Required for any behavioral change after the spec is Approved.
 
-### AMEND-001
+### AMEND-003: One period at a time at phone widths
 
-- **Date:**
-- **Reason:**
-- **Changed requirements:**
-- **Behavioral impact:**
-- **Test impact:**
-- **Human approval reference:**
+- **Date:** 2026-09-04
+- **Reason:** Owner request, 2026-09-04, after reviewing the controls drawer:
+  "If we show only the timestep band of the age currently selected it would give
+  us more breathing room. We could also change the 3 age buttons to a single
+  label with left and right arrows to change age." AMEND-001 gave the track
+  explicit stage steppers because it could not be aimed; it did not make the
+  track itself readable. Measured in the drawer at 390 x 664 the full Mesozoic
+  window puts ~30 stages across a 366 px track, narrowest step **1-2 px**. That
+  is a picture of a timescale, not a control.
+- **Changed requirements:** REQ-001 (the track spans the full Mesozoic window)
+  and REQ-002 (three period delimitations rendered side by side), both at
+  `max-width: 40rem` only.
+- **Behavioral impact:** below the breakpoint the track renders **only the stages
+  of the currently selected period**, still positioned and sized in proportion to
+  their durations within that window, and the Ma graduation re-scales to the
+  window it now shows. The three period bands are replaced by a single
+  `role="group"` "Jump to period" stepper — older-period button, the selected
+  period's name and ICS colour dot as text, younger-period button — disabled at
+  the ends with a stated reason. Measured after the change: **12 Cretaceous
+  stages** on the same 366 px track, narrowest step **13 px** (10 px at 320).
+  Above the breakpoint nothing changes: the full window and the three bands are
+  rendered exactly as REQ-001/REQ-002 state.
+- **What is not weakened:** the track is still to scale (proportionality is a
+  property of the window shown, not of the window's extent); the selected stage
+  name and Ma span are still always-present text; keyboard stepping still
+  traverses the **full** stage list, so Left/Right and Home/End cross period
+  boundaries and re-scope the track rather than stopping at its edges; the
+  REQ-005 range highlight is retained, clipped at the visible window's edges with
+  a marker that says the range continues (`data-clip-old` / `data-clip-young`);
+  every period remains reachable in one tap of the stepper, which is the
+  affordance REQ-002 exists to preserve.
+- **Why this and not something else:** the alternatives were a wider track (no
+  width to give — the drawer is the viewport), a scrollable track (a horizontal
+  scroll on a phone, which SPEC-030 REQ-002 forbids at the document level and
+  which hides the current age off-screen), or leaving it (a 1 px step is not a
+  target and reads as noise). Scoping the window is the only option that keeps
+  every stage aimable without taking width from anything else.
+- **Test impact:** new e2e assertion that the drawer's track carries only the
+  selected period's stages and that stepping the period re-scopes it; the
+  existing "Jump to period" group locator in `phone-sheet.e2e.ts` still resolves,
+  since the stepper keeps the group role and name. No desktop SPEC-009 test
+  changes.
+- **Human approval reference:** Owner request, 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su`.
+
+### AMEND-002: The Ma graduation axis is hidden at phone widths
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-003 acceptance criterion 1 — the map must still be at
+  least 55% of the space below the timeline when the occurrence sheet rests at
+  its peek stop. Measured at 390×664 it was **52.4%**, and every other candidate
+  for the missing 20px was a control the functional specification makes
+  permanent (FONC-040/050/060, CONS-450) or one belonging to another spec.
+- **Changed requirements:** REQ-001, by omission — the axis is drawn beneath the
+  track today but is not named in REQ-001's statement.
+- **Behavioral impact:** at `max-width: 40rem` the Ma tick axis is not rendered.
+  REQ-001's actual requirements are untouched: the to-scale track, the
+  proportional stage steps, the selected stage's **name and Ma span as
+  always-present text** (in the readout), REQ-002's period bands and the
+  keyboard slider all remain. The axis is already `aria-hidden`, so nothing
+  changes in the accessibility tree. Above the breakpoint it is drawn exactly as
+  before, and NFR-002's desktop gate asserts that.
+- **Why this and not something else:** the axis is a reading aid that duplicates,
+  less precisely, what the readout states exactly. Of the four candidates, it was
+  the only one whose removal costs no requirement — the taxon search row belongs
+  to SPEC-013, the frame toggle to SPEC-029 and CONS-450, and shrinking the
+  sheet's peek would contradict SPEC-030 REQ-003's own statement.
+- **Test impact:** `test/e2e/phone-sheet.e2e.ts` asserts the 55%;
+  `test/e2e/phone-states.e2e.ts` asserts the axis is still drawn above the
+  breakpoint.
+- **Superseded in part, 2026-09-04:** SPEC-030 AMEND-001 moved the whole
+  timeline into a controls drawer, where the 20px this amendment was buying no
+  longer matters. The axis is drawn again there (SPEC-030 AMEND-002 item 7).
+  What stays hidden is the axis in the *strip* layout, where the timeline itself
+  is not rendered at all — so the amendment still holds, on a narrower footing
+  than when it was written.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su` — "ammend what needs to be ammended and finish the work".
+
+### AMEND-001: Discrete stage stepping at phone widths
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-006. REQ-001's to-scale track cannot be aimed on a
+  phone: ~30 stages across a 214 px track gives a narrowest step of **0.0 px**,
+  and 30 × 44 px of touch target is 1,320 px — the geometry simply does not admit
+  a per-stage touch target at phone widths.
+- **Changed requirements:** REQ-001, the composition of the control only. The
+  track itself is unchanged.
+- **Behavioral impact:** at `max-width: 40rem` the control gains explicit
+  previous-stage and next-stage buttons beside the track, each ≥ 44 × 44 px,
+  disabled at the ends of the range with a stated reason. The stage readout moves
+  full-width above the track instead of into a fixed 128 px side column. The
+  to-scale track, the selection bar, the REQ-005 range highlight, the REQ-002
+  period bands and the keyboard slider semantics are all retained unchanged, and
+  the track still accepts a direct tap and a drag-scrub. **Purely additive**; above
+  the breakpoint nothing changes.
+- **Test impact:** new e2e geometry assertions and a Vitest stepping test. No
+  existing SPEC-009 test changes.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 

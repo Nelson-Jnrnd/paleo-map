@@ -14,6 +14,7 @@
 | [Daily Genus](daily-genus.md) | Daily genus puzzle; guesses reveal the classification tree | SPEC-019 REQ-001…REQ-014, UX-001…UX-004 | [`assets/mockups/daily-genus.svg`](../assets/mockups/daily-genus.svg) · [states](../assets/mockups/daily-genus-states.svg) | ✅ High-fidelity |
 | [Dinordle cladogram](dinordle-cladogram.md) | The puzzle's revealed classification, drawn as a horizontal cladogram | SPEC-025 REQ-001…REQ-005, UX-001…UX-003 | [`assets/mockups/dinordle-cladogram.svg`](../assets/mockups/dinordle-cladogram.svg) | ✅ High-fidelity |
 | [Exploration sidebar](exploration-sidebar.md) | The sidebar's five-unit list and its detail view, at the real 360px width | SPEC-026 REQ-001…REQ-006, UX-001…UX-002 | [`assets/mockups/exploration-sidebar.svg`](../assets/mockups/exploration-sidebar.svg) | ✅ High-fidelity |
+| Phone map screen | The exploration view at 390px: compact header, discrete stage stepping, full-bleed map, occurrence sheet | SPEC-030 REQ-002…REQ-007, UX-001…UX-004 | _built, not mocked_ | ⚙️ Built |
 
 ## State variants to capture
 

@@ -49,6 +49,7 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-025 | Dinordle cladogram render — a real horizontal cladogram | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-025-cladogram-render.md`](specs/implemented/SPEC-025-cladogram-render.md) |
 | SPEC-026 | Exploration sidebar redesign — one five-unit selector, one list | Implemented | nelsonjeanrenaud@gmail.com | — | #25 | [`specs/implemented/SPEC-026-sidebar-redesign.md`](specs/implemented/SPEC-026-sidebar-redesign.md) |
 | SPEC-027 | Search & selection legibility under clustering | In Implementation | nelsonjeanrenaud@gmail.com | — | #19 | [`specs/approved/SPEC-027-selection-legibility-under-clustering.md`](specs/approved/SPEC-027-selection-legibility-under-clustering.md) |
+| SPEC-030 | Phone layout — a portrait-phone form for the atlas | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-030-phone-layout.md`](specs/approved/SPEC-030-phone-layout.md) |
 
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in

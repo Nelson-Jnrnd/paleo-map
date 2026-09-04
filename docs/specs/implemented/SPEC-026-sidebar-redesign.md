@@ -1186,9 +1186,53 @@ clade word on a row under UX-002.
 
 ## Spec amendments
 
-> Required for any behavioral change after the spec is Approved. None yet — the
-> spec reached Approved with the owner's review changes already folded in
-> (2026-08-14), so there is no post-approval behavioral change to record.
+> Required for any behavioral change after the spec is Approved.
+
+### AMEND-002: The list's own controls stand down while a detail is open
+
+- **Date:** 2026-09-04
+- **Reason:** REQ-003 requires the unit selector to stay visible and operable
+  while a detail is open. In a full-height desktop column that costs nothing. In
+  the phone sheet at its half stop it is a 290px container, and the selector plus
+  the Wikipedia-gate toggle took 130px of it — so tapping a row showed the reader
+  the same two controls again and pushed the taxon's name and its back control
+  off the bottom of the screen.
+- **Changed requirements:** REQ-003's "the column must still show (a) the
+  REQ-001 unit selector, unchanged and still operable", at `max-width: 40rem`
+  only.
+- **Behavioral impact:** on a phone, while a detail is open the sheet shows the
+  back control and the detail. The selector and the gate return with the list —
+  one tap away, on the control REQ-003 already requires to be there. Everything
+  else REQ-003 specifies is untouched: the detail still replaces the list in the
+  same container, the back control still names the list it returns to, `Escape`
+  still clears, and the list still returns scrolled to the row you left.
+- **Also fixed under this amendment:** the sheet body kept the list's scroll
+  offset when a detail opened, so the reader landed midway down it with the back
+  control above the fold. Both directions now start at the top.
+- **Test impact:** a new phone e2e asserts the back control is
+  `toBeInViewport()` — not merely `toBeVisible()`, which passes for an element
+  scrolled out of a scroll container, and is why the existing REQ-004 test
+  missed this — and that the selector is absent while a detail is open.
+- **Human approval reference:** Owner approval: 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su` — review of the drawer and the unreviewed states.
+
+### AMEND-001: "The column" is a bottom sheet on a phone
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 REQ-003/REQ-004. REQ-001 and REQ-003 are written in terms
+  of "the sidebar" and "the same column"; at `max-width: 40rem` that column is a
+  draggable bottom sheet over a full-bleed map, because a 164 px-wide sidebar
+  beside a 226 px map serves neither.
+- **Changed requirements:** REQ-001 and REQ-003, **vocabulary only** — "the
+  column" reads as "the column, which on a phone is the sheet".
+- **Behavioral impact:** **none.** Every behaviour these two requirements specify
+  holds identically in the sheet: the always-visible five-unit selector with an
+  identical option set in every state, a selection replacing the list in the same
+  container, the back control naming the list it returns to, `Escape`, scroll
+  restoration to the previously selected row, `aria-current`, and focus handling.
+  This amendment exists so the two specs cannot be read as contradicting each
+  other, not because anything changes.
+- **Test impact:** the existing SPEC-026 suites run against both containers.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
 
 ## Review checklist
 

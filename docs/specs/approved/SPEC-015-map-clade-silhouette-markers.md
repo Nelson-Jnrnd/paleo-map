@@ -311,6 +311,23 @@ markers and the AMEND-005 Wikipedia gate are unaffected.
 
 ## Spec amendments
 
+### AMEND-002: The preview card has a touch trigger
+
+- **Date:** 2026-09-02
+- **Reason:** SPEC-030 UX-002. REQ-003 is written in mouse vocabulary —
+  "Hovering a marker shows…", "The card dismisses on mouse-out" — so on a touch
+  device the "answer before the click" guarantee it exists to deliver is not
+  weakened but simply **absent**.
+- **Changed requirements:** REQ-003, its trigger and dismissal only.
+- **Behavioral impact:** under `@media (hover: none)` a first tap on a marker pins
+  the card and a tap elsewhere dismisses it. Card content, anchoring, the clade
+  icon and the SPEC-009 cross-highlight are unchanged, as is all hover behaviour
+  on a fine pointer. SPEC-023 AMEND-001 depends on this: it is what keeps the
+  clade names reachable once the key opens collapsed on a phone.
+- **Test impact:** a new e2e asserts the card's content after a tap with
+  `hasTouch` and `hover: none`; the existing jsdom hover test is unchanged.
+- **Human approval reference:** Owner approval: 2026-09-02, session `session_01GvwYfnCtWQGcynW17zS4su`, approving SPEC-030.
+
 ### AMEND-001: Aggregate identity, interactive pinned card, live labels, transparent icons, Thyreophora
 
 - **Date / owner:** 2026-07-30, owner-directed after on-device testing.
