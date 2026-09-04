@@ -35,6 +35,14 @@ interface OccurrenceSheetProps {
    */
   detailKey: string | null;
   /**
+   * Raise the sheet and keep it raised — set when the body is showing something
+   * the reader must act on rather than a list they can leave closed. Today that
+   * is the empty state: at rest the sheet is 76px, so "no occurrences at this
+   * age" and its reset control sat below the fold and the screen became a blank
+   * map with no way out (charter §7, FONC-1280).
+   */
+  raised?: boolean;
+  /**
    * One line naming what is under the sheet — "938 occurrences in view".
    *
    * The peek stop used to render a 76px bar containing a grab handle and
@@ -50,12 +58,14 @@ export function OccurrenceSheet({
   label,
   detailKey,
   summary,
+  raised = false,
 }: OccurrenceSheetProps): React.ReactElement {
   const [stop, setStop] = useState<SheetStop>("peek");
   const [containerPx, setContainerPx] = useState(0);
   /** Live height during a drag; null when resting at `stop`. */
   const [dragPx, setDragPx] = useState<number | null>(null);
   const sheetRef = useRef<HTMLElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{
     pointerId: number;
     startY: number;
@@ -82,7 +92,16 @@ export function OccurrenceSheet({
 
   useEffect(() => {
     if (detailKey !== null) setStop((current) => stopForDetail(current));
+    // Opening a detail landed the reader in the middle of it: the body keeps
+    // whatever scroll offset the list had, so the taxon's name and the "← Back
+    // to N occurrences" control were above the fold and the way back was
+    // invisible. Closing one has the mirror problem. Both start at the top.
+    bodyRef.current?.scrollTo({ top: 0 });
   }, [detailKey]);
+
+  useEffect(() => {
+    if (raised) setStop((current) => stopForDetail(current));
+  }, [raised]);
 
   const settle = useCallback(
     (px: number) => {
@@ -175,7 +194,9 @@ export function OccurrenceSheet({
           {summary}
         </span>
       </button>
-      <div className={styles.sheetBody}>{children}</div>
+      <div ref={bodyRef} className={styles.sheetBody}>
+        {children}
+      </div>
     </section>
   );
 }

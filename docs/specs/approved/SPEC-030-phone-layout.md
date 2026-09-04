@@ -966,6 +966,49 @@ largest piece) → REQ-008 (taxonomy) → UX-005 (charter) → traceability.
 
 ## Spec amendments
 
+### AMEND-003: The states behind the first screen, reviewed
+
+- **Date:** 2026-09-04
+- **Reason:** AMEND-002 fixed the screen you land on. Reviewing the states
+  *behind* it — a detail, an empty age, the drawer — found seven more, two of
+  them worse than anything in that list.
+- **Changed requirements:** REQ-003 (the sheet raises itself when the body
+  carries something to act on) and UX-004 (the empty state's recovery path must
+  be on screen at rest, not merely rendered).
+- **Behavioral impact:**
+  1. **A detail opens at its own top.** The body kept the list's scroll offset,
+     so a tap on a row landed the reader halfway down the detail with the taxon
+     and the back control above the fold. Both directions reset now, and the
+     list's own controls stand down (SPEC-026 AMEND-002).
+  2. **An empty age raises the sheet.** At the 76px resting height "No
+     occurrences at this age" and its Reset control sat below the fold: the
+     screen was a blank map and a count of zero, with no way out. The sheet
+     raises itself when the list is empty — but only once the stage has
+     *resolved*, since `occurrences` is empty during the first fetch too and
+     raising on that opened every load at half.
+  3. **The count is stated once.** The handle carries it at every stop, so the
+     list header repeated it three lines below.
+  4. **The five unit options fit one row** — for real this time. AMEND-002 set
+     an 8px gap that never applied: these phone rules sit *earlier* in the
+     stylesheet than the declarations they override, so at equal specificity the
+     base rules won. Measured 12px gaps in a 358px group holding 317px of
+     options.
+  5. **The handle names the detail** while one is open, instead of claiming a
+     count of rows it is not showing.
+  6. **The drawer's stray "·"** — hiding the stats before the frame toggle left
+     the separator rule firing on the first visible item. Same specificity trap
+     as item 4.
+  7. **The drawer's frame toggle and Reset share a line**, and the Ma axis drops
+     its trailing unit, which collided with the last tick label ("75Ma").
+- **On the gates, again.** Every one of these passed the suite. `toBeVisible()`
+  is true for an element scrolled out of a scroll container, and `getByRole`
+  finds a control below the fold — so the three new assertions use
+  `toBeInViewport()` on the back control and on the empty state's recovery
+  control, and count how many times the sheet states its own count. The pattern
+  across AMEND-002 and AMEND-003 is the same: asserting that a thing *exists*
+  and *fits* is not asserting that the reader can see it when they need it.
+- **Human approval reference:** Owner approval: 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su` — review of the drawer and the unreviewed states.
+
 ### AMEND-002: The screen reviewed, and eleven layout defects fixed
 
 - **Date:** 2026-09-04

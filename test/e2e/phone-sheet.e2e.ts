@@ -181,6 +181,70 @@ test.describe("the occurrence sheet at 390×664", () => {
     await expect(handle).toContainText(/\d+\s+occurrences?/);
   });
 
+  test("a detail opens at its own top, with the way back on screen", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+
+    const row = page.locator("button[data-unit-row]").first();
+    await row.waitFor();
+    await row.click();
+
+    // The regression: the sheet body kept the list's scroll offset, so a tap on
+    // a row landed the reader halfway down the detail with the taxon's name and
+    // the back control above the fold. `toBeVisible()` passes for an element
+    // scrolled out of a scroll container — only `toBeInViewport()` catches it,
+    // which is why the existing REQ-004 test did not.
+    const back = page.getByRole("button", {
+      name: /back to .*(occurrence|genera|localities|families|groups)/i,
+    });
+    await expect(back).toBeInViewport();
+
+    // And the list's own controls stand down (SPEC-026 AMEND-002): in a 290px
+    // sheet they cost the detail most of its room.
+    await expect(
+      page.getByRole("radiogroup", { name: /one row per/i }),
+    ).toHaveCount(0);
+  });
+
+  test("an age with no occurrences offers its way out without a gesture", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+
+    const older = page.getByRole("button", { name: /older stage/i });
+    for (let i = 0; i < 34 && (await older.isEnabled()); i++) {
+      await older.click();
+      await page.waitForTimeout(80);
+    }
+    await page.waitForTimeout(1500);
+
+    // FONC-1280 and charter §7: the empty state carries a recovery path, and at
+    // a 76px resting height it sat below the fold — the screen was a blank map
+    // and a count of zero. The sheet raises itself instead.
+    await expect(
+      page.getByText(/no occurrences at this age/i),
+    ).toBeInViewport();
+    await expect(
+      page.getByRole("button", { name: /reset view/i }).last(),
+    ).toBeInViewport();
+  });
+
+  test("the in-view count is stated once, not twice", async ({ page }) => {
+    await page.goto("/");
+    await settle(page);
+    await page.getByRole("button", { name: /activate to resize/i }).click();
+    await page.waitForTimeout(500);
+
+    // The handle carries the count at every stop, so the list's own header
+    // repeated it three lines below.
+    const sheetText = await page.locator("[data-sheet-stop]").innerText();
+    const counts = sheetText.match(/\d+\s+occurrences?\b/gi) ?? [];
+    expect(counts.length).toBeLessThanOrEqual(1);
+  });
+
   test("REQ-008 (amended): the map opens framed on the data, not on a fixed camera", async ({
     page,
   }) => {

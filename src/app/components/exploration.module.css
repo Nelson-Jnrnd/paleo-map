@@ -429,6 +429,48 @@
     display: none;
   }
 
+  /* With the stats before it hidden, the separator rule still fired and left a
+     stray "·" floating to the left of "Paleogeographic". Scoped through
+     `.context` for specificity: the rule it overrides is itself
+     `.context .stat + .stat::before` and sits later in this file. */
+  .controlsDrawer .context .stat + .stat::before {
+    content: none;
+  }
+
+  /* The axis's trailing "Ma" is pinned to the right edge, where it collided
+     with the last tick label — "75Ma" ran together. The unit is stated twice
+     over in the strip's readout above ("72.1–66 Ma"), so the axis keeps its
+     numbers and drops the gloss. */
+  .controlsDrawer .axisUnit {
+    display: none;
+  }
+
+  /* The frame choice and Reset shared no line and no alignment: the options sat
+     left, Reset sat right on a row of its own, and the gap between them was
+     larger than the gap between anything else. One row, one baseline. */
+  .controlsDrawer .context {
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .controlsDrawer .frameStat {
+    flex: 1 1 auto;
+  }
+
+  .controlsDrawer .reset {
+    margin-left: 0;
+  }
+
+  /* One rhythm for the panel: every block is separated by the same step. */
+  .controlsDrawer {
+    gap: var(--space-3);
+  }
+
+  .controlsDrawer .timelineBody {
+    gap: var(--space-2);
+  }
+
   .controlsDrawer .timelineBody {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -1659,8 +1701,20 @@
   /* A 16px gap pushed the five options to 383px in a 366px column, wrapping
      4 + 1 and orphaning "Major group". 8px fits them on one line at 390px and
      still wraps cleanly below that. */
-  .unitGroup {
-    gap: var(--space-1) var(--space-2);
+  /* Scoped through `.sheet` for specificity, not for meaning: these phone rules
+     sit *earlier* in this file than `.unitBar` / `.unitGroup`'s own
+     declarations, so at equal specificity the base rules won and neither the
+     8px gap nor the reduced padding ever applied. Measured: 12px gaps in a
+     358px group against 317px of options — 365 into 358, and "Major group"
+     orphaned on a second row for the 7px. */
+  .sheet .unitGroup {
+    gap: var(--space-1) 6px;
+    justify-content: space-between;
+  }
+
+  .sheet .unitBar {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
   }
 
   /* SPEC-023 AMEND-003: the gate's phone home. Flat in the flow of the sheet,
@@ -1682,6 +1736,21 @@
      320px the context row was three rows and 132px tall. */
   .context .reset {
     margin-left: auto;
+  }
+}
+
+/* SPEC-030: inside the sheet the handle already carries "N occurrences in
+   view" — permanently, at every stop — so the list's own header repeated the
+   same count three lines below it. The overflow note is not a duplicate and
+   stays. */
+@media (max-width: 40rem) {
+  .sheet .listHeader .statLabel,
+  .sheet .listHeader .listCount {
+    display: none;
+  }
+
+  .sheet .listHeader:not(:has(.source)) {
+    display: none;
   }
 }
 

@@ -1188,6 +1188,33 @@ clade word on a row under UX-002.
 
 > Required for any behavioral change after the spec is Approved.
 
+### AMEND-002: The list's own controls stand down while a detail is open
+
+- **Date:** 2026-09-04
+- **Reason:** REQ-003 requires the unit selector to stay visible and operable
+  while a detail is open. In a full-height desktop column that costs nothing. In
+  the phone sheet at its half stop it is a 290px container, and the selector plus
+  the Wikipedia-gate toggle took 130px of it — so tapping a row showed the reader
+  the same two controls again and pushed the taxon's name and its back control
+  off the bottom of the screen.
+- **Changed requirements:** REQ-003's "the column must still show (a) the
+  REQ-001 unit selector, unchanged and still operable", at `max-width: 40rem`
+  only.
+- **Behavioral impact:** on a phone, while a detail is open the sheet shows the
+  back control and the detail. The selector and the gate return with the list —
+  one tap away, on the control REQ-003 already requires to be there. Everything
+  else REQ-003 specifies is untouched: the detail still replaces the list in the
+  same container, the back control still names the list it returns to, `Escape`
+  still clears, and the list still returns scrolled to the row you left.
+- **Also fixed under this amendment:** the sheet body kept the list's scroll
+  offset when a detail opened, so the reader landed midway down it with the back
+  control above the fold. Both directions now start at the top.
+- **Test impact:** a new phone e2e asserts the back control is
+  `toBeInViewport()` — not merely `toBeVisible()`, which passes for an element
+  scrolled out of a scroll container, and is why the existing REQ-004 test
+  missed this — and that the selector is absent while a detail is open.
+- **Human approval reference:** Owner approval: 2026-09-04, session `session_01GvwYfnCtWQGcynW17zS4su` — review of the drawer and the unreviewed states.
+
 ### AMEND-001: "The column" is a bottom sheet on a phone
 
 - **Date:** 2026-09-02

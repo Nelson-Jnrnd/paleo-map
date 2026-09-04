@@ -787,6 +787,19 @@ export function ExplorationView({
     </label>
   );
 
+  // What the sheet's handle says at rest. While a detail is open the list is not
+  // what is showing, so it names the selection rather than claiming a count of
+  // rows it is not displaying.
+  const detailName = selectedOccurrence
+    ? selectedOccurrence.taxonName
+    : selectedLocality
+      ? selectedLocality.name
+      : (selectedTaxonGroup?.name ?? null);
+  const sheetSummary =
+    detail && detailName
+      ? detailName
+      : `${unitRows.length} ${unitNoun}${viewport !== null ? " in view" : ""}`;
+
   const columnContents = (
     <>
       {stageStatus.kind === "loading" || stageStatus.kind === "error" ? (
@@ -801,13 +814,24 @@ export function ExplorationView({
         <EmptyState onReset={() => dispatch({ type: "reset" })} />
       ) : (
         <>
-          <GroupingControls
-            unit={unit}
-            onSelectUnit={(next) => dispatch({ type: "setUnit", unit: next })}
-          />
-
-          {phoneLayout && (
-            <div className={styles.sheetGate}>{wikipediaGate}</div>
+          {/* SPEC-026 AMEND-002: on a phone the list's own controls stand down
+              while a detail is open. REQ-003 keeps them beside the detail in a
+              full-height desktop column; in a 290px sheet they cost 130px of
+              the 160px the detail had, so tapping a row showed the same two
+              controls again and pushed the taxon and its back link off the
+              bottom. They return with the list. */}
+          {!(phoneLayout && detail) && (
+            <>
+              <GroupingControls
+                unit={unit}
+                onSelectUnit={(next) =>
+                  dispatch({ type: "setUnit", unit: next })
+                }
+              />
+              {phoneLayout && (
+                <div className={styles.sheetGate}>{wikipediaGate}</div>
+              )}
+            </>
           )}
 
           {/* SPEC-027 REQ-004: the app tells the Explorer what it did
@@ -999,9 +1023,15 @@ export function ExplorationView({
           <OccurrenceSheet
             label="Occurrence details"
             detailKey={detail ? (selectedKey ?? "detail") : null}
-            summary={`${unitRows.length} ${unitNoun}${
-              viewport !== null ? " in view" : ""
-            }`}
+            // Only once the stage has actually resolved: `occurrences` is empty
+            // during the first fetch too, and raising on that made the sheet
+            // open at half on every load.
+            raised={
+              stageStatus.kind !== "loading" &&
+              stageStatus.kind !== "error" &&
+              occurrences.length === 0
+            }
+            summary={sheetSummary}
           >
             {columnContents}
           </OccurrenceSheet>
