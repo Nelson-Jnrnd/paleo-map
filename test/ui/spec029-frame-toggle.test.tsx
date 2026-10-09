@@ -153,13 +153,13 @@ test("REQ-004: present-day mode says the age still filters, and names the age", 
   const group = await frameGroup();
 
   // Absent while the coastline is still changing with the age…
-  expect(screen.queryByText(/still chooses which occurrences/i)).toBeNull();
+  expect(screen.queryByText(/^Present-day map · .*fossil finds/i)).toBeNull();
 
   await user.click(group.getByRole("radio", { name: /present day/i }));
 
   // …and present once the usual cue — the coastline moving — is turned off.
-  const note = await screen.findByText(/still chooses which occurrences/i);
-  expect(note.textContent).toMatch(/selected age/i);
+  const note = await screen.findByText(/^Present-day map · .*fossil finds/i);
+  expect(note.textContent).toMatch(/Maastrichtian/i);
   // It names the age itself, so the statement is concrete rather than generic.
   const selectedAge = screen.getAllByText(/Maastrichtian/i);
   expect(selectedAge.length).toBeGreaterThan(0);
@@ -169,11 +169,11 @@ test("REQ-004: switching back removes the note", async () => {
   const { user } = await renderView();
   const group = await frameGroup();
   await user.click(group.getByRole("radio", { name: /present day/i }));
-  await screen.findByText(/still chooses which occurrences/i);
+  await screen.findByText(/^Present-day map · .*fossil finds/i);
 
   await user.click(group.getByRole("radio", { name: /paleogeographic/i }));
   await waitFor(() =>
-    expect(screen.queryByText(/still chooses which occurrences/i)).toBeNull(),
+    expect(screen.queryByText(/^Present-day map · .*fossil finds/i)).toBeNull(),
   );
 });
 
@@ -187,7 +187,7 @@ test("UX-002: with no present-day frame in the index, no control is offered", as
     expect(screen.queryByRole("radiogroup", { name: /^map$/i })).toBeNull(),
   );
   expect(screen.queryByText(/present day/i)).toBeNull();
-  expect(screen.queryByText(/still chooses which occurrences/i)).toBeNull();
+  expect(screen.queryByText(/^Present-day map · .*fossil finds/i)).toBeNull();
 });
 
 test("UX-003: the control is keyboard-operable and not colour-alone", async () => {

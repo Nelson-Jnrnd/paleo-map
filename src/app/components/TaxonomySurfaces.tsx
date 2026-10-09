@@ -93,9 +93,7 @@ function Silhouette({
         className={styles.silhouetteMissing}
         role="img"
         aria-label={`No silhouette for ${taxon.scientificName}`}
-      >
-        —
-      </span>
+      ></span>
     );
   }
   return (
@@ -273,7 +271,6 @@ function NeighbourList({
   label,
   taxa,
   deps,
-  emptyNote,
 }: {
   label: string;
   taxa: readonly ReadTaxon[];
@@ -284,6 +281,7 @@ function NeighbourList({
   // the ones worth seeing; the long tail of one-genus eggshell and footprint
   // families goes behind a disclosure rather than pushing the rest of the page
   // down by a screenful.
+  if (!taxa.length) return <></>;
   const head = taxa.slice(0, NEIGHBOUR_VISIBLE);
   const tail = taxa.slice(NEIGHBOUR_VISIBLE, SILHOUETTE_RENDER_CAP);
 
@@ -307,9 +305,7 @@ function NeighbourList({
   return (
     <div className={styles.neighbourGroup}>
       <h3 className={styles.neighbourLabel}>{label}</h3>
-      {taxa.length === 0 ? (
-        <p className={styles.taxEmpty}>{emptyNote}</p>
-      ) : (
+      {taxa.length === 0 ? null : (
         <>
           <ul className={styles.neighbourList}>{head.map(pill)}</ul>
           {tail.length > 0 && (
@@ -329,9 +325,11 @@ function NeighbourList({
 export function TaxonNeighbours({
   taxonId,
   deps,
+  compact = false,
 }: {
   taxonId: string;
   deps: TaxonomyDeps;
+  compact?: boolean;
 }): ReactElement {
   const { index } = deps;
   const taxon = index.byId.get(taxonId);
@@ -341,7 +339,9 @@ export function TaxonNeighbours({
   const siblings = parent
     ? index.children(parent.id).filter((t) => t.id !== taxonId)
     : [];
-  const children = index.children(taxonId);
+  const children = index
+    .children(taxonId)
+    .filter((t) => !compact || !index.isAvian(t.id));
 
   return (
     <section className={styles.taxSurface} aria-label="Neighbours on the tree">
@@ -352,12 +352,14 @@ export function TaxonNeighbours({
         deps={deps}
         emptyNote="Dinosauria is the root of the atlas's taxonomy — there is nothing above it here."
       />
-      <NeighbourList
-        label="Siblings"
-        taxa={siblings}
-        deps={deps}
-        emptyNote="No siblings — this taxon is its parent's only child in the atlas."
-      />
+      {!compact && (
+        <NeighbourList
+          label="Siblings"
+          taxa={siblings}
+          deps={deps}
+          emptyNote="No siblings — this taxon is its parent's only child in the atlas."
+        />
+      )}
       <NeighbourList
         label="Children"
         taxa={children}

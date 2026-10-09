@@ -15,7 +15,7 @@
  * nothing about content.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import styles from "./exploration.module.css";
 
@@ -67,6 +67,8 @@ export function UnitList({
   onSelect,
   onHighlight,
 }: UnitListProps): ReactElement {
+  const [limit, setLimit] = useState(LIST_RENDER_CAP);
+  useEffect(() => setLimit(LIST_RENDER_CAP), [rows]);
   const highlightedRowRef = useRef<HTMLButtonElement | null>(null);
 
   // Bring a row into view when the highlight is driven from the map (harmless
@@ -93,7 +95,7 @@ export function UnitList({
   }
 
   // Keep the selected row rendered even if it sits past the cap.
-  const capped = rows.slice(0, LIST_RENDER_CAP);
+  const capped = rows.slice(0, limit);
   const overflow = rows.length - capped.length;
   if (selectedKey && !capped.some((r) => r.key === selectedKey)) {
     const selected = rows.find((r) => r.key === selectedKey);
@@ -103,21 +105,10 @@ export function UnitList({
   return (
     <section className={styles.listPane} aria-label={label}>
       <div className={styles.listHeader}>
-        <span className={styles.statLabel}>
-          {viewportActive ? "In view" : label}
-        </span>
         <p className={styles.listCount}>
           <span className={`${styles.countValue} mono`}>{rows.length}</span>{" "}
-          {viewportActive
-            ? `${noun} in the current map view`
-            : `${noun} at this age`}
+          {viewportActive ? `${noun} in view` : `${noun} at this age`}
         </p>
-        {overflow > 0 && (
-          <p className={styles.source}>
-            Showing the first {capped.length} of {rows.length} — zoom in to
-            narrow the view.
-          </p>
-        )}
       </div>
 
       <ul className={styles.list}>
@@ -167,6 +158,15 @@ export function UnitList({
           );
         })}
       </ul>
+      {overflow > 0 && (
+        <button
+          type="button"
+          className={styles.panelBack}
+          onClick={() => setLimit((n) => n + LIST_RENDER_CAP)}
+        >
+          Load more ({overflow} remaining)
+        </button>
+      )}
     </section>
   );
 }

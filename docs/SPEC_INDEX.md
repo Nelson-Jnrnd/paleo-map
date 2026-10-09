@@ -51,6 +51,8 @@ Terminal alternatives: `Superseded`, `Archived`, `Rejected`.
 | SPEC-027 | Search & selection legibility under clustering | In Implementation | nelsonjeanrenaud@gmail.com | — | #19 | [`specs/approved/SPEC-027-selection-legibility-under-clustering.md`](specs/approved/SPEC-027-selection-legibility-under-clustering.md) |
 | SPEC-030 | Phone layout — a portrait-phone form for the atlas | In Implementation | nelsonjeanrenaud@gmail.com | — | — | [`specs/approved/SPEC-030-phone-layout.md`](specs/approved/SPEC-030-phone-layout.md) |
 
+| SPEC-031 | Quiet atlas interface | In Implementation | Nelson Jeanrenaud | — | — | [`specs/approved/SPEC-031-quiet-atlas-interface.md`](specs/approved/SPEC-031-quiet-atlas-interface.md) |
+
 > **Known drift (2026-08-05):** rows for SPEC-010…SPEC-016 are missing from this
 > table although those specs exist under `docs/specs/approved/`. Recorded in
 > `docs/reports/fan-feature-wishlist.md`; left for a dedicated `/drift-check`

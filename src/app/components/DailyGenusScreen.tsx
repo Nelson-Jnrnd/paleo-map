@@ -39,8 +39,6 @@ import {
   applyGuess,
   buildGameData,
   evaluateGuess,
-  formatCountdown,
-  msUntilNextUtcDay,
   poolForTrack,
   puzzleNumber,
   resolveGuess,
@@ -497,11 +495,7 @@ export function DailyGenusScreen({
   const [copied, setCopied] = useState<"idle" | "copied" | "unavailable">(
     "idle",
   );
-  // REQ-003: which track's pool size the detail slot is previewing, if any.
-  // Hover *and* focus drive it, so it is reachable without a pointer.
-  const [trackPreview, setTrackPreview] = useState<Track | null>(null);
-  // SPEC-020 AMEND-006: whether the ranking caveat's disclosure is open. Closed
-  // on load — the control, not the caveat, is what is always on the surface.
+  // SPEC-031: game instructions and ranking are disclosed together.
   const [aboutOpen, setAboutOpen] = useState(false);
   const listId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -611,17 +605,15 @@ export function DailyGenusScreen({
 
   // Countdown to the next 00:00 UTC. Recomputed from the clock on every tick, so
   // a backgrounded tab resumes correct rather than drifting (REQ-009).
-  const [remaining, setRemaining] = useState(() => msUntilNextUtcDay(now()));
   useEffect(() => {
     const tick = (): void => {
       const instant = now();
-      setRemaining(msUntilNextUtcDay(instant));
       // The UTC date moved while the screen was open: never swap the answer
       // under the player — offer the new round instead (REQ-013).
       if (utcDateKey(instant) !== dateKey) setRolledOver(true);
     };
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 10000);
     return () => clearInterval(id);
   }, [now, dateKey]);
 
@@ -753,11 +745,11 @@ export function DailyGenusScreen({
         {/* SPEC-020 AMEND-006: the track option sits on the header row, which
             is where the owner asked for it and what recovers the vertical space
             the old block cost above the board. */}
-        {trackAvailable(data, "wellKnown") && (
-          <div className={styles.tracks}>
-            {/* REQ-001: two controls, the domain names, single-choice. `radio`
+        <div className={styles.tracks}>
+          {/* REQ-001: two controls, the domain names, single-choice. `radio`
                 roles rather than a fieldset of labels: the same semantics in a
                 third of the copy. */}
+          {trackAvailable(data, "wellKnown") && (
             <div
               className={styles.trackGroup}
               role="radiogroup"
@@ -769,51 +761,34 @@ export function DailyGenusScreen({
                   type="button"
                   role="radio"
                   aria-checked={track === option}
-                  aria-describedby={`${listId}-track-detail`}
                   className={`${styles.trackButton} ${track === option ? styles.trackButtonOn : ""}`}
                   onClick={() => chooseTrack(option)}
-                  onMouseEnter={() => setTrackPreview(option)}
-                  onMouseLeave={() => setTrackPreview(null)}
-                  onFocus={() => setTrackPreview(option)}
-                  onBlur={() => setTrackPreview(null)}
                 >
                   {option === "full" ? "Every genus" : "Well-known"}
                 </button>
               ))}
             </div>
-            {/* SPEC-020 AMEND-006: the ranking caveat now sits behind this
+          )}
+          {/* SPEC-020 AMEND-006: the ranking caveat now sits behind this
                 control. A real `button` toggling a real element — never a
                 `title`, never hover-only — so it is reachable by keyboard and on
                 a touch device with no hover. The control is rendered in every
                 state the track option is, so the caveat is always one deliberate
                 action away. */}
-            <button
-              type="button"
-              className={styles.aboutToggle}
-              aria-expanded={aboutOpen}
-              aria-controls={`${listId}-track-about`}
-              onClick={() => setAboutOpen((open) => !open)}
-            >
-              <span aria-hidden="true">ⓘ</span>
-              <span className="visuallyHidden">
-                About the “well-known” ranking
-              </span>
-            </button>
-            {/* REQ-003: the pool size for the selected track is always rendered
-                here; hovering or focusing the other control previews its size in
-                the same slot. Not a live region — this must not be announced on
-                every hover — and the slot's height does not change with
-                content. */}
-            <p className={styles.trackDetail} id={`${listId}-track-detail`}>
-              {(trackPreview ?? track) === "full"
-                ? `all ${data.pool.length.toLocaleString("en-GB")} genera in the snapshot`
-                : `the ${data.wellKnownPool.length} most read about`}
-            </p>
-          </div>
-        )}
+          <button
+            type="button"
+            className={styles.aboutToggle}
+            aria-expanded={aboutOpen}
+            aria-controls={`${listId}-track-about`}
+            onClick={() => setAboutOpen((open) => !open)}
+          >
+            Help
+          </button>
+        </div>
         <div className={styles.headRight}>
-          <p className={styles.countdown}>{formatCountdown(remaining)}</p>
-          <p className={styles.countdownLabel}>next puzzle · 00:00 UTC</p>
+          {!practice && (
+            <p className={styles.countdownLabel}>Next puzzle tomorrow</p>
+          )}
         </div>
       </header>
 
@@ -821,12 +796,19 @@ export function DailyGenusScreen({
           version SPEC-020 UX-001/UX-002 require: English Wikipedia, the window,
           how often people read the article, and attention rather than scientific
           importance. Only its reachability changed (AMEND-006). */}
-      {trackAvailable(data, "wellKnown") && aboutOpen && (
+      {aboutOpen && (
         <p className={styles.trackAbout} id={`${listId}-track-about`}>
-          “Well-known” ranks genera by how often people read their article on
-          English Wikipedia
-          {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure of
-          attention, not of scientific importance.
+          Guess a dinosaur genus in eight attempts. Each guess reveals related
+          groups and clues. The geological scale shows older, younger or
+          overlapping ages.{" "}
+          {trackAvailable(data, "wellKnown") && (
+            <>
+              “Well-known” ranks genera by how often people read their article
+              on English Wikipedia
+              {popularityWindow ? ` over ${popularityWindow}` : ""} — a measure
+              of attention, not of scientific importance.
+            </>
+          )}
         </p>
       )}
 
@@ -858,7 +840,14 @@ export function DailyGenusScreen({
         </p>
       )}
 
-      <div className={styles.board}>
+      {round.guesses.length === 0 && (
+        <p className={styles.initialHint}>
+          Guess a dinosaur genus to reveal its relatives and clues.
+        </p>
+      )}
+      <div
+        className={`${styles.board} ${round.guesses.length === 0 ? styles.boardInitial : ""}`}
+      >
         <section className={styles.treeWrap} aria-labelledby={`${listId}-tree`}>
           <h2 className={styles.eyebrow} id={`${listId}-tree`}>
             Taxonomic tree
@@ -1313,10 +1302,6 @@ export function DailyGenusScreen({
               ))}
             </ul>
           )}
-          <p className={styles.entryNote}>
-            genera only · {data.guessable.length.toLocaleString("en-GB")}{" "}
-            guessable
-          </p>
           {rejection && (
             <p className={styles.rejection} role="alert">
               {rejectionMessage(rejection)}

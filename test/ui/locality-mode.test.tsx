@@ -16,6 +16,9 @@ async function enterLocalityMode() {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Browse dinosaurs" }),
+  );
   const group = within(
     await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
@@ -37,7 +40,9 @@ test("lists localities and inspects a locality's taxa", async () => {
   // The locality panel lists the taxa recorded there, each reaching a profile.
   const panel = screen.getByRole("region", { name: /locality:/i });
   expect(
-    within(panel).getAllByRole("button", { name: /open profile/i }).length,
+    within(panel).getAllByRole("button", {
+      name: /Tyrannosaurus|Triceratops|Nanotyrannus/i,
+    }).length,
   ).toBeGreaterThan(0);
 });
 
@@ -48,7 +53,9 @@ test("selecting a taxon in the locality panel opens its profile (SPEC-003 loop)"
 
   const panel = screen.getByRole("region", { name: /locality:/i });
   await user.click(
-    within(panel).getAllByRole("button", { name: /open profile/i })[0]!,
+    within(panel).getAllByRole("button", {
+      name: /Tyrannosaurus|Triceratops|Nanotyrannus/i,
+    })[0]!,
   );
 
   // Navigated to the taxon profile screen. SPEC-022 REQ-004 removed the screen's

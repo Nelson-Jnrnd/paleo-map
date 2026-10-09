@@ -11,12 +11,15 @@ import type { ReactElement } from "react";
 import type { ReadOccurrence } from "../../domain/index.js";
 import { formatMaRange } from "../format.js";
 import type { LocalityGroup, TaxonGroup } from "../state/grouping.js";
+import type { ReadApi } from "../../read/api.js";
+import { RecordDetails } from "./RecordDetails.js";
 import styles from "./exploration.module.css";
 
 /** No-article tooltip shared by the greyed profile affordances (AMEND-005). */
 const NO_ARTICLE = "No Wikipedia article for this taxon";
 
 interface LocalityPanelProps {
+  api: ReadApi;
   group: LocalityGroup;
   /** The occurrences recorded at this locality (for the taxa list). */
   occurrences: readonly ReadOccurrence[];
@@ -29,6 +32,7 @@ interface LocalityPanelProps {
 }
 
 export function LocalityPanel({
+  api,
   group,
   occurrences,
   onOpenProfile,
@@ -53,8 +57,6 @@ export function LocalityPanel({
       </div>
 
       <dl className={styles.fieldGrid}>
-        <dt className={styles.fieldLabel}>Formation</dt>
-        <dd className={styles.fieldValue}>{group.formation ?? "—"}</dd>
         <dt className={styles.fieldLabel}>Time range</dt>
         <dd className={styles.fieldValue}>
           <span className="mono">
@@ -83,7 +85,6 @@ export function LocalityPanel({
                 <span className={`${styles.occurrenceTaxon} sciName`}>
                   {taxonName}
                 </span>
-                <span className={styles.occurrenceMeta}>Open profile →</span>
               </button>
             </li>
           ) : (
@@ -96,17 +97,20 @@ export function LocalityPanel({
                 <span className={`${styles.occurrenceTaxon} sciName`}>
                   {taxonName}
                 </span>
-                <span className={styles.occurrenceMeta}>No article</span>
               </span>
             </li>
           ),
         )}
       </ul>
+      <RecordDetails api={api} occurrences={occurrences} />
     </section>
   );
 }
 
 interface TaxonPanelProps {
+  api?: ReadApi;
+  occurrences?: readonly ReadOccurrence[];
+  onOpenTaxonomy?: (taxonId: string) => void;
   group: TaxonGroup;
   onOpenProfile: (taxonId: string) => void;
   /** SPEC-014 AMEND-005: whether this taxon has a Wikipedia article (→ a page). */
@@ -125,6 +129,9 @@ interface TaxonPanelProps {
 }
 
 export function TaxonPanel({
+  api,
+  occurrences = [],
+  onOpenTaxonomy,
   group,
   onOpenProfile,
   hasArticle,
@@ -133,7 +140,6 @@ export function TaxonPanel({
   clade,
   substitutedFrom = null,
 }: TaxonPanelProps): ReactElement {
-  const unitWord = "taxon";
   return (
     <section className={styles.panel} aria-label={`Taxon: ${group.name}`}>
       {/* SPEC-026 REQ-003: back, named for the list it returns to. */}
@@ -145,9 +151,7 @@ export function TaxonPanel({
       </div>
       {/* UX-002: the clade the row's tint stood for, in visible words — so the
           tint never carries a meaning that has no worded form. */}
-      <p className={styles.panelClade}>
-        {clade} · {unitWord}
-      </p>
+      <p className={styles.panelClade}>{clade}</p>
 
       {substitutedFrom && (
         <p className={styles.notice} role="status">
@@ -182,17 +186,20 @@ export function TaxonPanel({
           className={styles.primary}
           onClick={() => onOpenProfile(group.taxonId)}
         >
-          Open taxon profile →
+          Read about this dinosaur
         </button>
-      ) : (
+      ) : null}
+      {onOpenTaxonomy && (
         <button
           type="button"
-          className={styles.primary}
-          disabled
-          title={NO_ARTICLE}
+          className={styles.reset}
+          onClick={() => onOpenTaxonomy(group.taxonId)}
         >
-          Open taxon profile →
+          Related groups
         </button>
+      )}
+      {api && (
+        <RecordDetails key={group.key} api={api} occurrences={occurrences} />
       )}
     </section>
   );

@@ -52,9 +52,7 @@ test("lists the in-view occurrences and states the in-view count", () => {
   const region = screen.getByRole("region", {
     name: /occurrences on the map/i,
   });
-  expect(
-    within(region).getByText(/in the current map view/i),
-  ).toBeInTheDocument();
+  expect(within(region).getByText(/in view/i)).toBeInTheDocument();
   expect(within(region).getByText("2")).toBeInTheDocument();
   expect(within(region).getAllByRole("button")).toHaveLength(2);
 });
@@ -142,8 +140,8 @@ test("an empty view over a non-empty age shows a recoverable message", () => {
   expect(screen.getByText(/Zoom out or pan/i)).toBeInTheDocument();
 });
 
-test("the rendered rows are bounded by the cap with an overflow affordance", () => {
-  const many = Array.from({ length: LIST_RENDER_CAP + 2 }, (_v, i) =>
+test("SPEC-031: load more reveals rows beyond the initial cap", async () => {
+  const many = Array.from({ length: LIST_RENDER_CAP + 2 }, (_, i) =>
     row(`o${i}`, `Taxon ${i}`),
   );
   render(
@@ -152,38 +150,34 @@ test("the rendered rows are bounded by the cap with an overflow affordance", () 
       noun="occurrence(s)"
       rows={many}
       totalAtAge={many.length}
-      viewportActive={true}
+      viewportActive
       selectedKey={null}
       highlightedKey={null}
       onSelect={noop}
       onHighlight={noop}
     />,
   );
-  const region = screen.getByRole("region", {
-    name: /occurrences on the map/i,
-  });
-  expect(within(region).getAllByRole("button")).toHaveLength(LIST_RENDER_CAP);
-  expect(
-    within(region).getByText(
-      new RegExp(`first ${LIST_RENDER_CAP} of ${many.length}`, "i"),
-    ),
-  ).toBeInTheDocument();
+  expect(screen.getAllByRole("button")).toHaveLength(LIST_RENDER_CAP + 1);
+  await userEvent.click(screen.getByRole("button", { name: /Load more/i }));
+  expect(screen.getAllByRole("button")).toHaveLength(many.length);
+  expect(screen.getByRole("button", { name: /Taxon 301/ })).toBeInTheDocument();
 });
 
 test("activating a row opens the occurrence panel (restored accessible loop)", async () => {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
+  await user.click(screen.getByRole("button", { name: "Browse dinosaurs" }));
 
   // Map is unavailable in jsdom, so the list holds the full age set.
   const region = await screen.findByRole("region", {
-    name: /occurrences on the map/i,
+    name: /genus on the map/i,
   });
   const firstRow = within(region).getAllByRole("button")[0]!;
   await user.click(firstRow);
 
   // The occurrence panel appears with its single primary action (SPEC-003 REQ-006).
   expect(
-    screen.getByRole("button", { name: /Open taxon profile/i }),
+    screen.getByRole("button", { name: /Read about this dinosaur/i }),
   ).toBeInTheDocument();
 });

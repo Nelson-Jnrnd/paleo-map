@@ -839,3 +839,12 @@
     height: 12rem;
   }
 }
+
+/* SPEC-031: the clue board earns its space after the first guess. */
+.boardInitial {
+  display: none;
+}
+.initialHint {
+  margin: var(--space-5) 0;
+  color: var(--color-text-muted);
+}

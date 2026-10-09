@@ -408,3 +408,11 @@ unreadable label.
   species here": Edmontosaurus, Tyrannosaurus, Leptoceratops, Saurexallopus).
 - **Human approval reference:** owner conversation 2026-07-30 (count off-centre;
   fewer labels; keep the multidot aggregate and list its species on click).
+
+
+### AMEND-006: Quiet interface presentation (SPEC-031)
+
+- **Date:** 2026-10-09
+- **Authority:** Owner-approved interface review and implementation request.
+- **Change:** SPEC-031 supersedes conflicting public presentation requirements: short hover identity and one persistent selection surface; collapsed legend; quiet puzzle entry, on-demand rules/ranking and no pool counters. Data contracts and semantic constraints remain.
+- **Verification:** SPEC-031 regression tests and applicable existing checks.

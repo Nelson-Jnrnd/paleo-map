@@ -141,11 +141,13 @@ test("UX-002: the scope root has no parent, and a leaf has no children", () => {
   const { unmount } = render(
     <TaxonNeighbours taxonId="t:dino" deps={deps()} />,
   );
-  expect(screen.getByText(/root of the atlas's taxonomy/i)).toBeInTheDocument();
+  expect(
+    screen.queryByText(/root of the atlas's taxonomy/i),
+  ).not.toBeInTheDocument();
   unmount();
 
   render(<TaxonNeighbours taxonId="t:trex" deps={deps()} />);
-  expect(screen.getByText(/tip of the tree/i)).toBeInTheDocument();
+  expect(screen.queryByText(/tip of the tree/i)).not.toBeInTheDocument();
 });
 
 /* REQ-006 — avian marking -------------------------------------------------- */

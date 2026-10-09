@@ -15,7 +15,6 @@
 
 import type { ReactElement } from "react";
 import type { GeologicalStage } from "../../domain/index.js";
-import { formatStageSpan } from "../format.js";
 import { TaxonSearch } from "./TaxonSearch.js";
 import type { SearchableTaxon } from "../state/search.js";
 import type { FrameMode } from "../state/frame.js";
@@ -41,41 +40,37 @@ interface ContextBarProps {
   searchIndex: readonly SearchableTaxon[];
   onSearchSelect: (taxonId: string) => void;
   onReset: () => void;
+  onBrowse?: () => void;
+  browseOpen?: boolean;
 }
 
 export function ContextBar({
-  stage,
-  stageName,
-  group,
   count,
   frameMode = "paleo",
   onFrameModeChange,
   searchIndex,
   onSearchSelect,
   onReset,
+  onBrowse,
+  browseOpen = false,
 }: ContextBarProps): ReactElement {
   return (
     <div className={styles.header}>
       <TaxonSearch index={searchIndex} onSelect={onSearchSelect} />
 
+      {onBrowse && (
+        <button
+          type="button"
+          className={styles.reset}
+          aria-expanded={browseOpen}
+          onClick={onBrowse}
+        >
+          Browse dinosaurs
+        </button>
+      )}
       <div className={styles.context}>
         <div className={styles.stat}>
-          <span className={styles.statLabel}>Selected age</span>
-          <span className={styles.statValue}>
-            {stageName}{" "}
-            <span className="mono">
-              {stage ? `· ${formatStageSpan(stage)}` : ""}
-            </span>
-          </span>
-        </div>
-
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Group</span>
-          <span className={styles.statValue}>{group}</span>
-        </div>
-
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Occurrences</span>
+          <span className={styles.statLabel}>All map occurrences</span>
           <span
             className={`${styles.statValue} ${styles.countValue} mono`}
             aria-live="polite"
@@ -130,6 +125,15 @@ export function ContextBar({
         <button type="button" className={styles.reset} onClick={onReset}>
           Reset view
         </button>
+        <details className={styles.aboutData}>
+          <summary>About data</summary>
+          <p>
+            Fossil discoveries from the Paleobiology Database. The map currently
+            includes records linked to genera with a Wikipedia article. Points
+            represent fossil finds, not a complete distribution. References and
+            coordinates are available in selected-item details.
+          </p>
+        </details>
       </div>
     </div>
   );

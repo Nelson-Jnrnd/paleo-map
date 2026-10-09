@@ -136,9 +136,10 @@ test("UX-001: the clade key collapses and expands on request", async ({
 
   const key = page.locator('[data-map-overlay="clade-key"]');
   await expect(key).toBeVisible();
-  const toggle = key.getByRole("button", { name: /clade key/i });
-  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const toggle = key.getByRole("button", { name: /legend/i });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
 
+  await toggle.click();
   const open = await key.boundingBox();
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");

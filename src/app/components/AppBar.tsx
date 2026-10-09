@@ -26,7 +26,6 @@ export type BarScreen = Destination | "profile";
 const DESTINATIONS: ReadonlyArray<{ id: Destination; label: string }> = [
   { id: "map", label: "Map" },
   { id: "daily", label: "Dinordle" },
-  { id: "taxonomy", label: "Taxonomy" },
 ];
 
 interface AppBarProps {

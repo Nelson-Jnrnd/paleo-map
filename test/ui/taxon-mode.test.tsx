@@ -16,6 +16,9 @@ async function enterTaxonMode() {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Browse dinosaurs" }),
+  );
   const group = within(
     await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
@@ -30,18 +33,13 @@ test("lists one row per genus at the Genus unit", async () => {
   expect(within(region).getByText("Triceratops")).toBeInTheDocument();
 });
 
-test("SPEC-026 REQ-001: choosing Family rolls genera up, in one action", async () => {
-  const user = await enterTaxonMode();
-  // The rank `<select>` is gone: the tier is one of the five units, so this is
-  // a single click rather than a mode plus a dropdown.
+test("SPEC-031: advanced rank aggregation has no public selector", async () => {
+  await enterTaxonMode();
   const group = within(
     screen.getByRole("radiogroup", { name: /one row per/i }),
   );
-  await user.click(group.getByRole("radio", { name: "Family" }));
-  const region = screen.getByRole("region", { name: /family on the map/i });
-  expect(within(region).getByText("Tyrannosauridae")).toBeInTheDocument();
-  // Genera are now rolled up, so their names no longer head a row.
-  expect(within(region).queryByText("Nanotyrannus")).toBeNull();
+  expect(group.queryByRole("radio", { name: "Family" })).toBeNull();
+  expect(group.queryByRole("radio", { name: "Major group" })).toBeNull();
 });
 
 test("SPEC-026 REQ-003: selecting a taxon replaces the list with its detail", async () => {
@@ -53,7 +51,7 @@ test("SPEC-026 REQ-003: selecting a taxon replaces the list with its detail", as
 
   const panel = screen.getByRole("region", { name: /taxon:/i });
   expect(
-    within(panel).getByRole("button", { name: /open taxon profile/i }),
+    within(panel).getByRole("button", { name: /read about this dinosaur/i }),
   ).toBeInTheDocument();
   // The detail *replaces* the list rather than stacking above it — stacking
   // pushed the list out of a 360px column.

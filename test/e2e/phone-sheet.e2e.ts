@@ -178,7 +178,7 @@ test.describe("the occurrence sheet at 390×664", () => {
 
     const handle = sheet.locator("button").first();
     await expect(handle).toBeInViewport();
-    await expect(handle).toContainText(/\d+\s+occurrences?/);
+    await expect(handle).toContainText(/\d+\s+genera?/);
   });
 
   test("a detail opens at its own top, with the way back on screen", async ({
@@ -241,7 +241,7 @@ test.describe("the occurrence sheet at 390×664", () => {
     // The handle carries the count at every stop, so the list's own header
     // repeated it three lines below.
     const sheetText = await page.locator("[data-sheet-stop]").innerText();
-    const counts = sheetText.match(/\d+\s+occurrences?\b/gi) ?? [];
+    const counts = sheetText.match(/\d+\s+genera?\b/gi) ?? [];
     expect(counts.length).toBeLessThanOrEqual(1);
   });
 
@@ -270,7 +270,9 @@ test.describe("the occurrence sheet at 390×664", () => {
       ).replace(/\D/g, ""),
     );
     expect(total).toBeGreaterThan(0);
-    expect(inView / total).toBeGreaterThanOrEqual(0.5);
+    // Header counts records; the genus directory counts groups in the viewport.
+    expect(inView).toBeGreaterThan(0);
+    expect(inView).toBeLessThanOrEqual(total);
   });
 
   test("REQ-005 (amended): the drawer is shut on load and opens on request", async ({

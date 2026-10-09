@@ -79,7 +79,7 @@ export interface ExplorationState {
 export const initialExplorationState: ExplorationState = {
   stageName: DEFAULT_STAGE,
   group: DEFAULT_GROUP,
-  mode: "occurrence",
+  mode: "taxon",
   rank: DEFAULT_RANK_TIER,
   selectedOccurrenceId: null,
   selectedLocalityId: null,
@@ -88,7 +88,7 @@ export const initialExplorationState: ExplorationState = {
   profileTaxonId: null,
   taxonomyTaxonId: null,
   dailyMode: "daily",
-  dailyTrack: "full",
+  dailyTrack: "wellKnown",
   frameMode: "paleo",
 };
 

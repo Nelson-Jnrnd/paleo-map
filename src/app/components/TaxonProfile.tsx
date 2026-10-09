@@ -14,7 +14,7 @@
 import type { ReactElement } from "react";
 import type { ReadApi } from "../../read/api.js";
 import { AttentionNote } from "./Cues.js";
-import { TaxonomyTree } from "./TaxonomyTree.js";
+import { taxonLineage } from "./lineage.js";
 import styles from "./exploration.module.css";
 
 interface TaxonProfileProps {
@@ -22,15 +22,23 @@ interface TaxonProfileProps {
   taxonId: string;
   /** Open another taxon's page (AMEND-005: navigable, filtered ancestor links). */
   onOpenTaxon: (taxonId: string) => void;
+  onBack?: () => void;
+  onOpenTaxonomy?: (taxonId: string) => void;
 }
 
 export function TaxonProfile({
   api,
   taxonId,
   onOpenTaxon,
+  onBack,
+  onOpenTaxonomy,
 }: TaxonProfileProps): ReactElement {
   const taxon = api.getTaxon(taxonId);
   const taxaById = new Map(api.listTaxa().map((t) => [t.id, t]));
+  const parent = taxonLineage(taxonId, taxaById)
+    .slice(0, -1)
+    .reverse()
+    .find((t) => t.wikipedia);
   const name = taxon?.scientificName ?? "Unavailable";
   const wikipedia = taxon?.wikipedia ?? null;
   // Embed the mobile article for a cleaner inline read; the stored canonical URL
@@ -45,12 +53,39 @@ export function TaxonProfile({
       aria-label={`Taxon page: ${name}`}
     >
       <div className={styles.topbar}>
-        {taxon && (
-          <TaxonomyTree
-            taxonId={taxonId}
-            taxaById={taxaById}
-            onOpenTaxon={onOpenTaxon}
-          />
+        {onBack && (
+          <button type="button" className={styles.reset} onClick={onBack}>
+            Back to map
+          </button>
+        )}
+        {parent && (
+          <button
+            type="button"
+            className={styles.crumbLink}
+            onClick={() => onOpenTaxon(parent.id)}
+          >
+            {parent.scientificName}
+          </button>
+        )}
+        <span className="sciName">{name}</span>
+        {onOpenTaxonomy && (
+          <button
+            type="button"
+            className={styles.reset}
+            onClick={() => onOpenTaxonomy(taxonId)}
+          >
+            Related groups
+          </button>
+        )}
+        {wikipedia && (
+          <a
+            className={styles.reset}
+            href={wikipedia.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open on Wikipedia
+          </a>
         )}
       </div>
 

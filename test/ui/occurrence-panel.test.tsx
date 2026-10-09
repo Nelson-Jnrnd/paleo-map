@@ -14,9 +14,8 @@ import { fixtureApi } from "./app-harness.js";
 
 afterEach(cleanup);
 
-test("occurrence panel shows provenance fields and the primary action", async () => {
+test("SPEC-031: optional absent fields are omitted and references expand on demand", async () => {
   const api = await fixtureApi();
-  // The Lance occurrence (Triceratops) has no paleocoordinate.
   const occ = api
     .listOccurrences()
     .find((o) => o.paleoPosition.value === null)!;
@@ -26,27 +25,23 @@ test("occurrence panel shows provenance fields and the primary action", async ()
       occurrence={occ}
       onOpenProfile={() => {}}
       onClose={() => {}}
-      backLabel="Back to 5 occurrence(s) in view"
+      backLabel="Back to records"
     />,
   );
-
   const panel = screen.getByRole("region", { name: /Occurrence:/i });
-  expect(within(panel).getByText("Time range")).toBeInTheDocument();
-  expect(within(panel).getByText("Modern location")).toBeInTheDocument();
+  expect(within(panel).getByText("Found in")).toBeInTheDocument();
+  expect(within(panel).queryByText("Paleogeographic position")).toBeNull();
+  expect(within(panel).queryByText("Not available")).toBeNull();
+  const details = within(panel)
+    .getByText("Details and sources")
+    .closest("details")!;
+  expect(details).not.toHaveAttribute("open");
   expect(
-    within(panel).getByText("Paleogeographic position"),
-  ).toBeInTheDocument();
-  // Missing paleoposition is labeled, not blank (PERF-180).
-  expect(within(panel).getByText("Not available")).toBeInTheDocument();
-  expect(within(panel).getByText("Source")).toBeInTheDocument();
-
-  // Exactly one primary action.
-  expect(
-    within(panel).getByRole("button", { name: /Open taxon profile/i }),
+    within(panel).getByRole("button", { name: /Read about this dinosaur/i }),
   ).toBeInTheDocument();
 });
 
-test("a paleoposition shows its coordinates without a reconstructed cue (SPEC-007)", async () => {
+test("a paleoposition retains its coordinates in details without a reconstructed cue (SPEC-007)", async () => {
   const api = await fixtureApi();
   const occ = api
     .listOccurrences()

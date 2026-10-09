@@ -42,7 +42,10 @@ test("taxonomy screen has no serious accessibility violations", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("navigation", { name: /timeline/i }).waitFor();
-  await page.getByRole("button", { name: "Taxonomy", exact: true }).click();
+  await page.getByRole("button", { name: "Browse dinosaurs" }).click();
+  await page.locator("button[data-unit-row]").first().click();
+  await page.getByRole("button", { name: "Related groups" }).click();
+  await page.getByRole("button", { name: "Tree view" }).click();
   await page.getByRole("region", { name: /shape of dinosauria/i }).waitFor();
 
   const violations = await seriousViolations(new AxeBuilder({ page }));
@@ -99,7 +102,7 @@ test("the ranking caveat's disclosure is accessible when open", async ({
   await page.getByLabel("Guess a genus").waitFor();
 
   const about = page.getByRole("button", {
-    name: /about the .well-known. ranking/i,
+    name: /^Help$/i,
   });
   await about.click();
   await expect(about).toHaveAttribute("aria-expanded", "true");
@@ -126,7 +129,7 @@ test("the present-day map frame has no serious accessibility violations", async 
   await expect(
     group.getByRole("radio", { name: /present day/i }),
   ).toHaveAttribute("aria-checked", "true");
-  await page.getByText(/still chooses which occurrences/i).waitFor();
+  await page.getByText(/^Present-day map · .*fossil finds/i).waitFor();
 
   const violations = await seriousViolations(new AxeBuilder({ page }));
   expect(violations, violations.join("\n")).toEqual([]);
@@ -146,6 +149,7 @@ test("the clade key is reachable by keyboard when it scrolls", async ({
   await page.goto("/");
   await page.getByRole("navigation", { name: /timeline/i }).waitFor();
 
+  await page.getByRole("button", { name: "Legend" }).click();
   const key = page.getByRole("group", { name: /clade key/i });
   await key.waitFor();
   // The precondition: it really is overflowing at this height, so the assertion

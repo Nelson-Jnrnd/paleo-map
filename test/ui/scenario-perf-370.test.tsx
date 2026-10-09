@@ -43,7 +43,8 @@ test("PERF-370: empty result → empty state → reset filters", async () => {
   ).toHaveAttribute("aria-pressed", "true");
   // Occurrences are back: the sidebar lists the on-screen occurrences (SPEC-009
   // restored the viewport-linked list), which only renders when the set is non-empty.
-  const list = screen.getByRole("region", { name: /occurrences on the map/i });
+  await user.click(screen.getByRole("button", { name: "Browse dinosaurs" }));
+  const list = screen.getByRole("region", { name: /genus on the map/i });
   expect(within(list).getAllByRole("button").length).toBeGreaterThan(0);
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

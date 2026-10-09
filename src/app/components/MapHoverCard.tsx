@@ -86,10 +86,6 @@ export function MapHoverCard({
             {content.taxon}
           </span>
           <span className={styles.mapHoverMeta}>{content.clade}</span>
-          <span className={styles.mapHoverMeta}>
-            <span className="mono">{content.age}</span>
-          </span>
-          <span className={styles.mapHoverMeta}>{content.formation}</span>
         </div>
       </div>
       {pinned && onOpenProfile && (

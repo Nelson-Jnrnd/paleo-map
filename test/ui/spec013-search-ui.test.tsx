@@ -29,7 +29,7 @@ test("finds a taxon by name and lands it in the side panel, not the profile (REQ
   // present) while we remain on the map screen (the header search box persists) —
   // i.e. we did NOT jump straight to the profile.
   expect(
-    screen.getByRole("button", { name: /Open taxon profile/i }),
+    screen.getByRole("button", { name: /Read about this dinosaur/i }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("combobox", { name: /search a dinosaur/i }),

@@ -31,7 +31,7 @@ async function renderApp() {
 
 const nav = () => within(screen.getByRole("navigation", { name: /main/i }));
 
-test("REQ-001/REQ-002: one bar, one banner, three destinations in order", async () => {
+test("REQ-001/REQ-002: one bar, one banner, two primary destinations in order", async () => {
   await renderApp();
   // Exactly one banner and one main nav — the bar is rendered by the shell, so a
   // screen adding its own would show up here as a duplicate.
@@ -41,7 +41,7 @@ test("REQ-001/REQ-002: one bar, one banner, three destinations in order", async 
   const labels = nav()
     .getAllByRole("button")
     .map((b) => b.textContent);
-  expect(labels).toEqual(["Map", "Dinordle", "Taxonomy"]);
+  expect(labels).toEqual(["Map", "Dinordle"]);
 });
 
 test("REQ-003: the current destination is marked, and never by colour alone", async () => {
@@ -51,7 +51,7 @@ test("REQ-003: the current destination is marked, and never by colour alone", as
     "page",
   );
   // The other two are not marked.
-  for (const name of ["Dinordle", "Taxonomy"]) {
+  for (const name of ["Dinordle"]) {
     expect(nav().getByRole("button", { name })).not.toHaveAttribute(
       "aria-current",
     );
@@ -78,16 +78,7 @@ test("REQ-002/REQ-004: each destination is reachable, and returns in one action"
     "page",
   );
 
-  // Map → Taxonomy, and back again in one action.
-  await user.click(nav().getByRole("button", { name: "Taxonomy" }));
-  expect(nav().getByRole("button", { name: "Taxonomy" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
-  expect(
-    screen.queryByRole("button", { name: /back to map/i }),
-  ).not.toBeInTheDocument();
-  await user.click(nav().getByRole("button", { name: "Map" }));
+  expect(nav().queryByRole("button", { name: "Taxonomy" })).toBeNull();
   expect(screen.getByRole("navigation", { name: /timeline/i })).toBeTruthy();
 });
 
@@ -98,7 +89,7 @@ test("UX-002: the bar renders identically on Dinordle's no-puzzle surface", asyn
   // honest data-error surface — exactly the state where being trapped would
   // matter most. All three destinations stay present and enabled.
   expect(screen.getByRole("alert").textContent).toContain("No puzzle today");
-  for (const name of ["Map", "Dinordle", "Taxonomy"]) {
+  for (const name of ["Map", "Dinordle"]) {
     expect(nav().getByRole("button", { name })).toBeEnabled();
   }
   expect(nav().getByRole("button", { name: "Dinordle" })).toHaveAttribute(
@@ -110,24 +101,15 @@ test("UX-002: the bar renders identically on Dinordle's no-puzzle surface", asyn
   expect(screen.getByRole("navigation", { name: /timeline/i })).toBeTruthy();
 });
 
-test("REQ-005: nothing that moved to the bar is duplicated in the context row", async () => {
+test("SPEC-031: the header keeps search and total count without repeating the timeline", async () => {
   await renderApp();
-  // The wordmark lives in the bar, once.
   expect(screen.getAllByText("Mesozoic Dinosaur Atlas")).toHaveLength(1);
-  // Taxonomy and Dinordle exist only as bar destinations — not as a second pair
-  // of buttons in the exploration context.
-  for (const name of ["Taxonomy", "Dinordle"]) {
-    expect(screen.getAllByRole("button", { name })).toHaveLength(1);
-  }
-  // The stats the loop depends on survive, inside the banner (SPEC-003 REQ-001).
-  // Scoped to the banner because "Occurrences" is also a grouping-mode button in
-  // the sidebar — a page-wide text query would match both.
   const banner = within(screen.getByRole("banner"));
-  for (const label of ["Selected age", "Group", "Occurrences"]) {
-    expect(banner.getByText(label)).toBeInTheDocument();
-  }
-  // The taxon search stays in the context row (SPEC-013).
+  expect(banner.getByText("All map occurrences")).toBeInTheDocument();
+  for (const label of ["Selected age", "Group"])
+    expect(banner.queryByText(label)).toBeNull();
   expect(banner.getByRole("combobox")).toBeInTheDocument();
+  expect(nav().queryByRole("button", { name: "Taxonomy" })).toBeNull();
 });
 
 test("REQ-006: the reset control is quiet, but still words and still a real target", async () => {

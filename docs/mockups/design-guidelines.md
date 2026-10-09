@@ -27,39 +27,23 @@ sourced** — not a screenshot-optimized SaaS dashboard.
   is why annotations reference `FONC-/CONS-/PERF-` IDs; keep them present in
   design artifacts, absent from the shipped product UI.
 
-## 2. The north star: uncertainty is first-class, not a footnote
+## 2. Exploration first, evidence on demand
 
-This product's credibility *is* the product. The interface must make provenance
-and uncertainty legible at a glance, never buried behind a hover or a secondary
-click (CONS-490):
+Owner-approved 2026-10-09 (SPEC-031). This general policy replaces earlier
+mandatory inline provenance conventions and their individually scoped exceptions.
 
-> **One recorded exception, owner-authorised 2026-08-26.** Dinordle's "well-known"
-> ranking caveat sits behind an information control on the puzzle screen — see
-> SPEC-020 AMEND-006, which states the reasoning and the constraints the
-> disclosure must still meet. It is scoped to that one caveat on that one screen
-> and is **not** precedent: every other provenance and uncertainty disclosure in
-> the product stays on the surface.
-
-
-- Fossil points are **discovery evidence**, never a distribution range or an
-  exact life position (FONC-1150, CONS-130/140).
-- Time ranges that **span multiple stages** are labeled as such (FONC-1140).
-  Reconstructed paleo positions carry **no on-screen cue**; the rotation model
-  behind them stays inspectable in the basemap attribution popover.
-  *(SPEC-021, 2026-08-14, owner-approved: the standing map-level "Paleogeographic
-  reconstruction" label was removed, retiring FONC-300, CONS-120 and FONC-1130
-  with it. SPEC-007, 2026-07-21: the per-occurrence "reconstructed" chip had
-  already been retired in favour of that label, and the time cue was reworded
-  from "approximate" to the factual "spans multiple stages".)*
-- **Missing** data is shown with an explicit label, never a blank or a silent
-  default (FONC-490, FONC-1120, PERF-180).
-- *(SPEC-007, 2026-07-21, owner-approved: the fossil-derived vs. **interpretative**
-  distinction was removed from the product — FONC-670/1110 retired. Sources remain
-  shown, so provenance stays inspectable.)*
-- Every visible occurrence and time range carries an **identifiable source**
-  (FONC-1100, PERF-140/150).
-
-If a design choice makes uncertainty *less* visible to look cleaner, it is wrong.
+- The primary interface prioritizes exploration. References, bibliographies,
+  coordinates and methodological detail are available through a deliberate
+  **Details and sources** action; routine provenance does not need badges or text.
+- Keep source associations in the data layer and make selected-record references
+  inspectable. Keep asset-required attribution access.
+- Show a short qualification beside a fact only when omitting it would materially
+  change its interpretation. Do not invent precision or treat fossil finds as a
+  complete distribution range.
+- Omit optional absent fields rather than filling the interface with missing-value
+  rows. An unavailable primary function still needs a short recovery explanation.
+- Prefer deletion of unnecessary controls to hiding all of them in an Advanced
+  panel. One persistent selection surface and one useful taxonomy view at a time.
 
 ## 3. Domain language
 
@@ -130,7 +114,7 @@ Everything else is cool neutral. Two additional colour systems exist, both
 | Reconstructed | ▲ standing map label | Paleogeographic positions are modeled, not observed (SPEC-007: standing label, not a per-occurrence chip) |
 | Spans multiple stages | ≈ + neutral chip | Time range spans more than one geological stage (SPEC-007: reworded from "Approximate") |
 | Incomplete / attention | muted amber `#8a5a12`, sparing | Profile is partial (a "note", not an error) |
-| Missing | explicit "Not available" label | Field has no sourced value |
+| Missing | omit optional fields; explain essential unavailable functions | Field has no sourced value |
 | Error | red `#c0392b`, sparing | Load failure only — signals the state; the recovery action stays the teal accent |
 
 > **Accessibility reconciliation (SPEC-003 AMEND-002).** The muted/faint/id greys,
@@ -247,8 +231,8 @@ state:
   require explicit confirmation.
 - **Feedback** — every action has a visible result: count updates, panel opens,
   error resolves. No silent success.
-- **Navigation context** — always show where the user is (selected age, group,
-  count are permanent — FONC-040/050/060) and the single-action way back.
+- **Navigation context** — show selected age once in the timeline or phone strip,
+  label the all-map count separately from viewport groups, and keep a clear way back (SPEC-031).
 
 ## 8b. Viewport and touch
 
@@ -316,7 +300,7 @@ Before calling a screen done:
 - Any decoration that doesn't help the user act or understand? Remove it.
 - Would it still work with messy, missing, uncertain real data? If not, redesign.
 - Is the primary action obvious within three seconds? If not, fix the hierarchy.
-- Is provenance/uncertainty still legible at a glance? If not, it fails §2.
+- Is selected-record evidence accessible on demand, with essential factual qualifications visible?
 
 ## What we deliberately avoid
 
