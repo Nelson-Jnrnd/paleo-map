@@ -1,5 +1,5 @@
 /** SPEC-031: one taxonomy view at a time, reached from a selected dinosaur. */
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import type { ReadApi } from "../../read/api.js";
 import { buildTaxonomyIndex } from "../state/taxonomy.js";
@@ -25,6 +25,14 @@ export function TaxonomyScreen({
   );
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(60);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const focusHeading = useRef(false);
+  useLayoutEffect(() => {
+    if (focusHeading.current) {
+      headingRef.current?.focus();
+      focusHeading.current = false;
+    }
+  });
   const focusId = taxonId && index.inScope(taxonId) ? taxonId : index.rootId;
   if (!focusId)
     return (
@@ -37,6 +45,7 @@ export function TaxonomyScreen({
     index,
     profileOf: (id) => api.getProfile(id),
     onOpenTaxon: (id) => {
+      focusHeading.current = true;
       onSelectTaxon(id);
       setQuery("");
       setLimit(60);
@@ -53,7 +62,9 @@ export function TaxonomyScreen({
   return (
     <section className={styles.profile} aria-label="Taxonomy">
       <header className={styles.taxHeader}>
-        <h1 className="sciName">{focus?.scientificName}</h1>
+        <h1 className="sciName" ref={headingRef} tabIndex={-1}>
+          {focus?.scientificName}
+        </h1>
         {taxonId && !index.inScope(taxonId) && (
           <p role="note">
             Showing Dinosauria; this taxon is outside the atlas taxonomy.

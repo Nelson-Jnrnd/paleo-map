@@ -6,6 +6,7 @@
  * no network at all.
  */
 
+import { useState } from "react";
 import { afterEach, expect, test, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -160,4 +161,27 @@ test("NFR-001: the screen renders with the network stubbed to fail", () => {
   ).toBeInTheDocument();
   expect(fetchSpy).not.toHaveBeenCalled();
   fetchSpy.mockRestore();
+});
+
+test("SPEC-031 NFR-001: opening a genus or related group moves focus to its heading", async () => {
+  function TaxonomyHarness() {
+    const [taxonId, setTaxonId] = useState("t:dino");
+    return (
+      <TaxonomyScreen api={api} taxonId={taxonId} onSelectTaxon={setTaxonId} />
+    );
+  }
+  render(<TaxonomyHarness />);
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Browse genera" }));
+  screen.getByRole("button", { name: "Tyrannosaurus" }).focus();
+  await user.keyboard("{Enter}");
+  expect(screen.getByRole("heading", { name: "Tyrannosaurus" })).toHaveFocus();
+  expect(
+    screen.getByRole("button", { name: "Related groups" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  screen.getByRole("button", { name: /Tyrannosauridae/ }).focus();
+  await user.keyboard("{Enter}");
+  expect(
+    screen.getByRole("heading", { name: "Tyrannosauridae" }),
+  ).toHaveFocus();
 });

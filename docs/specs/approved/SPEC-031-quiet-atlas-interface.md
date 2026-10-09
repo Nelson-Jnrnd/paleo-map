@@ -169,3 +169,12 @@ This owner-approved change amends presentation obligations in SPEC-003/010/014/0
 - **Change:** Link PR #30 and complete the verification/traceability records.
 - **Evidence:** 649 unit/integration/UI tests and 72 browser tests passed. TypeScript, ESLint, Prettier, production build, size budgets and the three governance checks passed. Desktop/phone screenshots were inspected locally. Browser checks used temporary Chromium 153 with software WebGL because normal downloads arrived incomplete; no dependency was added to the repository.
 - **Remaining step:** Human review and merge. Keep status In Implementation until merge per the repository workflow.
+
+
+### AMEND-002: Independent review interaction corrections
+
+- **Date:** 2026-10-09
+- **Authority:** Owner's “Continue” after the independent review of PR #30; corrections remain within NFR-001 keyboard access and empty-stage recovery.
+- **Change:** Closing the desktop directory restores focus to Browse dinosaurs. Empty/loading/error stages keep their mandatory recovery panel, omit its ineffective Close button, and expose Browse as expanded and disabled while the panel cannot be dismissed. Opening a genus or related group moves focus to the resulting taxonomy heading when the initiating control disappears.
+- **Assumption:** Recovery stays available whenever the selected stage has no displayable records; Reset view and stage navigation remain the way out.
+- **Verification:** Regression coverage in spec031-quiet-interface, spec017-screen and quiet-interface E2E checks keyboard focus, expanded state, empty-stage recovery and reset. 651 unit/integration/UI tests and all five focused desktop/phone browser tests passed. TypeScript, ESLint, Prettier, production build, size budgets and governance validators passed; only the existing SPEC-002/SPEC-012 drift warnings remain. The independent reviewer rechecked the fixes, ran both affected UI suites (16 passing tests), and reported no remaining blocking issues. Design self-check: no added text, containers, chips or colour conventions; the map stays primary and the ineffective Close control is removed from recovery.

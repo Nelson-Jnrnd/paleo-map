@@ -13,7 +13,7 @@
  * REQ-005's disclaimer criterion was retired with it (SPEC-003 AMEND-005).
  */
 
-import type { ReactElement } from "react";
+import type { ReactElement, Ref } from "react";
 import type { GeologicalStage } from "../../domain/index.js";
 import { TaxonSearch } from "./TaxonSearch.js";
 import type { SearchableTaxon } from "../state/search.js";
@@ -42,6 +42,8 @@ interface ContextBarProps {
   onReset: () => void;
   onBrowse?: () => void;
   browseOpen?: boolean;
+  browseDisabled?: boolean;
+  browseButtonRef?: Ref<HTMLButtonElement>;
 }
 
 export function ContextBar({
@@ -53,6 +55,8 @@ export function ContextBar({
   onReset,
   onBrowse,
   browseOpen = false,
+  browseDisabled = false,
+  browseButtonRef,
 }: ContextBarProps): ReactElement {
   return (
     <div className={styles.header}>
@@ -62,6 +66,8 @@ export function ContextBar({
         <button
           type="button"
           className={styles.reset}
+          ref={browseButtonRef}
+          disabled={browseDisabled}
           aria-expanded={browseOpen}
           onClick={onBrowse}
         >

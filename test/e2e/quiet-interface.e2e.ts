@@ -113,3 +113,34 @@ for (const phone of [false, true]) {
     },
   );
 }
+
+test.describe("quiet interface keyboard recovery", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("closing the directory restores focus and empty stages keep truthful recovery controls", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await settle(page);
+    const browse = page.getByRole("button", { name: "Browse dinosaurs" });
+    await browse.click();
+    await page.getByRole("button", { name: "Close", exact: true }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("aside")).toHaveCount(0);
+    await expect(browse).toBeFocused();
+    await page.getByRole("button", { name: /^Induan,/ }).click();
+    await expect(page.locator("aside")).toBeVisible();
+    await expect(browse).toBeDisabled();
+    await expect(browse).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.getByRole("button", { name: "Close", exact: true }),
+    ).toHaveCount(0);
+    await page
+      .getByRole("banner")
+      .getByRole("button", { name: "Reset view" })
+      .click();
+    await expect(page.locator("aside")).toHaveCount(0);
+    await expect(browse).toBeEnabled();
+    await expect(browse).toHaveAttribute("aria-expanded", "false");
+  });
+});

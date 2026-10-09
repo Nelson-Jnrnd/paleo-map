@@ -37,8 +37,12 @@ test("REQ-001/002: map entry hides the directory and retains a distinct record t
   expect(container.querySelector("[data-occurrence-count]")?.textContent).toBe(
     String(total),
   );
-  await user.click(screen.getByRole("button", { name: "Close" }));
+  screen.getByRole("button", { name: "Close" }).focus();
+  await user.keyboard("{Enter}");
   expect(screen.queryByRole("complementary")).toBeNull();
+  expect(
+    screen.getByRole("button", { name: "Browse dinosaurs" }),
+  ).toHaveFocus();
 });
 
 test("REQ-003: fossil evidence has two deliberate disclosures and retains record identity", async () => {
@@ -121,4 +125,22 @@ test("REQ-005: ordinary puzzle navigation selects Well-known; explicit full addr
   expect(
     await screen.findByRole("radio", { name: "Every genus" }),
   ).toHaveAttribute("aria-checked", "true");
+});
+
+test("NFR-001: empty stages expose recovery without a dead Close control", async () => {
+  const { user } = await app();
+  await user.click(screen.getByRole("button", { name: /^Induan,/ }));
+  expect(screen.getByRole("complementary")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+  const browse = screen.getByRole("button", { name: "Browse dinosaurs" });
+  expect(browse).toBeDisabled();
+  expect(browse).toHaveAttribute("aria-expanded", "true");
+  await user.click(
+    within(screen.getByRole("banner")).getByRole("button", {
+      name: "Reset view",
+    }),
+  );
+  expect(screen.queryByRole("complementary")).toBeNull();
+  expect(browse).toBeEnabled();
+  expect(browse).toHaveAttribute("aria-expanded", "false");
 });

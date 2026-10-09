@@ -208,6 +208,7 @@ export function ExplorationView({
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
   // indeterminate occurrences). SPEC-031 retains the gate without its checkbox.
   const [browseOpen, setBrowseOpen] = useState(false);
+  const browseButtonRef = useRef<HTMLButtonElement>(null);
   const showAll = false;
   const stage = stageByName(state.stageName);
   const stageStatus = useStageOccurrences(stageSource, stage, stageAttempt);
@@ -870,6 +871,13 @@ export function ExplorationView({
 
   // One ContextBar, two homes: the shell's banner on desktop, the drawer on a
   // phone. Declared once so the two cannot drift.
+  const recoveryRequired = occurrences.length === 0;
+  const directoryOpen =
+    browseOpen ||
+    Boolean(detail) ||
+    Boolean(absentTaxonName) ||
+    Boolean(unreachable) ||
+    recoveryRequired;
   const contextControls = (
     <ContextBar
       stage={stage}
@@ -890,12 +898,9 @@ export function ExplorationView({
         dispatch({ type: "clearSelection" });
         setSearchOutcome(null);
       }}
-      browseOpen={
-        browseOpen ||
-        Boolean(detail) ||
-        Boolean(absentTaxonName) ||
-        Boolean(unreachable)
-      }
+      browseOpen={directoryOpen}
+      browseDisabled={recoveryRequired}
+      browseButtonRef={browseButtonRef}
       onReset={() => {
         setBrowseOpen(false);
         dispatch({ type: "reset" });
@@ -1043,23 +1048,22 @@ export function ExplorationView({
           >
             {columnContents}
           </OccurrenceSheet>
-        ) : browseOpen ||
-          detail ||
-          absentTaxonName ||
-          unreachable ||
-          occurrences.length === 0 ? (
+        ) : directoryOpen ? (
           <aside className={styles.sidebar} aria-label="Occurrence details">
-            <button
-              type="button"
-              className={styles.panelBack}
-              onClick={() => {
-                setBrowseOpen(false);
-                dispatch({ type: "clearSelection" });
-                setSearchOutcome(null);
-              }}
-            >
-              Close
-            </button>
+            {!recoveryRequired && (
+              <button
+                type="button"
+                className={styles.panelBack}
+                onClick={() => {
+                  browseButtonRef.current?.focus();
+                  setBrowseOpen(false);
+                  dispatch({ type: "clearSelection" });
+                  setSearchOutcome(null);
+                }}
+              >
+                Close
+              </button>
+            )}
             {columnContents}
           </aside>
         ) : null}
