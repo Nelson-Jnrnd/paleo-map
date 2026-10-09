@@ -5,7 +5,7 @@ title: Quiet atlas interface
 status: In Implementation
 owner: Nelson Jeanrenaud
 related_issue: null
-related_prs: []
+related_prs: [30]
 affected_components: [app-frontend, design-guidance]
 affected_interfaces: [exploration, taxonomy, taxon-page, dinordle]
 supersedes: []
@@ -107,13 +107,13 @@ All requirements above pass their verification. Count scopes remain intentionall
 
 | Requirement ID | Acceptance criterion | Verification method | Test / command / manual check | Evidence location | PR reference |
 | --- | --- | --- | --- | --- | --- |
-| REQ-001 | Genus/Locality only, directory closed, gate removed | UI + browser | spec031-quiet-interface; grouping-mode; quiet-interface E2E | test/ui; test/e2e | pending |
-| REQ-002 | One age context, stable header total across viewport changes | UI + fake map | exploration-context; spec027-selection panning regression | test/ui | pending |
-| REQ-003 | Evidence disclosed, optional absent rows omitted, selected surface replaces hover | UI + browser | spec031-quiet-interface; occurrence-panel; quiet-interface + phone-touch E2E | test/ui; test/e2e | pending |
-| REQ-004 | Contextual taxonomy, one view, article return + external link | UI + browser | spec031-quiet-interface; spec017-screen; quiet-interface + a11y E2E | test/ui; test/e2e | pending |
-| REQ-005 | Well-known default, explicit full links, quiet entry and rollover | UI + browser | spec031-quiet-interface; spec019-rollover; spec020-track-option; spec019-daily E2E | test/ui; test/e2e | pending |
-| REQ-006 | On-demand presentation policy; data contract unchanged | Inspection + governance | AGENTS, CLAUDE, charter, functional specification and amendments | repository docs | pending |
-| NFR-001 | State, geometry, access and checks preserved | Automated + browser | typecheck, test, lint, format, build, budget, governance; phone, map, axe E2E | PR validation | pending |
+| REQ-001 | Genus/Locality only, directory closed, gate removed | UI + browser | spec031-quiet-interface; grouping-mode; quiet-interface E2E | test/ui; test/e2e | #30 |
+| REQ-002 | One age context, stable header total across viewport changes | UI + fake map | exploration-context; spec027-selection panning regression | test/ui | #30 |
+| REQ-003 | Evidence disclosed, optional absent rows omitted, selected surface replaces hover | UI + browser | spec031-quiet-interface; occurrence-panel; quiet-interface + phone-touch E2E | test/ui; test/e2e | #30 |
+| REQ-004 | Contextual taxonomy, one view, article return + external link | UI + browser | spec031-quiet-interface; spec017-screen; quiet-interface + a11y E2E | test/ui; test/e2e | #30 |
+| REQ-005 | Well-known default, explicit full links, quiet entry and rollover | UI + browser | spec031-quiet-interface; spec019-rollover; spec020-track-option; spec019-daily E2E | test/ui; test/e2e | #30 |
+| REQ-006 | On-demand presentation policy; data contract unchanged | Inspection + governance | AGENTS, CLAUDE, charter, functional specification and amendments | repository docs | #30 |
+| NFR-001 | State, geometry, access and checks preserved | Automated + browser | typecheck, test, lint, format, build, budget, governance; phone, map, axe E2E | PR validation | #30 |
 
 ## Test plan
 
@@ -152,7 +152,7 @@ This owner-approved change amends presentation obligations in SPEC-003/010/014/0
 | REQ-004 | Secondary navigation | AppBar, TaxonomyScreen, TaxonomySurfaces, TaxonProfile | spec017-screen, spec022-app-bar, spec031-quiet-interface | Verified |
 | REQ-005 | Quiet game entry | DailyGenusScreen, initialExplorationState | spec019-rollover, spec020-track-option, spec031-quiet-interface | Verified |
 | REQ-006 | Presentation policy | Agent guidance, design charter, functional specification | source inspection, governance scripts | Verified |
-| NFR-001 | Map and phone integrity | OccurrenceMap ResizeObserver; existing state/sheet contracts | unit/UI, map geometry, phone and axe checks | Verification in progress |
+| NFR-001 | Map and phone integrity | OccurrenceMap ResizeObserver; existing state/sheet contracts | unit/UI, map geometry, phone and axe checks | Verified |
 
 ## Implementation notes
 
@@ -162,4 +162,10 @@ This owner-approved change amends presentation obligations in SPEC-003/010/014/0
 
 ## Spec amendments
 
-No amendments to this newly approved spec yet. Approval records implementation choices in the validated report and the clarification above.
+### AMEND-001: Implementation verification and PR linkage
+
+- **Date:** 2026-10-09
+- **Authority:** Owner approval recorded in Context; no change to approved product scope.
+- **Change:** Link PR #30 and complete the verification/traceability records.
+- **Evidence:** 649 unit/integration/UI tests and 72 browser tests passed. TypeScript, ESLint, Prettier, production build, size budgets and the three governance checks passed. Desktop/phone screenshots were inspected locally. Browser checks used temporary Chromium 153 with software WebGL because normal downloads arrived incomplete; no dependency was added to the repository.
+- **Remaining step:** Human review and merge. Keep status In Implementation until merge per the repository workflow.

@@ -60,6 +60,7 @@ for (const phone of [false, true]) {
             .getByRole("heading")
             .first(),
         ).toHaveText(heading);
+        await settle(page);
         if (process.env["PALEO_QA_SHOTS"])
           await page.screenshot({
             path: `${process.env["PALEO_QA_SHOTS"]}/${phone ? "phone" : "desktop"}-selection.png`,
