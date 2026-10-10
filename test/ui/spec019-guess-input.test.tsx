@@ -110,7 +110,8 @@ test("UX-003: the guess field is a labelled combobox", () => {
   expect(input.getAttribute("aria-autocomplete")).toBe("list");
 });
 
-test("REQ-003: the guessable count is stated in domain terms", () => {
+test("SPEC-031: guessing omits the pool counter", () => {
   renderGame();
-  expect(screen.getByText(/genera only · \d[\d,]* guessable/i)).toBeTruthy();
+  expect(screen.queryByText(/guessable/i)).toBeNull();
+  expect(screen.getByRole("combobox", { name: "Guess a genus" })).toBeTruthy();
 });

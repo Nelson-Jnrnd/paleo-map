@@ -94,8 +94,7 @@ pnpm run snapshot    # build the dated snapshot from the fixture subset
 
 Any UI work — mockups, screens, or built interface — is **binding on**
 `docs/mockups/design-guidelines.md`. It defines the product's design charter:
-uncertainty and provenance are first-class and always legible (never hidden
-behind a hover or secondary click); domain language only (taxa, occurrences, Ma,
+exploration is primary and provenance is available on demand (SPEC-031); domain language only (taxa, occurrences, Ma,
 formations — never "Insights/Engagement"); a light deep-time cartographic system
 (a pale bathymetric chart) with one teal accent plus a meaning-only status system
 (incl. ICS period colours); restraint over decoration; and all real states

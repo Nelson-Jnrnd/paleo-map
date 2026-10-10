@@ -46,7 +46,8 @@ test("boots from the static bundle and renders the paleogeographic map", async (
 
   // The dinosaurs group is active by default, and the sidebar's on-screen
   // occurrence list is present (SPEC-009 REQ-003).
-  await expect(page.getByText("Dinosaurs", { exact: true })).toBeVisible();
+  await expect(page.locator("aside")).toHaveCount(0);
+  await page.getByRole("button", { name: "Browse dinosaurs" }).click();
   await expect(
     page.getByRole("complementary", { name: /occurrence details/i }),
   ).toBeVisible();

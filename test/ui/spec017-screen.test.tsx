@@ -6,6 +6,7 @@
  * no network at all.
  */
 
+import { useState } from "react";
 import { afterEach, expect, test, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -57,59 +58,36 @@ function renderScreen(taxonId: string | null = "t:trex") {
 
 /* REQ-003 — comparison ----------------------------------------------------- */
 
-test("comparing two taxa names the meeting point and counts branchings on each arm", async () => {
+test("SPEC-031: related groups is the only initial taxonomy surface", () => {
   renderScreen("t:trex");
-  await userEvent.type(
-    screen.getByRole("searchbox", { name: /second taxon/i }),
-    "Trice",
-  );
-  await userEvent.click(screen.getByRole("button", { name: "Triceratops" }));
-
-  const compare = screen.getByRole("region", { name: /compare two taxa/i });
-  expect(within(compare).getByText(/lineages meet at/i)).toBeInTheDocument();
-  expect(within(compare).getAllByText("Dinosauria").length).toBeGreaterThan(0);
-  // Both arms are 3 branchings from Dinosauria.
-  expect(within(compare).getAllByText(/3 branchings/)).toHaveLength(2);
-});
-
-test("REQ-003: the comparison never expresses elapsed time", async () => {
-  renderScreen("t:trex");
-  await userEvent.type(
-    screen.getByRole("searchbox", { name: /second taxon/i }),
-    "Trice",
-  );
-  await userEvent.click(screen.getByRole("button", { name: "Triceratops" }));
-
-  const compare = screen.getByRole("region", { name: /compare two taxa/i });
-  // Scan the *claims*, not the disclaimer: the note deliberately uses temporal
-  // words to say the surface is not making a temporal claim.
-  const note = within(compare).getByRole("note");
-  const claims = Array.from(compare.querySelectorAll("p, li"))
-    .filter((el) => !note.contains(el))
-    .map((el) => el.textContent ?? "")
-    .join(" ");
-  // No duration, no date, no Ma value — the chain is containment, not a dated
-  // phylogeny, so any temporal phrasing would be a claim the data cannot support.
-  expect(claims).not.toMatch(/\bMa\b|million years|myr|\bago\b|diverged/i);
-  expect(claims).toMatch(/branchings/);
-  // And the limitation is stated on the surface, not left implicit.
-  expect(within(compare).getByRole("note").textContent).toMatch(
-    /not how long ago/i,
-  );
-});
-
-test("UX-002: the comparison surface has a defined empty state", () => {
-  renderScreen("t:trex");
-  const compare = screen.getByRole("region", { name: /compare two taxa/i });
   expect(
-    within(compare).getByText(/search for a second taxon/i),
-  ).toBeInTheDocument();
+    screen.getByRole("button", { name: "Related groups" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: /Tyrannosauridae/ })).toBeTruthy();
+  expect(screen.queryByRole("searchbox")).toBeNull();
+  expect(
+    screen.queryByRole("region", {
+      name: /compare two taxa|shape of dinosauria/i,
+    }),
+  ).toBeNull();
+});
+test("SPEC-031: genus browsing replaces the relationships surface", async () => {
+  renderScreen("t:dino");
+  await userEvent.click(screen.getByRole("button", { name: "Browse genera" }));
+  await userEvent.type(
+    screen.getByRole("searchbox", { name: "Find a genus" }),
+    "Trice",
+  );
+  expect(screen.getByRole("button", { name: "Triceratops" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Tyrannosaurus" })).toBeNull();
+  expect(screen.queryByRole("region", { name: /neighbours/i })).toBeNull();
 });
 
 /* REQ-005 — fan ------------------------------------------------------------ */
 
-test("the fan renders wedges and an equivalent list for assistive tech", () => {
+test("the fan renders wedges and an equivalent list for assistive tech", async () => {
   renderScreen("t:trex");
+  await userEvent.click(screen.getByRole("button", { name: "Tree view" }));
   const fan = screen.getByRole("region", { name: /shape of dinosauria/i });
   expect(
     within(fan).getByRole("img", { name: /radial tree/i }),
@@ -126,7 +104,7 @@ test("the fan renders wedges and an equivalent list for assistive tech", () => {
 
 test("UX-002: an out-of-scope taxon falls back to the root and says so", () => {
   renderScreen("t:arch");
-  expect(screen.getByText(/sits above/i)).toBeInTheDocument();
+  expect(screen.getByText(/outside the atlas taxonomy/i)).toBeInTheDocument();
   expect(
     screen.getByRole("heading", { level: 1, name: "Dinosauria" }),
   ).toBeInTheDocument();
@@ -158,7 +136,7 @@ test("the screen carries no return control of its own (SPEC-022 REQ-004)", () =>
 test("NFR-003: every surface is a labelled region and every entry is a button", () => {
   renderScreen("t:trex");
   const regions = screen.getAllByRole("region");
-  expect(regions.length).toBeGreaterThanOrEqual(4);
+  expect(regions.length).toBeGreaterThanOrEqual(1);
   for (const region of regions) {
     expect(region.getAttribute("aria-label")).toBeTruthy();
   }
@@ -183,4 +161,27 @@ test("NFR-001: the screen renders with the network stubbed to fail", () => {
   ).toBeInTheDocument();
   expect(fetchSpy).not.toHaveBeenCalled();
   fetchSpy.mockRestore();
+});
+
+test("SPEC-031 NFR-001: opening a genus or related group moves focus to its heading", async () => {
+  function TaxonomyHarness() {
+    const [taxonId, setTaxonId] = useState("t:dino");
+    return (
+      <TaxonomyScreen api={api} taxonId={taxonId} onSelectTaxon={setTaxonId} />
+    );
+  }
+  render(<TaxonomyHarness />);
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Browse genera" }));
+  screen.getByRole("button", { name: "Tyrannosaurus" }).focus();
+  await user.keyboard("{Enter}");
+  expect(screen.getByRole("heading", { name: "Tyrannosaurus" })).toHaveFocus();
+  expect(
+    screen.getByRole("button", { name: "Related groups" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  screen.getByRole("button", { name: /Tyrannosauridae/ }).focus();
+  await user.keyboard("{Enter}");
+  expect(
+    screen.getByRole("heading", { name: "Tyrannosauridae" }),
+  ).toHaveFocus();
 });

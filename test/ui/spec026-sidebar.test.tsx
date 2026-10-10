@@ -26,6 +26,9 @@ async function renderApp() {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Browse dinosaurs" }),
+  );
   const units = within(
     await screen.findByRole("radiogroup", { name: /one row per/i }),
   );
@@ -34,7 +37,7 @@ async function renderApp() {
 
 test("REQ-004: no not-classified row exists at any taxon unit", async () => {
   const { user, units } = await renderApp();
-  for (const unit of ["Genus", "Family", "Major group"]) {
+  for (const unit of ["Genus"]) {
     await user.click(units.getByRole("radio", { name: unit }));
     expect(screen.queryByText(/not classified/i)).not.toBeInTheDocument();
   }
@@ -57,24 +60,16 @@ test("REQ-004: the same filter drives the list, the count and the map", async ()
   expect(groups.every((g) => Boolean(g.taxonId))).toBe(true);
 });
 
-test("REQ-004: those records are still present under Occurrence and Locality", async () => {
-  const { user, units } = await renderApp();
-
-  await user.click(units.getByRole("radio", { name: "Occurrence" }));
-  const occRegion = screen.getByRole("region", {
-    name: /occurrences on the map/i,
-  });
-  const occRows = within(occRegion).getAllByRole("button").length;
-  expect(occRows).toBeGreaterThan(0);
-
-  // The taxon unit lists no more than the Occurrence unit: REQ-004 removes
-  // records that do not classify, and nothing else. (The default Wikipedia gate,
-  // SPEC-014 AMEND-005, narrows both units equally and composes with this filter
-  // rather than being replaced by it.)
-  await user.click(units.getByRole("radio", { name: "Genus" }));
-  const genusRegion = screen.getByRole("region", { name: /genus on the map/i });
-  const genusRows = within(genusRegion).getAllByRole("button").length;
-  expect(genusRows).toBeLessThanOrEqual(occRows);
+test("SPEC-031: record evidence is reachable within a selected genus", async () => {
+  const { user } = await renderApp();
+  const list = screen.getByRole("region", { name: /genus on the map/i });
+  await user.click(within(list).getAllByRole("button")[0]!);
+  const panel = screen.getByRole("region", { name: /taxon:/i });
+  const disclosure = within(panel).getByText("Details and sources");
+  expect(disclosure.closest("details")).not.toHaveAttribute("open");
+  await user.click(disclosure);
+  expect(disclosure.closest("details")).toHaveAttribute("open");
+  expect(panel.querySelectorAll("details details").length).toBeGreaterThan(0);
 });
 
 test("REQ-005: rows are ordered by count descending, deterministically", async () => {
@@ -119,7 +114,7 @@ test("REQ-002: a locality row states where it is today, and carries no clade tin
 
 test("REQ-002: a row carries at most two meta values", async () => {
   const { user, units } = await renderApp();
-  for (const unit of ["Occurrence", "Locality", "Genus"]) {
+  for (const unit of ["Locality", "Genus"]) {
     await user.click(units.getByRole("radio", { name: unit }));
     const region = screen.getByRole("region", { name: /on the map/i });
     for (const row of within(region).getAllByRole("button")) {

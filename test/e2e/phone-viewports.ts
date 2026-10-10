@@ -105,7 +105,8 @@ export async function smallTargets(
 ): Promise<SmallTarget[]> {
   return page.evaluate(
     ({ min, exempt }) => {
-      const sel = "button, a, input, select, [role='radio'], [role='button']";
+      const sel =
+        "button, a, input, select, summary, [role='radio'], [role='button']";
       const out: SmallTarget[] = [];
       for (const el of Array.from(document.querySelectorAll(sel))) {
         if (exempt.some((e) => el.matches(e))) continue;

@@ -7,7 +7,7 @@
  */
 
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ReadApi } from "../../src/read/api.js";
 import { DailyGenusScreen } from "../../src/app/components/DailyGenusScreen.js";
@@ -24,7 +24,7 @@ import { loadRound, loadTrack } from "../../src/app/state/dailyGenusStorage.js";
 /** SPEC-020 AMEND-006's information control, which is always rendered. */
 function aboutToggle(): HTMLElement {
   return screen.getByRole("button", {
-    name: /about the .well-known. ranking/i,
+    name: /^Help$/i,
   });
 }
 
@@ -302,34 +302,14 @@ test("SPEC-020 AMEND-006: the disclosure is keyboard-operable", async () => {
   ).toBeNull();
 });
 
-test("SPEC-024 REQ-003: the pool size is described, and previews on focus as well as hover", async () => {
+test("SPEC-031: track controls omit pool previews", () => {
   renderScreen(rankedModel());
-  const every = screen.getByRole("radio", { name: /every genus/i });
-  const known = screen.getByRole("radio", { name: /well-known/i });
-
-  // The detail is a real element the control points at — not a bare title.
-  const describedBy = every.getAttribute("aria-describedby");
-  expect(describedBy).toBeTruthy();
-  const detail = document.getElementById(describedBy!);
-  expect(detail).not.toBeNull();
-  expect(every.getAttribute("title")).toBeNull();
-  expect(known.getAttribute("title")).toBeNull();
-
-  // The selected track's size is shown with no interaction.
-  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
-
-  // Keyboard focus previews the other track's size — hover is not the only path.
-  fireEvent.focus(known);
-  expect(detail!.textContent).toMatch(/most read about/i);
-  fireEvent.blur(known);
-  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
-
-  // Pointer hover previews it too, in the same slot.
-  fireEvent.mouseEnter(known);
-  expect(detail!.textContent).toMatch(/most read about/i);
-  fireEvent.mouseLeave(known);
-  expect(detail!.textContent).toMatch(/genera in the snapshot/i);
-
-  // The slot is not a live region: it must not be announced on every hover.
-  expect(detail!.getAttribute("aria-live")).toBeNull();
+  for (const name of [/every genus/i, /well-known/i]) {
+    const control = screen.getByRole("radio", { name });
+    expect(control).not.toHaveAttribute("aria-describedby");
+    expect(control).not.toHaveAttribute("title");
+  }
+  expect(
+    screen.queryByText(/genera in the snapshot|most read about/i),
+  ).toBeNull();
 });

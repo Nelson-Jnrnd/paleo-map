@@ -1254,3 +1254,13 @@ clade word on a row under UX-002.
       recorded in session, 2026-08-14 (nelsonjeanrenaud@gmail.com)** — "I confirm
       and approve everything mentionned here", covering the direction, OQ-1, OQ-2
       ("Tint"), the ordering change and the four mockup-review changes.
+
+
+### AMEND-006: Quiet interface presentation (SPEC-031)
+
+- **Date:** 2026-10-09
+- **Reason:** Owner approved the interface-review plan to reduce noise.
+- **Changed requirements:** Public presentation obligations overlapping SPEC-031 REQ-001 through REQ-006; underlying data/state contracts remain.
+- **Behavioral impact:** SPEC-031 governs the reduced controls, collapsed directory/evidence, selection surface, taxonomy/article navigation and initial puzzle display. Its header/list count scopes follow the owner's explicit clarification. Earlier mandatory visibility/defaults for these surfaces no longer apply.
+- **Test impact:** Replace assertions of retired public controls with replacement-behaviour coverage; retain algorithm and data checks.
+- **Human approval reference:** User, 2026-10-09: “Can you do those changes please I validate the plan”.

@@ -25,7 +25,7 @@ import {
  */
 
 /** The screens reachable from the app bar, plus the map the app boots into. */
-const SCREENS = ["Map", "Dinordle", "Taxonomy"] as const;
+const SCREENS = ["Map", "Dinordle"] as const;
 
 /**
  * REQ-006 exempts the to-scale stage steps by ID, not by accident: 30 stages ×
@@ -126,7 +126,7 @@ for (const viewport of PHONE_VIEWPORTS) {
       // FONC-040/050/060 and CONS-450 are MVP requirements and are not relaxed by
       // a narrow viewport. Asserted as *visible in the viewport*, not merely
       // present — an off-screen control is not permanently displayed.
-      for (const label of [/Maastrichtian/, /Dinosaur/i]) {
+      for (const label of [/Maastrichtian/]) {
         await expect(page.getByText(label).first()).toBeInViewport();
       }
       await expect(page.locator("[data-occurrence-count]")).toBeInViewport();
@@ -185,7 +185,7 @@ test.describe("phone overlays at 320px", () => {
 
     // SPEC-023 AMEND-001: collapsed by default below the breakpoint, but still
     // naming itself and still one tap from expanded.
-    const toggle = page.getByRole("button", { name: /clade key/i });
+    const toggle = page.getByRole("button", { name: /legend/i });
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
 

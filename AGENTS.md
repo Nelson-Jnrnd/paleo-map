@@ -35,6 +35,9 @@ truth. The full lifecycle is in `docs/workflow/AGENT_WORKFLOW.md`.
 - All UI work is binding on `docs/mockups/design-guidelines.md`, read together
   with `docs/mockups/anti-slop-checklist.md` (what the design must not drift
   into). Run the checklist's self-check before publishing a mockup or a screen.
+- SPEC-031 replaces blanket inline sourcing with on-demand evidence access. Do
+  not restore removed controls, routine provenance badges or optional missing-field
+  rows in the name of older presentation rules. Source associations remain intact.
 - If documentation conflicts, stop and run the drift check. If a blocking
   conflict exists, ask the human to decide.
 

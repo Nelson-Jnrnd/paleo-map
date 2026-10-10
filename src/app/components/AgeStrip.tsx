@@ -36,7 +36,6 @@ export function AgeStrip({
   selected,
   stage,
   onSelect,
-  group,
   count,
   drawerOpen,
   onToggleDrawer,
@@ -103,8 +102,6 @@ export function AgeStrip({
 
       {/* FONC-050/060: the group and the count, permanently, in one line. */}
       <p className={styles.ageStripMeta}>
-        <span>{group}</span>
-        <span aria-hidden="true"> · </span>
         <span
           className={`${styles.countValue} mono`}
           aria-live="polite"
@@ -112,7 +109,7 @@ export function AgeStrip({
         >
           {count}
         </span>{" "}
-        occurrences
+        occurrences on the map
       </p>
     </div>
   );

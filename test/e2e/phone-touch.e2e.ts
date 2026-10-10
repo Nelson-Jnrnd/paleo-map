@@ -23,7 +23,7 @@ test.describe("touch equivalents at 390×664", () => {
     isMobile: true,
   });
 
-  test("UX-002: tapping a marker shows the card SPEC-015 REQ-003 promises", async ({
+  test("SPEC-031: a touch selection opens details or the cluster picker", async ({
     page,
   }) => {
     await page.goto("/");
@@ -39,17 +39,26 @@ test.describe("touch equivalents at 390×664", () => {
     // that the app zooms in rather than carding it — the test would be hunting
     // a moving target. A search landing frames a handful of points instead.
     await openControlsDrawer(page);
-    await page.locator("input[type='search'], input").first().fill("Tyranno");
+    await page
+      .locator("input[type='search'], input")
+      .first()
+      .fill("Tyrannosaurus");
     await page.waitForTimeout(700);
-    await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Enter");
+    await page
+      .getByRole("option", { name: /^Tyrannosaurus/ })
+      .first()
+      .click();
+    await page.getByRole("button", { name: "Done" }).click();
     await page.waitForTimeout(2500);
 
     const canvas = page.locator("canvas.maplibregl-canvas");
     const box = await canvas.boundingBox();
     if (!box) throw new Error("map not painted");
 
-    const card = page.locator("[data-map-card]");
+    await page.getByRole("button", { name: /back to .*genera/i }).click();
+    const card = page.locator(
+      "[data-map-card], [data-sheet-stop] [aria-label^='Taxon:']",
+    );
     const fractions = [0.25, 0.35, 0.45, 0.5, 0.55, 0.65, 0.75];
     outer: for (const dy of fractions) {
       for (const dx of fractions) {
@@ -69,15 +78,16 @@ test.describe("touch equivalents at 390×664", () => {
   }) => {
     await page.goto("/");
     await settle(page);
-    await page.getByRole("button", { name: "Taxonomy", exact: true }).click();
+    await page.getByRole("button", { name: /activate to resize/i }).click();
+    await page.locator("button[data-unit-row]").first().click();
+    await page.getByRole("button", { name: "Related groups" }).click();
+    await page.getByRole("button", { name: "Tree view" }).click();
     await page.waitForTimeout(1200);
 
     const details = page.locator("details", {
       hasText: /branches, as a list/i,
     });
-    if ((await details.count()) === 0) {
-      test.skip(true, "no fan on this taxon");
-    }
+    await expect(details).toHaveCount(1);
     await details.first().locator("summary").click();
     const row = page.locator("[class*='fanListItem']").first();
     await expect(row).toHaveCSS("text-decoration-line", "underline");

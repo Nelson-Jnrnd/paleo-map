@@ -125,9 +125,11 @@ test.describe("NFR-002: the desktop layout is untouched", () => {
       // SPEC-023 UX-001 still applies above the breakpoint: the key opens
       // expanded, and the amendment did not touch that.
       await expect(
-        page.getByRole("button", { name: /clade key/i }),
-      ).toHaveAttribute("aria-expanded", "true");
+        page.getByRole("button", { name: /legend/i }),
+      ).toHaveAttribute("aria-expanded", "false");
 
+      await expect(page.locator("aside")).toHaveCount(0);
+      await page.getByRole("button", { name: "Browse dinosaurs" }).click();
       // The column is still a column: 360px, or 42vw where that is smaller.
       const aside = await page.locator("aside").boundingBox();
       expect(aside?.width ?? 0).toBeCloseTo(

@@ -1224,3 +1224,11 @@ Verified in the browser: an older mark sits at 572.4–581.4 against a bar top o
 - [x] Verification matrix covers every requirement.
 - [x] Conflict check completed.
 - [x] Human approval recorded before status set to Approved.
+
+
+### AMEND-006: Quiet interface presentation (SPEC-031)
+
+- **Date:** 2026-10-09
+- **Authority:** Owner-approved interface review and implementation request.
+- **Change:** SPEC-031 supersedes conflicting public presentation requirements: short hover identity and one persistent selection surface; collapsed legend; quiet puzzle entry, on-demand rules/ranking and no pool counters. Data contracts and semantic constraints remain.
+- **Verification:** SPEC-031 regression tests and applicable existing checks.

@@ -46,6 +46,9 @@ async function renderApp() {
   const user = userEvent.setup();
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
+  await userEvent.click(
+    screen.getByRole("button", { name: "Browse dinosaurs" }),
+  );
   await flushUntil(() => mapCount() > 0);
   const map = currentMap();
   await act(async () => {
@@ -118,6 +121,29 @@ test("REQ-002: the list stays viewport-linked while the selection does not", asy
   expect(within(list).getByText("Tyrannosaurus")).toBeInTheDocument();
 });
 
+test("SPEC-031 REQ-002: panning changes the list count without changing the header total", async () => {
+  const { map } = await renderApp();
+  const total = Number(
+    screen
+      .getByText("All map occurrences")
+      .parentElement!.querySelector("[data-occurrence-count]")!.textContent,
+  );
+  const initialRows = within(
+    screen.getByRole("region", { name: /on the map/i }),
+  ).getAllByRole("button").length;
+  await excludeNanotyrannus(map);
+  const list = screen.getByRole("region", { name: /on the map/i });
+  expect(within(list).getAllByRole("button").length).toBeLessThan(initialRows);
+  expect(within(list).getByText(/genera in view/)).toBeTruthy();
+  expect(
+    Number(
+      screen
+        .getByText("All map occurrences")
+        .parentElement!.querySelector("[data-occurrence-count]")!.textContent,
+    ),
+  ).toBe(total);
+});
+
 test("REQ-004: searching a taxon that is not a grouping level explains itself", async () => {
   const { user } = await renderApp();
 
@@ -170,7 +196,7 @@ test("REQ-002: switching unit keeps the selection resolvable at the new tier", a
     screen.getByRole("radiogroup", { name: /one row per/i }),
   );
 
-  // Genus unit, select from the list, then step up to Family.
+  // Genus unit, select from the list, then switch to Locality.
   await user.click(units.getByRole("radio", { name: "Genus" }));
   const list = screen.getByRole("region", { name: /on the map/i });
   await user.click(within(list).getByRole("button", { name: /Tyrannosaurus/ }));
@@ -180,7 +206,7 @@ test("REQ-002: switching unit keeps the selection resolvable at the new tier", a
 
   // SPEC-010 REQ-005 drops the selection on a rank change; the list returns
   // rather than a stale panel or a blank column.
-  await user.click(units.getByRole("radio", { name: "Family" }));
+  await user.click(units.getByRole("radio", { name: "Locality" }));
   expect(screen.queryByRole("region", { name: /taxon:/i })).toBeNull();
   expect(
     screen.getByRole("region", { name: /on the map/i }),

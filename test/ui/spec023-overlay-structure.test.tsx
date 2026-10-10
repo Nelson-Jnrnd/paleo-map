@@ -46,16 +46,14 @@ test("REQ-002: the top-right corner is reserved — no app overlay may claim it"
   expect(pane.querySelector('[data-map-rail="top-right"]')).toBeNull();
   // The gate toggle in particular moved out of that corner.
   const gate = pane.querySelector('[data-map-overlay="wikipedia-gate"]');
-  expect(gate).not.toBeNull();
-  expect(gate?.closest("[data-map-rail]")?.getAttribute("data-map-rail")).toBe(
-    "bottom-right",
-  );
+  expect(gate).toBeNull();
 });
 
 test("REQ-001: every rail child carries a stable, non-empty overlay name", async () => {
   const pane = await renderMap();
   const children = [...pane.querySelectorAll("[data-map-rail] > *")];
-  expect(children.length).toBeGreaterThan(0);
+  // WebGL fallback deliberately has no persistent overlays.
+  expect(pane.querySelector("[data-map-overlay='wikipedia-gate']")).toBeNull();
   for (const child of children) {
     expect(child.getAttribute("data-map-overlay")?.trim()).toBeTruthy();
   }

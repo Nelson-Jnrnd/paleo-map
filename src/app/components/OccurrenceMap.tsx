@@ -504,20 +504,13 @@ export function OccurrenceMap({
   const focusIdsRef = useRef<ReadonlySet<string>>(new Set());
   focusIdsRef.current = new Set(focusIds ?? []);
 
-  // Transient hover preview, the pinned (clicked) interactive card, the culled
+  // Transient hover preview, the culled
   // labels, and the cluster count badges.
   const [hover, setHover] = useState<{
     id: string;
     x: number;
     y: number;
   } | null>(null);
-  const [pinned, setPinned] = useState<{
-    id: string;
-    x: number;
-    y: number;
-  } | null>(null);
-  const pinnedRef = useRef(pinned);
-  pinnedRef.current = pinned;
   // The multi-species aggregate card (AMEND-002 #3): raw leaf rows + a geographic
   // anchor so it can follow the map; presentational fields are resolved in render.
   const [multi, setMulti] = useState<{
@@ -530,22 +523,8 @@ export function OccurrenceMap({
   const multiRef = useRef(multi);
   multiRef.current = multi;
   const [labels, setLabels] = useState<MapLabel[]>([]);
-  // SPEC-023 UX-001 as amended by SPEC-030 (AMEND-001, owner decision
-  // 2026-09-02): open by default above the 40rem breakpoint, **collapsed** below
-  // it — expanded the key is 183 × 193px, 26% of the map at 320px. Remembered
-  // for the session only, no storage, and one tap from expanded either way.
-  //
-  // Read once at mount rather than tracked: a viewport crossing the breakpoint
-  // mid-session must not yank the key shut under a reader who just opened it,
-  // which is the "collapse is a user action" half of UX-001 that survives.
-  const [cladeKeyOpen, setCladeKeyOpen] = useState(
-    () =>
-      !(
-        typeof window !== "undefined" &&
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(max-width: 40rem)").matches
-      ),
-  );
+  // SPEC-031: the legend starts collapsed at every width.
+  const [cladeKeyOpen, setCladeKeyOpen] = useState(false);
   const [clusterCounts, setClusterCounts] = useState<
     Array<{ key: string; x: number; y: number; count: number }>
   >([]);
@@ -581,18 +560,6 @@ export function OccurrenceMap({
     // and also spares a render per settled pan frame.
     setClusterCounts((prev) => (sameCounts(prev, counts) ? prev : counts));
 
-    // Keep the pinned card anchored to its marker as the map moves.
-    const pin = pinnedRef.current;
-    if (pin) {
-      const o = occurrencesRef.current.find((x) => x.id === pin.id);
-      const at = o ? positionIn(o, frameModeRef.current) : null;
-      if (at) {
-        const p = map.project([at.lng, at.lat]);
-        if (p.x !== pin.x || p.y !== pin.y) {
-          setPinned({ id: pin.id, x: p.x, y: p.y });
-        }
-      }
-    }
     // Keep the multi-species card anchored to its aggregate as the map moves.
     const m = multiRef.current;
     if (m) {
@@ -741,6 +708,13 @@ export function OccurrenceMap({
           "top-right",
         );
         mapRef.current = map;
+        // SPEC-031: opening/closing the directory changes the pane without a
+        // window resize. Keep the canvas and its hit testing in that pane.
+        const resizeObserver =
+          typeof ResizeObserver === "undefined"
+            ? null
+            : new ResizeObserver(() => map.resize());
+        resizeObserver?.observe(container);
         // Dev-only debug hook (stripped from production builds) — lets tooling
         // drive the map deterministically.
         // `import.meta.env.DEV` must be referenced inline: Vite replaces that
@@ -754,6 +728,7 @@ export function OccurrenceMap({
           mapRef.current = null;
           setMapLoaded(false);
           if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+          resizeObserver?.disconnect();
           map.remove();
         };
         map.on("load", () => {
@@ -1020,9 +995,8 @@ export function OccurrenceMap({
               onHoverRef.current?.(null);
             });
 
-            // SPEC-015 AMEND-001 (#3): one click handler. On a marker → pin the
-            // interactive card (and sync the list). On a cluster → zoom in. On
-            // empty map → dismiss the pinned card.
+            // SPEC-031: a marker opens the selected-item surface. A cluster
+            // zooms or offers disambiguation; empty space dismisses the picker.
             map.on("click", (e: MapMouseEvent) => {
               // The emphasis overlay sits on top, so it is hit-tested first —
               // a focused marker must stay clickable where it covers the base.
@@ -1037,7 +1011,7 @@ export function OccurrenceMap({
               const pid = pf[0]?.properties?.["id"];
               if (typeof pid === "string") {
                 setMulti(null);
-                setPinned({ id: pid, x: e.point.x, y: e.point.y });
+                setHover(null);
                 onSelectRef.current(pid);
                 return;
               }
@@ -1047,7 +1021,6 @@ export function OccurrenceMap({
               const cprops = cf[0]?.properties;
               const cg = cf[0]?.geometry;
               if (!cprops || !cg || cg.type !== "Point") {
-                setPinned(null);
                 setMulti(null);
                 return;
               }
@@ -1110,7 +1083,6 @@ export function OccurrenceMap({
                   const small = byTaxon.size <= 15;
                   if (small || spread < 1e-3 || map.getZoom() >= 13) {
                     const p = map.project(center);
-                    setPinned(null);
                     setMulti({
                       lng: center[0],
                       lat: center[1],
@@ -1126,8 +1098,8 @@ export function OccurrenceMap({
             });
 
             // SPEC-015 REQ-003 + SPEC-009 REQ-004: hover drives the transient
-            // preview card + the list cross-highlight. Suppressed while a card is
-            // pinned so the two don't fight.
+            // preview card + the list cross-highlight. A cluster picker suppresses
+            // hover until its disambiguation finishes.
             map.on("mousemove", (e: MapMouseEvent) => {
               const feats = map.queryRenderedFeatures(e.point, {
                 layers: ["points-bg", "points-icon", "clusters"],
@@ -1136,7 +1108,7 @@ export function OccurrenceMap({
               const id = top?.properties?.["id"];
               const isCluster = top?.properties?.["point_count"] != null;
               map.getCanvas().style.cursor = top ? "pointer" : "";
-              if (pinnedRef.current || multiRef.current) return;
+              if (multiRef.current) return;
               if (typeof id === "string" && !isCluster) {
                 setHover({ id, x: e.point.x, y: e.point.y });
                 onHoverRef.current?.(id);
@@ -1348,17 +1320,15 @@ export function OccurrenceMap({
   // the multi card is dismissed on any occurrence change (its leaves may be stale).
   useEffect(() => {
     const ids = new Set(occurrences.map((o) => o.id));
-    if (pinned && !ids.has(pinned.id)) setPinned(null);
     if (hover && !ids.has(hover.id)) setHover(null);
     setMulti(null);
-  }, [occurrences, pinned, hover]);
+  }, [occurrences, hover]);
 
   // SPEC-027 REQ-006: changing mode re-keys every feature, so any card left over
   // belongs to features that no longer exist. Clearing them here also releases
   // the hover suppression those cards hold — a locality cluster click used to
   // strand an invisible card and kill hover until the stage changed.
   useEffect(() => {
-    setPinned(null);
     setHover(null);
     setMulti(null);
   }, [mode]);
@@ -1375,9 +1345,8 @@ export function OccurrenceMap({
     frameMode === "paleo" &&
     occurrences.some((o) => o.paleoPosition.value?.reconstructionAgeMa != null);
 
-  // SPEC-015 REQ-003 / AMEND-001: the card shows the pinned occurrence if any,
-  // else the hovered one. SPEC-015 REQ-001: the legend shows in point modes.
-  const cardAnchor = pinned ?? hover;
+  // SPEC-031: transient hover only; selected-item details live in the directory.
+  const cardAnchor = multi ? null : hover;
   const carded = cardAnchor
     ? occurrences.find((o) => o.id === cardAnchor.id)
     : null;
@@ -1401,9 +1370,8 @@ export function OccurrenceMap({
       ) : (
         <div className={styles.stateWrap} role="note">
           <p>
-            The interactive map needs WebGL, which isn’t available here. Use the
-            occurrence list to explore — it carries the same occurrences,
-            sources and uncertainty.
+            The interactive map needs WebGL, which isn’t available here. Choose
+            Browse dinosaurs to explore the list.
           </p>
         </div>
       )}
@@ -1461,13 +1429,11 @@ export function OccurrenceMap({
                 x={cardAnchor.x}
                 y={cardAnchor.y}
                 iconSrc={cardedMarker.src}
-                pinned={Boolean(pinned)}
                 onOpenProfile={
                   onOpenProfileRef.current
                     ? () => onOpenProfileRef.current?.(carded.taxonId)
                     : undefined
                 }
-                onClose={() => setPinned(null)}
               />
             )}
             {showCladeUi && multi && (
@@ -1615,8 +1581,8 @@ export function OccurrenceMap({
                 aria-expanded={cladeKeyOpen}
                 onClick={() => setCladeKeyOpen((open) => !open)}
               >
-                <span aria-hidden="true">{cladeKeyOpen ? "▾" : "▸"}</span> Clade
-                key
+                <span aria-hidden="true">{cladeKeyOpen ? "▾" : "▸"}</span>{" "}
+                Legend
               </button>
               {cladeKeyOpen && (
                 <div

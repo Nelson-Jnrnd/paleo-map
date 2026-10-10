@@ -19,8 +19,8 @@ const MISSES = [
 
 test("REQ-012: #daily opens the puzzle directly", async ({ page }) => {
   await page.goto("/#daily");
-  await expect(page.getByText(/TAXONOMIC TREE/i)).toBeVisible();
-  await expect(page.getByText("Dinosauria")).toBeVisible();
+  await expect(page.getByLabel("Guess a genus")).toBeVisible();
+  await expect(page.getByRole("region", { name: /cladogram/i })).toBeHidden();
   await expect(page.getByText("0 of 8 guesses")).toBeVisible();
 });
 
@@ -54,9 +54,9 @@ test("REQ-005/REQ-007: a full round grows the tree and ends with a handoff", asy
   await page.getByRole("button", { name: /open taxon page/i }).click();
   const bar = page.getByRole("navigation", { name: /main/i });
   await expect(bar.getByRole("button", { name: "Map" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /back to map/i })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.getByRole("button", { name: /back to map/i }),
+  ).toBeVisible();
   await expect(bar.locator("[aria-current='page']")).toHaveCount(0);
   await bar.getByRole("button", { name: "Map" }).click();
   await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({
@@ -99,14 +99,14 @@ test("SPEC-020 REQ-004: the track option offers both puzzles and is honest about
   // never a `title`.
   const caveat = /attention, not of scientific importance/i;
   const about = page.getByRole("button", {
-    name: /about the .well-known. ranking/i,
+    name: /^Help$/i,
   });
   await expect(about).toBeVisible();
   await expect(about).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByText(caveat)).toHaveCount(0);
 
-  // REQ-003: the selected track's pool size is still visible without interaction.
-  await expect(page.getByText(/genera in the snapshot/i)).toBeVisible();
+  // SPEC-031 removes the pool-size display.
+  await expect(page.getByText(/genera in the snapshot/i)).toHaveCount(0);
 
   // Opening it discloses the wording UX-001 and UX-002 require, unchanged.
   await about.click();
@@ -122,7 +122,7 @@ test("SPEC-020 REQ-004: the track option offers both puzzles and is honest about
   // reachable in every state the option is rendered in; the detail follows the
   // selection.
   await expect(about).toBeVisible();
-  await expect(page.getByText(/most read about/i)).toBeVisible();
+  await expect(page.getByText(/most read about/i)).toHaveCount(0);
 });
 
 test("SPEC-020 REQ-007: #daily-known opens the well-known track directly", async ({

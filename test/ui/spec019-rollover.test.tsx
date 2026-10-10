@@ -30,39 +30,18 @@ async function guess(name: string): Promise<void> {
   await user.click(screen.getByRole("button", { name: /guess/i }));
 }
 
-test("REQ-009: the countdown reads the true interval to the next 00:00 UTC", () => {
-  const api = harnessApi();
-  const dateKey = dateWithAnswer(api, "t:trex");
-  render(
-    <DailyGenusScreen
-      api={api}
-      onOpenProfile={vi.fn()}
-      now={() => new Date(`${dateKey}T17:47:16Z`)}
-      store={memoryStore()}
-    />,
-  );
-  expect(screen.getByText("06:12:44")).toBeTruthy();
-  expect(screen.getByText(/next puzzle · 00:00 UTC/i)).toBeTruthy();
+test("SPEC-031: next puzzle timing is quiet", () => {
+  renderGame();
+  expect(screen.getByText(/Next puzzle tomorrow/i)).toBeTruthy();
+  expect(screen.queryByText(/\d{2}:\d{2}:\d{2}/)).toBeNull();
 });
 
-test("REQ-009: the countdown ticks down against the clock", () => {
-  const api = harnessApi();
-  const dateKey = dateWithAnswer(api, "t:trex");
-  let instant = new Date(`${dateKey}T17:47:16Z`).getTime();
-  render(
-    <DailyGenusScreen
-      api={api}
-      onOpenProfile={vi.fn()}
-      now={() => new Date(instant)}
-      store={memoryStore()}
-    />,
-  );
-  expect(screen.getByText("06:12:44")).toBeTruthy();
-
-  // Recomputed from the clock, not decremented — a long gap resolves correctly.
-  instant += 3_600_000;
-  act(() => void vi.advanceTimersByTime(1000));
-  expect(screen.getByText("05:12:44")).toBeTruthy();
+test("SPEC-031: rules remain available without a running countdown", async () => {
+  renderGame();
+  await userEvent
+    .setup({ advanceTimers: vi.advanceTimersByTime })
+    .click(screen.getByRole("button", { name: "Help" }));
+  expect(screen.getByText(/eight attempts/i)).toBeTruthy();
 });
 
 test("REQ-013: a UTC date change never swaps the answer under the player", async () => {
@@ -82,7 +61,7 @@ test("REQ-013: a UTC date change never swaps the answer under the player", async
 
   // Cross midnight UTC while the round is open.
   instant += 60_000;
-  act(() => void vi.advanceTimersByTime(1000));
+  act(() => void vi.advanceTimersByTime(10000));
 
   // The round is untouched: same guess, same tree, same count.
   expect(screen.getByText("1 of 8 guesses")).toBeTruthy();
@@ -106,7 +85,7 @@ test("REQ-013: the new day's round starts only on the explicit control", async (
   );
   await guess("Velociraptor");
   instant += 60_000;
-  act(() => void vi.advanceTimersByTime(1000));
+  act(() => void vi.advanceTimersByTime(10000));
 
   await userEvent
     .setup({ advanceTimers: vi.advanceTimersByTime })

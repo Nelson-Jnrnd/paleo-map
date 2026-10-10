@@ -118,6 +118,13 @@ taxon profile is two actions).
 
 ---
 
+> **Presentation amendment, owner-approved 2026-10-09:** SPEC-031 governs reduced
+> public grouping, directory defaults, count labels, selection/evidence disclosure,
+> taxonomy/article navigation and initial puzzle chrome. Older permanent-group,
+> all-surfaces and inline-source obligations are superseded in those areas.
+> Header counts cover all map occurrences; list counts describe viewport units.
+> Data/source association requirements remain.
+
 ## 1. Features
 
 ### 1.1 Main exploration view
@@ -163,7 +170,7 @@ taxon profile is two actions).
 - **FONC-260** [MVP] — The system must allow the user to pan the map horizontally and vertically.
 - **FONC-270** [MVP] — The system must allow a fossil occurrence displayed on the map to be selected.
 - **FONC-280** [MVP] — The system must display an information panel when a fossil occurrence is selected.
-- **FONC-290** [MVP] — The system must display at minimum, for a selected occurrence: the associated taxon, the time range, the modern location, the paleogeographic position and the source.
+- **FONC-290** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
 - **FONC-300** [MVP] — ~~The system must clearly indicate that the ancient map displayed is a paleogeographic reconstruction.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** the standing map label was removed; the reconstruction detail remains available in the basemap attribution popover.
 - **FONC-310** [V1] — The system should allow a comparison layer with present-day continents to be displayed.
 - **FONC-320** [V1] — The system should allow fossil occurrence display to be enabled or disabled.
@@ -208,7 +215,7 @@ taxon profile is two actions).
 - **FONC-560** [MVP] — The system must display the known fossil occurrences associated with the taxon.
 - **FONC-570** [MVP] — The system must display the modern discovery locations associated with the taxon.
 - **FONC-580** [MVP] — The system must display the reconstructed paleogeographic positions associated with the taxon.
-- **FONC-590** [MVP] — The system must display the sources used for the main information on the profile.
+- **FONC-590** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
 - **FONC-600** [V1] — The system should display the assumed diet of the taxon when this information is available.
 - **FONC-610** [V1] — The system should display the assumed locomotion mode of the taxon when this information is available.
 - **FONC-620** [V1] — The system should display an estimated length when this information is available.
@@ -251,7 +258,7 @@ taxon profile is two actions).
 - **FONC-900** [MVP] — The system must display the modern location associated with a fossil occurrence when this information is available.
 - **FONC-910** [MVP] — The system must display the reconstructed paleogeographic position associated with a fossil occurrence when this information is available.
 - **FONC-920** [MVP] — The system must display the time range associated with a fossil occurrence.
-- **FONC-930** [MVP] — The system must display the source associated with a fossil occurrence.
+- **FONC-930** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
 - **FONC-940** [V1] — The system should display the name of the geological formation associated with an occurrence when this information is available.
 - **FONC-950** [V1] — The system should provide a profile for a selected geological formation.
 - **FONC-960** [V1] — The system should display the taxa known from a selected geological formation.
@@ -280,10 +287,10 @@ taxon profile is two actions).
 > (Paleobiology Database + Wikipedia/Wikidata); any provider that supplies sourced
 > occurrences, time ranges and reconstructions satisfies the requirements below.
 
-- **FONC-1090** [MVP] — The system must display the sources of the scientific data used.
-- **FONC-1100** [MVP] — The system must display an identifiable source for each visible fossil occurrence.
+- **FONC-1090** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
+- **FONC-1100** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
 - **FONC-1110** [MVP] — ~~The system must distinguish data directly derived from fossil occurrences from interpretative data.~~ **Retired by SPEC-007 (2026-07-21, owner-approved):** the fossil-derived vs. interpretative distinction is removed. Sources (FONC-1090/1100) and the missing-data label (FONC-1120) are retained.
-- **FONC-1120** [MVP] — The system must indicate when information is missing instead of replacing it with an unmarked assumption.
+- **FONC-1120** [MVP] — Omit optional absent fields. Explain essential unavailable data/actions with recovery; never invent a substitute (SPEC-031).
 - **FONC-1130** [MVP] — ~~The system must indicate when a geographic position is reconstructed.~~ **Retired by SPEC-021 (2026-08-14, owner-approved):** its sole carrier was the standing map label retired above (FONC-300) — SPEC-007 (2026-07-21) had already retired the per-occurrence "reconstructed" chip in favour of that label. Occurrence paleocoordinates are still derived from the recorded `rotationModel`, which remains inspectable in the basemap attribution popover; the product no longer marks them as reconstructed at the point of reading.
 - **FONC-1140** [MVP] — The system must indicate when a time range is approximate.
 - **FONC-1150** [MVP] — The system must display fossil occurrences as evidence of discovery, not as complete distribution boundaries.
@@ -404,7 +411,7 @@ taxon profile is two actions).
 - **CONS-460** [MVP] — The system must allow access to a taxon profile in a maximum of 2 actions from an occurrence visible on the map.
 - **CONS-470** [MVP] — The system must allow the user to return to the map from a taxon profile in a maximum of 1 action.
 - **CONS-480** [MVP] — The system must maintain consistent nomenclature for periods, groups and taxa throughout the interface.
-- **CONS-490** [MVP] — The system must avoid hiding uncertainty information behind a secondary interaction when that information changes the scientific interpretation of the content.
+- **CONS-490** [MVP] — Show a short qualification beside a displayed fact only when omitting it would materially change interpretation. Routine provenance and methodological detail may use secondary disclosure (SPEC-031).
 - **CONS-500** [V1] — The system should allow the application to be used on desktop and tablet screens.
 - **CONS-510** [V2] — The system should allow the application to be used on mobile phones without loss of the main features.
 
@@ -433,11 +440,11 @@ taxon profile is two actions).
 
 ### 3.3 Minimum quality of visible data
 
-- **PERF-140** [MVP] — The system must display an identifiable source for 100% of visible fossil occurrences.
-- **PERF-150** [MVP] — The system must display a time range for 100% of visible fossil occurrences.
+- **PERF-140** [MVP] — **Amended by SPEC-031 (2026-10-09, owner-approved):** sources and technical record details must be available on demand for the selected content; no inline bibliography or per-row provenance display is required.
+- **PERF-150** [MVP] — Each fossil record must retain its time range; record-level ranges are available in selected-item details (SPEC-031).
 - **PERF-160** [MVP] — The system must display a minimum taxonomic classification for 100% of visible taxa.
 - **PERF-170** [MVP] — The system must display at least one parent group above genus or species for 100% of visible taxa when this information is available.
-- **PERF-180** [MVP] — The system must explicitly signal missing fields in 100% of affected taxon profiles.
+- **PERF-180** [MVP] — Omit optional absent fields. Explain essential unavailable data/actions with recovery; never invent a substitute (SPEC-031).
 - **PERF-190** [MVP] — The system must not display a taxon profile containing more than 20% silently empty fields.
 - **PERF-200** [V1] — The system should display at least 50 detailed dinosaur profiles in the first enriched version.
 - **PERF-210** [V1] — The system should display at least 10 featured species in the first enriched version.

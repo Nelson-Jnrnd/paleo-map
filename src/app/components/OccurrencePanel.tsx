@@ -11,8 +11,7 @@ import type { ReactElement } from "react";
 import type { ReadOccurrence } from "../../domain/index.js";
 import type { ReadApi } from "../../read/api.js";
 import { formatMaRange } from "../format.js";
-import { sourceReference } from "../sources.js";
-import { MissingValue } from "./Cues.js";
+import { OccurrenceEvidence } from "./RecordDetails.js";
 import styles from "./exploration.module.css";
 
 interface OccurrencePanelProps {
@@ -32,7 +31,6 @@ export function OccurrencePanel({
   backLabel,
 }: OccurrencePanelProps): ReactElement {
   const modern = occurrence.modernPosition.value;
-  const paleo = occurrence.paleoPosition.value;
   // SPEC-014 AMEND-005: only taxa with a resolved Wikipedia article have a page.
   const hasArticle = Boolean(api.getTaxon(occurrence.taxonId)?.wikipedia);
 
@@ -58,55 +56,27 @@ export function OccurrencePanel({
           </span>
         </dd>
 
-        <dt className={styles.fieldLabel}>Modern location</dt>
-        <dd className={styles.fieldValue}>
-          {modern ? (
-            <>
-              {modern.region}{" "}
-              <span className="mono">
-                ({modern.lat.toFixed(1)}°, {modern.lng.toFixed(1)}°)
-              </span>
-            </>
-          ) : (
-            <MissingValue />
-          )}
-        </dd>
-
-        <dt className={styles.fieldLabel}>Paleogeographic position</dt>
-        <dd className={styles.fieldValue}>
-          {paleo ? (
-            <span className="mono">
-              {paleo.palaeoLat.toFixed(1)}°, {paleo.palaeoLng.toFixed(1)}°
-            </span>
-          ) : (
-            <MissingValue />
-          )}
-        </dd>
-
-        <dt className={styles.fieldLabel}>Source</dt>
-        <dd className={styles.fieldValue}>
-          {sourceReference(api, occurrence.modernPosition.sourceId)}
-        </dd>
+        {modern && (
+          <>
+            <dt className={styles.fieldLabel}>Found in</dt>
+            <dd className={styles.fieldValue}>{modern.region}</dd>
+          </>
+        )}
       </dl>
 
+      <details className={styles.evidence}>
+        <summary>Details and sources</summary>
+        <OccurrenceEvidence api={api} occurrence={occurrence} />
+      </details>
       {hasArticle ? (
         <button
           type="button"
           className={styles.primary}
           onClick={() => onOpenProfile(occurrence.taxonId)}
         >
-          Open taxon profile →
+          Read about this dinosaur
         </button>
-      ) : (
-        <button
-          type="button"
-          className={styles.primary}
-          disabled
-          title="No Wikipedia article for this taxon"
-        >
-          Open taxon profile →
-        </button>
-      )}
+      ) : null}
     </section>
   );
 }

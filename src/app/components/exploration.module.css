@@ -3515,3 +3515,79 @@
   border-radius: 2px;
   flex: none;
 }
+
+/* SPEC-031: deliberate secondary disclosures, without repeated card chrome. */
+.aboutData {
+  position: relative;
+  font-size: 12px;
+}
+.aboutData summary,
+.evidence summary,
+.recordEvidence summary {
+  cursor: pointer;
+}
+.aboutData p {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: min(320px, 80vw);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-panel);
+  z-index: 35;
+  line-height: 1.5;
+}
+.evidence {
+  margin: var(--space-4);
+  font-size: 13px;
+}
+.recordEvidence {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.evidenceSource {
+  display: contents;
+}
+.taxSurface {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--space-4) 0;
+}
+.topbar {
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.unitOption[aria-pressed="true"] {
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-accent-deep);
+}
+@media (max-width: 40rem) {
+  .aboutData p {
+    position: static;
+    width: auto;
+    box-shadow: none;
+    padding: var(--space-3) 0;
+  }
+}
+
+@media (pointer: coarse) {
+  .aboutData summary,
+  .evidence summary,
+  .recordEvidence summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .aboutData summary::before,
+  .evidence summary::before,
+  .recordEvidence summary::before {
+    content: "▸";
+    margin-right: var(--space-2);
+  }
+  .aboutData[open] > summary::before,
+  .evidence[open] > summary::before,
+  .recordEvidence[open] > summary::before {
+    content: "▾";
+  }
+}

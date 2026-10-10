@@ -13,46 +13,20 @@ import { fixtureApi } from "./app-harness.js";
 
 afterEach(cleanup);
 
-test("shows selected age in Ma, group, and a matching occurrence count", async () => {
+test("SPEC-031: the age is on the timeline and the header counts all map records", async () => {
   const api = await fixtureApi();
   render(<ExplorationView api={api} />);
-
-  // Selected age is shown by stage name and Ma span (FONC-040/110), in the
-  // permanent context bar (the banner landmark).
   const banner = screen.getByRole("banner");
-  expect(within(banner).getByText("Selected age")).toBeInTheDocument();
-  expect(within(banner).getByText(/Maastrichtian/)).toBeInTheDocument();
-  expect(within(banner).getByText(/72\.1–66 Ma/)).toBeInTheDocument();
-
-  // Group defaults to dinosaurs and is permanently displayed (FONC-020/050).
-  expect(within(banner).getByText("Group")).toBeInTheDocument();
-  expect(within(banner).getByText("Dinosaurs")).toBeInTheDocument();
-
-  // Count matches the number of occurrences the API returns for the stage.
-  const expected = api.listOccurrences({ stage: "Maastrichtian" }).length;
-  const countEl = screen.getByText(
-    (_c, el) => el?.getAttribute("aria-live") === "polite",
-  );
-  expect(Number(countEl.textContent)).toBe(expected);
-
-  // SPEC-021 UX-001: the scope subtext under the title is removed on the owner's
-  // instruction, and SPEC-003 REQ-005's disclaimer criterion retired with it
-  // (SPEC-003 AMEND-005). FONC-400 is a prohibition, satisfied by omission.
-  expect(
-    screen.queryByText(/not a complete atlas of Mesozoic life/i),
-  ).not.toBeInTheDocument();
-
-  // The main controls (timeline, reset) stay visible (CONS-450).
+  expect(within(banner).queryByText("Selected age")).toBeNull();
+  expect(within(banner).queryByText("Group")).toBeNull();
   expect(
     screen.getByRole("navigation", { name: /timeline/i }),
-  ).toBeInTheDocument();
-  const header = screen.getByRole("banner");
+  ).toHaveTextContent("Maastrichtian");
+  expect(within(banner).getByText("All map occurrences")).toBeInTheDocument();
   expect(
-    within(header).getByRole("button", { name: /Reset view/i }),
-  ).toBeInTheDocument();
-  // The app exposes no user-set filters; the control must not imply otherwise
-  // (SPEC-011 REQ-004).
+    Number(banner.querySelector("[data-occurrence-count]")?.textContent),
+  ).toBe(api.listOccurrences({ stage: "Maastrichtian" }).length);
   expect(
-    within(header).queryByRole("button", { name: /Reset filters/i }),
-  ).not.toBeInTheDocument();
+    within(banner).getByRole("button", { name: /Reset view/i }),
+  ).toBeInTheDocument();
 });

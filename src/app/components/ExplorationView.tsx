@@ -206,8 +206,10 @@ export function ExplorationView({
   // screen, and everything in here is one tap away from the age strip.
   const [drawerOpen, setDrawerOpen] = useState(false);
   // SPEC-014 AMEND-005: default-hide taxa without a Wikipedia article (incl.
-  // indeterminate occurrences). The toggle below reveals them.
-  const [showAll, setShowAll] = useState(false);
+  // indeterminate occurrences). SPEC-031 retains the gate without its checkbox.
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const browseButtonRef = useRef<HTMLButtonElement>(null);
+  const showAll = false;
   const stage = stageByName(state.stageName);
   const stageStatus = useStageOccurrences(stageSource, stage, stageAttempt);
 
@@ -228,7 +230,6 @@ export function ExplorationView({
     () => gateOccurrences(rawOccurrences, gateTaxaById, showAll),
     [rawOccurrences, gateTaxaById, showAll],
   );
-  const hiddenCount = rawOccurrences.length - occurrences.length;
 
   // SPEC-026 API-001: the flat unit the sidebar's one control selects.
   const unit = unitOf(state.mode, state.rank);
@@ -631,24 +632,41 @@ export function ExplorationView({
         api={stageApi}
         occurrence={selectedOccurrence}
         onOpenProfile={(taxonId) => dispatch({ type: "openProfile", taxonId })}
-        onClose={() => dispatch({ type: "clearSelection" })}
+        onClose={() => {
+          setBrowseOpen(true);
+          dispatch({ type: "clearSelection" });
+        }}
         backLabel={backLabel}
       />
     ) : unit === "locality" && selectedLocality ? (
       <LocalityPanel
+        api={stageApi}
         group={selectedLocality}
         occurrences={localityOccurrences}
         onOpenProfile={(taxonId) => dispatch({ type: "openProfile", taxonId })}
         hasArticle={hasArticle}
-        onClose={() => dispatch({ type: "clearSelection" })}
+        onClose={() => {
+          setBrowseOpen(true);
+          dispatch({ type: "clearSelection" });
+        }}
         backLabel={backLabel}
       />
     ) : isTaxonUnit(unit) && selectedTaxonGroup ? (
       <TaxonPanel
+        api={stageApi}
+        occurrences={unitOccurrences.filter((o) =>
+          selectedTaxonGroup.occurrenceIds.includes(o.id),
+        )}
+        onOpenTaxonomy={(taxonId) =>
+          dispatch({ type: "openTaxonomy", taxonId })
+        }
         group={selectedTaxonGroup}
         onOpenProfile={(taxonId) => dispatch({ type: "openProfile", taxonId })}
         hasArticle={hasArticle}
-        onClose={() => dispatch({ type: "clearSelection" })}
+        onClose={() => {
+          setBrowseOpen(true);
+          dispatch({ type: "clearSelection" });
+        }}
         backLabel={backLabel}
         clade={cladeMarkerForTaxon(selectedTaxonGroup.taxonId, taxaById).label}
         // SPEC-027 REQ-004: when the search landed on an ancestor rather than
@@ -740,6 +758,10 @@ export function ExplorationView({
         api={stageApi}
         taxonId={state.profileTaxonId}
         onOpenTaxon={(taxonId) => dispatch({ type: "openProfile", taxonId })}
+        onBack={() => dispatch({ type: "backToMap" })}
+        onOpenTaxonomy={(taxonId) =>
+          dispatch({ type: "openTaxonomy", taxonId })
+        }
       />,
     );
   }
@@ -759,33 +781,6 @@ export function ExplorationView({
       : state.mode === "locality"
         ? spanRange(selectedLocality)
         : (selectedOccurrence?.timeRange.value ?? null);
-
-  // SPEC-023 AMEND-003. On the map it is a rail child; on a phone it renders in
-  // the sheet, with the unit selector.
-  //
-  // Measured at 320×568: the toggle's label wraps to four lines (80px tall) on a
-  // map pane that is 175px tall, of which the resting sheet leaves ~60px above
-  // it. No chrome trim closes that gap — the control does not fit on the map at
-  // the narrowest supported width. It is also the one overlay that is a *list
-  // filter* rather than a statement about the map, so the sheet is where it
-  // belongs anyway: it gives the map back 80px at every phone width, and
-  // CONS-450 is better served by a control visible beside the list it filters
-  // than by one pushed off the map.
-  const wikipediaGate = (
-    <label className={styles.wikiGateToggle} data-map-overlay="wikipedia-gate">
-      <input
-        type="checkbox"
-        checked={showAll}
-        onChange={(e) => setShowAll(e.target.checked)}
-      />
-      <span>
-        Show taxa without a Wikipedia article
-        {!showAll && hiddenCount > 0 && (
-          <span className={styles.wikiGateCount}> · {hiddenCount} hidden</span>
-        )}
-      </span>
-    </label>
-  );
 
   // What the sheet's handle says at rest. While a detail is open the list is not
   // what is showing, so it names the selection rather than claiming a count of
@@ -828,9 +823,6 @@ export function ExplorationView({
                   dispatch({ type: "setUnit", unit: next })
                 }
               />
-              {phoneLayout && (
-                <div className={styles.sheetGate}>{wikipediaGate}</div>
-              )}
             </>
           )}
 
@@ -879,6 +871,13 @@ export function ExplorationView({
 
   // One ContextBar, two homes: the shell's banner on desktop, the drawer on a
   // phone. Declared once so the two cannot drift.
+  const recoveryRequired = occurrences.length === 0;
+  const directoryOpen =
+    browseOpen ||
+    Boolean(detail) ||
+    Boolean(absentTaxonName) ||
+    Boolean(unreachable) ||
+    recoveryRequired;
   const contextControls = (
     <ContextBar
       stage={stage}
@@ -894,7 +893,18 @@ export function ExplorationView({
         : {})}
       searchIndex={searchIndex}
       onSearchSelect={onSearchSelect}
-      onReset={() => dispatch({ type: "reset" })}
+      onBrowse={() => {
+        setBrowseOpen(!browseOpen && !detail);
+        dispatch({ type: "clearSelection" });
+        setSearchOutcome(null);
+      }}
+      browseOpen={directoryOpen}
+      browseDisabled={recoveryRequired}
+      browseButtonRef={browseButtonRef}
+      onReset={() => {
+        setBrowseOpen(false);
+        dispatch({ type: "reset" });
+      }}
     />
   );
 
@@ -922,7 +932,10 @@ export function ExplorationView({
           <MapControlsDrawer
             open={drawerOpen}
             onClose={() => setDrawerOpen(false)}
-            onReset={() => dispatch({ type: "reset" })}
+            onReset={() => {
+              setBrowseOpen(false);
+              dispatch({ type: "reset" });
+            }}
           >
             {contextControls}
             <TimelineControl
@@ -956,8 +969,7 @@ export function ExplorationView({
           over by the map canvas, which is a positioning context. */}
       {state.frameMode === "present" && (
         <p className={styles.frameNote} role="status">
-          Present-day coastlines. The selected age still chooses which
-          occurrences are shown — {state.stageName} here.
+          Present-day map · {state.stageName} fossil finds
         </p>
       )}
       <div
@@ -971,16 +983,6 @@ export function ExplorationView({
               The top-left rail has no children since SPEC-021 removed the
               reconstruction label and the cluster note, so it does not render at
               all (REQ-001 — no empty box). */}
-          {/* SPEC-023 AMEND-003: on a phone this control lives in the sheet
-              instead, beside the unit selector it belongs with. */}
-          {!phoneLayout && (
-            <div
-              className={`${styles.mapRail} ${styles.railBottomRight}`}
-              data-map-rail="bottom-right"
-            >
-              {wikipediaGate}
-            </div>
-          )}
           {stageStatus.kind === "error" ? (
             <ErrorState
               message={stageStatus.message}
@@ -1046,11 +1048,25 @@ export function ExplorationView({
           >
             {columnContents}
           </OccurrenceSheet>
-        ) : (
+        ) : directoryOpen ? (
           <aside className={styles.sidebar} aria-label="Occurrence details">
+            {!recoveryRequired && (
+              <button
+                type="button"
+                className={styles.panelBack}
+                onClick={() => {
+                  browseButtonRef.current?.focus();
+                  setBrowseOpen(false);
+                  dispatch({ type: "clearSelection" });
+                  setSearchOutcome(null);
+                }}
+              >
+                Close
+              </button>
+            )}
             {columnContents}
           </aside>
-        )}
+        ) : null}
       </div>
     </>,
     phoneLayout ? undefined : contextControls,
